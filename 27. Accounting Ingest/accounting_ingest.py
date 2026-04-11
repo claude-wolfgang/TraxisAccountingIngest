@@ -49,18 +49,9 @@ GRAPH_ATTACHMENTS_URL = "https://graph.microsoft.com/v1.0/users/{mailbox}/messag
 PROSHOP_TOKEN_URL = "https://traxismfg.adionsystems.com/home/member/oauth/accesstoken"
 PROSHOP_GRAPHQL_URL = "https://traxismfg.adionsystems.com/api/graphql"
 
-QBO_TOKEN_URL = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
-# Toggle: "sandbox" or "production" — switch after Intuit approves production keys
-QBO_ENVIRONMENT = ENV.get("QBO_ENVIRONMENT", "sandbox")
-QBO_BASE_URLS = {
-    "sandbox":    "https://sandbox-quickbooks.api.intuit.com/v3/company/{realm_id}",
-    "production": "https://quickbooks.api.intuit.com/v3/company/{realm_id}",
-}
-QBO_BASE_URL = QBO_BASE_URLS[QBO_ENVIRONMENT]
-QBO_APP_URLS = {
-    "sandbox":    "https://app.sandbox.qbo.intuit.com/app/bill?txnId={bill_id}",
-    "production": "https://app.qbo.intuit.com/app/bill?txnId={bill_id}",
-}
+QBO_DISCOVERY_URL = "https://developer.api.intuit.com/.well-known/openid_configuration"
+QBO_TOKEN_URL = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"  # fallback
+QBO_REVOKE_URL = "https://developer.api.intuit.com/v2/oauth2/tokens/revoke"  # fallback
 
 DOC_TYPES = ["VENDOR_INVOICE", "PACKING_SLIP", "CUSTOMER_PO", "VENDOR_PO", "CUSTOMER_QUOTE", "UNKNOWN"]
 DOC_TYPE_LABELS = {
@@ -96,6 +87,18 @@ def load_env():
     return env
 
 ENV = load_env()
+
+# Toggle: "sandbox" or "production" — switch after Intuit approves production keys
+QBO_ENVIRONMENT = ENV.get("QBO_ENVIRONMENT", "sandbox")
+QBO_BASE_URLS = {
+    "sandbox":    "https://sandbox-quickbooks.api.intuit.com/v3/company/{realm_id}",
+    "production": "https://quickbooks.api.intuit.com/v3/company/{realm_id}",
+}
+QBO_BASE_URL = QBO_BASE_URLS[QBO_ENVIRONMENT]
+QBO_APP_URLS = {
+    "sandbox":    "https://app.sandbox.qbo.intuit.com/app/bill?txnId={bill_id}",
+    "production": "https://app.qbo.intuit.com/app/bill?txnId={bill_id}",
+}
 
 def _update_env_value(key, value):
     """Overwrite a single KEY=value line in .traxis.env (used to persist refreshed QBO tokens)."""
@@ -359,6 +362,31 @@ class QBOClient:
         self._vendors_cache = None
         self._vendors_cache_time = 0
         self._default_account_ref = None
+        self._token_url = QBO_TOKEN_URL
+        self._revoke_url = QBO_REVOKE_URL
+        self._load_discovery()
+
+    def _load_discovery(self):
+        """Fetch endpoints from Intuit's OpenID discovery document."""
+        try:
+            r = requests.get(QBO_DISCOVERY_URL, timeout=5)
+            if r.ok:
+                doc = r.json()
+                self._token_url = doc.get("token_endpoint", QBO_TOKEN_URL)
+                self._revoke_url = doc.get("revocation_endpoint", QBO_REVOKE_URL)
+        except Exception:
+            pass  # fall back to hardcoded URLs
+
+    def revoke_token(self):
+        """Revoke the current refresh token (used on disconnect)."""
+        creds = base64.b64encode(
+            f"{ENV['QBO_CLIENT_ID']}:{ENV['QBO_CLIENT_SECRET']}".encode()
+        ).decode()
+        requests.post(self._revoke_url, headers={
+            "Authorization": f"Basic {creds}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }, json={"token": ENV.get("QBO_REFRESH_TOKEN", "")})
 
     def _refresh(self):
         if self.access_token and time.time() < self.expires_at - 60:
@@ -366,7 +394,7 @@ class QBOClient:
         creds = base64.b64encode(
             f"{ENV['QBO_CLIENT_ID']}:{ENV['QBO_CLIENT_SECRET']}".encode()
         ).decode()
-        r = requests.post(QBO_TOKEN_URL, headers={
+        r = requests.post(self._token_url, headers={
             "Authorization": f"Basic {creds}",
             "Content-Type": "application/x-www-form-urlencoded",
             "Accept": "application/json",
@@ -374,7 +402,17 @@ class QBOClient:
             "grant_type": "refresh_token",
             "refresh_token": ENV["QBO_REFRESH_TOKEN"],
         })
-        r.raise_for_status()
+        if not r.ok:
+            try:
+                err = r.json().get("error", "")
+            except Exception:
+                err = ""
+            if err == "invalid_grant":
+                raise RuntimeError(
+                    "QBO refresh token expired or revoked. "
+                    "Run qbo_auth.py to re-authorize."
+                )
+            self._raise_qbo_error(r)
         data = r.json()
         self.access_token = data["access_token"]
         self.expires_at = time.time() + data.get("expires_in", 3600)
@@ -511,7 +549,7 @@ class QBOClient:
             self._url("bill"),
             headers=self._headers(),
             params={"minorversion": "65"},
-            json={"Bill": bill},
+            json=bill,
         )
         if not r.ok:
             self._raise_qbo_error(r)

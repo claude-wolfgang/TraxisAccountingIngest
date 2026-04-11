@@ -21,8 +21,11 @@ AUTH_URL      = "https://appcenter.intuit.com/connect/oauth2"
 TOKEN_URL     = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 ENV_PATH      = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\1. Proshop Automations\.traxis.env")
 
+import secrets as _secrets
+
 auth_code = None
 realm_id  = None
+csrf_state = None
 done      = threading.Event()
 
 class CallbackHandler(http.server.BaseHTTPRequestHandler):
@@ -30,6 +33,28 @@ class CallbackHandler(http.server.BaseHTTPRequestHandler):
         global auth_code, realm_id
         parsed = urllib.parse.urlparse(self.path)
         params = urllib.parse.parse_qs(parsed.query)
+
+        # CSRF check — verify state matches what we sent
+        returned_state = params.get("state", [None])[0]
+        if returned_state != csrf_state:
+            self.send_response(403)
+            self.end_headers()
+            self.wfile.write(b"<h2>CSRF error: state mismatch. Authorization rejected.</h2>")
+            print("ERROR: CSRF state mismatch — possible forgery. Aborting.")
+            done.set()
+            return
+
+        # Check for error response from Intuit
+        if params.get("error"):
+            self.send_response(400)
+            self.end_headers()
+            err = params["error"][0]
+            desc = params.get("error_description", [""])[0]
+            self.wfile.write(f"<h2>Authorization error: {err}</h2><p>{desc}</p>".encode())
+            print(f"ERROR: Intuit returned error: {err} — {desc}")
+            done.set()
+            return
+
         auth_code = params.get("code", [None])[0]
         realm_id  = params.get("realmId", [None])[0]
         self.send_response(200)
@@ -41,18 +66,21 @@ class CallbackHandler(http.server.BaseHTTPRequestHandler):
         pass  # suppress server logs
 
 def main():
+    global csrf_state
+    csrf_state = _secrets.token_urlsafe(32)
+
     # Start local callback server
     server = http.server.HTTPServer(("localhost", 8085), CallbackHandler)
     t = threading.Thread(target=server.serve_forever, daemon=True)
     t.start()
 
-    # Build auth URL
+    # Build auth URL with random CSRF state
     params = {
         "client_id":     CLIENT_ID,
         "response_type": "code",
         "scope":         SCOPE,
         "redirect_uri":  REDIRECT_URI,
-        "state":         "traxis_qbo_auth",
+        "state":         csrf_state,
     }
     url = AUTH_URL + "?" + urllib.parse.urlencode(params)
     print("Opening browser for QBO authorization...")
