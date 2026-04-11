@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Traxis Accounting Ingest - Privacy Policy</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #333; }
+  h1 { border-bottom: 2px solid #0078d4; padding-bottom: 8px; }
+  h2 { margin-top: 28px; color: #444; }
+  .updated { color: #888; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<h1>Privacy Policy</h1>
+<p class="updated">Last updated: April 2026</p>
+
+<p><strong>Traxis Accounting Ingest</strong> is a private, internal application built and operated by Traxis Manufacturing, Inc. It is not available to the public and is used solely by Traxis staff.</p>
+
+<h2>What data we access</h2>
+<p>This application connects to QuickBooks Online via Intuit's OAuth 2.0 API to:</p>
+<ul>
+  <li>Create Bills (vendor invoices) in the connected QuickBooks company</li>
+  <li>Query the Vendor list for name matching</li>
+  <li>Query the Chart of Accounts for expense categorization</li>
+  <li>Upload PDF attachments to Bill records</li>
+</ul>
+
+<h2>How data is used</h2>
+<p>Data retrieved from QuickBooks Online is used exclusively within the Traxis Accounting Ingest desktop application to match vendors, select expense accounts, and check for duplicate records before creating new entries. No QuickBooks data is shared with third parties, sold, or used for any purpose beyond Traxis's internal accounting workflows.</p>
+
+<h2>Data storage</h2>
+<ul>
+  <li><strong>OAuth tokens</strong> are stored locally in an encrypted environment file on Traxis-owned machines. Tokens are never transmitted to external servers.</li>
+  <li><strong>Extracted document data</strong> (vendor names, invoice numbers, amounts) is stored in a local SQLite database on the same machines.</li>
+  <li><strong>Source PDFs</strong> are stored in a local Dropbox-synced folder accessible only to authorized Traxis staff.</li>
+</ul>
+
+<h2>Data sharing</h2>
+<p>We do not share, sell, or distribute any QuickBooks data to third parties. The only external services that receive data are:</p>
+<ul>
+  <li><strong>Intuit/QuickBooks Online</strong> — to create Bills and upload attachments (the intended purpose)</li>
+  <li><strong>Anthropic Claude API</strong> — PDF images are sent for AI-based data extraction (invoice fields only; no QuickBooks data is sent to Anthropic)</li>
+</ul>
+
+<h2>Data retention</h2>
+<p>Local queue records are retained indefinitely for audit purposes. OAuth tokens are refreshed automatically and old tokens are overwritten.</p>
+
+<h2>Security</h2>
+<p>OAuth client credentials are stored in a local environment file excluded from version control. Access is restricted to authorized Traxis personnel. The application runs on Traxis-owned machines behind the company network.</p>
+
+<h2>Contact</h2>
+<p>For questions about this privacy policy, contact:<br>
+<strong>Traxis Manufacturing, Inc.</strong><br>
+Email: accounting@traxismfg.com</p>
+</body>
+</html>
