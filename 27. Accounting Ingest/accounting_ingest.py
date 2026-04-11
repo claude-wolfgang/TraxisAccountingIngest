@@ -50,7 +50,17 @@ PROSHOP_TOKEN_URL = "https://traxismfg.adionsystems.com/home/member/oauth/access
 PROSHOP_GRAPHQL_URL = "https://traxismfg.adionsystems.com/api/graphql"
 
 QBO_TOKEN_URL = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
-QBO_BASE_URL  = "https://sandbox-quickbooks.api.intuit.com/v3/company/{realm_id}"
+# Toggle: "sandbox" or "production" — switch after Intuit approves production keys
+QBO_ENVIRONMENT = ENV.get("QBO_ENVIRONMENT", "sandbox")
+QBO_BASE_URLS = {
+    "sandbox":    "https://sandbox-quickbooks.api.intuit.com/v3/company/{realm_id}",
+    "production": "https://quickbooks.api.intuit.com/v3/company/{realm_id}",
+}
+QBO_BASE_URL = QBO_BASE_URLS[QBO_ENVIRONMENT]
+QBO_APP_URLS = {
+    "sandbox":    "https://app.sandbox.qbo.intuit.com/app/bill?txnId={bill_id}",
+    "production": "https://app.qbo.intuit.com/app/bill?txnId={bill_id}",
+}
 
 DOC_TYPES = ["VENDOR_INVOICE", "PACKING_SLIP", "CUSTOMER_PO", "VENDOR_PO", "CUSTOMER_QUOTE", "UNKNOWN"]
 DOC_TYPE_LABELS = {
@@ -384,10 +394,24 @@ class QBOClient:
             "Content-Type": "application/json",
         }
 
+    def _raise_qbo_error(self, r):
+        """Raise with intuit_tid for Intuit support troubleshooting."""
+        tid = r.headers.get("intuit_tid", "unknown")
+        try:
+            body = r.json()
+            fault = body.get("Fault", {}).get("Error", [{}])[0]
+            detail = fault.get("Detail", fault.get("Message", r.text))
+        except Exception:
+            detail = r.text[:300]
+        raise RuntimeError(
+            f"QBO API {r.status_code}: {detail}  [intuit_tid={tid}]"
+        )
+
     def qbo_query(self, sql):
         r = requests.get(self._url("query"), headers=self._headers(),
                          params={"query": sql, "minorversion": "65"})
-        r.raise_for_status()
+        if not r.ok:
+            self._raise_qbo_error(r)
         return r.json()
 
     def get_vendors(self):
@@ -489,13 +513,36 @@ class QBOClient:
             params={"minorversion": "65"},
             json={"Bill": bill},
         )
-        r.raise_for_status()
+        if not r.ok:
+            self._raise_qbo_error(r)
         result = r.json()
         bill_id = result.get("Bill", {}).get("Id", "")
-        qbo_url = (
-            f"https://app.sandbox.qbo.intuit.com/app/bill?txnId={bill_id}"
-        )
+        qbo_url = QBO_APP_URLS[QBO_ENVIRONMENT].format(bill_id=bill_id)
         return bill_id, qbo_url
+
+    def attach_pdf(self, entity_type, entity_id, pdf_path):
+        """Upload a PDF and attach it to a QBO entity (e.g. Bill).
+        Uses the Attachable upload endpoint (multipart)."""
+        p = Path(pdf_path)
+        if not p.exists():
+            return None
+        metadata = json.dumps({
+            "AttachableRef": [{"EntityRef": {"type": entity_type, "value": entity_id}}],
+            "FileName": p.name,
+            "ContentType": "application/pdf",
+        })
+        r = requests.post(
+            self._url("upload"),
+            headers={"Authorization": f"Bearer {self._refresh()}", "Accept": "application/json"},
+            params={"minorversion": "65"},
+            files={
+                "file_metadata_0": ("metadata.json", metadata, "application/json"),
+                "file_content_0": (p.name, p.read_bytes(), "application/pdf"),
+            },
+        )
+        if not r.ok:
+            self._raise_qbo_error(r)
+        return r.json()
 
     def check_duplicate_bill(self, doc_number):
         """Return QBO URL if a Bill with this DocNumber already exists, else None."""
@@ -509,7 +556,7 @@ class QBOClient:
             bills = data.get("QueryResponse", {}).get("Bill", [])
             if bills:
                 bid = bills[0].get("Id", "")
-                return f"https://app.sandbox.qbo.intuit.com/app/bill?txnId={bid}"
+                return QBO_APP_URLS[QBO_ENVIRONMENT].format(bill_id=bid)
         except Exception:
             pass
         return None
@@ -1167,6 +1214,11 @@ class AccountingIngestApp(tk.Tk):
                                       relief="flat", padx=12, pady=8,
                                       command=self._approve)
         self._approve_btn.pack(side="left", padx=(0, 4))
+        self._extract_btn = tk.Button(btn_frame, text="⟳  Re-extract",
+                                      bg="#2a5a7a", fg="white", font=("Segoe UI", 10),
+                                      relief="flat", padx=12, pady=8,
+                                      command=self._re_extract)
+        self._extract_btn.pack(side="left", padx=(0, 4))
         self._reject_btn = tk.Button(btn_frame, text="✗  Reject",
                                      bg="#7a2a2a", fg="white", font=("Segoe UI", 10),
                                      relief="flat", padx=12, pady=8,
@@ -1452,6 +1504,19 @@ class AccountingIngestApp(tk.Tk):
                             if not proceed:
                                 return
                     bill_id, qbo_url = self.qbo.create_bill(data, vendor_id, vendor_display)
+                    self._log(f"Created QBO Bill #{bill_id} for {vendor_display}")
+
+                    # Attach the source PDF to the bill
+                    con = db()
+                    row = con.execute("SELECT pdf_path FROM queue WHERE id=?", (cur_id,)).fetchone()
+                    con.close()
+                    if row and row[0] and Path(row[0]).exists():
+                        try:
+                            self.qbo.attach_pdf("Bill", bill_id, row[0])
+                            self._log(f"Attached PDF to Bill #{bill_id}")
+                        except Exception as att_err:
+                            self._log(f"PDF attach failed (bill still created): {att_err}")
+
                     con = db()
                     con.execute("""
                         UPDATE queue SET status='QBO', edited_json=?, contact_name=?,
@@ -1460,7 +1525,6 @@ class AccountingIngestApp(tk.Tk):
                           datetime.now(timezone.utc).isoformat(), cur_id))
                     con.commit()
                     con.close()
-                    self._log(f"Created QBO Bill #{bill_id} for {vendor_display}")
                     self.after(0, self._refresh_queue)
                     self.after(0, lambda: self._load_record(cur_id))
                     self.after(0, self._advance_queue)
@@ -1568,6 +1632,44 @@ class AccountingIngestApp(tk.Tk):
                 self._tree.see(item)
                 self._on_queue_select()
                 return
+
+    def _re_extract(self):
+        """Run AI extraction (or re-extraction) on the currently selected record."""
+        if not self._current_id:
+            return
+        qid = self._current_id
+        con = db()
+        row = con.execute("SELECT pdf_path, doc_type FROM queue WHERE id=?", (qid,)).fetchone()
+        con.close()
+        if not row or not row[0]:
+            return
+        pdf_path, current_type = row
+
+        # Use the type selected in the dropdown (user may have changed it)
+        label = self._type_var.get()
+        doc_type = next((k for k, v in DOC_TYPE_LABELS.items() if v == label), current_type)
+
+        self._log(f"Extracting: {Path(pdf_path).name} as {doc_type}...")
+        self._extract_btn.config(state="disabled", text="Extracting...")
+
+        def do_extract():
+            try:
+                extracted = self.extractor.extract(pdf_path, doc_type)
+                pretty = json.dumps(extracted, indent=2)
+                con = db()
+                con.execute("UPDATE queue SET doc_type=?, extracted_json=?, confidence=? WHERE id=?",
+                            (doc_type, json.dumps(extracted), extracted.get("confidence", 0), qid))
+                con.commit()
+                con.close()
+                self._log(f"Extraction complete: {doc_type} conf={extracted.get('confidence', 0):.0%}")
+                self.after(0, lambda: self._load_record(qid))
+                self.after(0, self._refresh_queue)
+            except Exception as e:
+                self._log(f"Extraction failed: {e}")
+            finally:
+                self.after(0, lambda: self._extract_btn.config(state="normal", text="⟳  Re-extract"))
+
+        threading.Thread(target=do_extract, daemon=True).start()
 
     def _check_proshop_duplicate(self, doc_type, ref_number):
         """Query ProShop for an existing record with the same referenceNumber. Returns URL or None."""
