@@ -53,6 +53,48 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-11
+
+### Project 27: Accounting Ingest — QBO Test, ProShop Mutations, Intuit App Review, Live Testing
+
+**Task:** Test QBO bill creation end-to-end, complete Intuit app assessment for production keys, fix ProShop mutations with full field mapping, and live-test the app with real emails.
+
+**What was done:**
+
+1. **QBO Bill creation verified** — Test bill #145 created in sandbox (Bob's Burger Joint, 2 line items, $247.50). Duplicate detection confirmed. JSON payload fix (no wrapper object).
+
+2. **Intuit app assessment completed:**
+   - Created privacy policy, terms, EULA, disconnect pages on GitHub Pages
+   - Added `intuit_tid` capture, CSRF verification, `invalid_grant` handling, discovery doc fetch, token revocation, PDF attachment upload
+   - Added `QBO_ENVIRONMENT` toggle (sandbox/production) in `.traxis.env`
+   - Submitted questionnaire — waiting for Intuit approval
+
+3. **ProShop mutations fixed and expanded:**
+   - Fixed return field names (`id` not `purchaseOrderId`/`packingSlipId`)
+   - Added line item support for Bills, Packing Slips, and Purchase Orders
+   - Expanded field mapping for all doc types (PO gets confirmationNumber/date/lead time, PS gets tracking/PO ref, etc.)
+   - Tested: PO #263068 and Packing Slip #260411-01 created with line items
+
+4. **Email polling fixes:**
+   - Rolling 30-day window + pagination (gets all emails, not just first 50)
+   - Image attachment filtering (isInline, contentType, extensions, size)
+   - Whitelisted `tom@traxismfg.com` for forwarded accounting docs
+
+5. **UI improvements:**
+   - Better classify prompt (Traxis-specific Customer PO vs Vendor PO distinction)
+   - Re-extract button, UPLOAD_FAILED in Pending filter, combobox dark theme fix
+
+6. **ProShop API permission discovery:**
+   - API clients map to ProShop users (AccountingConnector = User #010)
+   - Two permission layers: OAuth scope AND user module permissions
+   - User 010 had read-only defaults — granted full write but `addCustomerPo` still failing — escalated to ProShop support
+
+**Key discovery:** ProShop API has two permission layers. OAuth scope gates endpoint access. User #010 permissions gate operations. Both must be configured.
+
+**Status:** QBO pipeline fully tested (sandbox). ProShop PO + Packing Slip working. Customer PO blocked on ProShop permissions — awaiting support. Intuit production keys pending.
+
+---
+
 ## 2026-04-08
 
 ### Project 19/22: Shop Scheduler — Tool Demand Checker + Overseer Integration

@@ -699,13 +699,17 @@ EXTRACTION_PROMPTS = {
 }""",
 }
 
-CLASSIFY_PROMPT = """Look at this document and classify it as exactly one of:
-VENDOR_INVOICE - a bill/invoice FROM a vendor/supplier TO us
-PACKING_SLIP - a delivery/shipping document listing items received
-CUSTOMER_PO - a purchase order FROM a customer TO us (they are buying from us)
-VENDOR_PO - a quote or PO we are sending TO a vendor, or a vendor's quote response
-CUSTOMER_QUOTE - a quote or estimate we are providing TO a customer, or an RFQ from a customer
+CLASSIFY_PROMPT = """You are classifying documents for Traxis Manufacturing (a CNC machine shop).
+
+Classify this document as exactly one of:
+VENDOR_INVOICE - a bill/invoice FROM a vendor/supplier TO Traxis (they want Traxis to pay)
+PACKING_SLIP - a delivery/shipping document listing items shipped or received
+CUSTOMER_PO - a purchase order FROM a customer TO Traxis (the customer is BUYING parts/services FROM Traxis — Traxis is the supplier/vendor on this document)
+VENDOR_PO - a purchase order FROM Traxis TO a vendor, or a vendor's quote/price list for materials/tools Traxis wants to buy
+CUSTOMER_QUOTE - a quote or estimate Traxis is providing TO a customer, or an RFQ from a customer asking Traxis to quote
 UNKNOWN - cannot determine
+
+KEY RULE: If the document is a Purchase Order and Traxis/Traxis Manufacturing/Traxis MFG appears as the VENDOR or SUPPLIER or SHIP-TO, it is a CUSTOMER_PO (the customer is ordering from Traxis). If Traxis appears as the BUYER, it is a VENDOR_PO.
 
 Reply with ONLY the classification word, nothing else."""
 
@@ -1105,14 +1109,7 @@ class ProShopUploader:
         if data.get("buyer_name"):
             payload["buyer"] = data["buyer_name"]
         if data.get("payment_terms"):
-            terms = data["payment_terms"]
-            # Extract discount days if present (e.g., "2% 10 Net 30")
-            net_match = re.search(r'[Nn]et\s*(\d+)', terms)
-            if net_match:
-                try:
-                    payload["termsDiscountDays"] = int(net_match.group(1))
-                except ValueError:
-                    pass
+            payload["paymentTerms"] = data["payment_terms"]
         if data.get("notes"):
             payload["notes"] = data["notes"]
         if data.get("ship_to"):
@@ -1231,7 +1228,16 @@ class AccountingIngestApp(tk.Tk):
         style.configure("TFrame", background="#1e1e1e")
         style.configure("TLabelframe", background="#1e1e1e", foreground="#aaaaaa")
         style.configure("TLabelframe.Label", background="#1e1e1e", foreground="#aaaaaa")
+        style.map("TCombobox",
+                  fieldbackground=[("readonly", "#2d2d2d"), ("!readonly", "#2d2d2d")],
+                  foreground=[("readonly", "#ffffff"), ("!readonly", "#ffffff")],
+                  selectbackground=[("readonly", "#0078d4")],
+                  selectforeground=[("readonly", "#ffffff")])
         style.configure("TCombobox", fieldbackground="#2d2d2d", foreground="#ffffff")
+        self.option_add("*TCombobox*Listbox.background", "#2d2d2d")
+        self.option_add("*TCombobox*Listbox.foreground", "#ffffff")
+        self.option_add("*TCombobox*Listbox.selectBackground", "#0078d4")
+        self.option_add("*TCombobox*Listbox.selectForeground", "#ffffff")
         style.configure("TEntry", fieldbackground="#2d2d2d", foreground="#ffffff", insertcolor="#ffffff")
 
         # Top bar
@@ -1434,6 +1440,11 @@ class AccountingIngestApp(tk.Tk):
         if filter_val == "ALL":
             rows = con.execute(
                 "SELECT id, doc_type, source, created_at, confidence, status FROM queue ORDER BY id DESC"
+            ).fetchall()
+        elif filter_val == "PENDING":
+            # Show PENDING and UPLOAD_FAILED together — both need attention
+            rows = con.execute(
+                "SELECT id, doc_type, source, created_at, confidence, status FROM queue WHERE status IN ('PENDING','UPLOAD_FAILED') ORDER BY id DESC"
             ).fetchall()
         else:
             rows = con.execute(
