@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+
+# Claude Code
+.claude/
+
+# Archives
+*.zip
+
+# Credentials
+.traxis.env
+*.env
+
+# Temp files
+nul
+temp.txt.txt
+
+# Office docs
+*.docx
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Scheduling probe logs
+scheduling_probe_log.jsonl
+scheduling_probe_run.log

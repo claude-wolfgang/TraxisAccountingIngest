@@ -1,0 +1,84 @@
+# Secrets — NEVER commit
+.traxis.env
+*.env
+secrets.*
+credentials.*
+Keys/
+**/claudeapikey.txt
+**/.claude/settings.local.json
+
+# Dropbox cloud-only folders (not downloaded on this machine — add after syncing)
+# To include: run `dropbox-cli start`, wait for sync, then `git add "<folder>"`
+2. YCM Post Processor Development/
+3. Setting Up Customer Portal/
+4. Inspection Print and Proshop Automation/
+6. Chevalier Post Processor Development/
+9. Shop Floor Cameras/
+12. FASData Implementation/
+14. Workstation Display/
+15. Proshop Replacement Research and Architecture/
+17. COTS - Tools Crib Kiosk/
+18. ProShop Message Notifier/
+19. Shop Scheduler/
+20. Traxis Data/
+21. Haas communication investigation/
+22. Tool Assembly Management/
+23. Air Compressor communication GUI/
+25. Agent Exploration/
+26. SMT Post Processor Development/
+API Projects/
+Git Recovery/
+OLD/
+
+# Temp files (editor backups, Claude Code temp writes)
+*.tmp
+*.tmp.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# Database / local state
+*.db
+*.sqlite
+*.sqlite3
+
+# Scanned / email attachment files (large, not source)
+"Accounting Inbox/Scanned/"
+"Accounting Inbox/From Email/"
+"Accounting Inbox/QBO Inbox/"
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Windows shortcuts
+*.lnk
+
+# Preserved git histories from embedded repos (renamed from .git)
+git-history/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Fusion 360 compiled add-in artifacts
+*.pyc
+
+# Log files
+*.log

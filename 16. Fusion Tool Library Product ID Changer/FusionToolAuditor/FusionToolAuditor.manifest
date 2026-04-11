@@ -1,0 +1,13 @@
+{
+    "autodeskProduct": "Fusion",
+    "type": "addin",
+    "id": "b7e2c3d4-5f6a-7b8c-9d0e-1f2a3b4c5d6e",
+    "author": "Traxis Manufacturing",
+    "description": {
+        "": "Audit and edit Product IDs in Fusion tool libraries for ProShop ERP integration"
+    },
+    "version": "1.0.0",
+    "runOnStartup": false,
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}

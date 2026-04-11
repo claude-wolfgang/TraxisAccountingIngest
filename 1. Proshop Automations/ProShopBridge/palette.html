@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProShop Bridge</title>
+<style>
+  :root {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #252526;
+    --bg-hover: #2d2d30;
+    --bg-active: #37373d;
+    --bg-card: #2d2d30;
+    --text-primary: #cccccc;
+    --text-secondary: #858585;
+    --text-bright: #e0e0e0;
+    --accent: #0078d4;
+    --accent-hover: #1a8fe8;
+    --accent-dim: #0060aa;
+    --border: #3e3e42;
+    --success: #4ec9b0;
+    --warning: #dcdcaa;
+    --error: #f14c4c;
+    --tag-bg: #383838;
+    --scrollbar-thumb: #424242;
+    --scrollbar-track: #1e1e1e;
+    --radius: 4px;
+    --transition: 150ms ease;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "Segoe UI", -apple-system, sans-serif;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+  /* ---- Header ---- */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px 0;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .header-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-bright);
+    letter-spacing: 0.3px;
+  }
+  .header-status {
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    transition: background var(--transition);
+  }
+  .status-dot.connected { background: var(--success); }
+  .status-dot.error { background: var(--error); }
+  .status-dot.loading { background: var(--warning); animation: pulse 1s infinite; }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* ---- Tab Bar ---- */
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: none;
+    margin: 0 -12px;
+    padding: 0 12px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 7px 0;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ---- Tab Content ---- */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ---- Shared Controls ---- */
+  .search-row { display: flex; gap: 6px; padding: 8px 12px; background: var(--bg-secondary); }
+  .search-input {
+    flex: 1;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    color: var(--text-bright);
+    font-size: 12px;
+    outline: none;
+    transition: border-color var(--transition);
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-secondary); }
+
+  .btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    padding: 5px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg-hover); color: var(--text-bright); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: var(--accent-hover); }
+  .btn.primary:disabled { background: var(--accent-dim); opacity: 0.5; cursor: not-allowed; }
+  .btn.small { padding: 3px 8px; font-size: 10px; }
+  .btn.success { background: #1a5c38; border-color: var(--success); color: var(--success); }
+  .btn.success:hover { background: #1a6b42; }
+
+  .filter-row {
+    display: flex; gap: 4px; padding: 0 12px 6px;
+    flex-wrap: wrap; background: var(--bg-secondary);
+  }
+  .filter-tag {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1px 8px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .filter-tag:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+  .filter-tag.active { background: var(--accent-dim); color: #fff; border-color: var(--accent); }
+
+  .stats-bar {
+    padding: 4px 12px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ---- WO List ---- */
+  .wo-list { padding: 4px 8px; }
+  .wo-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 4px;
+    transition: border-color var(--transition);
+    overflow: hidden;
+  }
+  .wo-card:hover { border-color: var(--text-secondary); }
+  .wo-card.expanded { border-color: var(--accent); }
+
+  .wo-card-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    cursor: pointer;
+    gap: 8px;
+  }
+  .wo-number {
+    font-weight: 600; color: var(--accent);
+    font-size: 12px; min-width: 55px;
+    font-variant-numeric: tabular-nums;
+  }
+  .wo-part {
+    flex: 1; font-size: 11px; color: var(--text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .wo-status {
+    font-size: 9px; padding: 1px 6px; border-radius: 3px;
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .wo-status.active { background: #1a3a1a; color: var(--success); }
+  .wo-status.complete { background: #1a2a3a; color: #6cb6ff; }
+  .wo-status.other { background: #3a3a1a; color: var(--warning); }
+  .wo-expand-icon {
+    color: var(--text-secondary); font-size: 10px;
+    transition: transform var(--transition);
+  }
+  .wo-card.expanded .wo-expand-icon { transform: rotate(90deg); }
+
+  .wo-ops {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 6px 10px 8px;
+    background: var(--bg-primary);
+  }
+  .wo-card.expanded .wo-ops { display: block; }
+
+  .wo-ops-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 6px;
+  }
+  .wo-ops-title {
+    font-size: 10px; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .wo-ops-btns { display: flex; gap: 4px; }
+
+  .op-row {
+    display: flex; align-items: center;
+    padding: 4px 6px; border-radius: var(--radius);
+    gap: 8px; transition: background var(--transition);
+  }
+  .op-row:hover { background: var(--bg-hover); }
+  .op-number {
+    font-weight: 600; color: var(--text-bright);
+    min-width: 32px; font-size: 11px; font-variant-numeric: tabular-nums;
+  }
+  .op-desc {
+    flex: 1; font-size: 11px; color: var(--text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .op-complete { font-size: 9px; color: var(--success); }
+  .op-link {
+    font-size: 10px; color: var(--accent); cursor: pointer;
+    text-decoration: none; padding: 2px 6px;
+    border-radius: var(--radius); transition: background var(--transition);
+  }
+  .op-link:hover { background: var(--bg-active); text-decoration: underline; }
+  .op-timer-btn {
+    font-size: 10px; color: var(--success); cursor: pointer;
+    padding: 2px 8px; border-radius: var(--radius);
+    border: 1px solid var(--success); transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .op-timer-btn:hover { background: #1a2a1a; }
+
+  /* ---- Messages ---- */
+  .message {
+    padding: 30px 20px; text-align: center; color: var(--text-secondary);
+  }
+  .message .icon { font-size: 28px; margin-bottom: 8px; }
+  .message .title { font-size: 13px; color: var(--text-primary); margin-bottom: 4px; }
+  .message .sub { font-size: 11px; line-height: 1.6; }
+
+  /* ---- Loading ---- */
+  .loading-bar {
+    height: 2px; background: var(--bg-primary); overflow: hidden; display: none;
+  }
+  .loading-bar.active { display: block; }
+  .loading-bar::after {
+    content: ""; display: block; height: 100%; width: 30%;
+    background: var(--accent);
+    animation: loading-slide 1.2s ease-in-out infinite;
+  }
+  @keyframes loading-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
+
+  .loading-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--bg-primary); z-index: 200;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: opacity 0.3s ease;
+  }
+  .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+  .loading-overlay .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-overlay .loading-text { font-size: 13px; color: var(--text-primary); margin-bottom: 4px; }
+  .loading-overlay .loading-sub { font-size: 11px; color: var(--text-secondary); }
+
+  .load-more-bar { padding: 8px 12px; text-align: center; }
+
+  .user-bar {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 12px; background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    font-size: 10px; color: var(--text-secondary);
+  }
+  .user-bar select {
+    background: var(--bg-primary); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text-bright);
+    font-size: 10px; padding: 2px 6px; outline: none;
+  }
+  .user-bar .user-name { color: var(--success); font-weight: 600; }
+
+  /* ---- Export Tab ---- */
+  .export-section { padding: 8px 12px; }
+
+  .selected-wo-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; margin-bottom: 8px;
+    background: var(--bg-card); border: 1px solid var(--accent);
+    border-radius: var(--radius);
+  }
+  .selected-wo-bar .wo-label {
+    font-size: 12px; font-weight: 600; color: var(--accent);
+  }
+  .selected-wo-bar .wo-detail {
+    flex: 1; font-size: 11px; color: var(--text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .setup-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px;
+    margin-bottom: 6px;
+  }
+  .setup-card-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .setup-name {
+    font-weight: 600; font-size: 12px; color: var(--text-bright); flex: 1;
+  }
+  .setup-info {
+    font-size: 10px; color: var(--text-secondary);
+  }
+  .setup-mapping {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .setup-mapping label {
+    font-size: 11px; color: var(--text-secondary); white-space: nowrap;
+  }
+  .setup-mapping select {
+    flex: 1;
+    background: var(--bg-primary); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text-bright);
+    font-size: 11px; padding: 4px 8px; outline: none;
+  }
+  .setup-mapping select:focus { border-color: var(--accent); }
+
+  .push-bar {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-secondary);
+  }
+  .push-bar .push-actions {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 6px;
+  }
+
+  .progress-section { margin-top: 8px; }
+  .progress-bar-outer {
+    height: 6px; background: var(--bg-primary);
+    border-radius: 3px; overflow: hidden; margin-bottom: 6px;
+  }
+  .progress-bar-inner {
+    height: 100%; background: var(--accent);
+    border-radius: 3px; transition: width 0.3s ease;
+    width: 0%;
+  }
+  .progress-bar-inner.complete { background: var(--success); }
+  .progress-bar-inner.error { background: var(--error); }
+
+  .push-log {
+    max-height: 200px; overflow-y: auto;
+    background: var(--bg-primary); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 6px 8px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 10px; line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .push-log .log-ok { color: var(--success); }
+  .push-log .log-err { color: var(--error); }
+  .push-log .log-warn { color: #f0ad4e; }
+  .push-log .log-info { color: var(--accent); }
+  .push-log .log-warn { color: var(--warning); }
+
+  /* WCS Audit Modal */
+  .audit-modal {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7); z-index: 300;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 20px 0; overflow-y: auto;
+  }
+  .audit-panel {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 6px; max-width: 95vw; width: 460px;
+    padding: 12px;
+  }
+  .audit-setup {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px; margin-bottom: 8px;
+  }
+  .audit-setup-name { font-weight: 600; font-size: 12px; color: var(--text-bright); margin-bottom: 6px; }
+  .audit-thumb { width: 100%; max-width: 440px; border-radius: 3px; margin: 6px 0; border: 1px solid var(--border); }
+  .audit-data { font-family: Consolas, monospace; font-size: 10px; line-height: 1.6; color: var(--text-primary); }
+  .audit-data .lbl { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<!-- ============ Header ============ -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-title">ProShop Bridge</div>
+    <div class="header-status">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Initializing...</span>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabWO" onclick="switchTab('wo')">Work Orders</button>
+    <button class="tab-btn" id="tabExport" onclick="switchTab('export')">Export &amp; Push</button>
+  </div>
+</div>
+
+<!-- ============ Tab 1: Work Orders ============ -->
+<div class="tab-content active" id="viewWO">
+
+  <div class="search-row">
+    <input type="text" class="search-input" id="searchInput"
+           placeholder="Search WO#, part number, part name..." autofocus>
+    <button class="btn" onclick="redetectDocument()" title="Re-detect active document">&#128269;</button>
+    <button class="btn" onclick="loadAllYears()" title="Load all (both years)">All</button>
+    <button class="btn" onclick="loadCurrentYear()" title="Refresh current year">&#8635;</button>
+  </div>
+  <div class="filter-row">
+    <span class="filter-tag active" id="activeOnlyTag" onclick="toggleActiveFilter()">Active only</span>
+    <span class="filter-tag" id="allStatusTag" onclick="toggleActiveFilter()">All statuses</span>
+  </div>
+
+  <div class="user-bar" id="userBar">
+    <span>User:</span>
+    <span class="user-name" id="userNameLabel" style="display:none"></span>
+    <select id="userSelect" onchange="selectUser()" style="display:none">
+      <option value="">Select user...</option>
+      <option value="001">Tom (001)</option>
+      <option value="018">Garrett (018)</option>
+      <option value="020">020</option>
+    </select>
+  </div>
+
+  <div class="loading-bar" id="loadingBar"></div>
+
+  <div class="stats-bar" id="statsBar">
+    <span id="statsCount">&mdash;</span>
+    <span id="statsTotal">&mdash;</span>
+  </div>
+
+  <div class="wo-list" id="woList"></div>
+
+  <div class="load-more-bar" id="loadMoreBar" style="display:none">
+    <button class="btn" onclick="loadPreviousYear()">Load previous year WOs</button>
+  </div>
+</div>
+
+<!-- ============ Tab 2: Export & Push ============ -->
+<div class="tab-content" id="viewExport">
+
+  <div class="export-section" id="exportContent">
+    <!-- Shown when no WO selected -->
+    <div id="noWOSelected">
+      <div class="message">
+        <div class="icon">&#128203;</div>
+        <div class="title">No work order selected</div>
+        <div class="sub">Go to Work Orders tab, expand a WO, and click<br><strong>Select for Export</strong></div>
+      </div>
+    </div>
+
+    <!-- Shown when WO is selected -->
+    <div id="woSelectedPanel" style="display:none;">
+      <div class="selected-wo-bar">
+        <span class="wo-label" id="exportWONum"></span>
+        <span class="wo-detail" id="exportWODetail"></span>
+        <button class="btn small" onclick="clearSelectedWO()">Change</button>
+      </div>
+
+      <div id="setupsContainer">
+        <div class="message">
+          <div class="icon">&#9881;</div>
+          <div class="title">Loading setups...</div>
+        </div>
+      </div>
+
+      <div style="padding:8px 0 4px; border-top:1px solid var(--border); margin-top:8px;">
+        <button class="btn small" id="auditWcsBtn" onclick="startWcsAudit()">Audit WCS Origins</button>
+        <span id="auditStatusText" style="font-size:10px; color:var(--text-secondary); margin-left:8px;"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Push bar (sticky bottom) -->
+  <div class="push-bar" id="pushBar" style="display:none;">
+    <div class="push-options" style="display:flex; gap:16px; padding:0 0 6px; font-size:11px;">
+      <label style="display:flex; align-items:center; gap:4px; cursor:pointer; color:var(--text-primary);">
+        <input type="checkbox" id="chkPushSequence" checked> Push Sequence Details
+      </label>
+      <label style="display:flex; align-items:center; gap:4px; cursor:pointer; color:var(--text-primary);">
+        <input type="checkbox" id="chkPushWritten" checked> Push Written Description
+      </label>
+    </div>
+    <div class="push-actions">
+      <button class="btn primary" id="pushBtn" onclick="startPush()">Push to ProShop</button>
+      <span id="pushStatusText" style="font-size:11px; color:var(--text-secondary);"></span>
+    </div>
+    <div class="progress-section" id="progressSection" style="display:none;">
+      <div class="progress-bar-outer">
+        <div class="progress-bar-inner" id="progressBar"></div>
+      </div>
+      <div class="push-log" id="pushLog"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Loading Overlay ============ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Connecting to ProShop...</div>
+  <div class="loading-sub" id="loadingSubText">Detecting document...</div>
+</div>
+
+<script>
+  // ================================================================
+  //  State
+  // ================================================================
+  let allWorkOrders = [];
+  let filteredWorkOrders = [];
+  let expandedWO = null;
+  let showActiveOnly = true;
+  let detectedSearch = "";
+  const loadedYears = new Set();
+  const opsCache = {};
+  const opsLoading = new Set();
+
+  // User detection
+  let proshopUserId = null;
+  let proshopUserName = "";
+
+  const FUSION_TO_PROSHOP = {
+    "tom buerkle":  { id: "001", name: "Tom" },
+    "garrett rink": { id: "018", name: "Garrett" }
+  };
+
+  const config = {
+    proshopBaseUrl: "https://traxismfg.adionsystems.com/procnc"
+  };
+
+  // Export state
+  let selectedWO = null;       // { woNum, partNumber, partName, partRev, status, ops[] }
+  let camSetups = [];           // from getSetups response
+  let pushInProgress = false;
+
+  // ================================================================
+  //  Fusion Palette Bridge
+  // ================================================================
+  const pendingCallbacks = {};
+  const permanentHandlers = {};  // for events that fire multiple times
+
+  window.fusionJavaScriptHandler = {
+    handle: function(action, dataStr) {
+      let data;
+      try { data = JSON.parse(dataStr); } catch { data = dataStr; }
+      // Check permanent handlers first (pushProgress, pushComplete)
+      if (permanentHandlers[action]) {
+        permanentHandlers[action](data);
+        return;
+      }
+      if (pendingCallbacks[action]) {
+        pendingCallbacks[action](data);
+        delete pendingCallbacks[action];
+      }
+    }
+  };
+
+  function sendToAddin(action, data) {
+    return new Promise((resolve, reject) => {
+      try {
+        if (typeof adsk === 'undefined' || typeof adsk.fusionSendData !== 'function') {
+          reject(new Error("Bridge not available"));
+          return;
+        }
+        const responseAction = action + "Response";
+        pendingCallbacks[responseAction] = resolve;
+        const dataStr = data ? JSON.stringify(data) : "";
+        adsk.fusionSendData(action, dataStr);
+        setTimeout(() => {
+          if (pendingCallbacks[responseAction]) {
+            delete pendingCallbacks[responseAction];
+            reject(new Error("Timeout: " + action));
+          }
+        }, 60000);
+      } catch (e) { reject(e); }
+    });
+  }
+
+  // ================================================================
+  //  Tab Switching
+  // ================================================================
+  function switchTab(tab) {
+    document.getElementById("viewWO").classList.toggle("active", tab === "wo");
+    document.getElementById("viewExport").classList.toggle("active", tab === "export");
+    document.getElementById("tabWO").classList.toggle("active", tab === "wo");
+    document.getElementById("tabExport").classList.toggle("active", tab === "export");
+  }
+
+  // ================================================================
+  //  UI Helpers
+  // ================================================================
+  function setStatus(state, text) {
+    document.getElementById("statusDot").className = "status-dot " + state;
+    document.getElementById("statusText").textContent = text;
+  }
+
+  function setLoading(on) {
+    document.getElementById("loadingBar").className = "loading-bar" + (on ? " active" : "");
+  }
+
+  function hideOverlay() {
+    const el = document.getElementById("loadingOverlay");
+    el.classList.add("hidden");
+    setTimeout(() => { el.style.display = "none"; }, 300);
+  }
+
+  function getStatusClass(status) {
+    if (!status) return "other";
+    const s = status.toLowerCase();
+    if (s.includes("active") || s.includes("open") || s.includes("in progress") || s.includes("wip")) return "active";
+    if (s.includes("complete") || s.includes("closed") || s.includes("shipped")) return "complete";
+    return "other";
+  }
+
+  // ================================================================
+  //  Search & Filter
+  // ================================================================
+  function applyFilters() {
+    const query = document.getElementById("searchInput").value.toLowerCase().trim();
+    filteredWorkOrders = allWorkOrders.filter(wo => {
+      if (showActiveOnly) {
+        const s = (wo.status || "").toLowerCase();
+        if (!(s.includes("active") || s.includes("open") || s.includes("in progress") || s.includes("wip"))) return false;
+      }
+      if (query) {
+        const woNum = (wo.workOrderNumber || "").toLowerCase();
+        const partNum = (wo.part?.partNumber || "").toLowerCase();
+        const partName = (wo.part?.partName || "").toLowerCase();
+        const partRev = String(wo.partRev || "").toLowerCase();
+        const status = (wo.status || "").toLowerCase();
+        if (!(woNum.includes(query) || partNum.includes(query) ||
+              partName.includes(query) || partRev.includes(query) ||
+              status.includes(query))) return false;
+      }
+      return true;
+    });
+    renderWorkOrders();
+  }
+
+  function toggleActiveFilter() {
+    showActiveOnly = !showActiveOnly;
+    document.getElementById("activeOnlyTag").className = "filter-tag" + (showActiveOnly ? " active" : "");
+    document.getElementById("allStatusTag").className = "filter-tag" + (!showActiveOnly ? " active" : "");
+    applyFilters();
+  }
+
+  // ================================================================
+  //  Render Work Orders
+  // ================================================================
+  function renderWorkOrders() {
+    const container = document.getElementById("woList");
+    const statsCount = document.getElementById("statsCount");
+    const statsTotal = document.getElementById("statsTotal");
+    const yearsStr = [...loadedYears].sort().reverse().join(", ");
+
+    if (allWorkOrders.length === 0) {
+      container.innerHTML = '<div class="message"><div class="icon">&#128203;</div>' +
+        '<div class="title">No work orders found</div>' +
+        '<div class="sub">Check your connection or try loading all years</div></div>';
+      statsCount.textContent = "0 shown";
+      statsTotal.textContent = yearsStr ? "0 total (" + yearsStr + ")" : "0 total";
+      return;
+    }
+
+    if (filteredWorkOrders.length === 0) {
+      container.innerHTML = '<div class="message"><div class="icon">&#128269;</div>' +
+        '<div class="title">No matches</div>' +
+        '<div class="sub">Try a different search term' +
+        (loadedYears.size < 2 ? ' or load previous year' : '') + '</div></div>';
+      statsCount.textContent = "0 matches";
+      statsTotal.textContent = allWorkOrders.length + " total (" + yearsStr + ")";
+      return;
+    }
+
+    const sorted = [...filteredWorkOrders].sort((a, b) =>
+      (b.workOrderNumber || "").localeCompare(a.workOrderNumber || "")
+    );
+
+    let html = "";
+    sorted.forEach(wo => {
+      const woNum = wo.workOrderNumber || "??";
+      const partStr = wo.part?.partNumber || wo.part?.partName || "";
+      const partRevStr = wo.partRev ? " Rev " + wo.partRev : "";
+      const displayPart = partStr || "(no part)";
+      const status = wo.status || "";
+      const statusClass = getStatusClass(status);
+      const isExpanded = expandedWO === woNum;
+
+      let opsHtml = "";
+      let opsCount = "...";
+      const cachedOps = opsCache[woNum];
+      if (cachedOps) {
+        const sortedOps = [...cachedOps].sort((a, b) =>
+          parseInt(a.operationNumber || 0) - parseInt(b.operationNumber || 0)
+        );
+        opsCount = sortedOps.length;
+        sortedOps.forEach(op => {
+          const opNum = op.operationNumber || "?";
+          const opDesc = op.operationDescription || "";
+          const complete = op.isOpComplete ? "&#10003;" : "";
+          const url = op.proshopUrl || "";
+          opsHtml += '<div class="op-row">' +
+            '<span class="op-number">' + opNum + '</span>' +
+            '<span class="op-desc" title="' + escHtml(opDesc) + '">' + escHtml(opDesc) + '</span>' +
+            (complete ? '<span class="op-complete">&#10003;</span>' : '') +
+            '<span class="op-timer-btn" onclick="event.stopPropagation(); openTimeTracking(\'' + woNum + '\', \'' + escAttr(url) + '\')">&#9201;</span>' +
+            (url ? '<span class="op-link" onclick="event.stopPropagation(); openUrl(\'' + escAttr(url) + '\')">Open</span>' : '') +
+            '</div>';
+        });
+      } else if (isExpanded) {
+        opsHtml = '<div style="color:var(--text-secondary);font-size:11px;padding:8px 6px;">Loading operations...</div>';
+      }
+
+      let woYear = "";
+      if (woNum.includes("-")) { woYear = "20" + woNum.split("-")[0]; }
+      const woUrl = (config.proshopBaseUrl && woYear)
+        ? config.proshopBaseUrl + "/workorder/" + woYear + "/" + woNum : "";
+
+      html += '<div class="wo-card ' + (isExpanded ? 'expanded' : '') + '" id="wo-' + woNum + '">' +
+        '<div class="wo-card-header" onclick="toggleWO(\'' + woNum + '\')">' +
+        '<span class="wo-number">' + woNum + '</span>' +
+        '<span class="wo-part" title="' + escHtml(displayPart + partRevStr) + '">' + escHtml(displayPart + partRevStr) + '</span>' +
+        '<span class="wo-status ' + statusClass + '">' + escHtml(status) + '</span>' +
+        '<span class="wo-expand-icon">&#9654;</span>' +
+        '</div>' +
+        '<div class="wo-ops">' +
+        '<div class="wo-ops-header">' +
+        '<span class="wo-ops-title">Operations (' + opsCount + ')</span>' +
+        '<div class="wo-ops-btns">' +
+        '<button class="btn small success" onclick="event.stopPropagation(); selectWOForExport(\'' + woNum + '\')">' +
+        'Select for Export</button>' +
+        (woUrl ? '<button class="btn small primary" onclick="event.stopPropagation(); openUrl(\'' + escAttr(woUrl) + '\')">Open WO &#8599;</button>' : '') +
+        '</div></div>' +
+        opsHtml +
+        (cachedOps && opsHtml === '' ? '<div style="color:var(--text-secondary);font-size:11px;padding:4px 6px;">No operations</div>' : '') +
+        '</div></div>';
+    });
+
+    container.innerHTML = html;
+    statsCount.textContent = filteredWorkOrders.length + " shown";
+    statsTotal.textContent = allWorkOrders.length + " total (" + yearsStr + ")";
+    document.getElementById("loadMoreBar").style.display = loadedYears.size < 2 ? "" : "none";
+  }
+
+  function escHtml(s) {
+    const d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+  function escAttr(s) {
+    return (s || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+  }
+
+  function toggleWO(woNum) {
+    expandedWO = expandedWO === woNum ? null : woNum;
+    renderWorkOrders();
+    if (expandedWO) {
+      const el = document.getElementById("wo-" + woNum);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (!opsCache[woNum] && !opsLoading.has(woNum)) {
+        fetchOpsForWO(woNum);
+      }
+    }
+  }
+
+  async function fetchOpsForWO(woNum) {
+    opsLoading.add(woNum);
+    renderWorkOrders();
+    try {
+      const result = await sendToAddin("fetchSingleWO", { workOrderNumber: woNum });
+      if (result.data?.workOrder?.ops?.records) {
+        opsCache[woNum] = result.data.workOrder.ops.records;
+      } else {
+        opsCache[woNum] = [];
+      }
+    } catch (e) {
+      opsCache[woNum] = [];
+    }
+    opsLoading.delete(woNum);
+    renderWorkOrders();
+  }
+
+  function openUrl(url) {
+    sendToAddin("openInBrowser", { url }).catch(() => window.open(url, "_blank"));
+  }
+
+  function openTimeTracking(woNum, opUrl) {
+    if (opUrl) {
+      openUrl(opUrl);
+    } else {
+      let woYear = "";
+      if (woNum.includes("-")) { woYear = "20" + woNum.split("-")[0]; }
+      if (woYear) openUrl(config.proshopBaseUrl + "/workorder/" + woYear + "/" + woNum);
+    }
+  }
+
+  // ================================================================
+  //  User Detection & Selection
+  // ================================================================
+  function detectUser(fusionUserName) {
+    const lower = (fusionUserName || "").toLowerCase();
+    for (const [key, val] of Object.entries(FUSION_TO_PROSHOP)) {
+      if (lower.includes(key)) {
+        proshopUserId = val.id;
+        proshopUserName = val.name;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function showUserUI() {
+    if (proshopUserId) {
+      document.getElementById("userNameLabel").textContent = proshopUserName + " (" + proshopUserId + ")";
+      document.getElementById("userNameLabel").style.display = "";
+      document.getElementById("userSelect").style.display = "none";
+    } else {
+      document.getElementById("userNameLabel").style.display = "none";
+      document.getElementById("userSelect").style.display = "";
+    }
+  }
+
+  function selectUser() {
+    const sel = document.getElementById("userSelect");
+    const id = sel.value;
+    if (!id) { proshopUserId = null; proshopUserName = ""; return; }
+    proshopUserId = id;
+    proshopUserName = id;
+    showUserUI();
+  }
+
+  // ================================================================
+  //  WO Data Loading
+  // ================================================================
+  async function fetchYear(year) {
+    const result = await sendToAddin("fetchWorkOrders", { year: year });
+    if (result.errors) throw new Error(result.errors[0]?.message || "API Error");
+    const records = result.data?.workOrders?.records || [];
+    loadedYears.add(year);
+    const existing = new Set(allWorkOrders.map(w => w.workOrderNumber));
+    records.forEach(r => {
+      if (!existing.has(r.workOrderNumber)) allWorkOrders.push(r);
+    });
+    return records.length;
+  }
+
+  async function loadCurrentYear() {
+    const year = new Date().getFullYear().toString();
+    setLoading(true);
+    setStatus("loading", "Loading " + year + "...");
+    try {
+      await fetchYear(year);
+      setStatus("connected", allWorkOrders.length + " WOs");
+      applyFilters();
+    } catch (e) {
+      setStatus("error", e.message || "Failed");
+      if (allWorkOrders.length === 0) {
+        document.getElementById("woList").innerHTML =
+          '<div class="message"><div class="icon">&#10060;</div>' +
+          '<div class="title">Connection failed</div>' +
+          '<div class="sub">' + escHtml(e.message || "Could not reach ProShop API") + '</div></div>';
+      }
+    }
+    setLoading(false);
+    hideOverlay();
+  }
+
+  async function loadPreviousYear() {
+    const year = (new Date().getFullYear() - 1).toString();
+    if (loadedYears.has(year)) return;
+    setLoading(true);
+    setStatus("loading", "Loading " + year + "...");
+    try {
+      await fetchYear(year);
+      setStatus("connected", allWorkOrders.length + " WOs");
+      applyFilters();
+    } catch (e) {
+      setStatus("error", e.message || "Failed");
+    }
+    setLoading(false);
+  }
+
+  async function loadAllYears() {
+    setLoading(true);
+    setStatus("loading", "Loading all...");
+    try {
+      const result = await sendToAddin("fetchMultiYearWorkOrders", {});
+      if (result.errors) throw new Error(result.errors[0]?.message || "API Error");
+      allWorkOrders = result.data?.workOrders?.records || [];
+      const thisYear = new Date().getFullYear();
+      loadedYears.add(thisYear.toString());
+      loadedYears.add((thisYear - 1).toString());
+      setStatus("connected", allWorkOrders.length + " WOs");
+      applyFilters();
+    } catch (e) {
+      setStatus("error", e.message || "Failed");
+    }
+    setLoading(false);
+    hideOverlay();
+  }
+
+  // ================================================================
+  //  Re-detect Active Document
+  // ================================================================
+  async function redetectDocument() {
+    setLoading(true);
+    setStatus("loading", "Detecting document...");
+    try {
+      const docInfo = await sendToAddin("getDocumentInfo", {});
+      const search = extractSearchTerms(docInfo.documentName || "", docInfo.folderName || "");
+      if (search) {
+        detectedSearch = search;
+        document.getElementById("searchInput").value = search;
+        setStatus("connected", "Detected: " + search);
+      } else {
+        document.getElementById("searchInput").value = "";
+        detectedSearch = "";
+        setStatus("connected", "No match from document name");
+      }
+      applyFilters();
+      // If no matches in current data, try loading previous year
+      if (detectedSearch && filteredWorkOrders.length === 0 && loadedYears.size < 2) {
+        await loadPreviousYear();
+      }
+    } catch (e) {
+      setStatus("error", e.message || "Detection failed");
+    }
+    setLoading(false);
+  }
+
+  // ================================================================
+  //  Select WO for Export
+  // ================================================================
+  async function selectWOForExport(woNum) {
+    // Find the WO in our data
+    const wo = allWorkOrders.find(w => w.workOrderNumber === woNum);
+    if (!wo) return;
+
+    // Make sure ops are loaded
+    if (!opsCache[woNum]) {
+      await fetchOpsForWO(woNum);
+    }
+
+    const ops = opsCache[woNum] || [];
+    selectedWO = {
+      woNum: woNum,
+      partNumber: wo.part?.partNumber || "",
+      partName: wo.part?.partName || "",
+      customerPartNumber: wo.part?.customerPartNumber || "",
+      partRev: wo.partRev || "",
+      status: wo.status || "",
+      ops: ops.sort((a, b) => parseInt(a.operationNumber || 0) - parseInt(b.operationNumber || 0))
+    };
+
+    // Update export tab UI
+    document.getElementById("exportWONum").textContent = woNum;
+    const detail = selectedWO.partNumber || selectedWO.partName || "(no part)";
+    const rev = selectedWO.partRev ? " Rev " + selectedWO.partRev : "";
+    document.getElementById("exportWODetail").textContent = detail + rev +
+      " — " + selectedWO.ops.length + " ops";
+
+    document.getElementById("noWOSelected").style.display = "none";
+    document.getElementById("woSelectedPanel").style.display = "";
+
+    // Save part number to Fusion document for TraxisPostProcessor
+    if (selectedWO.partNumber) {
+      adsk.fusionSendData("savePartNumber", JSON.stringify({
+        partNumber: selectedWO.partNumber,
+        customerPartNumber: selectedWO.customerPartNumber
+      }));
+    }
+
+    // Switch to export tab
+    switchTab("export");
+
+    // Load CAM setups
+    loadSetups();
+  }
+
+  function clearSelectedWO() {
+    selectedWO = null;
+    camSetups = [];
+    document.getElementById("noWOSelected").style.display = "";
+    document.getElementById("woSelectedPanel").style.display = "none";
+    document.getElementById("pushBar").style.display = "none";
+    switchTab("wo");
+  }
+
+  // ================================================================
+  //  CAM Setups
+  // ================================================================
+  async function loadSetups() {
+    const container = document.getElementById("setupsContainer");
+    container.innerHTML = '<div class="message"><div class="icon">&#9881;</div>' +
+      '<div class="title">Loading CAM setups...</div></div>';
+
+    try {
+      const result = await sendToAddin("getSetups", {});
+      if (result.error) {
+        container.innerHTML = '<div class="message"><div class="icon">&#9888;</div>' +
+          '<div class="title">No CAM data</div>' +
+          '<div class="sub">' + escHtml(result.error) + '</div></div>';
+        document.getElementById("pushBar").style.display = "none";
+        return;
+      }
+      camSetups = result.setups || [];
+      if (camSetups.length === 0) {
+        container.innerHTML = '<div class="message"><div class="icon">&#9888;</div>' +
+          '<div class="title">No setups found</div>' +
+          '<div class="sub">Open a document with CAM setups</div></div>';
+        document.getElementById("pushBar").style.display = "none";
+        return;
+      }
+      renderSetups();
+      document.getElementById("pushBar").style.display = "";
+    } catch (e) {
+      container.innerHTML = '<div class="message"><div class="icon">&#10060;</div>' +
+        '<div class="title">Error loading setups</div>' +
+        '<div class="sub">' + escHtml(e.message || "Unknown error") + '</div></div>';
+      document.getElementById("pushBar").style.display = "none";
+    }
+  }
+
+  function renderSetups() {
+    const container = document.getElementById("setupsContainer");
+    if (!selectedWO || camSetups.length === 0) return;
+
+    // Machining ops (40-200) for dropdown and auto-select
+    const machiningOps = selectedWO.ops.filter(op => {
+      const num = parseInt(op.operationNumber || 0);
+      return num >= 40 && num <= 200;
+    });
+
+    let html = '';
+    camSetups.forEach((setup, idx) => {
+      const prog = setup.program ? "O" + setup.program : "";
+      const comment = setup.programComment || "";
+      const label = setup.name;
+
+      // No auto-select — default to skip
+      const autoTarget = null;
+
+      // Build op dropdown options (only machining ops 40-200)
+      let opOptions = '<option value="">-- skip --</option>';
+      machiningOps.forEach(op => {
+        const opNum = op.operationNumber || "?";
+        const opDesc = op.operationDescription || "";
+        const autoSelect = (autoTarget && opNum === autoTarget) ? " selected" : "";
+        opOptions += '<option value="' + opNum + '"' + autoSelect + '>' +
+          opNum + ' — ' + escHtml(opDesc) + '</option>';
+      });
+
+      // WCS debug info
+      const wcs = setup.wcs || {};
+      let wcsHtml = '';
+      if (wcs.X) {
+        wcsHtml = '<div style="font-size:9px;color:var(--text-secondary);padding:4px 0 2px;font-family:Consolas,monospace;">' +
+          'WCS X:' + wcs.X + ' Y:' + wcs.Y + ' Z:' + wcs.Z + '</div>';
+      }
+
+      html += '<div class="setup-card">' +
+        '<div class="setup-card-header">' +
+        '<span class="setup-name">' + escHtml(label) + '</span>' +
+        '<span class="setup-info">' + (prog ? prog + " | " : "") +
+          setup.operationCount + ' ops</span>' +
+        '</div>' +
+        wcsHtml +
+        '<div class="setup-mapping">' +
+        '<label>Push to Op:</label>' +
+        '<select id="setupOp_' + idx + '">' + opOptions + '</select>' +
+        '</div></div>';
+    });
+
+    container.innerHTML = html;
+  }
+
+  // ================================================================
+  //  Push to ProShop
+  // ================================================================
+  function startPush() {
+    if (pushInProgress || !selectedWO) return;
+
+    const pushSequence = document.getElementById("chkPushSequence").checked;
+    const pushWritten = document.getElementById("chkPushWritten").checked;
+
+    if (!pushSequence && !pushWritten) {
+      document.getElementById("pushStatusText").textContent = "Select at least one push option";
+      return;
+    }
+
+    // Collect mappings
+    const mappings = [];
+    camSetups.forEach((setup, idx) => {
+      const sel = document.getElementById("setupOp_" + idx);
+      if (sel && sel.value) {
+        mappings.push({
+          setup_index: setup.index,
+          part_number: selectedWO.partNumber,
+          op_number: sel.value
+        });
+      }
+    });
+
+    if (mappings.length === 0) {
+      document.getElementById("pushStatusText").textContent = "No setups mapped to operations";
+      return;
+    }
+
+    pushInProgress = true;
+    document.getElementById("pushBtn").disabled = true;
+    document.getElementById("pushStatusText").textContent = "Pushing...";
+    document.getElementById("progressSection").style.display = "";
+    document.getElementById("progressBar").style.width = "0%";
+    document.getElementById("progressBar").className = "progress-bar-inner";
+    document.getElementById("pushLog").innerHTML = "";
+
+    addLog("info", "Starting push for " + mappings.length + " setup(s)..." +
+      (pushSequence ? "" : " (sequence skipped)") +
+      (pushWritten ? "" : " (written desc skipped)"));
+
+    // Fire-and-forget — progress comes via permanentHandlers, not a response promise
+    try {
+      adsk.fusionSendData("pushToProShop", JSON.stringify({
+        mappings: mappings,
+        pushSequence: pushSequence,
+        pushWritten: pushWritten
+      }));
+    } catch (e) {
+      addLog("err", "Bridge error: " + e.message);
+      pushInProgress = false;
+      document.getElementById("pushBtn").disabled = false;
+    }
+  }
+
+  // Register permanent handlers for push progress
+  permanentHandlers["pushProgress"] = function(data) {
+    const status = data.status || "";
+    const current = data.current || 0;
+    const total = data.total || 1;
+    const name = data.setup_name || "";
+    const pct = Math.round((current - 1) / total * 100);
+    document.getElementById("progressBar").style.width = pct + "%";
+
+    const msgs = {
+      "extracting": "Extracting CAM data from " + name + "...",
+      "screenshots": "Capturing screenshots for " + name + "...",
+      "pushing_sequence": "Pushing sequence details for " + name + "...",
+      "fixing_sequence_page": "Sorting sequence page for " + name + "...",
+      "pushing_written": "Pushing written description for " + name + "...",
+      "error": data.message || "Error"
+    };
+    const msg = msgs[status] || status;
+    document.getElementById("pushStatusText").textContent = "(" + current + "/" + total + ") " + msg;
+    addLog(status === "error" ? "err" : "info", msg);
+  };
+
+  permanentHandlers["pushComplete"] = function(data) {
+    pushInProgress = false;
+    document.getElementById("pushBtn").disabled = false;
+
+    const results = data.results || [];
+    let okCount = 0;
+    let failCount = 0;
+    results.forEach(r => {
+      const seq = r.sequence_skipped ? "seq skipped" : (r.sequence_ok ? "seq OK" : "seq FAIL");
+      const wd = r.written_skipped ? "wd skipped" : (r.written_ok ? "wd OK" : "wd FAIL");
+      const selWarn = (!r.sequence_skipped && r.sequence_ok && r.selenium_ok === false) ?
+        " (Selenium sort/G-Code FAILED)" : "";
+      const seqFailed = !r.sequence_skipped && !r.sequence_ok;
+      const wdFailed = !r.written_skipped && !r.written_ok;
+      if (!seqFailed && !wdFailed) {
+        okCount++;
+        addLog(selWarn ? "warn" : "ok", r.setup_name + " -> Op " + r.op_number +
+          ": " + seq + ", " + wd +
+          (r.tools_count ? " (" + r.tools_count + " tools)" : "") + selWarn);
+      } else {
+        failCount++;
+        addLog("err", r.setup_name + " -> Op " + r.op_number + ": " + seq + ", " + wd +
+          selWarn + (r.error ? " — " + r.error : ""));
+      }
+    });
+
+    document.getElementById("progressBar").style.width = "100%";
+    if (failCount === 0) {
+      document.getElementById("progressBar").className = "progress-bar-inner complete";
+      document.getElementById("pushStatusText").textContent = "Done! " + okCount + " setup(s) pushed.";
+      addLog("ok", "All pushes complete.");
+    } else {
+      document.getElementById("progressBar").className = "progress-bar-inner error";
+      document.getElementById("pushStatusText").textContent =
+        okCount + " OK, " + failCount + " failed.";
+      addLog("err", failCount + " push(es) had errors.");
+    }
+  };
+
+  function addLog(level, text) {
+    const log = document.getElementById("pushLog");
+    const ts = new Date().toLocaleTimeString();
+    const cls = "log-" + level;
+    log.innerHTML += '<div class="' + cls + '">[' + ts + '] ' + escHtml(text) + '</div>';
+    log.scrollTop = log.scrollHeight;
+  }
+
+  // ================================================================
+  //  WCS Origin Audit
+  // ================================================================
+  async function startWcsAudit() {
+    const btn = document.getElementById("auditWcsBtn");
+    const statusEl = document.getElementById("auditStatusText");
+    btn.disabled = true;
+    statusEl.textContent = "Scanning setups...";
+    try {
+      const result = await sendToAddin("auditWCS", {});
+      if (result.error) {
+        statusEl.textContent = result.error;
+      } else {
+        showAuditResults(result.setups || []);
+        statusEl.textContent = "";
+      }
+    } catch (e) {
+      statusEl.textContent = e.message || "Error";
+    }
+    btn.disabled = false;
+  }
+
+  function showAuditResults(setups) {
+    let html = '<div class="audit-modal" onclick="if(event.target===this)this.remove()">';
+    html += '<div class="audit-panel">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+    html += '<strong style="color:var(--text-bright);font-size:13px;">WCS Origin Audit &mdash; ' +
+            setups.length + ' setup(s)</strong>';
+    html += '<button class="btn small" onclick="this.closest(\'.audit-modal\').remove()">Close</button>';
+    html += '</div>';
+
+    setups.forEach(function(s) {
+      html += '<div class="audit-setup">';
+      html += '<div class="audit-setup-name">' + escHtml(s.name) + '</div>';
+      if (s.screenshot) {
+        html += '<img class="audit-thumb" src="data:image/png;base64,' + s.screenshot + '">';
+      }
+      html += '<div class="audit-data">';
+      html += '<span class="lbl">Origin (in):</span> X=' + s.origin_x + ' Y=' + s.origin_y + ' Z=' + s.origin_z + '<br>';
+      html += '<span class="lbl">Mode:</span> ' + escHtml(s.origin_mode || '\u2014') + '<br>';
+      html += '<span class="lbl">Box Point:</span> ' + escHtml(s.box_point || '\u2014') + '<br>';
+      html += '<span class="lbl">G-Code:</span> ' + escHtml(s.gcode || 'G54') + '<br>';
+      if (s.stock_size) {
+        html += '<span class="lbl">Stock:</span> ' + s.stock_size[0] + '" x ' +
+                s.stock_size[1] + '" x ' + s.stock_size[2] + '"<br>';
+      }
+      html += '<span class="lbl">WCS X:</span> ' + escHtml(s.wcs_x || '\u2014') + '<br>';
+      html += '<span class="lbl">WCS Y:</span> ' + escHtml(s.wcs_y || '\u2014') + '<br>';
+      html += '<span class="lbl">WCS Z:</span> ' + escHtml(s.wcs_z || '\u2014') + '<br>';
+      html += '</div></div>';
+    });
+
+    html += '</div></div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
+
+  // ================================================================
+  //  Auto-detect from Fusion document
+  // ================================================================
+  function extractSearchTerms(docName, folderName) {
+    const candidates = [];
+    const isYear = (s) => /^\d{4}$/.test(s) && parseInt(s) >= 2000 && parseInt(s) <= 2099;
+    if (docName && docName !== "Untitled") {
+      const tokens = docName.trim().split(/[\s_-]+/);
+      if (tokens.length > 0) candidates.push(tokens[0]);
+      const nums = docName.match(/\d{4,}/g);
+      if (nums) candidates.push(...nums.filter(n => !isYear(n)));
+    }
+    if (folderName && folderName !== "root" && folderName.length > 1) {
+      candidates.push(folderName);
+      const nums = folderName.match(/\d{4,}/g);
+      if (nums) candidates.push(...nums.filter(n => !isYear(n)));
+    }
+    const unique = [...new Set(candidates)].filter(c => c.length >= 3);
+    unique.sort((a, b) => {
+      const aNum = /^\d+$/.test(a);
+      const bNum = /^\d+$/.test(b);
+      if (aNum && !bNum) return -1;
+      if (!aNum && bNum) return 1;
+      return b.length - a.length;
+    });
+    return unique[0] || "";
+  }
+
+  // ================================================================
+  //  Initialize
+  // ================================================================
+  async function init() {
+    let searchTimer;
+    document.getElementById("searchInput").addEventListener("input", () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(applyFilters, 150);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        const input = document.getElementById("searchInput");
+        if (input.value) { input.value = ""; applyFilters(); }
+      }
+    });
+
+    await waitForBridge();
+
+    const sub = document.getElementById("loadingSubText");
+    try {
+      sub.textContent = "Detecting document...";
+      const docInfo = await sendToAddin("getDocumentInfo", {});
+      if (docInfo.fusionUser) detectUser(docInfo.fusionUser);
+      showUserUI();
+      const search = extractSearchTerms(docInfo.documentName || "", docInfo.folderName || "");
+      if (search) {
+        detectedSearch = search;
+        document.getElementById("searchInput").value = search;
+        sub.textContent = "Detected: " + search + " — loading WOs...";
+      } else {
+        sub.textContent = "Loading current year WOs...";
+      }
+    } catch (e) {
+      sub.textContent = "Loading current year WOs...";
+      showUserUI();
+    }
+
+    await loadCurrentYear();
+
+    if (detectedSearch && filteredWorkOrders.length === 0) {
+      document.getElementById("loadingSubText").textContent = "No match this year, checking last year...";
+      await loadPreviousYear();
+    }
+  }
+
+  function waitForBridge() {
+    return new Promise((resolve) => {
+      let attempts = 0;
+      const check = () => {
+        attempts++;
+        if (typeof adsk !== 'undefined' && typeof adsk.fusionSendData === 'function') {
+          resolve(); return;
+        }
+        if (attempts >= 30) { resolve(); return; }
+        document.getElementById("loadingSubText").textContent =
+          "Waiting for Fusion bridge... (" + attempts + ")";
+        setTimeout(check, 500);
+      };
+      check();
+    });
+  }
+
+  init();
+</script>
+
+</body>
+</html>

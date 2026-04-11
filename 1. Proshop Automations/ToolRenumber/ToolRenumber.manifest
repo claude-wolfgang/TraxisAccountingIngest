@@ -1,0 +1,13 @@
+{
+    "autodeskProduct": "Fusion",
+    "type": "addin",
+    "id": "tool-renumber-traxis-001",
+    "author": "Traxis Manufacturing",
+    "description": {
+        "": "Renumber CAM tools to match ProShop machine pocket assignments, minimizing changeovers."
+    },
+    "version": "1.0.0",
+    "runOnStartup": false,
+    "supportedOS": "windows",
+    "editEnabled": true
+}

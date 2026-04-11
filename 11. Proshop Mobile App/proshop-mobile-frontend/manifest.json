@@ -1,0 +1,22 @@
+{
+  "name": "ProShop Mobile",
+  "short_name": "ProShop",
+  "description": "ProShop ERP shop floor companion",
+  "start_url": "/app/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#0f3460",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

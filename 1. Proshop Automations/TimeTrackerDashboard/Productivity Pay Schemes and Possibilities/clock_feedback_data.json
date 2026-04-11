@@ -1,0 +1,12 @@
+{
+  "daily_metrics": {
+    "2026-01-23": {
+      "001": {
+        "clock_in": null,
+        "clock_out": "2026-01-24T022151Z",
+        "hours_worked": 0
+      }
+    }
+  },
+  "employee_stats": {}
+}

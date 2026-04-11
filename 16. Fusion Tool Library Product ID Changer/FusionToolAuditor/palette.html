@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 12px;
+            padding: 10px;
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
+        .header { margin-bottom: 10px; }
+        .header h2 { font-size: 16px; margin-bottom: 5px; color: #fff; }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select, button, input[type="text"] {
+            padding: 6px 10px;
+            border: 1px solid #555;
+            border-radius: 3px;
+            background: #3d3d3d;
+            color: #e0e0e0;
+            font-size: 12px;
+        }
+        select { min-width: 250px; }
+        button {
+            cursor: pointer;
+            background: #0078d4;
+            border-color: #0078d4;
+        }
+        button:hover { background: #106ebe; }
+        button.save { background: #107c10; border-color: #107c10; }
+        button.save:hover { background: #0e6b0e; }
+        button:disabled { background: #555; border-color: #555; cursor: not-allowed; }
+
+        .filter-toggle {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .filter-toggle input { width: auto; }
+
+        .stats {
+            margin-bottom: 8px;
+            padding: 6px 8px;
+            background: #3d3d3d;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        .stats span { margin-right: 15px; }
+        .stats .missing { color: #ffcc00; }
+        .stats .proshop { color: #4caf50; }
+
+        .table-container {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            border: 1px solid #555;
+            border-radius: 3px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 5px 6px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+            font-size: 11px;
+        }
+        th {
+            background: #3d3d3d;
+            position: sticky;
+            top: 0;
+            font-weight: 600;
+        }
+        tr:hover { background: #383838; }
+        tr.missing { background: #4a3d00; }
+        tr.missing:hover { background: #5a4d10; }
+
+        .product-id-cell {
+            position: relative;
+        }
+        .product-id-cell input {
+            width: 100%;
+            padding: 4px 6px;
+        }
+        .status {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+        }
+        .status-set { color: #4caf50; }
+        .status-empty { color: #ffcc00; }
+
+        .search-cell {
+            position: relative;
+        }
+        .search-cell input {
+            width: 100%;
+            padding: 4px 6px;
+        }
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #3d3d3d;
+            border: 1px solid #555;
+            border-radius: 3px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .search-dropdown.show { display: block; }
+        .search-item {
+            padding: 6px 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #444;
+        }
+        .search-item:hover { background: #4a4a4a; }
+        .search-item .tool-id { font-weight: bold; color: #4caf50; }
+        .search-item .tool-desc { color: #aaa; font-size: 10px; }
+
+        .message {
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 3px;
+            display: none;
+            font-size: 11px;
+        }
+        .message.success { background: #1b4d1b; display: block; }
+        .message.error { background: #4d1b1b; display: block; }
+        .message.info { background: #1b3d4d; display: block; }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Tool Library Auditor</h2>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div class="controls">
+        <select id="librarySelect" onchange="loadLibrary()">
+            <option value="">-- Select Library --</option>
+        </select>
+        <button id="connectLibBtn" onclick="refreshLibraries()">Connect to Libraries</button>
+        <button id="connectProshopBtn" onclick="sendAction('fetchProshopTools', {})">Connect to ProShop Tool Data</button>
+        <div class="filter-toggle">
+            <input type="checkbox" id="showMissingOnly" onchange="filterTable()">
+            <label for="showMissingOnly">Missing only</label>
+        </div>
+        <button class="save" onclick="saveChanges()" id="saveBtn" disabled>Save Changes</button>
+        <button onclick="autoExtract()" id="autoExtractBtn" style="background:#9c27b0;border-color:#9c27b0;">Auto-Extract IDs</button>
+        <button onclick="lookupByEDP()" id="edpLookupBtn" style="background:#ff5722;border-color:#ff5722;">Lookup by EDP</button>
+        <button onclick="moveEdpToVendor()" id="moveEdpBtn" style="background:#795548;border-color:#795548;">EDP → Vendor</button>
+        <button onclick="sendAction('exportJson', {tools: tools})" style="background:#607d8b;border-color:#607d8b;">Export JSON</button>
+        <button onclick="sendAction('closePalette', {})" style="background:#d32f2f;border-color:#d32f2f;">Close</button>
+    </div>
+
+    <div class="stats" id="stats" style="display: none;">
+        <span>Total: <strong id="totalCount">0</strong></span>
+        <span>With ID: <strong id="setCount">0</strong></span>
+        <span class="missing">Missing: <strong id="missingCount">0</strong></span>
+        <span class="proshop">ProShop: <strong id="proshopCount">0</strong> tools</span>
+    </div>
+
+    <div class="table-container">
+        <table id="toolTable">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">T#</th>
+                    <th>Description</th>
+                    <th style="width: 80px;">Type</th>
+                    <th style="width: 60px;">Dia</th>
+                    <th style="width: 100px;">Product ID</th>
+                    <th style="width: 140px;">ProShop Lookup</th>
+                </tr>
+            </thead>
+            <tbody id="toolTableBody">
+                <tr><td colspan="6" class="loading">Select a library to view tools</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let tools = [];
+        let proshopTools = [];
+        let edpMap = {};  // EDP -> toolNumber mapping
+        let hasChanges = false;
+        let activeDropdown = null;
+
+        function sendAction(action, data) {
+            const msg = JSON.stringify({ action: action, data: data });
+            adsk.fusionSendData('send', msg);
+        }
+
+        window.fusionJavaScriptHandler = {
+            handle: function(action, data) {
+                if (action === 'exec') {
+                    eval(data);
+                }
+            }
+        };
+
+        function setLibraries(libraryList) {
+            const select = document.getElementById('librarySelect');
+            select.innerHTML = '<option value="">-- Select Library --</option>';
+            let docIndex = -1;
+            libraryList.forEach((lib, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = '[' + lib.location + '] ' + lib.path;
+                select.appendChild(opt);
+                if (lib.location === 'Document') docIndex = idx;
+            });
+            // Auto-select and load the Document library if available
+            if (docIndex >= 0) {
+                select.value = docIndex;
+                loadLibrary();
+            }
+            // Turn button green to indicate connection
+            var btn = document.getElementById('connectLibBtn');
+            btn.style.background = '#107c10';
+            btn.style.borderColor = '#107c10';
+        }
+
+        function setTools(toolList) {
+            tools = toolList;
+            hasChanges = false;
+            document.getElementById('saveBtn').disabled = true;
+            renderTable();
+            updateStats();
+            document.getElementById('stats').style.display = 'block';
+        }
+
+        function setProshopTools(toolList) {
+            proshopTools = toolList;
+            document.getElementById('proshopCount').textContent = toolList.length;
+
+            // Build EDP map for reverse lookup
+            edpMap = {};
+            for (var i = 0; i < toolList.length; i++) {
+                var tool = toolList[i];
+                if (tool.edps) {
+                    for (var j = 0; j < tool.edps.length; j++) {
+                        var edp = tool.edps[j].toLowerCase().trim();
+                        // Also try to extract just the numeric part for fuzzy matching
+                        var numericEdp = edp.replace(/[^0-9]/g, '');
+                        if (edp) edpMap[edp] = tool.toolNumber;
+                        if (numericEdp && numericEdp.length >= 4) edpMap[numericEdp] = tool.toolNumber;
+                    }
+                }
+            }
+
+            if (toolList.length > 0) {
+                showMessage('Loaded ' + toolList.length + ' ProShop tools with ' + Object.keys(edpMap).length + ' EDPs', 'info');
+                // Turn button green to indicate connection
+                var btn = document.getElementById('connectProshopBtn');
+                btn.style.background = '#107c10';
+                btn.style.borderColor = '#107c10';
+            }
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = 'message ' + type;
+            setTimeout(function() { msg.className = 'message'; }, 3000);
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('toolTableBody');
+            const showMissing = document.getElementById('showMissingOnly').checked;
+
+            let html = '';
+            tools.forEach(function(tool, idx) {
+                const isMissing = !tool.productId || tool.productId.trim() === '';
+                if (showMissing && !isMissing) return;
+
+                const rowClass = isMissing ? 'missing' : '';
+                const statusClass = isMissing ? 'status-empty' : 'status-set';
+                const statusIcon = isMissing ? '!' : '\u2713';
+                const diaStr = tool.diameter ? tool.diameter.toFixed(3) : '-';
+                const desc = escapeHtml(tool.description || '');
+                const prodId = escapeHtml(tool.productId || '');
+
+                html += '<tr class="' + rowClass + '">' +
+                    '<td>' + (tool.toolNumber || '-') + '</td>' +
+                    '<td title="' + desc + '">' + truncate(tool.description || '', 40) + '</td>' +
+                    '<td>' + truncate(tool.type || '', 12) + '</td>' +
+                    '<td>' + diaStr + '</td>' +
+                    '<td class="product-id-cell">' +
+                        '<input type="text" value="' + prodId + '" onchange="updateProductId(' + idx + ', this.value)" placeholder="ID">' +
+                        '<span class="status ' + statusClass + '">' + statusIcon + '</span>' +
+                    '</td>' +
+                    '<td class="search-cell">' +
+                        '<input type="text" placeholder="Search..." onfocus="showDropdown(' + idx + ', this)" oninput="filterDropdown(' + idx + ', this.value)" onblur="hideDropdownDelayed(' + idx + ')">' +
+                        '<div class="search-dropdown" id="dropdown-' + idx + '"></div>' +
+                    '</td>' +
+                '</tr>';
+            });
+
+            if (html === '') {
+                html = '<tr><td colspan="6" class="loading">No tools to display</td></tr>';
+            }
+            tbody.innerHTML = html;
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function truncate(str, len) {
+            return str.length > len ? str.substring(0, len) + '...' : str;
+        }
+
+        function updateProductId(idx, value) {
+            tools[idx].productId = value;
+            hasChanges = true;
+            document.getElementById('saveBtn').disabled = false;
+            updateStats();
+        }
+
+        function updateStats() {
+            const total = tools.length;
+            let missing = 0;
+            for (let i = 0; i < tools.length; i++) {
+                if (!tools[i].productId || tools[i].productId.trim() === '') missing++;
+            }
+            const set = total - missing;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('setCount').textContent = set;
+            document.getElementById('missingCount').textContent = missing;
+        }
+
+        function filterTable() {
+            renderTable();
+        }
+
+        function showDropdown(idx, input) {
+            activeDropdown = idx;
+            filterDropdown(idx, input.value);
+            document.getElementById('dropdown-' + idx).classList.add('show');
+        }
+
+        function hideDropdownDelayed(idx) {
+            setTimeout(function() {
+                const dd = document.getElementById('dropdown-' + idx);
+                if (dd) dd.classList.remove('show');
+            }, 200);
+        }
+
+        function filterDropdown(idx, query) {
+            const dd = document.getElementById('dropdown-' + idx);
+            if (!dd) return;
+
+            const q = query.toLowerCase();
+            let matches = proshopTools;
+            if (q.length > 0) {
+                matches = [];
+                for (let i = 0; i < proshopTools.length; i++) {
+                    const t = proshopTools[i];
+                    if (t.toolNumber.toLowerCase().indexOf(q) >= 0 || (t.description && t.description.toLowerCase().indexOf(q) >= 0)) {
+                        matches.push(t);
+                    }
+                }
+            }
+            matches = matches.slice(0, 20);
+
+            let html = '';
+            for (let i = 0; i < matches.length; i++) {
+                const t = matches[i];
+                const dia = t.cutDiameter ? t.cutDiameter.toFixed(3) + '"' : '';
+                html += '<div class="search-item" onmousedown="selectProshopTool(' + idx + ', \'' + escapeHtml(t.toolNumber) + '\')">' +
+                    '<span class="tool-id">' + escapeHtml(t.toolNumber) + '</span> ' +
+                    '<span class="tool-desc">' + truncate(t.description || '', 30) + ' | ' + dia + '</span>' +
+                '</div>';
+            }
+
+            if (html === '') {
+                html = '<div class="search-item" style="color:#888">No matches</div>';
+            }
+            dd.innerHTML = html;
+        }
+
+        function selectProshopTool(idx, toolNumber) {
+            tools[idx].productId = toolNumber;
+            hasChanges = true;
+            document.getElementById('saveBtn').disabled = false;
+            updateStats();
+            renderTable();
+        }
+
+        function loadLibrary() {
+            const select = document.getElementById('librarySelect');
+            const idx = select.value;
+            if (idx === '') {
+                document.getElementById('toolTableBody').innerHTML = '<tr><td colspan="6" class="loading">Select a library to view tools</td></tr>';
+                document.getElementById('stats').style.display = 'none';
+                return;
+            }
+            document.getElementById('toolTableBody').innerHTML = '<tr><td colspan="6" class="loading">Loading tools...</td></tr>';
+            sendAction('loadLibrary', { index: parseInt(idx) });
+        }
+
+        function refreshLibraries() {
+            sendAction('refreshLibraries', {});
+        }
+
+        function saveChanges() {
+            if (!hasChanges) return;
+            document.getElementById('saveBtn').disabled = true;
+            sendAction('saveChanges', { tools: tools });
+        }
+
+        function autoExtract() {
+            // Pattern: 1-2 letters followed by 1-4 digits at start of description
+            var pattern = /^([A-Za-z]{1,2}\d{1,4})\b/;
+            var extracted = 0;
+            var skipped = 0;
+
+            for (var i = 0; i < tools.length; i++) {
+                var tool = tools[i];
+                // Skip if already has a Product ID
+                if (tool.productId && tool.productId.trim() !== '') {
+                    skipped++;
+                    continue;
+                }
+                // Try to extract from description
+                var desc = tool.description || '';
+                var match = desc.match(pattern);
+                if (match) {
+                    tools[i].productId = match[1].toUpperCase();
+                    extracted++;
+                    hasChanges = true;
+                }
+            }
+
+            if (extracted > 0) {
+                document.getElementById('saveBtn').disabled = false;
+                renderTable();
+                updateStats();
+                showMessage('Extracted ' + extracted + ' IDs from descriptions (skipped ' + skipped + ' with existing IDs)', 'success');
+            } else {
+                showMessage('No IDs found to extract', 'info');
+            }
+        }
+
+        function lookupByEDP() {
+            // Look up current Product IDs as EDPs in ProShop
+            if (Object.keys(edpMap).length === 0) {
+                showMessage('No EDP data loaded from ProShop yet', 'error');
+                return;
+            }
+
+            var found = 0;
+            var notFound = 0;
+            var alreadyCorrect = 0;
+
+            for (var i = 0; i < tools.length; i++) {
+                var tool = tools[i];
+                var currentId = (tool.productId || '').trim().toLowerCase();
+
+                if (!currentId) continue;  // No ID to look up
+
+                // Check if it's already a valid ProShop ID (letter + digits)
+                if (/^[a-z]{1,2}\d{1,4}$/i.test(currentId)) {
+                    alreadyCorrect++;
+                    continue;
+                }
+
+                // Try to find this EDP in our map
+                var proshopId = edpMap[currentId];
+
+                // Also try numeric-only version
+                if (!proshopId) {
+                    var numericOnly = currentId.replace(/[^0-9]/g, '');
+                    if (numericOnly.length >= 4) {
+                        proshopId = edpMap[numericOnly];
+                    }
+                }
+
+                if (proshopId) {
+                    tools[i].productId = proshopId;
+                    found++;
+                    hasChanges = true;
+                } else {
+                    notFound++;
+                }
+            }
+
+            if (found > 0) {
+                document.getElementById('saveBtn').disabled = false;
+                renderTable();
+                updateStats();
+            }
+            showMessage('EDP Lookup: ' + found + ' found, ' + notFound + ' not found, ' + alreadyCorrect + ' already correct', found > 0 ? 'success' : 'info');
+        }
+
+        function moveEdpToVendor() {
+            // Move EDP from Product ID to Vendor field, then do lookup
+            if (Object.keys(edpMap).length === 0) {
+                showMessage('No EDP data loaded from ProShop yet', 'error');
+                return;
+            }
+
+            var moved = 0;
+            var found = 0;
+            var skipped = 0;
+
+            for (var i = 0; i < tools.length; i++) {
+                var tool = tools[i];
+                var currentId = (tool.productId || '').trim();
+
+                if (!currentId) {
+                    skipped++;
+                    continue;
+                }
+
+                // Check if it's already a valid ProShop ID (letter + digits)
+                if (/^[a-z]{1,2}\d{1,4}$/i.test(currentId)) {
+                    skipped++;
+                    continue;
+                }
+
+                // This looks like an EDP - move it to vendor
+                var currentVendor = (tool.vendor || '').trim();
+                if (currentVendor) {
+                    // Append EDP to vendor if not already there
+                    if (currentVendor.indexOf(currentId) === -1) {
+                        tools[i].vendor = currentVendor + ' | ' + currentId;
+                    }
+                } else {
+                    tools[i].vendor = currentId;
+                }
+                moved++;
+
+                // Now try to find ProShop ID from this EDP
+                var proshopId = edpMap[currentId.toLowerCase()];
+                if (!proshopId) {
+                    var numericOnly = currentId.replace(/[^0-9]/g, '');
+                    if (numericOnly.length >= 4) {
+                        proshopId = edpMap[numericOnly];
+                    }
+                }
+
+                if (proshopId) {
+                    tools[i].productId = proshopId;
+                    found++;
+                } else {
+                    tools[i].productId = '';  // Clear it so user can fill in manually
+                }
+
+                hasChanges = true;
+            }
+
+            if (moved > 0) {
+                document.getElementById('saveBtn').disabled = false;
+                renderTable();
+                updateStats();
+            }
+            showMessage('Moved ' + moved + ' EDPs to Vendor, found ' + found + ' ProShop IDs', moved > 0 ? 'success' : 'info');
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-cell')) {
+                var dds = document.querySelectorAll('.search-dropdown');
+                for (var i = 0; i < dds.length; i++) {
+                    dds[i].classList.remove('show');
+                }
+            }
+        });
+
+        sendAction('getLibraries', {});
+        sendAction('fetchProshopTools', {});
+    </script>
+</body>
+</html>

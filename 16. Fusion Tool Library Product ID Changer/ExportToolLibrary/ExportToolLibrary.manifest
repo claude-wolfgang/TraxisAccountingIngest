@@ -1,0 +1,10 @@
+{
+    "autodeskProduct": "Fusion",
+    "type": "script",
+    "author": "Traxis Manufacturing",
+    "description": {
+        "": "Exports Fusion 360 tool libraries to JSON and CSV for ProShop ERP integration"
+    },
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}

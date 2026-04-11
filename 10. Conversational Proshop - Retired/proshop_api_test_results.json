@@ -1,0 +1,2285 @@
+{
+  "session": {
+    "data": {
+      "session": {
+        "user": {
+          "firstName": null,
+          "id": null,
+          "lastName": null
+        }
+      }
+    }
+  },
+  "users": {
+    "data": {
+      "users": {
+        "records": [
+          {
+            "emailAddress": "TBuerkle@traxismfg.com",
+            "firstName": "Tom",
+            "id": "001",
+            "isActive": true,
+            "lastName": "Buerkle",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "Ndouglass@traxismfg.com",
+            "firstName": "Nick",
+            "id": "002",
+            "isActive": false,
+            "lastName": "Douglass",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "Achavez@traxismfg.com",
+            "firstName": "Alix",
+            "id": "003",
+            "isActive": false,
+            "lastName": "Chavez",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "Kelsey@adionsystems.com",
+            "firstName": "Zach",
+            "id": "004",
+            "isActive": true,
+            "lastName": "Clarke",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "Bsimon@traxismfg.com",
+            "firstName": "Benjamin",
+            "id": "005",
+            "isActive": false,
+            "lastName": "Simon",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "Dwillis@traxismfg.com",
+            "firstName": "Daniel",
+            "id": "006",
+            "isActive": false,
+            "lastName": "Willis",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "Jmolina@traxismfg.com",
+            "firstName": "Jose",
+            "id": "007",
+            "isActive": true,
+            "lastName": "Molina",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "Jmyles@traxismfg.com",
+            "firstName": "James",
+            "id": "008",
+            "isActive": false,
+            "lastName": "Myles",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "Pche@traxismfg.com",
+            "firstName": "Phan",
+            "id": "009",
+            "isActive": false,
+            "lastName": "Che",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "Shophand@traxismfg.com",
+            "firstName": "Shop",
+            "id": "010",
+            "isActive": false,
+            "lastName": "Hand",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "rene@traxismfg.com",
+            "firstName": "Rene",
+            "id": "011",
+            "isActive": true,
+            "lastName": "Maldonado",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "ngarza@traxismfg.com",
+            "firstName": "Nick",
+            "id": "012",
+            "isActive": false,
+            "lastName": "Garza",
+            "workShift": ""
+          },
+          {
+            "emailAddress": "bburris@traxismfg.com",
+            "firstName": "Byron",
+            "id": "013",
+            "isActive": false,
+            "lastName": "Burris",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "dmeinhart@traxismfg.com",
+            "firstName": "Daniel",
+            "id": "014",
+            "isActive": false,
+            "lastName": "Meinhart",
+            "workShift": ""
+          },
+          {
+            "emailAddress": "earnest@traxismfg.com",
+            "firstName": "Earnest",
+            "id": "015",
+            "isActive": false,
+            "lastName": "Kumar",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "timothy@traxismfg.com",
+            "firstName": "Timothy",
+            "id": "016",
+            "isActive": false,
+            "lastName": "Lee",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "ryan@traxismfg.com",
+            "firstName": "Ryan",
+            "id": "017",
+            "isActive": false,
+            "lastName": "Severeid",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "garrett@traxismfg.com",
+            "firstName": "Garrett",
+            "id": "018",
+            "isActive": true,
+            "lastName": "Roeder",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "david@traxismfg.com",
+            "firstName": "David",
+            "id": "019",
+            "isActive": false,
+            "lastName": "Choi",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "christopher@traxismfg.com",
+            "firstName": "Christopher",
+            "id": "020",
+            "isActive": true,
+            "lastName": "Hotz",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "jose@traxismfg.com",
+            "firstName": "Jose",
+            "id": "021",
+            "isActive": true,
+            "lastName": "Gonzalez",
+            "workShift": "Night"
+          },
+          {
+            "emailAddress": "tuyen@traxismfg.com",
+            "firstName": "Tuyen",
+            "id": "022",
+            "isActive": false,
+            "lastName": "Tran",
+            "workShift": "Night"
+          },
+          {
+            "emailAddress": "james@traxismfg.com",
+            "firstName": "James",
+            "id": "023",
+            "isActive": false,
+            "lastName": "Lee",
+            "workShift": "Day"
+          },
+          {
+            "emailAddress": "oliver@traxismfg.com",
+            "firstName": "Oliver",
+            "id": "024",
+            "isActive": false,
+            "lastName": "Kelly",
+            "workShift": ""
+          },
+          {
+            "emailAddress": "timr@adionsystems.com",
+            "firstName": "Tim",
+            "id": "047",
+            "isActive": true,
+            "lastName": "Roddick",
+            "workShift": ""
+          },
+          {
+            "emailAddress": "matt@adionsystems.com",
+            "firstName": "Matthew",
+            "id": "121",
+            "isActive": true,
+            "lastName": "Carrico",
+            "workShift": ""
+          },
+          {
+            "emailAddress": "paul@adionsystems.com",
+            "firstName": "System",
+            "id": "124",
+            "isActive": true,
+            "lastName": "User",
+            "workShift": ""
+          },
+          {
+            "emailAddress": "matt@adionsystems.com",
+            "firstName": "System",
+            "id": "999",
+            "isActive": true,
+            "lastName": "Agent",
+            "workShift": ""
+          }
+        ],
+        "totalRecords": 28
+      }
+    }
+  },
+  "user_detail": {
+    "data": {
+      "user": {
+        "firstName": "Tom",
+        "id": "001",
+        "isActive": true,
+        "lastName": "Buerkle",
+        "timeClock": {
+          "records": [
+            {
+              "clockPunchId": "06-23_10:10:00_in",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "in",
+              "operatorPlainText": "001",
+              "punchDate": "2021-06-23T151000Z"
+            },
+            {
+              "clockPunchId": "06-23_17:07:26_out",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "out",
+              "operatorPlainText": "001",
+              "punchDate": "2021-06-23T220726Z"
+            },
+            {
+              "clockPunchId": "06-24_08:04:06_in",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "in",
+              "operatorPlainText": "001",
+              "punchDate": "2021-06-24T130406Z"
+            },
+            {
+              "clockPunchId": "06-24_08:23:42_out",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "out",
+              "operatorPlainText": "001",
+              "punchDate": "2021-06-24T132342Z"
+            },
+            {
+              "clockPunchId": "06-29_09:00:57_in",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "in",
+              "operatorPlainText": "001",
+              "punchDate": "2021-06-29T140057Z"
+            },
+            {
+              "clockPunchId": "06-30_16:37:18_out",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "out",
+              "operatorPlainText": "001",
+              "punchDate": "2021-06-30T213718Z"
+            },
+            {
+              "clockPunchId": "07-01_09:59:48_in",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "in",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-01T145948Z"
+            },
+            {
+              "clockPunchId": "07-01_16:00:55_out",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "out",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-01T210055Z"
+            },
+            {
+              "clockPunchId": "07-07_08:30:15_in",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "in",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-07T133015Z"
+            },
+            {
+              "clockPunchId": "07-07_17:09:02_out",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "out",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-07T220902Z"
+            },
+            {
+              "clockPunchId": "07-08_09:08:02_in",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "in",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-08T140802Z"
+            },
+            {
+              "clockPunchId": "07-08_16:29:45_out",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "out",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-08T212945Z"
+            },
+            {
+              "clockPunchId": "07-12_07:36:46_in",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "in",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-12T123646Z"
+            },
+            {
+              "clockPunchId": "07-12_15:14:13_out",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "out",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-12T201413Z"
+            },
+            {
+              "clockPunchId": "07-13_10:17:21_in",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "in",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-13T151721Z"
+            },
+            {
+              "clockPunchId": "07-13_16:00:00_out",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "out",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-13T210000Z"
+            },
+            {
+              "clockPunchId": "07-14_09:52:28_in",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "in",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-14T145228Z"
+            },
+            {
+              "clockPunchId": "07-14_16:09:30_out",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "out",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-14T210930Z"
+            },
+            {
+              "clockPunchId": "07-16_09:34:59_in",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "in",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-16T143459Z"
+            },
+            {
+              "clockPunchId": "07-16_14:19:30_out",
+              "creationMachine": "172.31.21.199",
+              "inOrOut": "out",
+              "operatorPlainText": "001",
+              "punchDate": "2021-07-16T191930Z"
+            }
+          ],
+          "totalRecords": 2454
+        },
+        "timeTracking": {
+          "records": [
+            {
+              "id": "20211215212904-f424c1d9bf55f3",
+              "operationNumber": "60",
+              "percentTime": 50.0,
+              "qtyRun": "9.0",
+              "spentDoing": "running op 60, clean table \n",
+              "status": "loggedout",
+              "timeIn": "2021-12-15T212800Z",
+              "timeOut": "2021-12-15T224500Z",
+              "workCellPlainText": "Mill-6",
+              "workOrderPlainText": "21-0096"
+            },
+            {
+              "id": "20211223172646-cf026ff71e6560",
+              "operationNumber": "60",
+              "percentTime": 100.0,
+              "qtyRun": null,
+              "spentDoing": "nothing!",
+              "status": "loggedout",
+              "timeIn": "2021-12-23T172600Z",
+              "timeOut": "2021-12-23T172800Z",
+              "workCellPlainText": "Deburr",
+              "workOrderPlainText": "21-0071"
+            },
+            {
+              "id": "20220131164453-9b0a9fa1b9be4e",
+              "operationNumber": null,
+              "percentTime": 100.0,
+              "qtyRun": null,
+              "spentDoing": "lathe program",
+              "status": "loggedout",
+              "timeIn": "2022-01-31T164400Z",
+              "timeOut": "2022-01-31T173000Z",
+              "workCellPlainText": null,
+              "workOrderPlainText": "22-0036"
+            },
+            {
+              "id": "20220201143118-a9d140cad1f65b",
+              "operationNumber": "60",
+              "percentTime": 100.0,
+              "qtyRun": "5.0",
+              "spentDoing": "running parts",
+              "status": "loggedout",
+              "timeIn": "2022-02-01T143100Z",
+              "timeOut": "2022-02-01T173200Z",
+              "workCellPlainText": "T2",
+              "workOrderPlainText": "22-0036"
+            },
+            {
+              "id": "20220201223341-0c623e6b03842c",
+              "operationNumber": "70",
+              "percentTime": 100.0,
+              "qtyRun": null,
+              "spentDoing": "setting up side 2",
+              "status": "loggedout",
+              "timeIn": "2022-02-01T193300Z",
+              "timeOut": "2022-02-01T203300Z",
+              "workCellPlainText": "T2",
+              "workOrderPlainText": "22-0036"
+            },
+            {
+              "id": "20220308222219-916cba04627ca6",
+              "operationNumber": "1",
+              "percentTime": 100.0,
+              "qtyRun": null,
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-03-06T140000Z",
+              "timeOut": "2022-03-06T222200Z",
+              "workCellPlainText": "T2",
+              "workOrderPlainText": "22-0170"
+            },
+            {
+              "id": "20220308222601-73711d9a1166c2",
+              "operationNumber": "1",
+              "percentTime": 100.0,
+              "qtyRun": null,
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-03-07T140000Z",
+              "timeOut": "2022-03-07T142600Z",
+              "workCellPlainText": "T2",
+              "workOrderPlainText": "22-0170"
+            },
+            {
+              "id": "20220308222331-94e8b645161cfd",
+              "operationNumber": "1",
+              "percentTime": 100.0,
+              "qtyRun": null,
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-03-08T140000Z",
+              "timeOut": "2022-03-08T222300Z",
+              "workCellPlainText": "T2",
+              "workOrderPlainText": "22-0170"
+            },
+            {
+              "id": "20220310141554-2cc835de9724fd",
+              "operationNumber": "1",
+              "percentTime": 100.0,
+              "qtyRun": null,
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-03-10T141500Z",
+              "timeOut": "2022-03-10T205000Z",
+              "workCellPlainText": "T2",
+              "workOrderPlainText": "22-0020"
+            },
+            {
+              "id": "20220321141518-3707e4c8c8e38a",
+              "operationNumber": "1",
+              "percentTime": 100.0,
+              "qtyRun": null,
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-03-21T141500Z",
+              "timeOut": "2022-03-21T141600Z",
+              "workCellPlainText": "Mill-8",
+              "workOrderPlainText": "21-0144"
+            },
+            {
+              "id": "20220328145729-c7744088dbabbb",
+              "operationNumber": "60",
+              "percentTime": 100.0,
+              "qtyRun": null,
+              "spentDoing": "Working through program",
+              "status": "loggedout",
+              "timeIn": "2022-03-28T145700Z",
+              "timeOut": "2022-03-28T222000Z",
+              "workCellPlainText": "Mill-8",
+              "workOrderPlainText": "21-0144"
+            },
+            {
+              "id": "20220331161115-a54e4375070dc3",
+              "operationNumber": "70",
+              "percentTime": 100.0,
+              "qtyRun": "12.0",
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-03-31T161000Z",
+              "timeOut": "2022-03-31T195900Z",
+              "workCellPlainText": "T2",
+              "workOrderPlainText": "22-0040"
+            },
+            {
+              "id": "20220331161425-561e635c27aa8b",
+              "operationNumber": "60",
+              "percentTime": 100.0,
+              "qtyRun": null,
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-03-31T161400Z",
+              "timeOut": "2022-03-31T195900Z",
+              "workCellPlainText": "T1",
+              "workOrderPlainText": "22-0004"
+            },
+            {
+              "id": "20220331200110-942be505b5c0da",
+              "operationNumber": "70",
+              "percentTime": 50.0,
+              "qtyRun": "-2.0",
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-03-31T200000Z",
+              "timeOut": "2022-03-31T221200Z",
+              "workCellPlainText": "T2",
+              "workOrderPlainText": "22-0040"
+            },
+            {
+              "id": "20220401160425-f21ffa4a87d4cd",
+              "operationNumber": "60",
+              "percentTime": 50.0,
+              "qtyRun": "50.0",
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-04-01T160400Z",
+              "timeOut": "2022-04-01T203000Z",
+              "workCellPlainText": "T1",
+              "workOrderPlainText": "22-0004"
+            },
+            {
+              "id": "20220401160510-687c4c09aa9a21",
+              "operationNumber": "70",
+              "percentTime": 100.0,
+              "qtyRun": "5.0",
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-04-01T160400Z",
+              "timeOut": "2022-04-01T203000Z",
+              "workCellPlainText": "T1",
+              "workOrderPlainText": "22-0040"
+            },
+            {
+              "id": "20220401160609-fc8829869cc3bd",
+              "operationNumber": "70",
+              "percentTime": 50.0,
+              "qtyRun": null,
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-04-01T160600Z",
+              "timeOut": "2022-04-01T203000Z",
+              "workCellPlainText": "T2",
+              "workOrderPlainText": "22-0004"
+            },
+            {
+              "id": "20220401160721-8100c86a39c3d0",
+              "operationNumber": "60",
+              "percentTime": 50.0,
+              "qtyRun": "-2.0",
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-04-01T160600Z",
+              "timeOut": "2022-04-01T203000Z",
+              "workCellPlainText": "T1",
+              "workOrderPlainText": "22-0040"
+            },
+            {
+              "id": "20220418173850-9de09d523e3ede",
+              "operationNumber": "60",
+              "percentTime": 100.0,
+              "qtyRun": "10.0",
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-04-18T173800Z",
+              "timeOut": "2022-04-18T225800Z",
+              "workCellPlainText": "T2",
+              "workOrderPlainText": "22-0019"
+            },
+            {
+              "id": "20220419151357-a936829a5743cd",
+              "operationNumber": "60",
+              "percentTime": 100.0,
+              "qtyRun": "9.0",
+              "spentDoing": null,
+              "status": "loggedout",
+              "timeIn": "2022-04-19T151300Z",
+              "timeOut": "2022-04-19T185400Z",
+              "workCellPlainText": "T1",
+              "workOrderPlainText": "22-0019"
+            }
+          ],
+          "totalRecords": 821
+        }
+      }
+    }
+  },
+  "clock_punches": {
+    "data": {
+      "clockPunch": {
+        "latestClockPunches": {
+          "records": [
+            {
+              "clockPunchId": "01-23_20:21:51_out",
+              "creationMachine": "136.49.81.123",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "001",
+              "punchDate": "2026-01-24T022151Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "172.31.21.199",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "002",
+              "punchDate": "2022-09-25T224321Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "104.185.183.244",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "003",
+              "punchDate": "2024-03-03T215454Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "172.31.21.199",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "005",
+              "punchDate": "2022-09-08T191919Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "172.56.40.209",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "006",
+              "punchDate": "2024-05-15T001326Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.81.123",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "007",
+              "punchDate": "2025-12-29T180951Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "172.31.21.199",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "008",
+              "punchDate": "2021-11-30T151539Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.81.123",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "009",
+              "punchDate": "2025-05-22T205615Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.81.123",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "011",
+              "punchDate": "2026-01-24T021208Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.16.248",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "012",
+              "punchDate": "2024-08-29T211025Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "107.122.173.123",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "013",
+              "punchDate": "2024-02-16T211827Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.16.248",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "014",
+              "punchDate": "2023-06-22T130005Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "172.31.21.199",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "015",
+              "punchDate": "2023-01-06T214737Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "172.31.21.199",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "016",
+              "punchDate": "2022-11-11T202015Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "172.31.21.199",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "017",
+              "punchDate": "2023-05-24T201259Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.81.123",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "018",
+              "punchDate": "2026-01-24T021008Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.16.248",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "019",
+              "punchDate": "2024-01-19T195131Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.81.123",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "020",
+              "punchDate": "2026-01-22T215954Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.81.123",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "021",
+              "punchDate": "2026-01-23T235321Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.81.123",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "022",
+              "punchDate": "2024-11-08T212159Z"
+            },
+            {
+              "clockPunchId": null,
+              "creationMachine": "136.49.81.123",
+              "flNeedsReview": false,
+              "inOrOut": "out",
+              "operator": "023",
+              "punchDate": "2025-08-15T213913Z"
+            }
+          ],
+          "totalRecords": 21
+        }
+      }
+    }
+  },
+  "work_cells": {
+    "data": {
+      "workCells": {
+        "records": [
+          {
+            "commonName": "Accounting-Invoicing",
+            "department": "",
+            "description": "",
+            "isLathe": false,
+            "isScheduledResource": false,
+            "potId": "ACCOUNT-01",
+            "shortName": "Acct-Inv"
+          },
+          {
+            "commonName": "Assembly",
+            "department": "Assembly",
+            "description": "Assembly Operation or Activity",
+            "isLathe": false,
+            "isScheduledResource": false,
+            "potId": "ASSEMBLY-01",
+            "shortName": "ASM"
+          },
+          {
+            "commonName": "Final Deburr",
+            "department": "Cell System",
+            "description": "",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "Deburr / Clean",
+            "shortName": "Deburr / Clean"
+          },
+          {
+            "commonName": "Manual Lathe",
+            "department": "Prototype",
+            "description": "Manual lathe with collet and three jaw chuck",
+            "isLathe": true,
+            "isScheduledResource": false,
+            "potId": "DoAll Manual Lathe",
+            "shortName": "Manual Lathe"
+          },
+          {
+            "commonName": "External-Outside Processing",
+            "department": "",
+            "description": "Any Process or Operation Required for a Job that is an External/Outside Process.",
+            "isLathe": false,
+            "isScheduledResource": false,
+            "potId": "EXTERNAL-01",
+            "shortName": "External"
+          },
+          {
+            "commonName": "Final/Outgoing/Incoming Inspection",
+            "department": "Inspection",
+            "description": "",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "INSPECT-01",
+            "shortName": "Inspect"
+          },
+          {
+            "commonName": "Bridgeport",
+            "department": null,
+            "description": "Manual knee mill",
+            "isLathe": null,
+            "isScheduledResource": null,
+            "potId": "Manual Mill",
+            "shortName": "Bridgeport"
+          },
+          {
+            "commonName": "Haas VF5",
+            "department": "Production Milling",
+            "description": "40 Taper, 50 x 25 work envelope",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "Mill-1",
+            "shortName": "Mill 1"
+          },
+          {
+            "commonName": "Smec #1",
+            "department": "Production Milling",
+            "description": "40 Taper, 30 x 16 work envelope",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "Mill-2",
+            "shortName": "Mill 2"
+          },
+          {
+            "commonName": "Smec #2",
+            "department": "Production Milling",
+            "description": "40 Taper, 30 x 16 work envelope",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "Mill-3",
+            "shortName": "Mill 3"
+          },
+          {
+            "commonName": "Black Robodrill",
+            "department": "Production Milling",
+            "description": "30 Taper, X 16\", Y 12 work envelope",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "Mill-4",
+            "shortName": "Mill 4"
+          },
+          {
+            "commonName": "White Robodrill",
+            "department": "Production Milling",
+            "description": "30 Taper X-Axis: 19.69\u2033 \u00b7 Y-Axis: 14.96\u2033 \u00b7 Z-Axis: 11.81\u2033",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "Mill-5",
+            "shortName": "Mill 5"
+          },
+          {
+            "commonName": "Chevalier",
+            "department": "Prototype",
+            "description": "40 Taper, 40 x 20 work envelope",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "Mill-6",
+            "shortName": "Mill 6"
+          },
+          {
+            "commonName": "5-axis Robodrill",
+            "department": "Prototype",
+            "description": "5 Axis table mount",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "Mill-7",
+            "shortName": "Mill 7"
+          },
+          {
+            "commonName": "Hyundai-Wia KF5600II",
+            "department": "Production Milling",
+            "description": "40 Taper, 40 x 20 work envelope",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "Mill-8",
+            "shortName": "Hyundai"
+          },
+          {
+            "commonName": "MILL CATCH-ALL",
+            "department": "",
+            "description": "Work can be assigned to any mill",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "MILL-X",
+            "shortName": "CATCHALL"
+          },
+          {
+            "commonName": "Programming",
+            "department": "Programming Department",
+            "description": "These work orders need programmed, and set up info added to proshop",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "Program",
+            "shortName": "Prog"
+          },
+          {
+            "commonName": "Horizontal Bandsaw",
+            "department": "Material Prep",
+            "description": "Manual Horizontal Bandsaw",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "SAW-01",
+            "shortName": "Bandsaw"
+          },
+          {
+            "commonName": "Surface Grinder",
+            "department": "Prototype",
+            "description": "DoAll Surface Grinder",
+            "isLathe": false,
+            "isScheduledResource": true,
+            "potId": "SG",
+            "shortName": "Surface Grinder"
+          },
+          {
+            "commonName": "Shipping",
+            "department": "",
+            "description": "",
+            "isLathe": false,
+            "isScheduledResource": false,
+            "potId": "SHIP-01",
+            "shortName": "Ship"
+          },
+          {
+            "commonName": "Okuma Lathe",
+            "department": "Production Lathe",
+            "description": "Turning, 13\" chuck, 3\" spindle tube, ~21\" Z travel",
+            "isLathe": true,
+            "isScheduledResource": true,
+            "potId": "T1",
+            "shortName": "Turn 1"
+          },
+          {
+            "commonName": "YCM NTC1600LY",
+            "department": "Production Lathe",
+            "description": "Mill-Turn, 2\" spindle tube, 6\" chuck, 3J collet chuck",
+            "isLathe": true,
+            "isScheduledResource": true,
+            "potId": "T2",
+            "shortName": "YCM"
+          },
+          {
+            "commonName": "CNC Tool Caddy (#1)",
+            "department": "",
+            "description": "Pre-Processing: Prepared Tool Caddy Organized and Loaded with Required Cutting Tools Prior to CNC Operation. Should include: OOH & Tool Holders Touched Off and Matching Proshop Values, Pull Stud Check, etc.",
+            "isLathe": false,
+            "isScheduledResource": false,
+            "potId": "TOOL_CADDY-01",
+            "shortName": "Caddy (#1)"
+          },
+          {
+            "commonName": "Tooling/Fixture Set-Up",
+            "department": "",
+            "description": "Tooling/Fixture Set-up Required for the Job. Part of the Pre-Processing Checklist Procedure when used.",
+            "isLathe": false,
+            "isScheduledResource": false,
+            "potId": "TOOLING_FIX-01",
+            "shortName": "PP CHECK"
+          }
+        ],
+        "totalRecords": 24
+      }
+    }
+  },
+  "work_orders": {
+    "data": {
+      "workOrders": {
+        "records": [
+          {
+            "dueDate": "10/6/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Complete",
+            "workOrderNumber": "21-0001"
+          },
+          {
+            "dueDate": "8/2/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 10,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0002"
+          },
+          {
+            "dueDate": "8/07/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0003"
+          },
+          {
+            "dueDate": "8/2/21",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 50,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0004"
+          },
+          {
+            "dueDate": "1/14/22",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 50,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0005"
+          },
+          {
+            "dueDate": "8/2/21",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 100,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0006"
+          },
+          {
+            "dueDate": "8/13/2021",
+            "hoursTotalSpent": "12.65",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 100,
+            "runningTimeHoursActualLabor": "10.95",
+            "setupTimeHoursActualLabel": "1.7",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0007"
+          },
+          {
+            "dueDate": "08/04/2021",
+            "hoursTotalSpent": "0.3",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.02",
+            "setupTimeHoursActualLabel": "0.28",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0008"
+          },
+          {
+            "dueDate": "08/04/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0009"
+          },
+          {
+            "dueDate": "08/04/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0010"
+          },
+          {
+            "dueDate": "08/04/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0011"
+          },
+          {
+            "dueDate": "08/04/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0012"
+          },
+          {
+            "dueDate": "08/04/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0013"
+          },
+          {
+            "dueDate": "08/04/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0014"
+          },
+          {
+            "dueDate": "08/04/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0015"
+          },
+          {
+            "dueDate": "08/04/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0016"
+          },
+          {
+            "dueDate": "08/04/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 1,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0017"
+          },
+          {
+            "dueDate": "8/13/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 5,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0018"
+          },
+          {
+            "dueDate": "10/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 200,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0019"
+          },
+          {
+            "dueDate": "8/27/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "dollarsConsideredBilled": null,
+              "grossProfit": null,
+              "grossProfitMargin": null,
+              "profit": null,
+              "profitMargin": null,
+              "profitPerDLH": null,
+              "totalCost": null
+            },
+            "qtyComplete": null,
+            "quantityOrdered": 148,
+            "runningTimeHoursActualLabor": "0.0",
+            "setupTimeHoursActualLabel": "0.0",
+            "status": "Invoiced",
+            "workOrderNumber": "21-0020"
+          }
+        ],
+        "totalRecords": 2237
+      }
+    }
+  },
+  "completed_wos": {
+    "data": {
+      "workOrders": {
+        "records": [
+          {
+            "dateShipped": "",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Complete",
+            "workOrderNumber": "21-0001"
+          },
+          {
+            "dateShipped": "8/16/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 10,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0002"
+          },
+          {
+            "dateShipped": "7/19/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0003"
+          },
+          {
+            "dateShipped": "11/30/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 50,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0004"
+          },
+          {
+            "dateShipped": "10/6/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 50,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0005"
+          },
+          {
+            "dateShipped": "9/22/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 100,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0006"
+          },
+          {
+            "dateShipped": "8/16/2021",
+            "hoursTotalSpent": "12.65",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 100,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0007"
+          },
+          {
+            "dateShipped": "9/8/2021",
+            "hoursTotalSpent": "0.3",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0008"
+          },
+          {
+            "dateShipped": "9/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0009"
+          },
+          {
+            "dateShipped": "9/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0010"
+          },
+          {
+            "dateShipped": "9/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0011"
+          },
+          {
+            "dateShipped": "9/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0012"
+          },
+          {
+            "dateShipped": "9/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0013"
+          },
+          {
+            "dateShipped": "9/8/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0014"
+          },
+          {
+            "dateShipped": "9/22/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0015"
+          },
+          {
+            "dateShipped": "",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0016"
+          },
+          {
+            "dateShipped": "9/22/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0017"
+          },
+          {
+            "dateShipped": "",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 5,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0018"
+          },
+          {
+            "dateShipped": "10/6/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 200,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0019"
+          },
+          {
+            "dateShipped": "",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 148,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0020"
+          },
+          {
+            "dateShipped": "9/22/2021",
+            "hoursTotalSpent": "0.33",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 10,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0021"
+          },
+          {
+            "dateShipped": "12/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 16,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0022"
+          },
+          {
+            "dateShipped": "12/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0023"
+          },
+          {
+            "dateShipped": "12/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0024"
+          },
+          {
+            "dateShipped": "12/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 3,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0025"
+          },
+          {
+            "dateShipped": "12/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 3,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0026"
+          },
+          {
+            "dateShipped": "12/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 3,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0027"
+          },
+          {
+            "dateShipped": "12/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 3,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0028"
+          },
+          {
+            "dateShipped": "12/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 18,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0029"
+          },
+          {
+            "dateShipped": "12/1/2021",
+            "hoursTotalSpent": "0.7",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 2,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0030"
+          },
+          {
+            "dateShipped": "9/22/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 10,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0031"
+          },
+          {
+            "dateShipped": "9/22/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 10,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0032"
+          },
+          {
+            "dateShipped": "",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 16,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0033"
+          },
+          {
+            "dateShipped": "9/22/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 100,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0034"
+          },
+          {
+            "dateShipped": "8/26/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0035"
+          },
+          {
+            "dateShipped": "9/22/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 2,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0036"
+          },
+          {
+            "dateShipped": "12/1/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 50,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0037"
+          },
+          {
+            "dateShipped": "8/26/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0038"
+          },
+          {
+            "dateShipped": "9/22/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 4,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0039"
+          },
+          {
+            "dateShipped": "9/10/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0040"
+          },
+          {
+            "dateShipped": "9/10/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0041"
+          },
+          {
+            "dateShipped": "9/10/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0042"
+          },
+          {
+            "dateShipped": "9/10/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 1,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0043"
+          },
+          {
+            "dateShipped": "",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 2,
+            "status": "Canceled",
+            "workOrderNumber": "21-0044"
+          },
+          {
+            "dateShipped": "11/10/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 5,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0045"
+          },
+          {
+            "dateShipped": "11/10/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 5,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0046"
+          },
+          {
+            "dateShipped": "11/10/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 5,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0047"
+          },
+          {
+            "dateShipped": "11/10/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 5,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0048"
+          },
+          {
+            "dateShipped": "11/10/2021",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 5,
+            "status": "Invoiced",
+            "workOrderNumber": "21-0049"
+          },
+          {
+            "dateShipped": "",
+            "hoursTotalSpent": "0.0",
+            "profitability": {
+              "dlh": null,
+              "profit": null,
+              "profitMargin": null
+            },
+            "quantityOrdered": 5,
+            "status": "Canceled",
+            "workOrderNumber": "21-0050"
+          }
+        ],
+        "totalRecords": 2237
+      }
+    }
+  },
+  "wo_detail": {
+    "data": {
+      "workOrder": {
+        "hoursTotalSpent": "0.0",
+        "ops": {
+          "records": [
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "10",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "1800.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "ProShop Lead"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "20",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "5400.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "ProShop Lead"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "30",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "5400.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "ProShop Lead"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "40",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "3600.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Users"
+            },
+            {
+              "isOpComplete": false,
+              "operationDescription": null,
+              "operationNumber": "50",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Users"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "51",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "3600.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Implementation Specialist"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "52",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "3600.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Implementation Specialist"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "60",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "5400.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Implementation Specialist"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "60.1",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Users"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "60.2",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "13200.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Implementation Specialist"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "60.3",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Users"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "60.4",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "3600.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "ProShop Lead"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "60.5",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "1800.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Recorded Training Sessions"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "65",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "1800.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Implementation Specialist"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "70",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "5400.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Implementation Specialist"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "70.1",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Users"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "70.2",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "5400.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Implementation Specialist"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "70.3",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Users"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "70.4",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "3600.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "ProShop Lead"
+            },
+            {
+              "isOpComplete": true,
+              "operationDescription": null,
+              "operationNumber": "70.5",
+              "runTime": "0",
+              "runTimeSpent": "0",
+              "setupTime": "1800.0",
+              "setupTimeSpent": "0",
+              "workCenterPlainText": "Recorded Training Sessions"
+            }
+          ]
+        },
+        "status": "Complete",
+        "timeTracking": {
+          "records": [],
+          "totalRecords": 0
+        },
+        "workOrderNumber": "21-0001"
+      }
+    }
+  }
+}

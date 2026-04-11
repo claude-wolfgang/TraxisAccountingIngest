@@ -1,0 +1,10 @@
+{
+    "autodeskProduct": "Fusion",
+    "type": "script",
+    "author": "Traxis Manufacturing",
+    "description": {
+        "": "Test 2: Can We Read One Tool? Reads first tool from first library."
+    },
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}

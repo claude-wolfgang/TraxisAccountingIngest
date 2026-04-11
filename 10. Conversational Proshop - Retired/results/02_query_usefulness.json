@@ -1,0 +1,137 @@
+{
+  "test_name": "Single-Query Usefulness",
+  "timestamp": "2026-01-26T17:13:55.950154",
+  "queries_tested": [
+    {
+      "name": "Work Order Status",
+      "description": "Get status and details of a specific work order",
+      "status_code": 200,
+      "elapsed_seconds": 0.77,
+      "success": true,
+      "has_data": true,
+      "record_count": null,
+      "sample_fields": [
+        "dueDate",
+        "hoursTotalSpent",
+        "qtyComplete",
+        "quantityOrdered",
+        "status",
+        "workOrderNumber"
+      ],
+      "errors": null
+    },
+    {
+      "name": "Work Order Operations",
+      "description": "Get operations for a work order",
+      "status_code": 200,
+      "elapsed_seconds": 1.036,
+      "success": true,
+      "has_data": true,
+      "record_count": null,
+      "sample_fields": [
+        "ops",
+        "workOrderNumber"
+      ],
+      "errors": null
+    },
+    {
+      "name": "List Work Orders",
+      "description": "Get list of work orders",
+      "status_code": 200,
+      "elapsed_seconds": 1.679,
+      "success": true,
+      "has_data": true,
+      "record_count": 20,
+      "sample_fields": [
+        "dueDate",
+        "quantityOrdered",
+        "status",
+        "workOrderNumber"
+      ],
+      "errors": null
+    },
+    {
+      "name": "Parts Query",
+      "description": "Query parts information",
+      "status_code": 200,
+      "elapsed_seconds": 1.019,
+      "success": true,
+      "has_data": true,
+      "record_count": 20,
+      "sample_fields": [
+        "partDescription",
+        "partNumber"
+      ],
+      "errors": null
+    },
+    {
+      "name": "Single Part with Operations",
+      "description": "Get a specific part with its operations",
+      "status_code": 200,
+      "elapsed_seconds": 0.976,
+      "success": true,
+      "has_data": true,
+      "record_count": 2,
+      "sample_fields": [
+        "operations",
+        "partDescription",
+        "partNumber"
+      ],
+      "errors": null
+    },
+    {
+      "name": "Work Order Time Tracking",
+      "description": "Get time tracking data for a work order",
+      "status_code": 200,
+      "elapsed_seconds": 0.857,
+      "success": true,
+      "has_data": true,
+      "record_count": null,
+      "sample_fields": [
+        "hoursTotalSpent",
+        "runningTimeHoursActualLabor",
+        "setupTimeHoursActualLabel",
+        "timeTracking",
+        "workOrderNumber"
+      ],
+      "errors": null
+    },
+    {
+      "name": "Work Order Profitability",
+      "description": "Get profitability data for work orders",
+      "status_code": 200,
+      "elapsed_seconds": 1.65,
+      "success": true,
+      "has_data": true,
+      "record_count": 5,
+      "sample_fields": [
+        "profitability",
+        "status",
+        "workOrderNumber"
+      ],
+      "errors": null
+    },
+    {
+      "name": "Work Order with Part Info",
+      "description": "Get work order with linked part information",
+      "status_code": 200,
+      "elapsed_seconds": 0.764,
+      "success": true,
+      "has_data": true,
+      "record_count": null,
+      "sample_fields": [
+        "dueDate",
+        "part",
+        "status",
+        "workOrderNumber"
+      ],
+      "errors": null
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "successful": 8,
+    "with_data": 8,
+    "failed": 0
+  }
+}

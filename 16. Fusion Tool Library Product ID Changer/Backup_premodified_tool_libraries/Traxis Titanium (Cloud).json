@@ -1,0 +1,4467 @@
+{
+    "data": [
+        {
+            "BMC": "carbide",
+            "description": "A22 3/32-.1875 LOC-1.5 OAL 4FL",
+            "expressions": {
+                "tool_bodyLength": ".5 in",
+                "tool_description": "'A22 3/32-.1875 LOC-1.5 OAL 4FL'",
+                "tool_diameter": "(3/32) in",
+                "tool_fluteLength": ".1875 in",
+                "tool_material": "'carbide'",
+                "tool_number": "22",
+                "tool_productId": "'A22'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/A/A22$'",
+                "tool_shoulderLength": ".2in",
+                "tool_vendor": "'GWS Monster \t203-001042'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.09375,
+                "HAND": true,
+                "LB": 0.5,
+                "LCF": 0.1875,
+                "NOF": 4,
+                "OAL": 1.5,
+                "SFDM": 0.09375,
+                "assemblyGaugeLength": 0.5,
+                "shoulder-diameter": 0.09375,
+                "shoulder-length": 0.2
+            },
+            "guid": "76675d0f-0e4a-4fa8-8422-e3e68c435f7f",
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 22,
+                "length-offset": 22,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 22,
+                "turret": 0
+            },
+            "product-id": "A22",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/A/A22$",
+            "start-values": {
+                "presets": [
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": ".0004 in",
+                            "tool_feedPlunge": "8.0 inpm",
+                            "tool_surfaceSpeed": "200 ft/min"
+                        },
+                        "f_n": 0.00098174770424681,
+                        "f_z": 4e-04,
+                        "guid": "d634525f-c693-4754-b61b-dfa3577dde40",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 8148.733086305043,
+                        "n_ramp": 8148.733086305043,
+                        "name": "Stainless",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 200,
+                        "v_f": 13.037972938088068,
+                        "v_f_leadIn": 13.037972938088068,
+                        "v_f_leadOut": 13.037972938088068,
+                        "v_f_plunge": 8,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 13.037972938088068
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "GWS Monster \t203-001042"
+        },
+        {
+            "BMC": "hss",
+            "description": "A16 5FL 1/2\"-.625 -2.5 OAL",
+            "expressions": {
+                "tool_bodyLength": "1.2 in",
+                "tool_description": "'A16 5FL 1/2\"-.625 -2.5 OAL'",
+                "tool_diameter": ".5 in",
+                "tool_fluteLength": ".625 in",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "2.5 in",
+                "tool_productId": "'a16'",
+                "tool_shaftDiameter": ".50 in",
+                "tool_vendor": "'Gorilla 30196(GMHT12FS5)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.5,
+                "HAND": true,
+                "LB": 1.2,
+                "LCF": 0.625,
+                "NOF": 5,
+                "OAL": 2.5,
+                "SFDM": 0.5,
+                "assemblyGaugeLength": 3.174,
+                "shoulder-diameter": 0.5,
+                "shoulder-length": 0.875
+            },
+            "guid": "13c2ad16-9581-4972-8d61-42d074a9f9da",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "a16",
+            "product-link": "",
+            "start-values": {
+                "presets": [
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": ".0018 in",
+                            "tool_surfaceSpeed": "250 fpm"
+                        },
+                        "f_n": 0.0069813170079773175,
+                        "f_z": 0.0018,
+                        "guid": "41414e90-33d1-4b9c-9b33-6db57c4a2715",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 1909.859317102744,
+                        "n_ramp": 1909.859317102744,
+                        "name": "Stainless",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 250,
+                        "v_f": 17.1887338539247,
+                        "v_f_leadIn": 17.1887338539247,
+                        "v_f_leadOut": 17.1887338539247,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 17.1887338539247
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "Gorilla 30196(GMHT12FS5)"
+        },
+        {
+            "BMC": "carbide",
+            "description": "A29 1/8-.250 LOC-1.5 OAL 5FL",
+            "expressions": {
+                "tool_bodyLength": ".5in",
+                "tool_description": "'A29 1/8-.250 LOC-1.5 OAL 5FL'",
+                "tool_diameter": ".125 in",
+                "tool_fluteLength": ".25 in",
+                "tool_material": "'carbide'",
+                "tool_number": "29",
+                "tool_numberOfFlutes": "5",
+                "tool_productId": "'10310(GM18FS5)'",
+                "tool_shoulderLength": ".25 in",
+                "tool_vendor": "'GORILLA'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.125,
+                "HAND": true,
+                "LB": 0.5,
+                "LCF": 0.25,
+                "NOF": 5,
+                "OAL": 1.5,
+                "SFDM": 0.125,
+                "assemblyGaugeLength": 2.474,
+                "shoulder-diameter": 0.125,
+                "shoulder-length": 0.25
+            },
+            "guid": "e7541f20-2521-4a81-ac1f-695d3b47633c",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "last_modified": 1769040067185,
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 29,
+                "length-offset": 29,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 29,
+                "turret": 0
+            },
+            "product-id": "10310(GM18FS5)",
+            "product-link": "",
+            "reference_guid": "<NEW TOOL GUID>",
+            "start-values": {
+                "presets": [
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": ".0006 in",
+                            "tool_feedPlunge": "20 inpm",
+                            "tool_feedRamp": "20 inpm",
+                            "tool_stepover": "tool_diameter * 0.15",
+                            "tool_surfaceSpeed": "300 fpm",
+                            "use_tool_stepdown": "true",
+                            "use_tool_stepover": "true"
+                        },
+                        "f_n": 0.002181661564992912,
+                        "f_z": 6e-04,
+                        "guid": "67781f2c-c315-42af-8e9e-c988acfd2a27",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 9167.32472209317,
+                        "n_ramp": 9167.32472209317,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "stepdown": 0.225,
+                        "stepover": 0.01875,
+                        "tool-coolant": "flood",
+                        "use-stepdown": true,
+                        "use-stepover": true,
+                        "v_c": 300,
+                        "v_f": 27.501974166279517,
+                        "v_f_leadIn": 27.501974166279517,
+                        "v_f_leadOut": 27.501974166279517,
+                        "v_f_plunge": 20,
+                        "v_f_ramp": 20,
+                        "v_f_transition": 27.501974166279517
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "GORILLA"
+        },
+        {
+            "BMC": "carbide",
+            "description": "B110 1/2\" Bull EM .015 Rad 1\" LOC 4 Flute Yeti, GMS² Coating, Radius End",
+            "expressions": {
+                "tool_bodyLength": "1.25 in",
+                "tool_cornerRadius": ".015 in",
+                "tool_description": "'B110 1/2\" Bull EM .015 Rad 1\" LOC 4 Flute Yeti, GMS² Coating, Radius End'",
+                "tool_diameter": ".5 in",
+                "tool_fluteLength": "1 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "4",
+                "tool_overallLength": "3 in",
+                "tool_productId": "'b110'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B110$'",
+                "tool_shoulderLength": "1 in",
+                "tool_vendor": "'Gorilla GMRF12RH4015'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.5,
+                "HAND": true,
+                "LB": 1.25,
+                "LCF": 1,
+                "NOF": 4,
+                "OAL": 3,
+                "RE": 0.015,
+                "SFDM": 0.5,
+                "assemblyGaugeLength": 3.224,
+                "shoulder-diameter": 0.5,
+                "shoulder-length": 1
+            },
+            "guid": "f3ca5f25-c3d6-4474-b913-b428ded1b299",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "b110",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B110$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.002,
+                        "guid": "1b52cb0b-8dfb-47a3-8b29-644b95d16abb",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 654.4984694978734,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "bull nose end mill",
+            "unit": "inches",
+            "vendor": "Gorilla GMRF12RH4015"
+        },
+        {
+            "BMC": "hss",
+            "description": "L18 1/4 Diam 90° Chamfer Mill ",
+            "expressions": {
+                "tool_bodyLength": ".65 in",
+                "tool_description": "'L18 1/4 Diam 90° Chamfer Mill '",
+                "tool_diameter": ".250 in",
+                "tool_fluteLength": ".25 in",
+                "tool_number": "0",
+                "tool_numberOfFlutes": "4",
+                "tool_overallLength": "2.5 in",
+                "tool_productId": "'L18'",
+                "tool_shaftDiameter": ".250 in",
+                "tool_shoulderLength": ".25 in",
+                "tool_tipDiameter": ".010 in"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.25,
+                "HAND": true,
+                "LB": 0.65,
+                "LCF": 0.25,
+                "NOF": 4,
+                "OAL": 2.5,
+                "SFDM": 0.25,
+                "TA": 45,
+                "assemblyGaugeLength": 2.624,
+                "shoulder-diameter": 0.25,
+                "shoulder-length": 0.25,
+                "tip-diameter": 0.01
+            },
+            "guid": "15df4428-dcb0-4e47-88e9-357cd6c79623",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "L18",
+            "product-link": "",
+            "start-values": {
+                "presets": [
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": ".0015 in",
+                            "tool_feedPlunge": "48 inpm",
+                            "tool_spindleSpeed": "8000 rpm"
+                        },
+                        "f_n": 0.005999999999999998,
+                        "f_z": 0.0015,
+                        "guid": "b4aa4564-1239-4556-9fdc-1863d8a2e827",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 8000,
+                        "n_ramp": 8000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 523.598775598299,
+                        "v_f": 48,
+                        "v_f_leadIn": 48,
+                        "v_f_leadOut": 48,
+                        "v_f_plunge": 48,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 48
+                    }
+                ]
+            },
+            "type": "chamfer mill",
+            "unit": "inches",
+            "vendor": ""
+        },
+        {
+            "BMC": "carbide",
+            "GRADE": "Mill Generic",
+            "description": "M62 60 Degree 1/8 ENGRAVING TOOL",
+            "expressions": {
+                "tool_bodyLength": ".5 in",
+                "tool_description": "'M62 60 Degree 1/8 ENGRAVING TOOL'",
+                "tool_diameter": ".125 in",
+                "tool_fluteLength": ".25 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "1",
+                "tool_overallLength": "1.5 in",
+                "tool_productId": "'M62'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/M/M62$'",
+                "tool_shaftDiameter": ".125 in",
+                "tool_shoulderLength": ".25 in",
+                "tool_taperAngle": "30 degrees",
+                "tool_tipDiameter": "0.001 in",
+                "tool_vendor": "'Monster 716-125150'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.125,
+                "HAND": true,
+                "LB": 0.5,
+                "LCF": 0.25,
+                "NOF": 1,
+                "NT": 1,
+                "OAL": 1.5,
+                "RE": 0,
+                "SFDM": 0.125,
+                "TA": 30,
+                "TP": 0,
+                "assemblyGaugeLength": 2.773901,
+                "shoulder-diameter": 0.125,
+                "shoulder-length": 0.25,
+                "thread-profile-angle": 60,
+                "tip-diameter": 0.001,
+                "tip-length": 0,
+                "tip-offset": 0
+            },
+            "guid": "c2828e2c-988c-4846-963b-7b1a01231df3",
+            "holder": {
+                "description": "Maritool CAT40-EM.125-2.25",
+                "gaugeLength": 2.273901,
+                "guid": "66b77b44-6cff-4460-b8f0-49b8f6d4c734",
+                "product-id": "CAT40-EM.125-2.25",
+                "product-link": "",
+                "segments": [
+                    {
+                        "height": 0.156299,
+                        "lower-diameter": 0.25,
+                        "upper-diameter": 0.725
+                    },
+                    {
+                        "height": 0.681102,
+                        "lower-diameter": 0.725,
+                        "upper-diameter": 0.725
+                    },
+                    {
+                        "height": 0.0625,
+                        "lower-diameter": 0.725,
+                        "upper-diameter": 0.85
+                    },
+                    {
+                        "height": 0.625,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "last_modified": 1770744703404,
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 1,
+                "length-offset": 1,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 1,
+                "turret": 0
+            },
+            "product-id": "M62",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/M/M62$",
+            "reference_guid": "<NEW TOOL GUID>",
+            "start-values": {
+                "presets": [
+                    {
+                        "description": "",
+                        "expressions": {
+                            "tool_feedPerTooth": ".0003 in",
+                            "tool_feedPlunge": "5 inpm",
+                            "tool_surfaceSpeed": "300 fpm"
+                        },
+                        "f_n": 0.000545415391248228,
+                        "f_z": 3e-04,
+                        "guid": "6bccedbe-8355-462c-98ab-0fbbee85996b",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 9167.32472209317,
+                        "n_ramp": 9167.32472209317,
+                        "name": "Annealed A2",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 300,
+                        "v_f": 2.7501974166279513,
+                        "v_f_leadIn": 2.7501974166279513,
+                        "v_f_leadOut": 2.7501974166279513,
+                        "v_f_plunge": 5,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 2.7501974166279513
+                    }
+                ]
+            },
+            "type": "chamfer mill",
+            "unit": "inches",
+            "vendor": "Monster 716-125150"
+        },
+        {
+            "BMC": "carbide",
+            "description": "A69 1/16-.125 LOC-1.5 OAL 4FL",
+            "expressions": {
+                "tool_bodyLength": ".5 in",
+                "tool_description": "'A69 1/16-.125 LOC-1.5 OAL 4FL'",
+                "tool_diameter": "(1/16) in",
+                "tool_fluteLength": ".125 in",
+                "tool_material": "'carbide'",
+                "tool_productId": "'A69'",
+                "tool_shaftDiameter": ".125 in",
+                "tool_shoulderLength": ".15 in",
+                "tool_vendor": "'Monster (GWS) 203-001022'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.0625,
+                "HAND": true,
+                "LB": 0.5,
+                "LCF": 0.125,
+                "NOF": 4,
+                "OAL": 1.5,
+                "SFDM": 0.125,
+                "assemblyGaugeLength": 0.5,
+                "shoulder-diameter": 0.0625,
+                "shoulder-length": 0.15
+            },
+            "guid": "99de5336-a8fe-4b81-8a34-16ce931e9ccc",
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 6,
+                "length-offset": 6,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 6,
+                "turret": 0
+            },
+            "product-id": "A69",
+            "product-link": "",
+            "start-values": {
+                "presets": [
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": ".0003 in",
+                            "tool_spindleSpeed": "5900 rpm"
+                        },
+                        "f_n": 0.0022598870056497176,
+                        "f_z": 3e-04,
+                        "guid": "0a3012d1-d43c-4321-9882-fd8d846467c7",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5900,
+                        "n_ramp": 5900,
+                        "name": "Lathe Steels 6k Max",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 96.5385242509363,
+                        "v_f": 7.08,
+                        "v_f_leadIn": 7.08,
+                        "v_f_leadOut": 7.08,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 7.08
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "Monster (GWS) 203-001022"
+        },
+        {
+            "BMC": "carbide",
+            "description": "A49 5FL 1/4\" .500 LOC 2.0 LOA",
+            "expressions": {
+                "tool_description": "'A49 5FL 1/4\" .500 LOC 2.0 LOA'",
+                "tool_fluteLength": ".5 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "2.0 in",
+                "tool_productId": "'A49'",
+                "tool_shoulderLength": ".7 in",
+                "tool_vendor": "'Gorilla 30260(GMHT14FS5)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.25,
+                "HAND": true,
+                "LB": 1,
+                "LCF": 0.5,
+                "NOF": 5,
+                "OAL": 2,
+                "SFDM": 0.25,
+                "assemblyGaugeLength": 2.974,
+                "shoulder-diameter": 0.25,
+                "shoulder-length": 0.7
+            },
+            "guid": "91a2433d-9cef-4054-9e52-17303dc56f8a",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "A49",
+            "product-link": "",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "c4a19378-f27c-4b45-a07e-aaa24b4a91b3",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 327.2492347489367,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "Gorilla 30260(GMHT14FS5)"
+        },
+        {
+            "BMC": "hss",
+            "description": "A81 1/4\"D 5flt reduced shank",
+            "expressions": {
+                "tool_description": "'A81 1/4\"D 5flt reduced shank'",
+                "tool_fluteLength": ".375 in",
+                "tool_numberOfFlutes": "5",
+                "tool_productId": "'a81'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/A/A81$'",
+                "tool_shaftDiameter": ".2 in",
+                "tool_shoulderLength": ".375 in",
+                "tool_vendor": "'GORILLA 10738(GMNR14F51.125)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.25,
+                "HAND": true,
+                "LB": 1,
+                "LCF": 0.375,
+                "NOF": 5,
+                "OAL": 1.5,
+                "SFDM": 0.2,
+                "assemblyGaugeLength": 1,
+                "shoulder-diameter": 0.25,
+                "shoulder-length": 0.375
+            },
+            "guid": "11534743-79f4-4e1c-94b7-b7beb2baac27",
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 1,
+                "length-offset": 1,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 1,
+                "turret": 0
+            },
+            "product-id": "a81",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/A/A81$",
+            "start-values": {
+                "presets": [
+                    {
+                        "expressions": {
+                            "tool_feedPlunge": "40 inpm",
+                            "tool_feedRamp": "40 inpm",
+                            "tool_surfaceSpeed": "700 fpm"
+                        },
+                        "f_n": 0.003739991254273563,
+                        "f_z": 0.0007479982508547126,
+                        "guid": "b06201f5-40af-4544-935d-a4201d236f66",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 10695.212175775368,
+                        "n_ramp": 10695.212175775368,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 700,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 40,
+                        "v_f_ramp": 40,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "GORILLA 10738(GMNR14F51.125)"
+        },
+        {
+            "BMC": "hss",
+            "description": "A82 5FL 1/2\" Dia Sq 1.25 LOC",
+            "expressions": {
+                "tool_bodyLength": "1.5 in",
+                "tool_description": "'A82 5FL 1/2\" Dia Sq 1.25 LOC'",
+                "tool_diameter": ".50 in",
+                "tool_fluteLength": "1.25 in",
+                "tool_number": "82",
+                "tool_overallLength": "3.5 in",
+                "tool_productId": "'A82'",
+                "tool_shoulderLength": "1.3 in"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.5,
+                "HAND": true,
+                "LB": 1.5,
+                "LCF": 1.25,
+                "NOF": 4,
+                "OAL": 3.5,
+                "SFDM": 0.5,
+                "assemblyGaugeLength": 1.5,
+                "shoulder-diameter": 0.5,
+                "shoulder-length": 1.3
+            },
+            "guid": "d5cd1645-58fb-4e4a-837e-ddd2c9acf9a7",
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 82,
+                "length-offset": 82,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 82,
+                "turret": 0
+            },
+            "product-id": "A82",
+            "product-link": "",
+            "start-values": {
+                "presets": [
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": ".003 in",
+                            "tool_surfaceSpeed": "250 fpm"
+                        },
+                        "f_n": 0.0069813170079773175,
+                        "f_z": 0.003,
+                        "guid": "70302891-470d-4a79-b5b7-4a9128190af5",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 1909.859317102744,
+                        "n_ramp": 1909.859317102744,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 250,
+                        "v_f": 22.918311805232932,
+                        "v_f_leadIn": 22.918311805232932,
+                        "v_f_leadOut": 22.918311805232932,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 22.918311805232932
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": ""
+        },
+        {
+            "BMC": "carbide",
+            "description": "A15 3/16-.750 LOC-2.50 OAL 5FL",
+            "expressions": {
+                "tool_bodyLength": "1.5 in",
+                "tool_description": "'A15 3/16-.750 LOC-2.50 OAL 5FL'",
+                "tool_diameter": ".1875 in",
+                "tool_material": "'carbide'",
+                "tool_number": "15",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "2.5 in",
+                "tool_productId": "'a15'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/A/A15$'",
+                "tool_vendor": "'YG-1\tUGMH12S905'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.1875,
+                "HAND": true,
+                "LB": 1.5,
+                "LCF": 0.75,
+                "NOF": 5,
+                "OAL": 2.5,
+                "SFDM": 0.1875,
+                "assemblyGaugeLength": 3.474,
+                "shoulder-diameter": 0.1875,
+                "shoulder-length": 0.875
+            },
+            "guid": "6d522756-6b68-4a6c-b734-c2f0621ba2e8",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 15,
+                "length-offset": 15,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 15,
+                "turret": 0
+            },
+            "product-id": "a15",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/A/A15$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "7a474849-3c59-458c-9497-16f628f4f235",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 245.4369260617025,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "YG-1\tUGMH12S905"
+        },
+        {
+            "BMC": "carbide",
+            "GRADE": "Mill Generic",
+            "description": "B259 HARVEY - 74456-C3 - BALL END MILL - 0.1562 (5/32) DIA X 0.5620 (9/16) LOC , 4 FLUTES, ALTIN COATED",
+            "expressions": {
+                "tool_description": "'B259 HARVEY - 74456-C3 - BALL END MILL - 0.1562 (5/32) DIA X 0.5620 (9/16) LOC , 4 FLUTES, ALTIN COATED'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B259$'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.1562,
+                "HAND": true,
+                "LB": 0.71416,
+                "LCF": 0.562,
+                "NOF": 4,
+                "OAL": 2,
+                "SFDM": 0.1875,
+                "assemblyGaugeLength": 2.56316,
+                "shoulder-diameter": 0.1562,
+                "shoulder-length": 0.562
+            },
+            "guid": "d0a81c75-fc03-4d6b-9f27-8af95334dfab",
+            "holder": {
+                "description": "Maritool CAT40-ER25-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.849,
+                "guid": "71252879-cc95-4d3b-a8f1-9581f086fce7",
+                "product-id": "CAT40-ER25-1.85",
+                "product-link": "https://www.maritool.com/autodesk/16373",
+                "segments": [
+                    {
+                        "height": 0.16,
+                        "lower-diameter": 1.1875,
+                        "upper-diameter": 1.66
+                    },
+                    {
+                        "height": 0.71,
+                        "lower-diameter": 1.66,
+                        "upper-diameter": 1.66
+                    },
+                    {
+                        "height": 0.07,
+                        "lower-diameter": 1.25984,
+                        "upper-diameter": 1.25984
+                    },
+                    {
+                        "height": 0.16,
+                        "lower-diameter": 1.25984,
+                        "upper-diameter": 1.57992
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "74456-C3",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B259$",
+            "shaft": {
+                "segments": [
+                    {
+                        "height": 0.05841,
+                        "lower-diameter": 0.1562,
+                        "upper-diameter": 0.1875
+                    }
+                ],
+                "type": "shaft"
+            },
+            "start-values": {
+                "presets": [
+                    {
+                        "description": "",
+                        "f_n": 1,
+                        "f_z": 0.25,
+                        "guid": "85C6B369-7615-473A-AD01-5F5427ED5E77",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 1,
+                        "n_ramp": 1,
+                        "name": "Default Preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 0.040893064374227135,
+                        "v_f": 1,
+                        "v_f_leadIn": 1,
+                        "v_f_leadOut": 1,
+                        "v_f_plunge": 1,
+                        "v_f_ramp": 1,
+                        "v_f_transition": 1
+                    }
+                ]
+            },
+            "type": "ball end mill",
+            "unit": "inches",
+            "vendor": "HARVEY TOOL"
+        },
+        {
+            "BMC": "carbide",
+            "description": "A12 5 Flute Phenom, GMS² Coating, Square End",
+            "expressions": {
+                "tool_bodyLength": "1.25 in",
+                "tool_description": "'A12 5 Flute Phenom, GMS² Coating, Square End'",
+                "tool_diameter": ".375 in",
+                "tool_fluteLength": "1 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "2.5 in",
+                "tool_productId": "'A12'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/A/A12$'",
+                "tool_shoulderLength": "1 in",
+                "tool_vendor": "'GMILL 30379'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.375,
+                "HAND": true,
+                "LB": 1.25,
+                "LCF": 1,
+                "NOF": 5,
+                "OAL": 2.5,
+                "SFDM": 0.375,
+                "assemblyGaugeLength": 3.224,
+                "shoulder-diameter": 0.375,
+                "shoulder-length": 1
+            },
+            "guid": "a2d05979-2c4b-4596-af42-e97b9d22ac06",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "A12",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/A/A12$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "f8c74132-536b-4f32-a13c-4c51b477b45c",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 490.873852123405,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "GMILL 30379"
+        },
+        {
+            "BMC": "hss",
+            "description": "A248 1/2 5 Flute Gorilla Mill, Neck Relieved, Square End",
+            "expressions": {
+                "tool_bodyLength": "2.25 in",
+                "tool_description": "'A248 1/2 5 Flute Gorilla Mill, Neck Relieved, Square End'",
+                "tool_diameter": ".5 in",
+                "tool_fluteLength": "(5/8) in",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "4 in",
+                "tool_productId": "'a248'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/A/A248$'",
+                "tool_shaftDiameter": ".48 in",
+                "tool_shoulderLength": ".625 in",
+                "tool_vendor": "'GORILLA MILL\t10691(GMNR12F52.250)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.5,
+                "HAND": true,
+                "LB": 2.25,
+                "LCF": 0.625,
+                "NOF": 5,
+                "OAL": 4,
+                "SFDM": 0.48,
+                "assemblyGaugeLength": 4.224,
+                "shoulder-diameter": 0.5,
+                "shoulder-length": 0.625
+            },
+            "guid": "0db7fe7f-d5d8-4509-a6c1-c05f98a3ad78",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "a248",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/A/A248$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "79f511de-f3f3-4f47-871a-1aff47402cd7",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 654.4984694978734,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "GORILLA MILL\t10691(GMNR12F52.250)"
+        },
+        {
+            "BMC": "carbide",
+            "description": "B148 .250 x .750 LOC x 2.5 OAL 4 Flute Yeti, GMS² Coating .015 CR",
+            "expressions": {
+                "tool_bodyLength": "1 in",
+                "tool_cornerRadius": ".015 in",
+                "tool_description": "'B148 .250 x .750 LOC x 2.5 OAL 4 Flute Yeti, GMS² Coating .015 CR'",
+                "tool_diameter": ".25 in",
+                "tool_fluteLength": ".75 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "4",
+                "tool_overallLength": "2.5 in",
+                "tool_productId": "'b148'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B148$'",
+                "tool_shoulderLength": "1 in",
+                "tool_vendor": "'Gorilla 00148(GMRF14R4015)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.25,
+                "HAND": true,
+                "LB": 1,
+                "LCF": 0.75,
+                "NOF": 4,
+                "OAL": 2.5,
+                "RE": 0.015,
+                "SFDM": 0.25,
+                "assemblyGaugeLength": 2.974,
+                "shoulder-diameter": 0.25,
+                "shoulder-length": 1
+            },
+            "guid": "e59c9d89-1a8f-4d54-8b62-e02b8fcf40d5",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "b148",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B148$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.002,
+                        "guid": "1b52cb0b-8dfb-47a3-8b29-644b95d16abb",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 327.2492347489367,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "bull nose end mill",
+            "unit": "inches",
+            "vendor": "Gorilla 00148(GMRF14R4015)"
+        },
+        {
+            "BMC": "carbide",
+            "description": "B122 3/8 BULL EM .015 RAD 4FL",
+            "expressions": {
+                "tool_bodyLength": "1 in",
+                "tool_cornerRadius": ".015 in",
+                "tool_description": "'B122 3/8 BULL EM .015 RAD 4FL'",
+                "tool_diameter": ".5 in",
+                "tool_fluteLength": ".625 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "4",
+                "tool_overallLength": "3 in",
+                "tool_productId": "'b122'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B122$'",
+                "tool_shoulderLength": "1 in",
+                "tool_vendor": "'Gorilla 00256(GMRF38RS4015)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.5,
+                "HAND": true,
+                "LB": 1,
+                "LCF": 0.625,
+                "NOF": 4,
+                "OAL": 3,
+                "RE": 0.015,
+                "SFDM": 0.5,
+                "assemblyGaugeLength": 2.974,
+                "shoulder-diameter": 0.5,
+                "shoulder-length": 1
+            },
+            "guid": "e8348a8b-fdac-44b4-be29-9db17ce43b4b",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "b122",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B122$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.002,
+                        "guid": "1b52cb0b-8dfb-47a3-8b29-644b95d16abb",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 654.4984694978734,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "bull nose end mill",
+            "unit": "inches",
+            "vendor": "Gorilla 00256(GMRF38RS4015)"
+        },
+        {
+            "BMC": "hss",
+            "description": "A157 1/8-.5 LOC-1.5 OAL 4FL",
+            "expressions": {
+                "tool_description": "'A157 1/8-.5 LOC-1.5 OAL 4FL'",
+                "tool_diameter": "0.125 in",
+                "tool_fluteLength": ".50 in",
+                "tool_number": "157",
+                "tool_productId": "'a157'",
+                "tool_productLink": "'https://gorillamill.com/en/product/cutting-tools-browse-by-brand-yeti/4-flute-yeti-gms-coating-square-end--GMRF18F4'",
+                "tool_shaftDiameter": ".125 in",
+                "tool_shoulderLength": ".6 in",
+                "tool_vendor": "'Gorilla 00174(GMRF18F4)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.125,
+                "HAND": true,
+                "LB": 1,
+                "LCF": 0.5,
+                "NOF": 4,
+                "OAL": 1.5,
+                "SFDM": 0.125,
+                "assemblyGaugeLength": 1,
+                "shoulder-diameter": 0.125,
+                "shoulder-length": 0.6
+            },
+            "guid": "5000a68b-9042-4580-aa77-759b256ee08e",
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 157,
+                "length-offset": 157,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 157,
+                "turret": 0
+            },
+            "product-id": "a157",
+            "product-link": "https://gorillamill.com/en/product/cutting-tools-browse-by-brand-yeti/4-flute-yeti-gms-coating-square-end--GMRF18F4",
+            "start-values": {
+                "presets": [
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": ".0006 in",
+                            "tool_surfaceSpeed": "250 fpm"
+                        },
+                        "f_n": 0.0017453292519943294,
+                        "f_z": 6e-04,
+                        "guid": "08c217c5-c084-4af6-90fd-4a0b5547528d",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 7639.437268410977,
+                        "n_ramp": 7639.437268410977,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 250,
+                        "v_f": 18.334649444186343,
+                        "v_f_leadIn": 18.334649444186343,
+                        "v_f_leadOut": 18.334649444186343,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 18.334649444186343
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "Gorilla 00174(GMRF18F4)"
+        },
+        {
+            "BMC": "hss",
+            "description": "R488 M18 x 2mm Plug Tap ",
+            "expressions": {
+                "tool_description": "'R488 M18 x 2mm Plug Tap '",
+                "tool_productId": "'R488'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/R/R488'",
+                "tool_vendor": "'Guhring 58597824'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.4,
+                "LB": 2,
+                "LCF": 0.8,
+                "NOF": 3,
+                "OAL": 2,
+                "SFDM": 0.4,
+                "TP": 0.04,
+                "assemblyGaugeLength": 2,
+                "shoulder-length": 1.2
+            },
+            "guid": "d4d53b97-10a4-41ff-b4f5-4f001da1a09a",
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 4,
+                "length-offset": 4,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 4,
+                "turret": 0
+            },
+            "product-id": "R488",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/R/R488",
+            "start-values": {
+                "presets": [
+                    {
+                        "guid": "14e59cd2-8a53-486e-b129-420a5caa594b",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 500,
+                        "name": "Default preset",
+                        "tool-coolant": "flood",
+                        "v_c": 52.3598775598299
+                    }
+                ]
+            },
+            "type": "tap right hand",
+            "unit": "inches",
+            "vendor": "Guhring 58597824"
+        },
+        {
+            "BMC": "carbide",
+            "description": "B77  1/2-R0.03-.625 LOC- 2.5 OAL 5 Flute Phenom, GMS² Coating",
+            "expressions": {
+                "tool_cornerRadius": ".03 in",
+                "tool_description": "'B77  1/2-R0.03-.625 LOC- 2.5 OAL 5 Flute Phenom, GMS² Coating'",
+                "tool_diameter": ".5 in",
+                "tool_fluteLength": "(5/8) in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "2.5 in",
+                "tool_productId": "'b77'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B77$'",
+                "tool_shoulderLength": "(5/8) in",
+                "tool_vendor": "'Gorilla 30232(GMHT12RS5030)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.5,
+                "HAND": true,
+                "LB": 1,
+                "LCF": 0.625,
+                "NOF": 5,
+                "OAL": 2.5,
+                "RE": 0.03,
+                "SFDM": 0.5,
+                "assemblyGaugeLength": 2.974,
+                "shoulder-diameter": 0.5,
+                "shoulder-length": 0.625
+            },
+            "guid": "66959898-05db-46e3-b164-24132143f299",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "b77",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B77$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "1b52cb0b-8dfb-47a3-8b29-644b95d16abb",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 654.4984694978734,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "bull nose end mill",
+            "unit": "inches",
+            "vendor": "Gorilla 30232(GMHT12RS5030)"
+        },
+        {
+            "BMC": "carbide",
+            "description": "B254 1/2-R0.09-2.0 LOC- 4.0 OAL 6 Flute Kong, Radius End",
+            "expressions": {
+                "tool_bodyLength": "2.5 in",
+                "tool_cornerRadius": ".09 in",
+                "tool_description": "'B254 1/2-R0.09-2.0 LOC- 4.0 OAL 6 Flute Kong, Radius End'",
+                "tool_diameter": ".5 in",
+                "tool_fluteLength": "2 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "6",
+                "tool_overallLength": "4 in",
+                "tool_productId": "'b254'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B254$'",
+                "tool_shaftDiameter": "tool_diameter",
+                "tool_shoulderLength": "2 in",
+                "tool_vendor": "'GORILLA MILL 30991(GMHT12RXL6090)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.5,
+                "HAND": true,
+                "LB": 2.5,
+                "LCF": 2,
+                "NOF": 6,
+                "OAL": 4,
+                "RE": 0.09,
+                "SFDM": 0.5,
+                "assemblyGaugeLength": 4.474,
+                "shoulder-diameter": 0.5,
+                "shoulder-length": 2
+            },
+            "guid": "9a3f10a0-e44f-4ac0-98a9-342f1bcce2ad",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "b254",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B254$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0013333333333333333,
+                        "guid": "1b52cb0b-8dfb-47a3-8b29-644b95d16abb",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 654.4984694978734,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "bull nose end mill",
+            "unit": "inches",
+            "vendor": "GORILLA MILL 30991(GMHT12RXL6090)"
+        },
+        {
+            "BMC": "carbide",
+            "description": "N125 M3 THREADMILL .0906 dia x .268 reach",
+            "expressions": {
+                "tool_bodyLength": ".6 in",
+                "tool_description": "'N125 M3 THREADMILL .0906 dia x .268 reach'",
+                "tool_diameter": ".0906 in",
+                "tool_fluteLength": ".021 in",
+                "tool_material": "'carbide'",
+                "tool_maximumThreadPitch": ".02 in",
+                "tool_minimumThreadPitch": ".020 in",
+                "tool_numberOfFlutes": "4",
+                "tool_overallLength": "1.496 in",
+                "tool_productId": "'N125'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/N/N125$'",
+                "tool_shaftDiameter": "3 mm",
+                "tool_shoulderLength": ".268 in",
+                "tool_vendor": "'Harvey 772724-c6'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.0906,
+                "HAND": true,
+                "LB": 0.6,
+                "LCF": 0.021,
+                "NOF": 4,
+                "NT": 1,
+                "OAL": 1.496,
+                "SFDM": 0.11811023622047244,
+                "TPN": 0.02,
+                "TPX": 0.02,
+                "assemblyGaugeLength": 0.6,
+                "shoulder-diameter": 0.05595898384862246,
+                "shoulder-length": 0.268,
+                "thread-profile-angle": 60,
+                "thread-tip-type": "point"
+            },
+            "guid": "16f5c4a5-ac7f-402c-a3a3-3cd38f852f3c",
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 3,
+                "length-offset": 3,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 3,
+                "turret": 0
+            },
+            "product-id": "N125",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/N/N125$",
+            "start-values": {
+                "presets": [
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": "0.0001 in",
+                            "tool_surfaceSpeed": "150 fpm"
+                        },
+                        "f_n": 0.00210835773640915,
+                        "f_z": 1e-04,
+                        "guid": "261e0482-bb72-47ce-b92c-9509bd6fc71e",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 6324.037473850146,
+                        "n_ramp": 6324.037473850146,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 150,
+                        "v_f": 2.5296149895400584,
+                        "v_f_leadIn": 2.5296149895400584,
+                        "v_f_leadOut": 2.5296149895400584,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 2.5296149895400584
+                    }
+                ]
+            },
+            "type": "thread mill",
+            "unit": "inches",
+            "vendor": "Harvey 772724-c6"
+        },
+        {
+            "BMC": "carbide",
+            "description": "A15 3/16-.750 LOC-2.50 OAL 5FL",
+            "expressions": {
+                "tool_bodyLength": "1.5 in",
+                "tool_description": "'A15 3/16-.750 LOC-2.50 OAL 5FL'",
+                "tool_diameter": ".1875 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "2.5 in",
+                "tool_productId": "'a15'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/A/A15$'",
+                "tool_vendor": "'YG-1\tUGMH12S905'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.1875,
+                "HAND": true,
+                "LB": 1.5,
+                "LCF": 0.75,
+                "NOF": 5,
+                "OAL": 2.5,
+                "SFDM": 0.1875,
+                "assemblyGaugeLength": 3.474,
+                "shoulder-diameter": 0.1875,
+                "shoulder-length": 0.875
+            },
+            "guid": "ce30c6a9-a6f2-4b1f-b009-c517fa93c291",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "a15",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/A/A15$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "7a474849-3c59-458c-9497-16f628f4f235",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 245.4369260617025,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "YG-1\tUGMH12S905"
+        },
+        {
+            "BMC": "carbide",
+            "description": "N124 .180 dia for 1/4 THREADMILL, .750 max depth",
+            "expressions": {
+                "tool_bodyLength": "1.0 in",
+                "tool_description": "'N124 .180 dia for 1/4 THREADMILL, .750 max depth'",
+                "tool_diameter": ".180 in",
+                "tool_fluteLength": ".050 in",
+                "tool_material": "'carbide'",
+                "tool_maximumThreadPitch": "0.05 in",
+                "tool_numberOfFlutes": "4",
+                "tool_overallLength": "2.5 in",
+                "tool_productId": "'N124'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/N/N124$'",
+                "tool_shaftDiameter": "0.115 in",
+                "tool_shoulderLength": ".75 in",
+                "tool_vendor": "'Harvey 41450-C3'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.18,
+                "HAND": true,
+                "LB": 1,
+                "LCF": 0.05,
+                "NOF": 4,
+                "NT": 1,
+                "OAL": 2.5,
+                "SFDM": 0.115,
+                "TPN": 0.04,
+                "TPX": 0.05,
+                "assemblyGaugeLength": 1,
+                "shoulder-diameter": 0.0933974596215561,
+                "shoulder-length": 0.75,
+                "thread-profile-angle": 60,
+                "thread-tip-type": "point"
+            },
+            "guid": "7ba051aa-fe36-48e6-b50c-2d8de4b8af41",
+            "last_modified": 1765471183545,
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 2,
+                "length-offset": 2,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 2,
+                "turret": 0
+            },
+            "product-id": "N124",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/N/N124$",
+            "reference_guid": "<NEW TOOL GUID>",
+            "start-values": {
+                "presets": [
+                    {
+                        "expressions": {
+                            "tool_surfaceSpeed": "200 ft/min"
+                        },
+                        "f_n": 0.0031415926535897924,
+                        "f_z": 0.0023561944901923444,
+                        "guid": "345b261a-05bf-4706-916d-c89de4c1de6e",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 4244.131815783876,
+                        "n_ramp": 4244.131815783876,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 200,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    },
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": "0.00015 in",
+                            "tool_feedPlunge": "20.0 inpm",
+                            "tool_feedRamp": "3.395 inpm",
+                            "tool_surfaceSpeed": "200 ft/min"
+                        },
+                        "f_n": 0.00471238898038469,
+                        "f_z": 0.00015,
+                        "guid": "e9adf7c1-816e-4db5-8169-87bc5a98b354",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 4244.131815783876,
+                        "n_ramp": 4244.131815783876,
+                        "name": "Stainless",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 200,
+                        "v_f": 2.546479089470326,
+                        "v_f_leadIn": 2.546479089470326,
+                        "v_f_leadOut": 2.546479089470326,
+                        "v_f_plunge": 20,
+                        "v_f_ramp": 3.395,
+                        "v_f_transition": 2.546479089470326
+                    }
+                ]
+            },
+            "type": "thread mill",
+            "unit": "inches",
+            "vendor": "Harvey 41450-C3"
+        },
+        {
+            "BMC": "carbide",
+            "GRADE": "Mill Generic",
+            "description": "I431 2\" Face Mill",
+            "expressions": {
+                "tool_cornerRadius": "0.006 in",
+                "tool_description": "'I431 2\" Face Mill'",
+                "tool_material": "'carbide'",
+                "tool_number": "1",
+                "tool_numberOfFlutes": "7",
+                "tool_productId": "'i431'",
+                "tool_vendor": "'Maritool MSAP16-D050A05R-25.4'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 2,
+                "DCX": 2,
+                "HAND": true,
+                "LB": 1.563,
+                "LCF": 0.633,
+                "NOF": 7,
+                "OAL": 1.563,
+                "RE": 0.006,
+                "SFDM": 1.8,
+                "TA": 0,
+                "assemblyGaugeLength": 3.062,
+                "shoulder-diameter": 2,
+                "shoulder-length": 0.633,
+                "upper-radius": 0
+            },
+            "guid": "9c553bb3-f884-420c-993a-9268daae9f88",
+            "holder": {
+                "description": "Maritool CAT40-FMA1.0-1.5M",
+                "gaugeLength": 1.499,
+                "guid": "",
+                "product-id": "CAT40-FMA1.0-1.5M",
+                "product-link": "",
+                "segments": [
+                    {
+                        "height": 0.6875,
+                        "lower-diameter": 1.85,
+                        "upper-diameter": 1.85
+                    },
+                    {
+                        "height": 0.0625,
+                        "lower-diameter": 1.85,
+                        "upper-diameter": 1.975
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 1,
+                "length-offset": 1,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 1,
+                "turret": 0
+            },
+            "product-id": "i431",
+            "product-link": "",
+            "shaft": {
+                "segments": [
+                    {
+                        "height": 0.465,
+                        "lower-diameter": 1.9685,
+                        "upper-diameter": 1.8
+                    }
+                ],
+                "type": "shaft"
+            },
+            "start-values": {
+                "presets": [
+                    {
+                        "description": "",
+                        "expressions": {
+                            "tool_coolant": "'flood'",
+                            "tool_feedCutting": "48 inpm",
+                            "tool_surfaceSpeed": "3000 fpm"
+                        },
+                        "f_n": 0.002290458335950564,
+                        "f_z": 0.00119679720136754,
+                        "guid": "2573831d-f4ea-4e78-9af3-6b19e11ad64c",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5729.5779513082325,
+                        "n_ramp": 5729.5779513082325,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 3000,
+                        "v_f": 48,
+                        "v_f_leadIn": 48,
+                        "v_f_leadOut": 48,
+                        "v_f_plunge": 13.123359580052496,
+                        "v_f_ramp": 13.123359580052496,
+                        "v_f_transition": 48
+                    },
+                    {
+                        "description": "",
+                        "expressions": {
+                            "tool_coolant": "'flood'",
+                            "tool_feedPerTooth": ".003 in",
+                            "tool_surfaceSpeed": "3000 fpm"
+                        },
+                        "f_n": 0.002290458335950564,
+                        "f_z": 0.003,
+                        "guid": "64f61c90-68ff-4d7e-bf16-2c9bf878d780",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5729.5779513082325,
+                        "n_ramp": 5729.5779513082325,
+                        "name": "Alu Rough",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 3000,
+                        "v_f": 120.32113697747288,
+                        "v_f_leadIn": 120.32113697747288,
+                        "v_f_leadOut": 120.32113697747288,
+                        "v_f_plunge": 13.123359580052496,
+                        "v_f_ramp": 13.123359580052496,
+                        "v_f_transition": 120.32113697747288
+                    },
+                    {
+                        "description": "",
+                        "expressions": {
+                            "tool_coolant": "'flood'",
+                            "tool_feedPerTooth": ".0005 in",
+                            "tool_feedRamp": "30 inpm",
+                            "tool_feedTransition": "200 inpm",
+                            "tool_stepover": "tool_diameter * 0.75",
+                            "tool_surfaceSpeed": "3000 fpm",
+                            "use_tool_stepover": "true"
+                        },
+                        "f_n": 0.002290458335950564,
+                        "f_z": 5e-04,
+                        "guid": "9044f0df-882d-424e-8f0d-7f4184d40648",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5729.5779513082325,
+                        "n_ramp": 5729.5779513082325,
+                        "name": "Alu Finish",
+                        "ramp-angle": 2,
+                        "stepover": 1.5,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": true,
+                        "v_c": 3000,
+                        "v_f": 20.053522829578817,
+                        "v_f_leadIn": 20.053522829578817,
+                        "v_f_leadOut": 20.053522829578817,
+                        "v_f_plunge": 13.123359580052496,
+                        "v_f_ramp": 30,
+                        "v_f_transition": 200
+                    }
+                ]
+            },
+            "type": "face mill",
+            "unit": "inches",
+            "vendor": "Maritool MSAP16-D050A05R-25.4"
+        },
+        {
+            "BMC": "carbide",
+            "description": "B109 1/8\" Bull EM .015 Rad 1/4\" LOC 4 Flute Yeti, GMS² Coating",
+            "expressions": {
+                "tool_bodyLength": ".5 in",
+                "tool_cornerRadius": ".015 in",
+                "tool_description": "'B109 1/8\" Bull EM .015 Rad 1/4\" LOC 4 Flute Yeti, GMS² Coating'",
+                "tool_diameter": ".125 in",
+                "tool_fluteLength": ".25 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "4",
+                "tool_overallLength": "1.5 in",
+                "tool_productId": "'00178 (GMRF18RS4015)'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B109$'",
+                "tool_shoulderLength": ".25 in",
+                "tool_vendor": "'Gorilla'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.125,
+                "HAND": true,
+                "LB": 0.5,
+                "LCF": 0.25,
+                "NOF": 4,
+                "OAL": 1.5,
+                "RE": 0.015,
+                "SFDM": 0.125,
+                "assemblyGaugeLength": 2.474,
+                "shoulder-diameter": 0.125,
+                "shoulder-length": 0.25
+            },
+            "guid": "bfdc87b4-c387-4505-b308-68d8a10c44a3",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "00178 (GMRF18RS4015)",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B109$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.002,
+                        "guid": "1b52cb0b-8dfb-47a3-8b29-644b95d16abb",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 163.62461737446836,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "bull nose end mill",
+            "unit": "inches",
+            "vendor": "Gorilla"
+        },
+        {
+            "BMC": "hss",
+            "description": "B23 3/8 BALL 1.00 LOC-2.5 OAL 4FL",
+            "expressions": {
+                "tool_description": "'B23 3/8 BALL 1.00 LOC-2.5 OAL 4FL'",
+                "tool_diameter": ".375 in",
+                "tool_productId": "'B23'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B23$'",
+                "tool_vendor": "'YG-1 43584TF'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.375,
+                "HAND": true,
+                "LB": 1,
+                "LCF": 0.75,
+                "NOF": 3,
+                "OAL": 1.5,
+                "SFDM": 0.375,
+                "assemblyGaugeLength": 1,
+                "shoulder-diameter": 0.375,
+                "shoulder-length": 0.875
+            },
+            "guid": "06b668bb-81b2-4679-b2fb-7c853419f63d",
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 5,
+                "length-offset": 5,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 5,
+                "turret": 0
+            },
+            "product-id": "B23",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B23$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0026666666666666666,
+                        "guid": "0f6d9eb8-934d-479e-87d7-ce6b655732a3",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Steel Surfacing",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 490.873852123405,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    },
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": ".005 in",
+                            "tool_surfaceSpeed": "550 fpm"
+                        },
+                        "f_n": 0.0023799944345377216,
+                        "f_z": 0.005,
+                        "guid": "35571785-ae7d-40ca-9ca1-c22a7327d3e3",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5602.253996834716,
+                        "n_ramp": 5602.253996834716,
+                        "name": "Aluminum Surfacing",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 550,
+                        "v_f": 84.03380995252076,
+                        "v_f_leadIn": 84.03380995252076,
+                        "v_f_leadOut": 84.03380995252076,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 84.03380995252076
+                    },
+                    {
+                        "expressions": {
+                            "tool_feedPerTooth": ".0023 in",
+                            "tool_surfaceSpeed": "250 fpm"
+                        },
+                        "f_n": 0.005235987755982987,
+                        "f_z": 0.0023,
+                        "guid": "bf4eb678-fafd-47d3-bcc4-d7a0b3279038",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 2546.479089470326,
+                        "n_ramp": 2546.479089470326,
+                        "name": "Stainless Surfacing",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 250,
+                        "v_f": 17.57070571734525,
+                        "v_f_leadIn": 17.57070571734525,
+                        "v_f_leadOut": 17.57070571734525,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 17.57070571734525
+                    }
+                ]
+            },
+            "type": "ball end mill",
+            "unit": "inches",
+            "vendor": "YG-1 43584TF"
+        },
+        {
+            "BMC": "carbide",
+            "description": "A72 1/4-.375 LOC-2 OAL 5FL",
+            "expressions": {
+                "tool_bodyLength": ".5 in",
+                "tool_description": "'A72 1/4-.375 LOC-2 OAL 5FL'",
+                "tool_fluteLength": ".375 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "5",
+                "tool_productId": "'a72'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/A/A72$'",
+                "tool_shoulderLength": ".375 in",
+                "tool_vendor": "'YG-1\tUGMH12016'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.25,
+                "HAND": true,
+                "LB": 0.5,
+                "LCF": 0.375,
+                "NOF": 5,
+                "OAL": 1.5,
+                "SFDM": 0.25,
+                "assemblyGaugeLength": 2.474,
+                "shoulder-diameter": 0.25,
+                "shoulder-length": 0.375
+            },
+            "guid": "218805c4-1bb3-46b9-a548-7acca00248f0",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "a72",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/A/A72$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "8586b453-0972-41d1-813f-4cd9033b4c96",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 327.2492347489367,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "YG-1\tUGMH12016"
+        },
+        {
+            "BMC": "carbide",
+            "description": "B255 1/2-R0.09-1.0 LOC- 3.0 OAL 4 Flute Gorilla Mill",
+            "expressions": {
+                "tool_bodyLength": "1.25 in",
+                "tool_cornerRadius": ".09 in",
+                "tool_description": "'B255 1/2-R0.09-1.0 LOC- 3.0 OAL 4 Flute Gorilla Mill'",
+                "tool_diameter": ".5 in",
+                "tool_fluteLength": "1 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "4",
+                "tool_overallLength": "3 in",
+                "tool_productId": "'b255'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B255$'",
+                "tool_shaftDiameter": "tool_diameter",
+                "tool_shoulderLength": "1 in",
+                "tool_vendor": "'GORILLA MILL\tgm12RH4090'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.5,
+                "HAND": true,
+                "LB": 1.25,
+                "LCF": 1,
+                "NOF": 4,
+                "OAL": 3,
+                "RE": 0.09,
+                "SFDM": 0.5,
+                "assemblyGaugeLength": 3.224,
+                "shoulder-diameter": 0.5,
+                "shoulder-length": 1
+            },
+            "guid": "d90b7fce-f0de-457d-aa5a-569070ee812c",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "b255",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B255$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.002,
+                        "guid": "1b52cb0b-8dfb-47a3-8b29-644b95d16abb",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 654.4984694978734,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "bull nose end mill",
+            "unit": "inches",
+            "vendor": "GORILLA MILL\tgm12RH4090"
+        },
+        {
+            "BMC": "carbide",
+            "description": "A14 5FL 3/16\" .625 LOC 2.0 LOA",
+            "expressions": {
+                "tool_bodyLength": ".8 in",
+                "tool_description": "'A14 5FL 3/16\" .625 LOC 2.0 LOA'",
+                "tool_diameter": "(3/16) in",
+                "tool_fluteLength": ".625 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "2 in",
+                "tool_productId": "'10345(GM316F5)'",
+                "tool_shoulderLength": ".625 in",
+                "tool_vendor": "'Gorilla'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.1875,
+                "HAND": true,
+                "LB": 0.8,
+                "LCF": 0.625,
+                "NOF": 5,
+                "OAL": 2,
+                "SFDM": 0.1875,
+                "assemblyGaugeLength": 2.649,
+                "shoulder-diameter": 0.1875,
+                "shoulder-length": 0.625
+            },
+            "guid": "05c4e3dd-a36b-4e56-a32e-fc36d8d191b0",
+            "holder": {
+                "description": "Maritool CAT40-ER25-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.849,
+                "guid": "71252879-cc95-4d3b-a8f1-9581f086fce7",
+                "product-id": "CAT40-ER25-1.85",
+                "product-link": "https://www.maritool.com/autodesk/16373",
+                "segments": [
+                    {
+                        "height": 0.16,
+                        "lower-diameter": 1.1875,
+                        "upper-diameter": 1.66
+                    },
+                    {
+                        "height": 0.71,
+                        "lower-diameter": 1.66,
+                        "upper-diameter": 1.66
+                    },
+                    {
+                        "height": 0.07,
+                        "lower-diameter": 1.25984,
+                        "upper-diameter": 1.25984
+                    },
+                    {
+                        "height": 0.16,
+                        "lower-diameter": 1.25984,
+                        "upper-diameter": 1.57992
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "10345(GM316F5)",
+            "product-link": "",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "75cda260-7c8d-4b16-924f-7a658d280aba",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 245.4369260617025,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "flat end mill",
+            "unit": "inches",
+            "vendor": "Gorilla"
+        },
+        {
+            "BMC": "carbide",
+            "description": "B209 1/4 ext. neckback 5FLT EM .03CR",
+            "expressions": {
+                "tool_bodyLength": "1.125 in",
+                "tool_cornerRadius": ".015 in",
+                "tool_description": "'B209 1/4 ext. neckback 5FLT EM .03CR'",
+                "tool_diameter": ".25 in",
+                "tool_fluteLength": ".375 in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "2.5 in",
+                "tool_productId": "'b209'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B209$'",
+                "tool_shaftDiameter": ".23 in",
+                "tool_shoulderLength": ".375 in",
+                "tool_vendor": "'YG-1 UGMH07906\t'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.25,
+                "HAND": true,
+                "LB": 1.125,
+                "LCF": 0.375,
+                "NOF": 5,
+                "OAL": 2.5,
+                "RE": 0.015,
+                "SFDM": 0.23,
+                "assemblyGaugeLength": 3.099,
+                "shoulder-diameter": 0.25,
+                "shoulder-length": 0.375
+            },
+            "guid": "a7cdb1e0-ee29-40e6-96ab-c3a2ef8024b4",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "b209",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B209$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "1b52cb0b-8dfb-47a3-8b29-644b95d16abb",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 327.2492347489367,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "bull nose end mill",
+            "unit": "inches",
+            "vendor": "YG-1 UGMH07906\t"
+        },
+        {
+            "BMC": "carbide",
+            "description": "B45 5 Flute Phenom 3/8-.03R-.875 LOC-2.5 OAL 5FL",
+            "expressions": {
+                "tool_cornerRadius": ".03 in",
+                "tool_description": "'B45 5 Flute Phenom 3/8-.03R-.875 LOC-2.5 OAL 5FL'",
+                "tool_diameter": ".375 in",
+                "tool_fluteLength": "(7/8) in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "2.5 in",
+                "tool_productId": "'b45'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B45$'",
+                "tool_vendor": "'Gorilla 31450(GMHT38R5030WTF)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.375,
+                "HAND": true,
+                "LB": 1,
+                "LCF": 0.875,
+                "NOF": 5,
+                "OAL": 2.5,
+                "RE": 0.03,
+                "SFDM": 0.375,
+                "assemblyGaugeLength": 2.974,
+                "shoulder-diameter": 0.375,
+                "shoulder-length": 0.875
+            },
+            "guid": "4abd67eb-2737-40d7-b1c9-ebbeaa46f47c",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "b45",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B45$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "1b52cb0b-8dfb-47a3-8b29-644b95d16abb",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 490.873852123405,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "bull nose end mill",
+            "unit": "inches",
+            "vendor": "Gorilla 31450(GMHT38R5030WTF)"
+        },
+        {
+            "BMC": "carbide",
+            "GRADE": "Mill Generic",
+            "description": "B260 HARVEY - 51004-C3 - BALL END MILL - 0.1180 (3 MM) DIA X 0.1770 LOC , 4 FLUTES, ALTIN COATED",
+            "expressions": {
+                "tool_bodyLength": ".375 in",
+                "tool_description": "'B260 HARVEY - 51004-C3 - BALL END MILL - 0.1180 (3 MM) DIA X 0.1770 LOC , 4 FLUTES, ALTIN COATED'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B260$'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.118,
+                "HAND": true,
+                "LB": 0.375,
+                "LCF": 0.177,
+                "NOF": 4,
+                "OAL": 1.5,
+                "SFDM": 0.125,
+                "assemblyGaugeLength": 2.224,
+                "shoulder-diameter": 0.118,
+                "shoulder-length": 0.177
+            },
+            "guid": "4fac37ee-f59c-4f7c-9a0b-c9ea13251e66",
+            "holder": {
+                "description": "Maritool CAT40-ER25-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.849,
+                "guid": "71252879-cc95-4d3b-a8f1-9581f086fce7",
+                "product-id": "CAT40-ER25-1.85",
+                "product-link": "https://www.maritool.com/autodesk/16373",
+                "segments": [
+                    {
+                        "height": 0.16,
+                        "lower-diameter": 1.1875,
+                        "upper-diameter": 1.66
+                    },
+                    {
+                        "height": 0.71,
+                        "lower-diameter": 1.66,
+                        "upper-diameter": 1.66
+                    },
+                    {
+                        "height": 0.07,
+                        "lower-diameter": 1.25984,
+                        "upper-diameter": 1.25984
+                    },
+                    {
+                        "height": 0.16,
+                        "lower-diameter": 1.25984,
+                        "upper-diameter": 1.57992
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "51004-C3",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B260$",
+            "shaft": {
+                "segments": [
+                    {
+                        "height": 0.01306,
+                        "lower-diameter": 0.118,
+                        "upper-diameter": 0.125
+                    }
+                ],
+                "type": "shaft"
+            },
+            "start-values": {
+                "presets": [
+                    {
+                        "description": "",
+                        "f_n": 1,
+                        "f_z": 0.25,
+                        "guid": "885D9E63-2584-4732-AE07-86BBE275CE63",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 1,
+                        "n_ramp": 1,
+                        "name": "Default Preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 0.03089232776029963,
+                        "v_f": 1,
+                        "v_f_leadIn": 1,
+                        "v_f_leadOut": 1,
+                        "v_f_plunge": 1,
+                        "v_f_ramp": 1,
+                        "v_f_transition": 1
+                    }
+                ]
+            },
+            "type": "ball end mill",
+            "unit": "inches",
+            "vendor": "HARVEY TOOL"
+        },
+        {
+            "BMC": "carbide",
+            "description": "B147 1/2\" 5 Flute Gorilla Mill .015R",
+            "expressions": {
+                "tool_bodyLength": "1 in",
+                "tool_cornerRadius": ".015 in",
+                "tool_description": "'B147 1/2\" 5 Flute Gorilla Mill .015R'",
+                "tool_diameter": ".5 in",
+                "tool_fluteLength": "(5/8) in",
+                "tool_material": "'carbide'",
+                "tool_numberOfFlutes": "5",
+                "tool_overallLength": "3 in",
+                "tool_productId": "'b147'",
+                "tool_productLink": "'https://traxismfg.adionsystems.com/procnc/tools/B/B147$'",
+                "tool_shoulderLength": "1 in",
+                "tool_vendor": "'Gorilla 10222(GM12RS5015)'"
+            },
+            "geometry": {
+                "CSP": false,
+                "DC": 0.5,
+                "HAND": true,
+                "LB": 1,
+                "LCF": 0.625,
+                "NOF": 5,
+                "OAL": 3,
+                "RE": 0.015,
+                "SFDM": 0.5,
+                "assemblyGaugeLength": 2.974,
+                "shoulder-diameter": 0.5,
+                "shoulder-length": 1
+            },
+            "guid": "b0d3e6ef-e4e8-49d8-ab21-fb1f6a6a57cf",
+            "holder": {
+                "description": "Maritool CAT40-ER32-1.85",
+                "expressions": {
+                    "tool_holderGaugeLength": "segment_1_height + segment_2_height + segment_3_height + segment_4_height + segment_5_height + segment_6_height + segment_7_height + segment_8_height + segment_9_height + segment_10_height + segment_11_height + segment_12_height"
+                },
+                "gaugeLength": 1.974,
+                "guid": "1f8b4a21-851b-4427-828e-406242897d6a",
+                "product-id": "CAT40-ER32-1.85",
+                "product-link": "https://www.maritool.com/autodesk/477",
+                "segments": [
+                    {
+                        "height": 0.148,
+                        "lower-diameter": 1.5,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.836,
+                        "lower-diameter": 1.97,
+                        "upper-diameter": 1.97
+                    },
+                    {
+                        "height": 0.151,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.57
+                    },
+                    {
+                        "height": 0.09,
+                        "lower-diameter": 1.57,
+                        "upper-diameter": 1.75
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.442,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.145,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.118,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.215
+                    },
+                    {
+                        "height": 0.079,
+                        "lower-diameter": 2.215,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.143,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.502
+                    },
+                    {
+                        "height": 0.03,
+                        "lower-diameter": 2.502,
+                        "upper-diameter": 2.442
+                    },
+                    {
+                        "height": 0.125,
+                        "lower-diameter": 1.75,
+                        "upper-diameter": 1.75
+                    }
+                ],
+                "type": "holder",
+                "unit": "inches",
+                "vendor": "Maritool"
+            },
+            "post-process": {
+                "break-control": false,
+                "comment": "",
+                "diameter-offset": 0,
+                "length-offset": 0,
+                "live": true,
+                "manual-tool-change": false,
+                "number": 0,
+                "turret": 0
+            },
+            "product-id": "b147",
+            "product-link": "https://traxismfg.adionsystems.com/procnc/tools/B/B147$",
+            "start-values": {
+                "presets": [
+                    {
+                        "f_n": 0.0026666666666666666,
+                        "f_z": 0.0016,
+                        "guid": "1b52cb0b-8dfb-47a3-8b29-644b95d16abb",
+                        "material": {
+                            "category": "all",
+                            "query": "",
+                            "use-hardness": false
+                        },
+                        "n": 5000,
+                        "n_ramp": 5000,
+                        "name": "Default preset",
+                        "ramp-angle": 2,
+                        "tool-coolant": "flood",
+                        "use-stepdown": false,
+                        "use-stepover": false,
+                        "v_c": 654.4984694978734,
+                        "v_f": 40,
+                        "v_f_leadIn": 40,
+                        "v_f_leadOut": 40,
+                        "v_f_plunge": 13.333333333333334,
+                        "v_f_ramp": 13.333333333333334,
+                        "v_f_transition": 40
+                    }
+                ]
+            },
+            "type": "bull nose end mill",
+            "unit": "inches",
+            "vendor": "Gorilla 10222(GM12RS5015)"
+        }
+    ],
+    "version": 36
+}

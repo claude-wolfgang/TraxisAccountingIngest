@@ -1,0 +1,173 @@
+part,part_name,op,op_desc,bom_item,part_number,description,quantity,unit,cost,supplier,order_number,missing
+3DS1-IBC Lid,IBC Lid,200,Outsource build from AWJ,1,MAT-45,,1,per part,,TRA1,MAT-45,"NO DESCRIPTION, NO COST"
+ADS1-Couplers and Shafts Assy,Couplers and Shafts Assy,70,Press rods into couplers,1,ADS1-Mod- Splined Fitting,,1,per part,,,ADS1-Mod- Splined Fitting,"NO DESCRIPTION, NO COST, NO SUPPLIER"
+ADS1-Couplers and Shafts Assy,Couplers and Shafts Assy,70,Press rods into couplers,2,ADS1-Stem 5/8 Diameter,,1,per part,,,ADS1-Stem 5/8 Diameter,"NO DESCRIPTION, NO COST, NO SUPPLIER"
+ALM1-ssi-9302-52006,CHAMBER FAN MOTOR COLD PLATE,10,Manufacturing Planning,1,WAKEFIELD-VETTE 180-11-6C COLD PLATE,Heat Sink,1,per part,88.47,Digikey,345-1166-ND,COMPLETE
+ALM1-ssi-9303-25074,assembly bracket right angle gear mount,90,Assemble Parts,1,91292A134,SHCS - 18-8 SST - M6 X 1 X 12mm,2,per part,0.2,MCM1,91292A134,COMPLETE
+ALM1-ssi-9303-25074,assembly bracket right angle gear mount,90,Assemble Parts,2,SSI-9303-62204,"LOWER BRACKET, RIGHT ANGLE GEAR MOUNT",1,per part,,,ALM1-SSI-9303-62204,"NO COST, NO SUPPLIER"
+ALM1-ssi-9303-25074,assembly bracket right angle gear mount,90,Assemble Parts,3,SSI-9303-62203,"UPPER BRACKET, RIGHT ANGLE GEAR MOUNT",1,per part,,,ALM1-SSI-9303-62203,"NO COST, NO SUPPLIER"
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,1,ssi-9303-62427,pulley idler timing belt 32mm id,1,per part,100.0,TRA1,ssi-9303-62427,COMPLETE
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,2,SSI-1300-13297,bearing sealed 12mm id x 32mm od x 10mm wide ss,2,per part,20.23,MCM1,5972k42,COMPLETE
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,3,ssi-9301-60556,bracket right angle idler pulley block mount,1,per part,,TRA1,ALM1-ssi-9303-60556,NO COST
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,4,ssi-9301-60241,block pulley take-up timing belt,1,per part,170.0,TRA1,ssi-9301-60241,COMPLETE
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,5,ssi-9301-60060,plate pulley adjustment,1,per part,70.0,TRA1,ssi-9301-60060,COMPLETE
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,6,ssi-1300-13292,"shoulder 18-8 sst m10 x 1.5 x 40, 12mm shldr dia",,per part,20.1,MCM1,90278a357,NO QTY
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,7,ssi-1300-12939,shcs 18-8 sst m8 x 1.25 x 35mm,3,per part,0.54,MCM1,91292a151,COMPLETE
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,8,ssi-1300-12724,fhcs 18-8 sst m8 x 1.25 x 14mm,2,per part,0.43,MCM1,92125a281,COMPLETE
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,9,ssi-1300-13294,spacer m12 x 5mm 18-8 sst,1,per part,6.08,MCM1,92871a369,COMPLETE
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,10,slsi-2850-01449,pin dowel 6mm dia x 12mm long ss,2,per part,0.9,MCM1,93600a635,COMPLETE
+ALM1-ssi-9303-25142,Assembly block idler pulley,50,Assembly,11,ssi-1300-12943,shcs 18-8 sst m8 x 1.25 x 20mm,2,per part,,MCM1,FAS-9,NO COST
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,1,ssi-2560-03327,right angle gear drive 15:1 ratio 2 stage,1,per part,2291.0,GAM,DL-DW-055-015G,COMPLETE
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,2,ssi-2540-00811,grommet snap in seal,1,per part,2.17,MCM1,63595k39,COMPLETE
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,3,ssi-1300-11294,pulley timing belt type H 14 groove,1,per part,89.0,MiMotion,1056803,COMPLETE
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,4,ssi-2590-03644,bushing sprocket type G 200MM Bore Browning,1,per part,100.2,MiMotion,1069251,COMPLETE
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,5,ssi-9303-25074,assembly bracket right angle gear mount,1,per part,100.0,TRA1,ssi-9303-25074,COMPLETE
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,6,ssi-1300-12972,shcs 18-8 sst m6 x 1 x 14,4,per part,0.26,MCM1,91292A070,COMPLETE
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,7,ssi-1300-12994,shcs 18-8 sst m5 x 0.8 x 12 mm,4,per part,0.12,MCM1,91292A125,COMPLETE
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,8,ssi-1300-12968,shcs 18-8 sst m6 x 1 x 22 mm,2,per part,0.3,MCM1,91292A073,COMPLETE
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,9,ssi-1300-12990,shcs 18-8 sst m5 x .8 x 20 mm,2,per part,0.16,MCM1,91292A128,COMPLETE
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,10,ssi-3500-01290,motor servo 400w 220vac,1,per part,411.0,GAM,J0400-302-4-000,COMPLETE
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,11,ssi-1300-13803,threadlocker high temp high strength,1,per part,,TRA1,907TS-Red,NO COST
+ALM1-ssi-9303-25160,assembly right angle gear drive,60,Assemble Parts,12,ssi-1300-13804,threadlocker high temp Medium strength,1,per part,,TRA1,907TS-Blue,NO COST
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,1,ssi-1300-14156,"compression fitting, .5 od x .375 od",2,per part,27.0,MCM1,50915K252,COMPLETE
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,2,ssi-2540-00813,o-ring -013 75a kalrez 7075,1,per part,55.0,MCM1,1280n22,COMPLETE
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,3,ssi-9303-62649,chamber fan mounting plate,1,per part,,TRA1,ALM1-ssi-9303-62649,NO COST
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,4,ssi-9303-52072,ball bearing retention plate,1,per part,12.0,AUS3,,COMPLETE
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,5,ssi-1300-13581,shielded ball bearing 188 0.25 id krytox,2,per part,5.52,AST Bearings,07301359,COMPLETE
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,6,ssi-1300-13011,shcs 18-8 sst m4 x .7 x 10mm,4,per part,0.09,MCM1,91292a116,COMPLETE
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,7,ssi-1300-13012,shcs 18-8 sst m4 x .7 x 8mm,4,per part,0.09,MCM1,91292a108,COMPLETE
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,8,ssi-1300-12971,shcs 18-8 m6 x 1 x 16mm,4,per part,0.19,MCM1,91292a135,COMPLETE
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,9,ssi-1300-12936,shcs 18-8 sst m8 x 1.25 x 50mm,4,per part,0.8,MCM1,91292a154,COMPLETE
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,10,ssi-1300-12688,coupling slit clamp 5 x 6.35 mm,1,per part,61.53,Misumi,cplsc20-5-6.35,COMPLETE
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,11,ssi-9303-62654,chamber fan shaft,1,per part,,TRA1,ALM1-ssi-9303-62654,NO COST
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,12,ssi-9303-52052,blower wheel nickel plated,1,per part,,TRA1,ALM1-ssi-9303-52052,NO COST
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,13,ssi-9302-52006,chamber fan motor cold plate,1,per part,,TRA1,ALM1-ssi-9302-52006,NO COST
+ALM1-ssi-9303-25219,Chamber Fan Assembly,50,Assembly,14,ssi-9303-62650,chamber fan mounting bracket,1,per part,,TRA1,ALM1-ssi-9303-62650,NO COST
+ALM1-ssi-9303-25223,belt drive assembly,60,Assembly,1,ALM1-ssi-9303-25160,assembly right angle gear drive,1,per part,3295.39,TRA1,,COMPLETE
+ALM1-ssi-9303-25223,belt drive assembly,60,Assembly,2,ALM1-ssi-9303-25142,assembly block idler pulley,1,per part,870.0,TRA1,,COMPLETE
+ALM1-ssi-9303-25223,belt drive assembly,60,Assembly,3,ALM1-ssi-9303-52059,belt roller drive p400 ht,1,per part,89.0,JJC,,COMPLETE
+ALM1-ssi-9303-25303,ir sensor shield assy,70,Assembly,1,ssi-9303-62919,shield,1,per part,17.79,AUS3,,COMPLETE
+ALM1-ssi-9303-25303,ir sensor shield assy,70,Assembly,2,ssi-9303-62921-01,bracket,1,per part,18.18,AUS3,,COMPLETE
+ALM1-ssi-9303-25303,ir sensor shield assy,70,Assembly,3,ssi-1300-13162,hex nut din 934 18-8 ss m6 x 1,2,per part,0.11,MCM1,91828a251,COMPLETE
+ALM1-ssi-9303-25303,ir sensor shield assy,70,Assembly,4,ssi-1300-13126,washer flat 18-8 sst m5,2,per part,0.03,MCM1,934475a240,COMPLETE
+ALM1-ssi-9303-25303,ir sensor shield assy,70,Assembly,5,ssi-1300-14158,metric thumb grip 18-8 ss shoulder screw,2,per part,5.0,MCM1,92957a170,COMPLETE
+ALM1-ssi-9303-25303,ir sensor shield assy,70,Assembly,6,ssi-1300-14159,ptfe thrust bearing .25 id .625 od,2,per part,3.0,MCM1,2796t110,COMPLETE
+ALM1-ssi-9303-52072,ball bearing retention plate,30.1,Outside Manufacturing,1,ssi-9303-52072,ball bearing retention plate,20,Total,0.0,AUS3,,COMPLETE
+ALM1-ssi-9303-62649,chamber fan mounting plate,30.1,Outside Manufacturing,1,ssi-9303-62649 blank,waterjetted disc,1,per part,24.05,AUS3,"7.5"" disc",COMPLETE
+ALM1-ssi-9303-62987-001,VERFLOW BIN PROX  SENSOR BRACKET,30.1,Outside Manufacturing,1,SSI-9303-62992,Formed metal part,1,per part,10.01,AUS3,,COMPLETE
+ALM1-ssi-9303-63027-001,heater wire routing bracket,60,Forming,1,SSI-9303-63027-001,Heater Wire Routing Bracket,1,per part,75.0,Lopez Machine,,COMPLETE
+AME1-121240-000,"SPACER, KEYBOARD - DVM2130 MOUNT",10,Manufacturing Planning,,,,,,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+AUS1-UCTDA,,10,Manufacturing Planning,3,Barb Fitting,Barb fitting stainless 304,1,per part,0.0,TRA1,AUS1-Barb Fitting,COMPLETE
+AUS1-UCTDA,,10,Manufacturing Planning,4,1-1/4 Flange,Customer provided,1,per part,,AUS1,,NO COST
+BRI1-MIP35406,600X400 WW DIMM TRAY,60,Mill Machining OP1,1,,,4,Total,,,THI-159,"NO PN & NO DESC, NO COST, NO SUPPLIER"
+CEL1-013-0011,"Assembly, Arbor Press Accessories",70,Assemble,4,92373A367,18-8 SS SLOTTED SPRING PIN,1,per part,18.37,MCM1,92373A367,COMPLETE
+CEL1-013-0011,"Assembly, Arbor Press Accessories",70,Assemble,5,1-007-19711,OIL RESISTANT BUNA N MULTIPURPOSE O-RING,1,per part,3.0,Precision Associates,9452K172,COMPLETE
+CEL1-013-0011,"Assembly, Arbor Press Accessories",70,Assemble,2,CEL1-013-0011-2,BOTTOM,1,per part,,TRA1,CEL1-013-0011-2,NO COST
+CEL1-013-0011,"Assembly, Arbor Press Accessories",70,Assemble,1,CEL1-013-0011-1,TOP,1,per part,,TRA1,CEL1-013-0011-1,NO COST
+CEL1-013-0044-ASSEMBLY,"Assembly, 2 STEP TUBE INSERTION FIXTURE",70,Assemble,6,92196A540,"1/4"" Bolt - 18-8 SST",2,per part,23.83,MCM1,92196A540,COMPLETE
+CEL1-013-0044-ASSEMBLY,"Assembly, 2 STEP TUBE INSERTION FIXTURE",70,Assemble,4,9452K172,ARBOR PRESS O-RING - BUNA-N RUBBER,1,per part,2.87,MCM1,9452K172,COMPLETE
+CEL1-013-0044-ASSEMBLY,"Assembly, 2 STEP TUBE INSERTION FIXTURE",70,Assemble,5,1-007-19711,O-RING 1/6 C/S X 5/32 ID X 9/32 OD - 70 DUROMETER SALMON SILICON,1,per part,8.0,Precision Associates,1-007-19711,COMPLETE
+CEL1-013-0044-ASSEMBLY,"Assembly, 2 STEP TUBE INSERTION FIXTURE",70,Assemble,3,CEL1-013-0044 -item 3,PISTON HOLDER,1,per part,,TRA1,CEL1-013-0044 -item 3,NO COST
+CEL1-013-0044-ASSEMBLY,"Assembly, 2 STEP TUBE INSERTION FIXTURE",70,Assemble,2,CEL1-013-0044 item 2,BASE,1,per part,,TRA1,CEL1-013-0044 item 2,NO COST
+CEL1-013-0044-ASSEMBLY,"Assembly, 2 STEP TUBE INSERTION FIXTURE",70,Assemble,1,CEL1-013-0044 -item 1,HEAD,1,per part,,TRA1,CEL1-013-0044 -item 1,NO COST
+CLIENT_VENDOR1-SV,"ProShop Software Validation - URS, Risk Assessment, Lifecycle",40,Software Validation Plan,1,,,1,per part,,Client_Vendor1,CLIENT_VENDOR1-SV-PLAN,"NO PN & NO DESC, NO COST"
+CLIENT_VENDOR1-SV-PLAN,ProShop Software Validation - Plan,50,Software IQOQ Verification,1,,,1,Total,,Client_Vendor1,CLIENT_VENDOR1-SV-IQOQ,"NO PN & NO DESC, NO COST"
+CLIENT_VENDOR1-SV-PLAN,ProShop Software Validation - Plan,60,Software PQ Verification,1,,,1,Total,,Client_Vendor1,Client_Vendor1-SV-PQ,"NO PN & NO DESC, NO COST"
+CLIENT_VENDOR1-SV-PLAN,ProShop Software Validation - Plan,70,21CFR11 PQ Verification,1,,,1,Total,,Client_Vendor1,CLIENT_VENDOR1-21CFR11-PQ,"NO PN & NO DESC, NO COST"
+DEP1-DT0498,Shield Lower Final,90,Install Pins,1,97395A414,,6,per part,,MCM1,PIN-173,"NO DESCRIPTION, NO COST"
+DEP1-DT0498,Shield Lower Final,2010,Shipping,1,,,5,Total,,,PAC-133,"NO PN & NO DESC, NO COST, NO SUPPLIER"
+FRA1-Bottom Panel only,EMS SITE CONTROLLER ENCLOSURE (Bottom Plate Only),1500,Press fit studs into plate,1,,,19,per part,,,thi-103,"NO PN & NO DESC, NO COST, NO SUPPLIER"
+FRA1-EMS SITE CONTROLLER ENCLOSURE,EMS SITE CONTROLLER ENCLOSURE,1500,Press fit studs into plate,1,,,19,per part,,,thi-103,"NO PN & NO DESC, NO COST, NO SUPPLIER"
+FRA1-RM2U1913SBK_C,"GPIC SIGNAL COND, 2U",1010,HOUSING - Install PEM inserts,1,PEM FH-440-4ZI,PEM Mounting Stud,23,per part,0.01,DBR1,PEM FH-440-4ZI,COMPLETE
+INF1-Repair Helicoiled Threads Large Aluminum Box,Repair Helicoiled Threads Large Aluminum Box,1500,Install new helicoils,1,,,,per part,,,THI-99,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+"INF1-Repair, Robot Bearing Replacement","Repair, Robot Bearing Replacement",70,Remove and replace bearings and clips,1,,Ring clip 1.5  x .03,.5,per part,10.0,MCM1,93576A210,NO PART NUMBER
+"INF1-Repair, Robot Bearing Replacement","Repair, Robot Bearing Replacement",70,Remove and replace bearings and clips,2,,Ring clip 2.549 x .03,.5,per part,10.0,MCM1,93576A510,NO PART NUMBER
+"INF1-Repair, Robot Bearing Replacement","Repair, Robot Bearing Replacement",70,Remove and replace bearings and clips,3,,shipping,.5,per part,20.0,,,"NO PART NUMBER, NO SUPPLIER"
+JRT1-Heater Frame,Heater Frame,80,Insert Helicoils,1,,m3 x 0.5 helicoil insert,4,per part,2.0,DBR1,,NO PART NUMBER
+KET1-0275610-601,KITKAT BOARD LEVEL TESTER,45,Shop PP Check (Job Kitting),1,,reamer,1,Total,50.0,DIX1,,NO PART NUMBER
+KET1-0275610-721,KITKAT BOARD LEVEL TESTER,50,Milling,1,,,,per part,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+LYN1-BH-A-E,"Bolt Hat, Enforcer",15,Part Programming/Modeling,,,,,,,MCM1,,"NO PN & NO DESC, NO COST, NO QTY"
+R2S1-10016,"HOUSING BACKSHELL MACHINED, 500MM, 2024",130,Install Helicoils and Inserts,1,2TNC-06C-0207,,36,per part,,DBR1,THI-159,"NO DESCRIPTION, NO COST"
+R2S1-10016,"HOUSING BACKSHELL MACHINED, 500MM, 2024",130,Install Helicoils and Inserts,2,HELICOIL 1084-4CN60,,4,per part,,DBR1,THI-3,"NO DESCRIPTION, NO COST"
+R2S1-10016,"HOUSING BACKSHELL MACHINED, 500MM, 2024",130,Install Helicoils and Inserts,3,PEM P/N: NFPC-M4,,4,per part,,DBR1,THI-188,"NO DESCRIPTION, NO COST"
+R2S1-10016(Ti inserts),"HOUSING BACKSHELL MACHINED, 500MM, 2024",130,Install Helicoils and Inserts,1,2TNC-06C-0207,,36,per part,,DBR1,THI-159,"NO DESCRIPTION, NO COST"
+R2S1-10016(Ti inserts),"HOUSING BACKSHELL MACHINED, 500MM, 2024",130,Install Helicoils and Inserts,2,HELICOIL 1084-4CN60,,4,per part,,DBR1,THI-3,"NO DESCRIPTION, NO COST"
+R2S1-10016(Ti inserts),"HOUSING BACKSHELL MACHINED, 500MM, 2024",130,Install Helicoils and Inserts,3,PEM P/N: NFPC-M4,,4,per part,,DBR1,THI-188,"NO DESCRIPTION, NO COST"
+R2S1-10016-OLD,"PROSHOP DATA STORAGE HOUSING BACKSHELL MACHINED, 500MM, 2024",130,Install Helicoils and Inserts,1,2TNC-06C-0207,,36,per part,,DBR1,THI-159,"NO DESCRIPTION, NO COST"
+R2S1-10016-OLD,"PROSHOP DATA STORAGE HOUSING BACKSHELL MACHINED, 500MM, 2024",130,Install Helicoils and Inserts,2,HELICOIL 1084-4CN60,,4,per part,,DBR1,THI-3,"NO DESCRIPTION, NO COST"
+R2S1-10016-OLD,"PROSHOP DATA STORAGE HOUSING BACKSHELL MACHINED, 500MM, 2024",130,Install Helicoils and Inserts,3,PEM P/N: NFPC-M4,,4,per part,,DBR1,THI-188,"NO DESCRIPTION, NO COST"
+R2S1-10019,"CONNECTOR PROTECTOR, 2024",60,MILL Side 1 Array,1,R2S1-10019,,1,per part,,AUS3,MAT-43,"NO DESCRIPTION, NO COST"
+R2S1-10019,"CONNECTOR PROTECTOR, 2024",2010,Shipping,1,,,,per part,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-10019-7,"CONNECTOR PROTECTOR, 2024, 500m",60,MILL Side 1 Array,1,R2S1-10019,,1,per part,,AUS3,MAT-43,"NO DESCRIPTION, NO COST"
+R2S1-10019-7,"CONNECTOR PROTECTOR, 2024, 500m",2010,Shipping,1,,,,per part,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-10020,"HOUSING BACKSHELL, MACHINED,250 MM",130,Install Helicoils,1,2TNC-06C-0207,,20,per part,,DBR1,THI-159,"NO DESCRIPTION, NO COST"
+R2S1-10020,"HOUSING BACKSHELL, MACHINED,250 MM",130,Install Helicoils,2,1084-4CN060,,4,per part,,DBR1,THI-3,"NO DESCRIPTION, NO COST"
+R2S1-10020,"HOUSING BACKSHELL, MACHINED,250 MM",130,Install Helicoils,3,PEM P/N: NFPC-M4,,4,per part,,DBR1,THI-188,"NO DESCRIPTION, NO COST"
+R2S1-10048,Weldment- 2024 Sonar mount,40,Order Material for OSM,1,,Aluminum Channel,1,per part,,TRA1,Aluminum Channel,"NO PART NUMBER, NO COST"
+R2S1-10048,Weldment- 2024 Sonar mount,40,Order Material for OSM,2,,Aluminum Tube,1,per part,,TRA1,Aluminum Tube,"NO PART NUMBER, NO COST"
+R2S1-10048,Weldment- 2024 Sonar mount,40,Order Material for OSM,3,,Flange,1,per part,,TRA1,"9"" OD 6061 Round","NO PART NUMBER, NO COST"
+R2S1-10048,Weldment- 2024 Sonar mount,40,Order Material for OSM,4,,Aluminum Plate,1,per part,,TRA1,Aluminum Plate,"NO PART NUMBER, NO COST"
+R2S1-10048,Weldment- 2024 Sonar mount,40,Order Material for OSM,5,,Aluminum Bar,1,per part,,TRA1,.38 x 2.5 6061 Al,"NO PART NUMBER, NO COST"
+R2S1-10048,Weldment- 2024 Sonar mount,40,Order Material for OSM,6,,Aluminum Plate,1,per part,,TRA1,.38 x 2 6061 Al,"NO PART NUMBER, NO COST"
+R2S1-10048,Weldment- 2024 Sonar mount,40,Order Material for OSM,7,,Aluminum Plate,2,per part,,TRA1,.25 x 5 flat bar 6061 Al,"NO PART NUMBER, NO COST"
+R2S1-10048,Weldment- 2024 Sonar mount,1090,Install helicoils,1,,,10,per part,,TRA1,Thi-1,"NO PN & NO DESC, NO COST"
+R2S1-10051,Base-Valeport Sensor,80,Install Helicoils,1,,,8,per part,,DBR1,THI-28,"NO PN & NO DESC, NO COST"
+R2S1-10087,Weldment- Sonar mount-2022,1090,Install helicoils,1,,,10,per part,,TRA1,Thi-1,"NO PN & NO DESC, NO COST"
+R2S1-10097,"CONNECTOR PROTECTOR, 2022",40,Sort plates to include only plates witho,1,R2S1-10097,,1,per part,7.5,AUS3,MAT-43,NO DESCRIPTION
+R2S1-10106,"LID, CAP BANK, 2026",2010,Shipping,1,,PACKAGE IN EVEN AMOUNTS!,4 OR 5,PER BOX,,,PAC-130,"NO PART NUMBER, NO COST, NO SUPPLIER"
+R2S1-10130,Housing back mach'd delrin 2020,1100,Install helicoil,1,2TNC-06C-0207,Helicoil 6-32 x 1.5d,18,per part,,DBR1,THI-159,NO COST
+R2S1-10130,Housing back mach'd delrin 2020,1100,Install helicoil,2,1084-4CN040,Helicoil m4 x .7,2,per part,,DBR1,THI-10,NO COST
+R2S1-10130,Housing back mach'd delrin 2020,2010,Shipping,1,,,,per part,,,PAC-109,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-10151,"BASEPLATE, IMU",200,Install Pins,1,,2mm x 8mm dowel,2,per part,0.15,,PIN-63,"NO PART NUMBER, NO SUPPLIER"
+R2S1-10151,"BASEPLATE, IMU",200,Install Pins,2,R2S1-10151,Finished part without pins,1,per part,,TRA1,,NO COST
+R2S1-10163,"HOUSING, MACH'D, 2026 Tx",130,Install Helicoils,1,2TNC-06C-0207,,36,per part,,DBR1,THI-159,"NO DESCRIPTION, NO COST"
+R2S1-10163,"HOUSING, MACH'D, 2026 Tx",130,Install Helicoils,2,HEL1084-4CN060,,4,per part,,DBR1,THI-3,"NO DESCRIPTION, NO COST"
+R2S1-10188,Weldment- Bracket 2026 Mounting,1090,Install helicoils,1,1084-5cn050,,10,per part,,TRA1,Thi-1,"NO DESCRIPTION, NO COST"
+R2S1-10235,"PLATE, CONN PROTECTOR, 2026T",30,Jitterbug engraved side. Check for Scrat,1,R2S1-10235,,1,per part,,AUS3,MAT-176,"NO DESCRIPTION, NO COST"
+R2S1-10235-5,"PLATE, CONN PROTECTOR, 2026T, 500m",30,Jitterbug engraved side. Check for Scrat,1,R2S1-10235,,1,per part,,AUS3,MAT-176,"NO DESCRIPTION, NO COST"
+R2S1-10243,"BRACKET, CABLE CLAMP, LOWER, PROJ",70,MILL OP20 / INSTALL INSERTS,1,R2S1-10243,,4,per part,,DBR1,THI-42,"NO DESCRIPTION, NO COST"
+R2S1-10312,"BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc",1500,Install Inserts,1,R2S1-10312,,2,per part,,DBR1,THI-188,"NO DESCRIPTION, NO COST"
+R2S1-10312 (Ti inserts),"BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc, Ti",1500,Install Inserts,1,R2S1-10312,,2,per part,,DBR1,THI-188,"NO DESCRIPTION, NO COST"
+R2S1-10378,"10378 Labor, Mach, RX TI Housing, XL/L, 384 CH",2010,Shipping,1,,,,per part,,,PAC-109,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-10451,"BASEPLATE, IMU, MODIFIED CTR",60,Gang cut edges to size,1,,,1,per part,,TRI2,MAT-40,"NO PN & NO DESC, NO COST"
+R2S1-10451,"BASEPLATE, IMU, MODIFIED CTR",60,Gang cut edges to size,2,91585A345,"18-8 Stainless Steel Dowel Pin 3 mm Diameter, 6 mm Long",2,per part,,MCM1,pin-62,NO COST
+R2S1-10657 Mod,Mod to IMU Process Fixture Center Split Cavity,200,Install Helicoils,1,,,6,per part,0.86,,THI-10,"NO PN & NO DESC, NO SUPPLIER"
+R2S1-10701,"Clamp Lid, Ultra SV Sonic G1-V",1100,Add Helicoil inserts,1,R2S1-10701,,4,per part,,DBR1,THI-104,"NO DESCRIPTION, NO COST"
+R2S1-10726,Large Flat Mount Plate,2010,Shipping,,,,,,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-10767,Oil Fill Fixture With Tapped Holes,1500,Install Press Pins,1,,2.5 x 8 mm dowel pin (316 ss),2,per part,7.95/25,MCM1,93600A254,NO PART NUMBER
+R2S1-10982,"R2S1-SOCKET CONTACT BODY, 2.8mm CONTACT, MCIL CABLES",50,Turning Front,1,,,,per part,,,MUST FILL THIS IN WITH FULL PARTS OR COTS IDs,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-10982,"R2S1-SOCKET CONTACT BODY, 2.8mm CONTACT, MCIL CABLES",50,Turning Front,2,,,,per part,,,MUST FILL THIS IN WITH FULL PARTS OR COTS IDs,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-10982,"R2S1-SOCKET CONTACT BODY, 2.8mm CONTACT, MCIL CABLES",50,Turning Front,3,,,,per part,,,MUST FILL THIS IN WITH FULL PARTS OR COTS IDs,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD-229-04-0102,384 Element Ti Plate,2010,Shipping,1,,,,per part,,,PAC-131,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD-229-04-0102,384 Element Ti Plate,2010,Shipping,2,,,,per part,,,PAC-128,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD163-001-022,Front Plate,50,Machining side 1 (rough),1,,M8 Thread Gage,1,per part,,,TG-M8-125,"NO PART NUMBER, NO COST, NO SUPPLIER"
+R2S1-AD163-001-022,Front Plate,50,Machining side 1 (rough),2,,M4 Thread Gage,1,per part,,,TG-M4-07,"NO PART NUMBER, NO COST, NO SUPPLIER"
+R2S1-AD163-001-022,Front Plate,50,Machining side 1 (rough),3,,.128- Pin - check M4's drill depth,1,per part,,,.128 pin,"NO PART NUMBER, NO COST, NO SUPPLIER"
+R2S1-AD163-001-022,Front Plate,50,Machining side 1 (rough),4,,.140- pin(Go),1,per part,,,.140 pin,"NO PART NUMBER, NO COST, NO SUPPLIER"
+R2S1-AD163-001-022,Front Plate,50,Machining side 1 (rough),5,,.142+ pin (No Go),1,per part,,,.142 pin,"NO PART NUMBER, NO COST, NO SUPPLIER"
+R2S1-AD163-001-022,Front Plate,2010,Shipping,1,,,,,,,PAC-128,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD163-001-022,Front Plate,2010,Shipping,2,,,,per part,,,PAC-131,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD181-001-01,"LABOR, MACHG TI TX PLATE, 2026",2010,Shipping,1,,,,per part,,,PAC-128,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD181-001-01,"LABOR, MACHG TI TX PLATE, 2026",2010,Shipping,2,,,,per part,,,PAC-131,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD201-01-0102,2022 Front Plate,2010,Shipping / Cleaning,1,,,,per part,,,PAC-131,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD201-01-0102,2022 Front Plate,2010,Shipping / Cleaning,2,,,,per part,,,PAC-130,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD232-04-0101,TI G2 TX Face Plate,2010,Shipping,1,,,,per part,,,PAC-131,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD232-04-0101,TI G2 TX Face Plate,2010,Shipping,2,,,,per part,,,PAC-128,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD245-01-0102,Ti Plate - 192 Element,2010,Shipping,1,,,,per part,,,PAC-131,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD245-01-0102,Ti Plate - 192 Element,2010,Shipping,2,,,,per part,,,PAC-130,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD246-02-0101,"LABOR MACH, TI G2 TX FACE PLATE, L/M",2010,Shipping,1,,,,per part,,,PAC-131,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-AD246-02-0101,"LABOR MACH, TI G2 TX FACE PLATE, L/M",2010,Shipping,2,,,,per part,,,PAC-130,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+R2S1-Mod 10591,Mod Temporary Heatsink Wet Controller 5.0,30,"Count incoming parts, note damage if any",1,10591,unmodified part from customer,1,per part,0.0,R2Sonic,,COMPLETE
+R3V1-10852,"LID, CAPACITOR BANK",2010,Shipping,1,,PACKAGE IN EVEN AMOUNTS!,4 OR 5,PER BOX,,,PAC-130,"NO PART NUMBER, NO COST, NO SUPPLIER"
+RAD1-Beacon Mount,Beacon Mount,1200,Install Magnets and Beacon,1,,beacon,1,per part,,radiant RFID,,"NO PART NUMBER, NO COST"
+RAD1-Beacon Mount,Beacon Mount,1200,Install Magnets and Beacon,2,,rubber coated magnet with 6mm stud,2,per part,,,,"NO PART NUMBER, NO COST, NO SUPPLIER"
+RAD1-Beacon Mount,Beacon Mount,1200,Install Magnets and Beacon,3,,6mm Nylok Nut (stainless),2,per part,0.075,American Bolt,MET-NLNSM06C00000,NO PART NUMBER
+RAD1-Beacon Mount,Beacon Mount,1200,Install Magnets and Beacon,4,,6mm washer (stainless),2,per part,0.054,American Bolt,MET-USSSM06N00000,NO PART NUMBER
+RAD1-Beacon Mount,Beacon Mount,1200,Install Magnets and Beacon,5,,6mm x 25 button head socket cap screw (stainless),2,per part,0.186,American Bolt,MET-BSCSM06C02500,NO PART NUMBER
+RAD1-Ceiling Tile Bracket,Ceiling Tile Bracket,60,Install inserts,1,,,1,Total,150.0,,,"NO PN & NO DESC, NO SUPPLIER"
+RES1-RIGHT SIDE BLOCK,Right-Side-Block,50,Milling 1st op,,,,,per part,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+RES1-RIGHT SIDE BLOCK,Right-Side-Block,50,Milling 1st op,,,,,per part,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+RES1-RIGHT SIDE BLOCK,Right-Side-Block,50,Milling 1st op,,,,,per part,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+ROV1-TES24A-FAB1210,Conveyor Clearance Plate,60,Milling Side 1,,,,,,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+ROV1-TES24A-FAB1210,Conveyor Clearance Plate,60,Milling Side 1,,,,,,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"
+ROV1-TES24A-FAB1210,Conveyor Clearance Plate,60,Milling Side 1,,,,,,,,,"NO PN & NO DESC, NO COST, NO SUPPLIER, NO QTY"

@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Traxis Manufacturing - Shop Hub</title>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+    width:1920px; height:1080px; overflow:hidden;
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    background: #0e0a05;
+    color: #e8dcc8;
+}
+
+:root {
+    --obsidian: #0e0a05;
+    --dark-stone: #1a1208;
+    --stone: #251c0e;
+    --stone-mid: #2f2415;
+    --light-stone: #3d2e18;
+    --terracotta: #c45a3c;
+    --terracotta-dk: #8b3a25;
+    --gold: #d4a926;
+    --gold-dk: #8b7117;
+    --jade: #2d8659;
+    --jade-lt: #3aad72;
+    --turquoise: #3eb8a0;
+    --blood: #b91c1c;
+    --blood-lt: #dc2626;
+    --warm-white: #e8dcc8;
+    --warm-gray: #a39580;
+}
+
+/* ── Dashboard Grid ──────────────────────────── */
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    width: 1920px;
+    height: 1080px;
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(196,90,60,0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 100%, rgba(62,184,160,0.02) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 100%, rgba(212,169,38,0.02) 0%, transparent 40%),
+        var(--obsidian);
+}
+
+/* ── Aztec Band Patterns ─────────────────────── */
+.aztec-band {
+    height: 12px;
+    flex-shrink: 0;
+    background: repeating-linear-gradient(90deg,
+        var(--terracotta) 0 28px,
+        var(--gold-dk) 28px 32px,
+        var(--obsidian) 32px 36px,
+        var(--gold-dk) 36px 40px,
+        var(--turquoise) 40px 68px,
+        var(--gold-dk) 68px 72px,
+        var(--obsidian) 72px 76px,
+        var(--gold-dk) 76px 80px
+    );
+    position: relative;
+}
+.aztec-band::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0; right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(90deg,
+        transparent 0 6px,
+        var(--terracotta-dk) 6px 8px,
+        transparent 8px 14px,
+        var(--gold-dk) 14px 16px
+    );
+    opacity: 0.5;
+}
+
+.aztec-band-thin {
+    height: 6px;
+    flex-shrink: 0;
+    background: repeating-linear-gradient(90deg,
+        var(--terracotta) 0 14px,
+        var(--gold-dk) 14px 16px,
+        var(--turquoise) 16px 30px,
+        var(--gold-dk) 30px 32px
+    );
+}
+
+/* ── Stepped Fret Border ─────────────────────── */
+.stepped-fret {
+    height: 10px;
+    flex-shrink: 0;
+    background:
+        linear-gradient(135deg, var(--terracotta-dk) 25%, transparent 25%) -8px 0 / 16px 16px,
+        linear-gradient(225deg, var(--terracotta-dk) 25%, transparent 25%) -8px 0 / 16px 16px,
+        linear-gradient(315deg, var(--gold-dk) 25%, transparent 25%) 0 0 / 16px 16px,
+        linear-gradient(45deg, var(--gold-dk) 25%, transparent 25%) 0 0 / 16px 16px;
+    background-color: var(--dark-stone);
+    opacity: 0.7;
+}
+
+/* ── Header ──────────────────────────────────── */
+.header {
+    height: 68px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #1a1208 0%, #120e06 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    border-bottom: 2px solid var(--terracotta-dk);
+}
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.header-title {
+    display: flex;
+    flex-direction: column;
+}
+.header-title .company {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--terracotta);
+}
+.header-title .subtitle {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warm-white);
+}
+.header-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+.clock {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+}
+.header-date {
+    font-size: 12px;
+    color: var(--warm-gray);
+    letter-spacing: 1px;
+}
+
+/* ── Machine Cards ───────────────────────────── */
+.machines {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 16px;
+    padding: 12px 24px;
+}
+
+.machine-card {
+    flex: 1;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--dark-stone);
+    border: 2px solid var(--light-stone);
+    box-shadow:
+        0 0 20px var(--sg, rgba(85,85,85,0.15)),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: box-shadow 0.5s, border-color 0.5s;
+}
+
+/* Aztec zigzag on cards */
+.card-aztec-top, .card-aztec-bottom {
+    height: 8px;
+    flex-shrink: 0;
+    background:
+        linear-gradient(135deg, var(--terracotta) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(225deg, var(--terracotta) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(315deg, var(--gold-dk) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(45deg, var(--gold-dk) 33%, transparent 33%) 0 0 / 8px 8px;
+    background-color: var(--dark-stone);
+}
+
+/* Corner glyphs on cards */
+.card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 10px 6px;
+    gap: 3px;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(196,90,60,0.04) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(62,184,160,0.03) 0%, transparent 60%),
+        var(--dark-stone);
+}
+/* Aztec corner decoration */
+.card-body::before, .card-body::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--terracotta-dk);
+    opacity: 0.25;
+}
+.card-body::before {
+    top: 6px; left: 6px;
+    border-right: none; border-bottom: none;
+}
+.card-body::after {
+    bottom: 6px; right: 6px;
+    border-left: none; border-top: none;
+}
+
+.card-id {
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--warm-white);
+    letter-spacing: 3px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--warm-gray);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+.card-gauge {
+    width: 100%;
+    max-width: 200px;
+}
+.card-gauge svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 0 6px var(--sg, rgba(85,85,85,0.15)));
+}
+.gauge-arc {
+    animation: arc-fill 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes arc-fill {
+    from { stroke-dashoffset: 490.1; }
+}
+.card-detail {
+    font-size: 13px;
+    color: var(--warm-gray);
+    letter-spacing: 0.5px;
+}
+.card-live-info {
+    font-size: 11px;
+    color: #4a3d2e;
+    letter-spacing: 0.5px;
+}
+
+/* ── Live Data Panel ──────────────────────── */
+.live-panel {
+    width: 100%;
+    padding: 4px 6px 2px;
+    margin-top: 2px;
+}
+.live-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    line-height: 1.6;
+}
+.live-label {
+    color: var(--warm-gray);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    min-width: 28px;
+    flex-shrink: 0;
+}
+.live-value {
+    color: var(--warm-white);
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* ── Speed/Feed Readout ──────────────────── */
+.live-readouts {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 2px 0;
+    gap: 4px;
+}
+.live-readout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    flex: 1;
+}
+.live-readout-val {
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--warm-white);
+    line-height: 1.1;
+    text-shadow: 0 0 8px rgba(232,220,200,0.3);
+}
+.live-readout-unit {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warm-gray);
+    line-height: 1;
+}
+
+/* ── Spindle Load Meter ──────────────────── */
+.spindle-meter {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.spindle-meter svg {
+    display: block;
+    filter: drop-shadow(0 0 4px var(--spl-glow, rgba(58,173,114,0.3)));
+    transition: filter 0.5s;
+}
+.spl-arc {
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.25,0.46,0.45,0.94), stroke 0.5s;
+}
+.spl-text {
+    font-weight: 800;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    text-anchor: middle;
+}
+.spl-label {
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    fill: var(--warm-gray);
+    text-anchor: middle;
+}
+
+/* ── Servo Load Bars ─────────────────────── */
+.servo-section {
+    width: 100%;
+    padding: 0 4px;
+}
+.servo-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 2px;
+}
+.servo-axis-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--warm-gray);
+    min-width: 14px;
+    text-align: right;
+    letter-spacing: 1px;
+}
+.servo-bar-track {
+    flex: 1;
+    height: 10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.servo-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+    position: relative;
+}
+.servo-bar-fill.sbar-green {
+    background: linear-gradient(90deg, #1a6b3a, #3aad72);
+    box-shadow: 0 0 6px rgba(58,173,114,0.4);
+}
+.servo-bar-fill.sbar-yellow {
+    background: linear-gradient(90deg, #8b7117, #d4a926);
+    box-shadow: 0 0 8px rgba(212,169,38,0.5);
+}
+.servo-bar-fill.sbar-red {
+    background: linear-gradient(90deg, #8b1c1c, #dc2626);
+    box-shadow: 0 0 12px rgba(220,38,38,0.6);
+    animation: servo-pulse 1.2s ease-in-out infinite;
+}
+@keyframes servo-pulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(220,38,38,0.6); }
+    50% { box-shadow: 0 0 20px rgba(220,38,38,0.9), 0 0 30px rgba(220,38,38,0.3); }
+}
+.servo-pct {
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    min-width: 28px;
+    text-align: right;
+    color: var(--warm-gray);
+}
+
+/* ── Position DRO ────────────────────────── */
+.live-pos {
+    display: flex;
+    gap: 10px;
+    font-size: 10px;
+    color: var(--warm-gray);
+    font-variant-numeric: tabular-nums;
+    justify-content: center;
+    margin-top: 1px;
+}
+.live-pos span {
+    color: var(--warm-white);
+    font-weight: 600;
+}
+
+/* E-Stop / Alarm indicator */
+.estop-badge {
+    display: inline-block;
+    background: var(--blood-lt);
+    color: white;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    padding: 2px 10px;
+    border-radius: 3px;
+    animation: estop-flash 0.8s ease-in-out infinite;
+    margin-top: 2px;
+}
+@keyframes estop-flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+.alarm-badge {
+    display: inline-block;
+    background: var(--gold-dk);
+    color: var(--warm-white);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-top: 2px;
+}
+.card-status {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sc, #555);
+    text-shadow: 0 0 12px var(--sg, rgba(85,85,85,0.15));
+    padding: 3px 12px;
+    border: 2px solid var(--sc, #555);
+    border-radius: 4px;
+    background: rgba(0,0,0,0.3);
+}
+
+/* ── Part Info ───────────────────────────────── */
+.card-part-info {
+    font-size: 12px;
+    color: var(--turquoise);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.card-part-info .part-label {
+    color: var(--warm-gray);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* ── Work Orders Section ─────────────────────── */
+.card-wo-section {
+    width: 100%;
+    padding: 4px 10px;
+    margin-top: 4px;
+    border-top: 1px solid var(--stone-mid);
+}
+.card-wo-section .wo-header {
+    font-size: 10px;
+    color: var(--warm-gray);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+.wo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--warm-white);
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 2px 4px;
+    transition: background 0.15s;
+}
+.wo-item:hover {
+    background: var(--stone-mid);
+}
+.wo-item.wo-selected {
+    background: var(--stone-mid);
+    border-left: 3px solid var(--turquoise);
+    padding-left: 5px;
+}
+.wo-item .wo-number {
+    color: var(--gold);
+    font-weight: 600;
+}
+.wo-item .wo-qty {
+    color: var(--warm-gray);
+    font-size: 10px;
+}
+.wo-none {
+    font-size: 10px;
+    color: #4a3d2e;
+    font-style: italic;
+}
+
+/* Status-specific card styles */
+.status-green { border-color: var(--jade); }
+.status-green .card-aztec-top,
+.status-green .card-aztec-bottom {
+    background:
+        linear-gradient(135deg, var(--jade) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(225deg, var(--jade) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(315deg, var(--gold-dk) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(45deg, var(--gold-dk) 33%, transparent 33%) 0 0 / 8px 8px;
+    background-color: var(--dark-stone);
+}
+
+.status-yellow { border-color: var(--gold-dk); }
+.status-yellow .card-aztec-top,
+.status-yellow .card-aztec-bottom {
+    background:
+        linear-gradient(135deg, var(--gold) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(225deg, var(--gold) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(315deg, var(--terracotta-dk) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(45deg, var(--terracotta-dk) 33%, transparent 33%) 0 0 / 8px 8px;
+    background-color: var(--dark-stone);
+}
+
+.status-red { border-color: var(--blood); }
+.status-red .card-aztec-top,
+.status-red .card-aztec-bottom {
+    background:
+        linear-gradient(135deg, var(--blood) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(225deg, var(--blood) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(315deg, var(--terracotta-dk) 33%, transparent 33%) 0 0 / 8px 8px,
+        linear-gradient(45deg, var(--terracotta-dk) 33%, transparent 33%) 0 0 / 8px 8px;
+    background-color: var(--dark-stone);
+}
+
+.status-offline {
+    border-color: #333;
+    opacity: 0.6;
+}
+.status-offline .card-status {
+    animation: offline-pulse 3s ease-in-out infinite;
+}
+@keyframes offline-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* ── Summary Bar ─────────────────────────────── */
+.summary-bar {
+    height: 70px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #12100a 0%, #1a1208 100%);
+    border-top: 2px solid var(--light-stone);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px;
+}
+.summary-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 16px;
+    position: relative;
+}
+.summary-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 15%;
+    height: 70%;
+    width: 2px;
+    background: linear-gradient(180deg, transparent, var(--terracotta-dk), transparent);
+}
+.summary-value {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
+}
+.summary-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--warm-gray);
+    margin-top: 1px;
+}
+
+/* ── Footer ──────────────────────────────────── */
+.footer {
+    height: 28px;
+    flex-shrink: 0;
+    background: var(--obsidian);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    font-size: 11px;
+    color: #5a4d3a;
+    letter-spacing: 1px;
+}
+.footer span { opacity: 0.7; }
+.diamond-sep {
+    display: inline-block;
+    color: var(--terracotta-dk);
+    margin: 0 6px;
+    font-size: 9px;
+}
+
+/* ── Loading ─────────────────────────────────── */
+.loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--warm-gray);
+    letter-spacing: 2px;
+}
+</style>
+</head>
+<body>
+<div class="dashboard">
+    <div class="aztec-band"></div>
+    <header class="header">
+        <div class="header-left">
+            <svg viewBox="0 0 60 60" width="48" height="48" style="opacity:0.85">
+                <circle cx="30" cy="30" r="27" fill="none" stroke="#c45a3c" stroke-width="1.5" opacity="0.7"/>
+                <circle cx="30" cy="30" r="20" fill="none" stroke="#d4a926" stroke-width="1" opacity="0.6"/>
+                <circle cx="30" cy="30" r="11" fill="none" stroke="#c45a3c" stroke-width="2"/>
+                <circle cx="30" cy="30" r="4" fill="#d4a926"/>
+                <polygon points="30,1 27.5,9 32.5,9" fill="#d4a926" opacity="0.8"/>
+                <polygon points="30,59 27.5,51 32.5,51" fill="#d4a926" opacity="0.8"/>
+                <polygon points="1,30 9,27.5 9,32.5" fill="#d4a926" opacity="0.8"/>
+                <polygon points="59,30 51,27.5 51,32.5" fill="#d4a926" opacity="0.8"/>
+                <polygon points="9,9 13.5,14 16,11.5" fill="#c45a3c" opacity="0.6"/>
+                <polygon points="51,51 46.5,46 44,48.5" fill="#c45a3c" opacity="0.6"/>
+                <polygon points="51,9 46.5,14 44,11.5" fill="#c45a3c" opacity="0.6"/>
+                <polygon points="9,51 13.5,46 16,48.5" fill="#c45a3c" opacity="0.6"/>
+                <circle cx="30" cy="16" r="2" fill="#3eb8a0" opacity="0.7"/>
+                <circle cx="30" cy="44" r="2" fill="#3eb8a0" opacity="0.7"/>
+                <circle cx="16" cy="30" r="2" fill="#3eb8a0" opacity="0.7"/>
+                <circle cx="44" cy="30" r="2" fill="#3eb8a0" opacity="0.7"/>
+            </svg>
+            <div class="header-title">
+                <span class="company">Traxis Manufacturing</span>
+                <span class="subtitle">Shop Hub</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="clock" id="clock">--:--:--</div>
+            <div class="header-date" id="headerDate">--</div>
+        </div>
+    </header>
+    <div class="aztec-band-thin"></div>
+
+    <div class="machines" id="machinesGrid">
+        <div class="loading">Connecting to FASData...</div>
+    </div>
+
+    <div class="stepped-fret"></div>
+
+    <div class="summary-bar" id="summaryBar">
+        <div class="summary-item">
+            <div class="summary-value" id="sumAvg" style="color:var(--warm-gray)">--%</div>
+            <div class="summary-label">Shop Average</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value" id="sumActive" style="color:var(--turquoise)">-- / --</div>
+            <div class="summary-label">Active Machines</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value" id="sumHours" style="color:#8aafcf">--</div>
+            <div class="summary-label">Cutting / Available</div>
+        </div>
+    </div>
+
+    <div class="aztec-band-thin"></div>
+
+    <footer class="footer">
+        <span id="footerUpdate">--</span>
+        <span class="diamond-sep">&#9670;</span>
+        <span>Shop Hub v2.2</span>
+        <span class="diamond-sep">&#9670;</span>
+        <span>Live &middot; 60s refresh</span>
+    </footer>
+
+    <div class="aztec-band"></div>
+</div>
+
+<script>
+const REFRESH_MS = 60000;
+const STATUS_COLORS = {
+    GREEN:   '#2d8659',
+    YELLOW:  '#d4a926',
+    RED:     '#b91c1c',
+    OFFLINE: '#555555',
+};
+const STATUS_GLOWS = {
+    GREEN:   'rgba(45,134,89,0.5)',
+    YELLOW:  'rgba(212,169,38,0.5)',
+    RED:     'rgba(185,28,28,0.5)',
+    OFFLINE: 'rgba(85,85,85,0.15)',
+};
+const STATUS_LABELS = {
+    GREEN:   'ON TARGET',
+    YELLOW:  'BELOW TARGET',
+    RED:     'CRITICAL',
+    OFFLINE: 'OFFLINE',
+};
+const MACHINE_ORDER = ['T2','M2','M3','M6','M8'];
+
+// ── Utilities ────────────────────────────────
+
+function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+}
+
+// ── WO Selection ─────────────────────────────
+
+function getSelectedWO(machineId) {
+    try {
+        const sel = JSON.parse(localStorage.getItem('shopHubWO') || '{}');
+        return sel[machineId] || null;
+    } catch { return null; }
+}
+
+function selectWO(machineId, woNum) {
+    try {
+        const sel = JSON.parse(localStorage.getItem('shopHubWO') || '{}');
+        sel[machineId] = (sel[machineId] === woNum) ? null : woNum;
+        localStorage.setItem('shopHubWO', JSON.stringify(sel));
+    } catch {}
+    document.querySelectorAll(`#wo-list-${machineId} .wo-item`).forEach(el => {
+        el.classList.toggle('wo-selected', el.dataset.wo === woNum && !el.classList.contains('wo-selected'));
+    });
+}
+
+// ── Load Bar Color ──────────────────────────
+function barColor(pct) {
+    if (pct >= 80) return 'bar-red';
+    if (pct >= 50) return 'bar-yellow';
+    return 'bar-green';
+}
+function sbarColor(pct) {
+    if (pct >= 80) return 'sbar-red';
+    if (pct >= 50) return 'sbar-yellow';
+    return 'sbar-green';
+}
+function loadColor(pct) {
+    if (pct >= 80) return '#dc2626';
+    if (pct >= 50) return '#d4a926';
+    return '#3aad72';
+}
+function loadGlow(pct) {
+    if (pct >= 80) return 'rgba(220,38,38,0.6)';
+    if (pct >= 50) return 'rgba(212,169,38,0.4)';
+    return 'rgba(58,173,114,0.3)';
+}
+
+// ── Spindle Load Mini Gauge ─────────────────
+function makeSpindleLoadSVG(loadPct) {
+    const pct = Math.max(0, Math.min(100, loadPct || 0));
+    const cx = 60, cy = 48, r = 38;
+    // 180° arc (bottom half = semicircle)
+    const startAngle = Math.PI;      // 180°
+    const endAngle = 2 * Math.PI;    // 360°
+    const totalArc = Math.PI * r;    // half circumference
+    const offset = totalArc * (1 - pct / 100);
+    const color = loadColor(pct);
+
+    let svg = '';
+    // Track
+    svg += `<path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="#1a1508" stroke-width="8" stroke-linecap="round"/>`;
+    // Tick marks at 50% and 80%
+    [50, 80].forEach(t => {
+        const a = Math.PI + (t / 100) * Math.PI;
+        const x1 = cx + (r - 6) * Math.cos(a), y1 = cy + (r - 6) * Math.sin(a);
+        const x2 = cx + (r + 6) * Math.cos(a), y2 = cy + (r + 6) * Math.sin(a);
+        svg += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#4a3a20" stroke-width="1.5"/>`;
+    });
+    // Fill arc
+    if (pct > 0) {
+        svg += `<path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" class="spl-arc" style="stroke-dasharray:${totalArc.toFixed(1)};stroke-dashoffset:${offset.toFixed(1)}"/>`;
+    }
+    // Value
+    svg += `<text x="${cx}" y="${cy - 8}" class="spl-text" fill="${color}" font-size="18">${pct}%</text>`;
+    svg += `<text x="${cx}" y="${cy + 4}" class="spl-label">SPINDLE LOAD</text>`;
+
+    return `<svg viewBox="0 0 120 56" width="140" height="65" style="--spl-glow:${loadGlow(pct)}">${svg}</svg>`;
+}
+
+// ── Gauge SVG ────────────────────────────────
+
+function makeGaugeSVG(pct, status) {
+    const color = STATUS_COLORS[status] || '#555';
+    const cx = 100, cy = 100, r = 78;
+    const circumference = 2 * Math.PI * r; // ~490.1
+
+    // Background ring
+    let svg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1a1508" stroke-width="14"/>`;
+
+    // Tick marks at thresholds
+    [30, 10].forEach(thr => {
+        const a = (-90 + (thr/100) * 360) * Math.PI / 180;
+        const x1 = cx + (r-12)*Math.cos(a), y1 = cy + (r-12)*Math.sin(a);
+        const x2 = cx + (r+12)*Math.cos(a), y2 = cy + (r+12)*Math.sin(a);
+        svg += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#4a3a20" stroke-width="2"/>`;
+    });
+
+    if (status === 'OFFLINE') {
+        svg += `<text x="${cx}" y="${cy+8}" text-anchor="middle" fill="#555" font-size="26" font-weight="bold" font-family="Arial,sans-serif">OFFLINE</text>`;
+        return `<svg viewBox="0 0 200 200">${svg}</svg>`;
+    }
+
+    const p = Math.max(0, Math.min(100, pct));
+    if (p > 0) {
+        const offset = circumference * (1 - p/100);
+        svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="14" stroke-linecap="round" class="gauge-arc" transform="rotate(-90 ${cx} ${cy})" style="stroke-dasharray:${circumference.toFixed(1)};stroke-dashoffset:${offset.toFixed(1)}"/>`;
+    }
+
+    svg += `<text x="${cx}" y="${cy+8}" text-anchor="middle" fill="${color}" font-size="46" font-weight="bold" font-family="Arial,sans-serif">${pct.toFixed(1)}%</text>`;
+    return `<svg viewBox="0 0 200 200">${svg}</svg>`;
+}
+
+// ── Render Machines ──────────────────────────
+
+function renderMachines(data) {
+    const grid = document.getElementById('machinesGrid');
+    const machines = data.machines;
+    const ids = MACHINE_ORDER.filter(id => machines[id]);
+
+    if (ids.length === 0) {
+        grid.innerHTML = '<div class="loading">No machine data available</div>';
+        return;
+    }
+
+    grid.innerHTML = ids.map(mid => {
+        const m = machines[mid];
+        const color = STATUS_COLORS[m.status] || '#555';
+        const glow = STATUS_GLOWS[m.status] || 'rgba(85,85,85,0.15)';
+        const label = STATUS_LABELS[m.status] || 'UNKNOWN';
+        const statusCls = m.status.toLowerCase();
+        const gauge = makeGaugeSVG(m.cutting_pct, m.status);
+
+        // Detail line with live data
+        let detail;
+        if (m.status === 'OFFLINE') {
+            detail = '<div class="card-detail">No connection</div>';
+        } else {
+            detail = `<div class="card-detail">${m.hours_cutting}h cutting / ${m.hours_available}h avail</div>`;
+
+            // E-Stop / Alarm indicators
+            if (m.emergency) {
+                detail += '<div class="estop-badge">E-STOP</div>';
+            } else if (m.alarm) {
+                detail += `<div class="alarm-badge">ALARM${m.alarm_message ? ': ' + escHtml(m.alarm_message) : ''}</div>`;
+            }
+
+            // Live data panel
+            detail += '<div class="live-panel">';
+
+            // Feed rate: FOCAS returns mm/min, convert to inches/min
+            const feedIPM = m.feed_rate ? (m.feed_rate / 25.4).toFixed(1) : '0.0';
+
+            if (m.is_running || m.spindle_speed > 0) {
+                // Running: prominent speed/feed readouts
+                detail += `<div class="live-readouts">
+                    <div class="live-readout">
+                        <div class="live-readout-val">${m.spindle_speed}</div>
+                        <div class="live-readout-unit">RPM</div>
+                    </div>
+                    <div class="live-readout">
+                        <div class="live-readout-val">${feedIPM}</div>
+                        <div class="live-readout-unit">IN/MIN</div>
+                    </div>
+                    <div class="live-readout">
+                        <div class="live-readout-val" style="font-size:14px">O${m.program_number}</div>
+                        <div class="live-readout-unit">PROG</div>
+                    </div>
+                </div>`;
+
+                // Spindle load arc gauge
+                const splPct = Math.min(m.spindle_load || 0, 200);
+                const splDisplay = Math.min(splPct, 100);
+                detail += `<div class="spindle-meter">${makeSpindleLoadSVG(splDisplay)}</div>`;
+
+                // Servo load bars (dramatic)
+                const svx = m.servo_load_x || 0;
+                const svy = m.servo_load_y || 0;
+                const svz = m.servo_load_z || 0;
+                detail += `<div class="servo-section">
+                    <div class="servo-row">
+                        <span class="servo-axis-label">X</span>
+                        <div class="servo-bar-track"><div class="servo-bar-fill ${sbarColor(svx)}" style="width:${Math.min(svx,100)}%"></div></div>
+                        <span class="servo-pct" style="color:${loadColor(svx)}">${svx}%</span>
+                    </div>
+                    <div class="servo-row">
+                        <span class="servo-axis-label">Y</span>
+                        <div class="servo-bar-track"><div class="servo-bar-fill ${sbarColor(svy)}" style="width:${Math.min(svy,100)}%"></div></div>
+                        <span class="servo-pct" style="color:${loadColor(svy)}">${svy}%</span>
+                    </div>
+                    <div class="servo-row">
+                        <span class="servo-axis-label">Z</span>
+                        <div class="servo-bar-track"><div class="servo-bar-fill ${sbarColor(svz)}" style="width:${Math.min(svz,100)}%"></div></div>
+                        <span class="servo-pct" style="color:${loadColor(svz)}">${svz}%</span>
+                    </div>
+                </div>`;
+            } else {
+                // Idle: show mode and program
+                detail += `<div class="live-readouts">
+                    <div class="live-readout">
+                        <div class="live-readout-val" style="font-size:14px">${m.mode || '--'}</div>
+                        <div class="live-readout-unit">MODE</div>
+                    </div>
+                    <div class="live-readout">
+                        <div class="live-readout-val" style="font-size:14px">O${m.program_number || '--'}</div>
+                        <div class="live-readout-unit">PROG</div>
+                    </div>
+                </div>`;
+
+                // Servo load bars (holding torque visible even when idle)
+                const svx = m.servo_load_x || 0;
+                const svy = m.servo_load_y || 0;
+                const svz = m.servo_load_z || 0;
+                if (svx + svy + svz > 0) {
+                    detail += `<div class="servo-section">
+                        <div class="servo-row">
+                            <span class="servo-axis-label">X</span>
+                            <div class="servo-bar-track"><div class="servo-bar-fill ${sbarColor(svx)}" style="width:${Math.min(svx,100)}%"></div></div>
+                            <span class="servo-pct" style="color:${loadColor(svx)}">${svx}%</span>
+                        </div>
+                        <div class="servo-row">
+                            <span class="servo-axis-label">Y</span>
+                            <div class="servo-bar-track"><div class="servo-bar-fill ${sbarColor(svy)}" style="width:${Math.min(svy,100)}%"></div></div>
+                            <span class="servo-pct" style="color:${loadColor(svy)}">${svy}%</span>
+                        </div>
+                        <div class="servo-row">
+                            <span class="servo-axis-label">Z</span>
+                            <div class="servo-bar-track"><div class="servo-bar-fill ${sbarColor(svz)}" style="width:${Math.min(svz,100)}%"></div></div>
+                            <span class="servo-pct" style="color:${loadColor(svz)}">${svz}%</span>
+                        </div>
+                    </div>`;
+                }
+            }
+
+            // Position readout (DRO-style)
+            if (m.axis_x != null || m.axis_y != null || m.axis_z != null) {
+                const fmt = v => v != null ? (v / 10000).toFixed(3) : '--';
+                detail += `<div class="live-pos">
+                    X:<span>${fmt(m.axis_x)}</span>
+                    Y:<span>${fmt(m.axis_y)}</span>
+                    Z:<span>${fmt(m.axis_z)}</span>
+                </div>`;
+            }
+
+            detail += '</div>'; // close live-panel
+        }
+
+        // Part info from program comment
+        let partHtml = '';
+        if (m.detected_part) {
+            partHtml = `<div class="card-part-info">
+                <span class="part-label">PART</span> ${escHtml(m.detected_part)}
+                ${m.program_comment ? ` <span class="part-label" style="margin-left:6px">PGM</span> ${escHtml(m.program_comment)}` : ''}
+            </div>`;
+        } else if (m.program_comment) {
+            partHtml = `<div class="card-part-info">
+                <span class="part-label">PGM</span> ${escHtml(m.program_comment)}
+            </div>`;
+        }
+
+        // Work orders
+        let woHtml = '';
+        if (m.work_orders && m.work_orders.length > 0) {
+            const selectedWO = getSelectedWO(mid);
+            const woItems = m.work_orders.slice(0, 4).map(wo => {
+                const sel = wo.workOrderNumber === selectedWO ? ' wo-selected' : '';
+                const rev = wo.partRev ? ` Rev ${escHtml(wo.partRev)}` : '';
+                return `<div class="wo-item${sel}" data-wo="${wo.workOrderNumber}"
+                         onclick="selectWO('${mid}','${wo.workOrderNumber}')">
+                    <span class="wo-number">${escHtml(wo.workOrderNumber)}</span>
+                    <span class="wo-qty">${escHtml(wo.status)}${rev}</span>
+                </div>`;
+            }).join('');
+            woHtml = `<div class="card-wo-section">
+                <div class="wo-header">WORK ORDERS</div>
+                <div id="wo-list-${mid}">${woItems}</div>
+            </div>`;
+        } else if (m.detected_part && m.status !== 'OFFLINE') {
+            woHtml = `<div class="card-wo-section">
+                <div class="wo-none">No active WOs for ${escHtml(m.detected_part)}</div>
+            </div>`;
+        }
+
+        return `<div class="machine-card status-${statusCls}" style="--sc:${color};--sg:${glow}">
+            <div class="card-aztec-top"></div>
+            <div class="card-body">
+                <div class="card-id">${mid}</div>
+                <div class="card-name">${m.name}</div>
+                <div class="card-gauge">${gauge}</div>
+                ${detail}
+                ${partHtml}
+                <div class="card-status">${label}</div>
+                ${woHtml}
+            </div>
+            <div class="card-aztec-bottom"></div>
+        </div>`;
+    }).join('');
+}
+
+// ── Summary ──────────────────────────────────
+
+function statusColor(avgPct) {
+    if (avgPct >= 30) return '#2d8659';
+    if (avgPct >= 10) return '#d4a926';
+    return '#b91c1c';
+}
+
+function renderSummary(data) {
+    document.getElementById('sumAvg').textContent = data.shop_avg + '%';
+    document.getElementById('sumAvg').style.color = statusColor(data.shop_avg);
+    document.getElementById('sumActive').textContent = `${data.active_count} / ${data.total_count}`;
+    document.getElementById('sumHours').innerHTML =
+        `${data.total_hours_cutting}h <span style="font-size:16px;color:var(--warm-gray)">/ ${data.total_hours_available}h</span>`;
+    document.getElementById('headerDate').textContent = data.date || '--';
+}
+
+// ── Data Refresh ─────────────────────────────
+
+async function refresh() {
+    try {
+        const resp = await fetch('/api/status');
+        const data = await resp.json();
+        if (data.error) {
+            document.getElementById('machinesGrid').innerHTML =
+                `<div class="loading">Error: ${data.error}</div>`;
+            return;
+        }
+        renderMachines(data);
+        renderSummary(data);
+        const now = new Date();
+        document.getElementById('footerUpdate').textContent =
+            `Updated ${now.toLocaleTimeString()}`;
+    } catch (e) {
+        document.getElementById('footerUpdate').textContent = 'Connection lost';
+    }
+}
+
+// ── Clock ────────────────────────────────────
+
+function tickClock() {
+    const d = new Date();
+    let h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+    const ap = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('clock').textContent =
+        h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + ' ' + ap;
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+// ── Start ────────────────────────────────────
+
+refresh();
+setInterval(refresh, REFRESH_MS);
+</script>
+</body>
+</html>

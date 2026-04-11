@@ -1,0 +1,10 @@
+{
+    "autodeskProduct": "Fusion",
+    "type": "script",
+    "author": "Traxis Manufacturing",
+    "description": {
+        "": "Test 1: Can We See Libraries? Minimal discovery test."
+    },
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}

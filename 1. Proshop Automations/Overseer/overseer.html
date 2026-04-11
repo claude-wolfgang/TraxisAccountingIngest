@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traxis Service Overseer</title>
+<style>
+  :root {
+    --bg:        #1a1a2e;
+    --surface:   #16213e;
+    --card:      #0f3460;
+    --border:    #1a3a6a;
+    --text:      #e0e0e0;
+    --text-dim:  #8899aa;
+    --green:     #4caf50;
+    --yellow:    #ff9800;
+    --red:       #f44336;
+    --blue:      #2196f3;
+    --gray:      #607080;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .header h1 span { color: var(--blue); }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .overall-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .overall-status.all-healthy { background: rgba(76,175,80,0.15); color: var(--green); }
+  .overall-status.has-degraded { background: rgba(255,152,0,0.15); color: var(--yellow); }
+  .overall-status.has-down { background: rgba(244,67,54,0.15); color: var(--red); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  /* Service cards */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .service-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .service-card.status-healthy  { border-left: 4px solid var(--green); }
+  .service-card.status-degraded { border-left: 4px solid var(--yellow); }
+  .service-card.status-down     { border-left: 4px solid var(--red); }
+  .service-card.status-starting { border-left: 4px solid var(--blue); }
+  .service-card.status-stopped  { border-left: 4px solid var(--gray); }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .status-badge.healthy  { background: rgba(76,175,80,0.2);  color: var(--green); }
+  .status-badge.degraded { background: rgba(255,152,0,0.2);  color: var(--yellow); }
+  .status-badge.down     { background: rgba(244,67,54,0.2);  color: var(--red); }
+  .status-badge.starting { background: rgba(33,150,243,0.2); color: var(--blue); }
+  .status-badge.stopped  { background: rgba(96,112,128,0.2); color: var(--gray); }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .status-dot.healthy  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.degraded { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+  .status-dot.down     { background: var(--red); box-shadow: 0 0 6px var(--red); animation: pulse-red 1.5s infinite; }
+  .status-dot.starting { background: var(--blue); box-shadow: 0 0 6px var(--blue); animation: pulse-blue 1.5s infinite; }
+  .status-dot.stopped  { background: var(--gray); }
+
+  @keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 4px var(--red); }
+    50% { box-shadow: 0 0 12px var(--red); }
+  }
+  @keyframes pulse-blue {
+    0%, 100% { box-shadow: 0 0 4px var(--blue); }
+    50% { box-shadow: 0 0 12px var(--blue); }
+  }
+
+  .card-message {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    min-height: 18px;
+  }
+
+  .card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+  .stat-label { color: var(--text-dim); }
+  .stat-value { color: var(--text); font-weight: 500; }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  .btn {
+    padding: 5px 14px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+  .btn.btn-restart { border-color: var(--yellow); color: var(--yellow); }
+  .btn.btn-restart:hover { background: rgba(255,152,0,0.1); }
+  .btn.btn-stop { border-color: var(--red); color: var(--red); }
+  .btn.btn-stop:hover { background: rgba(244,67,54,0.1); }
+  .btn.btn-start { border-color: var(--green); color: var(--green); }
+  .btn.btn-start:hover { background: rgba(76,175,80,0.1); }
+  .btn.btn-open { border-color: var(--blue); color: var(--blue); }
+  .btn.btn-open:hover { background: rgba(33,150,243,0.1); }
+
+  /* Event log */
+  .events-section h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .events-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .events-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--card);
+    color: var(--text-dim);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 11px;
+  }
+  .events-table td {
+    padding: 6px 12px;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .event-type {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .event-type.healthy, .event-type.started, .event-type.adopted { background: rgba(76,175,80,0.2); color: var(--green); }
+  .event-type.degraded, .event-type.cooldown { background: rgba(255,152,0,0.2); color: var(--yellow); }
+  .event-type.down, .event-type.error, .event-type.stopped { background: rgba(244,67,54,0.2); color: var(--red); }
+  .event-type.restarting, .event-type.monitoring { background: rgba(33,150,243,0.2); color: var(--blue); }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  .refresh-indicator {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .refresh-indicator.stale { color: var(--yellow); }
+
+  /* Programming Sessions */
+  .sessions-section {
+    margin-bottom: 32px;
+  }
+  .sessions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .sessions-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .sessions-filters {
+    display: flex;
+    gap: 4px;
+  }
+  .filter-btn {
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+  .filter-btn.active { background: rgba(33,150,243,0.15); color: var(--blue); border-color: var(--blue); }
+
+  .sessions-summary {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 14px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .summary-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .summary-stat .label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .summary-stat .value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .summary-stat .value.highlight { color: var(--blue); }
+
+  .parts-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-left: auto;
+    align-items: center;
+  }
+  .part-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    background: rgba(33,150,243,0.1);
+    border: 1px solid rgba(33,150,243,0.2);
+    border-radius: 12px;
+    font-size: 11px;
+    color: var(--text);
+  }
+  .part-chip .part-time {
+    color: var(--blue);
+    font-weight: 600;
+  }
+
+  .sessions-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .sessions-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--card);
+    color: var(--text-dim);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 11px;
+  }
+  .sessions-table td {
+    padding: 6px 12px;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .duration-cell {
+    font-weight: 600;
+    color: var(--blue);
+  }
+  .seat-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    background: rgba(96,112,128,0.2);
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>TRAXIS</span> Service Overseer</h1>
+  <div class="header-right">
+    <span class="overall-status" id="overallStatus">--</span>
+    <span class="refresh-indicator" id="refreshInfo">Connecting...</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="services-grid" id="servicesGrid">
+    <div class="empty-state">Connecting to overseer...</div>
+  </div>
+
+  <div class="sessions-section">
+    <div class="sessions-header">
+      <h2>Programming Timer Sessions</h2>
+      <div class="sessions-filters">
+        <button class="filter-btn active" data-filter="today" onclick="setSessionFilter('today')">Today</button>
+        <button class="filter-btn" data-filter="week" onclick="setSessionFilter('week')">This Week</button>
+        <button class="filter-btn" data-filter="all" onclick="setSessionFilter('all')">All</button>
+      </div>
+    </div>
+    <div class="sessions-summary" id="sessionsSummary">
+      <div class="summary-stat">
+        <span class="label">Total Time</span>
+        <span class="value highlight" id="totalTime">--</span>
+      </div>
+      <div class="summary-stat">
+        <span class="label">Sessions</span>
+        <span class="value" id="sessionCount">--</span>
+      </div>
+      <div class="parts-breakdown" id="partsBreakdown"></div>
+    </div>
+    <table class="sessions-table">
+      <thead>
+        <tr>
+          <th style="width:80px">Date</th>
+          <th style="width:120px">Part</th>
+          <th>Document</th>
+          <th style="width:80px">Duration</th>
+          <th style="width:80px">Start</th>
+          <th style="width:80px">End</th>
+          <th style="width:90px">Seat</th>
+        </tr>
+      </thead>
+      <tbody id="sessionsBody">
+        <tr><td colspan="7" class="empty-state">Loading sessions...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="events-section">
+    <h2>Event Log</h2>
+    <table class="events-table">
+      <thead>
+        <tr>
+          <th style="width:140px">Time</th>
+          <th style="width:160px">Service</th>
+          <th style="width:90px">Event</th>
+          <th>Message</th>
+        </tr>
+      </thead>
+      <tbody id="eventsBody">
+        <tr><td colspan="4" class="empty-state">No events yet</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const REFRESH_MS = 10000;
+let lastData = null;
+
+function formatUptime(seconds) {
+  if (!seconds || seconds < 0) return '--';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m`;
+  return `${Math.floor(seconds)}s`;
+}
+
+function formatTime(iso) {
+  if (!iso) return '--';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  } catch { return iso; }
+}
+
+function formatEventTime(iso) {
+  if (!iso) return '--';
+  try {
+    const d = new Date(iso);
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) {
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' +
+           d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch { return iso; }
+}
+
+function renderServices(services) {
+  const grid = document.getElementById('servicesGrid');
+  if (!services || services.length === 0) {
+    grid.innerHTML = '<div class="empty-state">No services configured</div>';
+    return;
+  }
+
+  grid.innerHTML = services.map(svc => `
+    <div class="service-card status-${svc.status}">
+      <div class="card-header">
+        <div class="card-title">${svc.displayName}</div>
+        <div class="status-badge ${svc.status}">
+          <span class="status-dot ${svc.status}"></span>
+          ${svc.status}
+        </div>
+      </div>
+      <div class="card-message">${svc.message || '--'}</div>
+      <div class="card-stats">
+        <span class="stat-label">Uptime</span>
+        <span class="stat-value">${formatUptime(svc.uptimeSeconds)}</span>
+        <span class="stat-label">Type</span>
+        <span class="stat-value">${svc.serviceType === 'windows_service' ? 'Windows Service' : 'Process'}</span>
+        <span class="stat-label">${svc.port ? 'Port' : 'PID'}</span>
+        <span class="stat-value">${svc.port || svc.pid || '--'}</span>
+        <span class="stat-label">Last Check</span>
+        <span class="stat-value">${formatTime(svc.lastCheck)}</span>
+        <span class="stat-label">Restarts</span>
+        <span class="stat-value">${svc.restartCount}</span>
+        <span class="stat-label">Last Healthy</span>
+        <span class="stat-value">${formatTime(svc.lastHealthy)}</span>
+      </div>
+      <div class="card-actions">
+        ${svc.status === 'stopped'
+          ? `<button class="btn btn-start" onclick="doAction('${svc.name}','start')">Start</button>`
+          : `<button class="btn btn-restart" onclick="doAction('${svc.name}','restart')">Restart</button>
+             <button class="btn btn-stop" onclick="doAction('${svc.name}','stop')">Stop</button>`}
+        ${svc.healthUrl ? `<button class="btn btn-open" onclick="window.open('${svc.healthUrl.replace('/api/status','/')}','_blank')">Open</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderEvents(events) {
+  const tbody = document.getElementById('eventsBody');
+  if (!events || events.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No events yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = events.map(ev => `
+    <tr>
+      <td>${formatEventTime(ev.timestamp)}</td>
+      <td>${ev.service}</td>
+      <td><span class="event-type ${ev.type}">${ev.type}</span></td>
+      <td>${ev.message}</td>
+    </tr>
+  `).join('');
+}
+
+function updateOverallStatus(services) {
+  const el = document.getElementById('overallStatus');
+  const hasDown = services.some(s => s.status === 'down');
+  const hasDegraded = services.some(s => s.status === 'degraded');
+  const allStopped = services.every(s => s.status === 'stopped');
+
+  if (hasDown) {
+    el.className = 'overall-status has-down';
+    el.textContent = 'Issues Detected';
+  } else if (hasDegraded) {
+    el.className = 'overall-status has-degraded';
+    el.textContent = 'Degraded';
+  } else if (allStopped) {
+    el.className = 'overall-status';
+    el.textContent = 'All Stopped';
+  } else {
+    el.className = 'overall-status all-healthy';
+    el.textContent = 'All Healthy';
+  }
+}
+
+async function refresh() {
+  try {
+    const resp = await fetch('/api/status');
+    const data = await resp.json();
+    lastData = data;
+    renderServices(data.services);
+    renderEvents(data.events);
+    updateOverallStatus(data.services);
+    document.getElementById('refreshInfo').textContent =
+      `Updated ${formatTime(data.timestamp)} · Next in ${Math.round(REFRESH_MS/1000)}s`;
+    document.getElementById('refreshInfo').className = 'refresh-indicator';
+  } catch (e) {
+    document.getElementById('refreshInfo').textContent = 'Connection lost';
+    document.getElementById('refreshInfo').className = 'refresh-indicator stale';
+  }
+}
+
+async function doAction(serviceName, action) {
+  try {
+    await fetch(`/api/services/${serviceName}/${action}`, { method: 'POST' });
+    setTimeout(refresh, 1000);
+    setTimeout(refresh, 5000);
+  } catch (e) {
+    alert(`Action failed: ${e.message}`);
+  }
+}
+
+// ---- Programming Timer Sessions ----
+let sessionFilter = 'today';
+
+function formatDuration(seconds) {
+  if (!seconds || seconds <= 0) return '0s';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+function formatSessionDate(dateStr) {
+  if (!dateStr) return '--';
+  try {
+    const parts = dateStr.split('-');
+    return `${parseInt(parts[1])}/${parseInt(parts[2])}`;
+  } catch { return dateStr; }
+}
+
+function setSessionFilter(filter) {
+  sessionFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === filter);
+  });
+  refreshSessions();
+}
+
+function renderSessions(data) {
+  const { sessions, summary } = data;
+
+  // Summary
+  document.getElementById('totalTime').textContent = formatDuration(summary.totalSeconds);
+  document.getElementById('sessionCount').textContent = summary.sessionCount;
+
+  const breakdown = document.getElementById('partsBreakdown');
+  if (summary.partBreakdown && summary.partBreakdown.length > 0) {
+    breakdown.innerHTML = summary.partBreakdown.slice(0, 8).map(p =>
+      `<span class="part-chip">${p.part} <span class="part-time">${formatDuration(p.seconds)}</span></span>`
+    ).join('');
+  } else {
+    breakdown.innerHTML = '';
+  }
+
+  // Table
+  const tbody = document.getElementById('sessionsBody');
+  if (!sessions || sessions.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No sessions found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sessions.map(s => `
+    <tr>
+      <td>${formatSessionDate(s.date)}</td>
+      <td><strong>${s.part_identifier || '--'}</strong></td>
+      <td>${s.document_name || '--'}</td>
+      <td class="duration-cell">${formatDuration(s.duration_seconds)}</td>
+      <td>${formatTime(s.start_time)}</td>
+      <td>${formatTime(s.end_time)}</td>
+      <td><span class="seat-badge">${s.seat || '--'}</span></td>
+    </tr>
+  `).join('');
+}
+
+async function refreshSessions() {
+  try {
+    const resp = await fetch(`/api/programming-sessions?date=${sessionFilter}`);
+    const data = await resp.json();
+    renderSessions(data);
+  } catch (e) {
+    document.getElementById('sessionsBody').innerHTML =
+      '<tr><td colspan="7" class="empty-state">Failed to load sessions</td></tr>';
+  }
+}
+
+// Initial load + periodic refresh
+refresh();
+refreshSessions();
+setInterval(refresh, REFRESH_MS);
+setInterval(refreshSessions, 60000);  // refresh sessions every 60s
+</script>
+</body>
+</html>

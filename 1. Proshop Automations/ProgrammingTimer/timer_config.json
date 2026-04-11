@@ -1,0 +1,7 @@
+{
+  "company_file_patterns": ["Traxis Main", "hub://Traxis", "D:/Dropbox/MACHINE COMM Traxis"],  "idle_timeout_seconds": 120,
+  "gap_threshold_seconds": 1800,
+  "log_folder": "D:\\Dropbox\\MACHINE COMM Traxis\\Proshop Automation and Claude Projects\\1. Proshop Automations\\ProgrammingTimer",
+  "programmer_name": "",
+  "poll_interval_seconds": 15
+}

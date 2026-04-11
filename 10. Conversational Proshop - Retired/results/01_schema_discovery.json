@@ -1,0 +1,2677 @@
+{
+  "test_name": "Schema Discovery",
+  "timestamp": "2026-01-26T17:13:55.943393",
+  "success": true,
+  "query_types": [
+    "approval",
+    "approvals",
+    "auditReport",
+    "auditReports",
+    "bill",
+    "bills",
+    "classification",
+    "classifications",
+    "clockPunch",
+    "companyPosition",
+    "companyPositions",
+    "contact",
+    "contacts",
+    "correctiveActionRequest",
+    "correctiveActionRequests",
+    "cotsItem",
+    "cotsItems",
+    "customerPO",
+    "customerPOs",
+    "customerSatisfactionSurvey",
+    "customerSurveys",
+    "document",
+    "documents",
+    "editLog",
+    "equipment",
+    "equipments",
+    "estimate",
+    "estimateArchive",
+    "estimates",
+    "estimatesArchive",
+    "fixture",
+    "fixtures",
+    "format",
+    "formats",
+    "globalSearches",
+    "invoice",
+    "invoices",
+    "localSearches",
+    "merchandise",
+    "message",
+    "messages",
+    "moduleConfiguration",
+    "nonConformanceReport",
+    "nonConformanceReports",
+    "packingSlip",
+    "packingSlips",
+    "par",
+    "pars",
+    "part",
+    "partArchive",
+    "parts",
+    "partsArchive",
+    "purchaseOrder",
+    "purchaseOrders",
+    "qualityManual",
+    "qualityManualSection",
+    "qualityProcedure",
+    "qualityProcedures",
+    "quote",
+    "quotes",
+    "returnMaterialAuthorization",
+    "returnMaterialAuthorizations",
+    "riskAndOpportunity",
+    "risksAndOpportunities",
+    "rta",
+    "rtas",
+    "session",
+    "smartTrips",
+    "standards",
+    "standardSection",
+    "systemConfig",
+    "systemSearches",
+    "task",
+    "tasks",
+    "tool",
+    "tools",
+    "training",
+    "trainings",
+    "user",
+    "users",
+    "vendorPO",
+    "vendorPOs",
+    "workCell",
+    "workCells",
+    "workOrder",
+    "workOrders",
+    "writeCheckouts"
+  ],
+  "key_entities_found": {
+    "workOrder": true,
+    "workOrders": true,
+    "parts": true,
+    "part": true,
+    "users": true,
+    "contacts": true,
+    "clockPunch": true,
+    "session": true
+  },
+  "raw_response": {
+    "status_code": 200,
+    "elapsed_seconds": 1.345,
+    "headers": {
+      "Server": "nginx/1.14.0 (Ubuntu)",
+      "Date": "Mon, 26 Jan 2026 23:13:55 GMT",
+      "Content-Type": "application/json",
+      "Content-Length": "25197",
+      "Connection": "keep-alive",
+      "Content-Security-Policy": "connect-src https://*.intercom.io wss://*.intercom.io  wss://*.intercom-messenger.com https://*.intercomcdn.com https://data.pendo.io https://dhelp-f4b211c7-65b6-4a56-a690-67f58ddac296.adionsystems.com https://traxismfg-8a89ecd8-1907-4ac7-bcc7-d27ee80503c9.adionsystems.com:8181 https://services.traxismfg.adionsystems.com https://traxismfg-mastercam.adionsystems.com https://docs.google.com https://traxismfg-8a89ecd8-1907-4ac7-bcc7-d27ee80503c9.adionsystems.com:8181 https://*.traxismfg.adionsystems.com 'self'; default-src 'self'; font-src data: https://*.intercomcdn.com 'self'; frame-src https://intercom-sheets.com https://dhelp-f4b211c7-65b6-4a56-a690-67f58ddac296.adionsystems.com https://traxismfg-8a89ecd8-1907-4ac7-bcc7-d27ee80503c9.adionsystems.com:8181 https://docs.google.com https://traxismfg-8a89ecd8-1907-4ac7-bcc7-d27ee80503c9.adionsystems.com:8181 https://*.traxismfg.adionsystems.com 'self'; img-src data: blob: https://*.intercomcdn.com https://*.intercomassets.com https://data.pendo.io https://dhelp-f4b211c7-65b6-4a56-a690-67f58ddac296.adionsystems.com https://traxismfg-8a89ecd8-1907-4ac7-bcc7-d27ee80503c9.adionsystems.com:8181 https://docs.google.com https://traxismfg-8a89ecd8-1907-4ac7-bcc7-d27ee80503c9.adionsystems.com:8181 https://*.traxismfg.adionsystems.com 'self'; media-src https://*.intercomcdn.com https://dhelp-f4b211c7-65b6-4a56-a690-67f58ddac296.adionsystems.com https://traxismfg-8a89ecd8-1907-4ac7-bcc7-d27ee80503c9.adionsystems.com:8181 https://docs.google.com https://traxismfg-8a89ecd8-1907-4ac7-bcc7-d27ee80503c9.adionsystems.com:8181 https://*.traxismfg.adionsystems.com 'self'; object-src https://dhelp-f4b211c7-65b6-4a56-a690-67f58ddac296.adionsystems.com https://traxismfg-8a89ecd8-1907-4ac7-bcc7-d27ee80503c9.adionsystems.com:8181 https://docs.google.com https://traxismfg-8a89ecd8-1907-4ac7-bcc7-d27ee80503c9.adionsystems.com:8181 https://*.traxismfg.adionsystems.com 'self'; script-src 'unsafe-inline' 'unsafe-eval' https://*.intercom.io https://*.intercomcdn.com https://data.pendo.io https://pendo-static-6318855275020288.storage.googleapis.com https://*.gstatic.com 'self'; style-src 'unsafe-inline' 'unsafe-eval' 'self'; report-uri https://traxismfg.adionsystems.com/cspreports; report-to csp-endpoint;",
+      "Referrer-Policy": "origin-when-cross-origin",
+      "Reporting-Endpoints": "csp-endpoint=\"https://traxismfg.adionsystems.com/cspreports\"",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "SAMEORIGIN",
+      "X-Robots-Tag": "noindex, nofollow",
+      "X-XSS-Protection": "1; mode=block"
+    },
+    "response": {
+      "data": {
+        "__schema": {
+          "queryType": {
+            "fields": [
+              {
+                "args": [
+                  {
+                    "name": "approvalId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "approval",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Approval",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ApprovalFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ApprovalQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "approvals",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedApprovalResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "auditId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "auditReport",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "AuditReport",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "AuditReportFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "AuditReportQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "auditReports",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedAuditReportResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "billId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "bill",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Bill",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "BillFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "BillQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "bills",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedBillResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "classificationId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "classification",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Classification",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ClassificationFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ClassificationQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "classifications",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedClassificationResult"
+                  }
+                }
+              },
+              {
+                "args": [],
+                "description": null,
+                "name": "clockPunch",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "ClockPunchData",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "positionName",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "companyPosition",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "CompanyPosition",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CompanyPositionFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CompanyPositionQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "companyPositions",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedCompanyPositionResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "name",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "contact",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Contact",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ContactFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ContactQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "contacts",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedContactResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "carId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "correctiveActionRequest",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "CorrectiveActionRequest",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CorrectiveActionRequestFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CorrectiveActionRequestQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "correctiveActionRequests",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedCorrectiveActionRequestResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "otsId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "cotsItem",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "COTS",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "COTSFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "COTSQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "cotsItems",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedCOTSResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "poId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "customerPO",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "CustomerPO",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CustomerPOFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CustomerPOQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "customerPOs",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedCustomerPOResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "surveyId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "customerSatisfactionSurvey",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "CustomerSatisfactionSurvey",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CustomerSatisfactionSurveyFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CustomerSatisfactionSurveyQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "customerSurveys",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedCustomerSatisfactionSurveyResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "documentId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "document",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Document",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DocumentFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DocumentQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "documents",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedDocumentResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "editLog",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "editLog",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "EditLog",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "tool",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "equipment",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Equipment",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "EquipmentFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "EquipmentQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "equipments",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedEquipmentResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "estimateId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "estimate",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Estimate",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "uniqueId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "estimateArchive",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "EstimateArchive",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "EstimateFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "EstimateQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "estimates",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedEstimateResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "EstimateArchiveFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "EstimateArchiveQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "estimatesArchive",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedEstimateArchiveResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "fixtureNumber",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "fixture",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Fixture",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "FixtureFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "FixtureQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "fixtures",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedFixtureResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "formatId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "format",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Format",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "FormatFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "FormatQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "formats",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedFormatResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ProShopGlobalSearchDefinitionFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "globalSearches",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedProShopGlobalSearchDefinitionResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "invoiceId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "invoice",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Invoice",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "InvoiceFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "InvoiceQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "invoices",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedInvoiceResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ProShopLocalSearchDefinitionFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "userId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "localSearches",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedProShopLocalSearchDefinitionResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "uniqueId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "merchandise",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Merchandise",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "id",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "message",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Message",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "MessageFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "MessageQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "messages",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedMessageResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "module",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": "Module level configuration settings.",
+                "name": "moduleConfiguration",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "ModuleConfiguration",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "ncrRefNumber",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "nonConformanceReport",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "NonConformanceReport",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "NonConformanceReportFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "NonConformanceReportQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "nonConformanceReports",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedNonConformanceReportResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "id",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "packingSlip",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "PackingSlip",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "PackingSlipFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "PackingSlipQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "packingSlips",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedPackingSlipResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "parId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "par",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "RiskAndOpportunity",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "RiskAndOpportunityFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "RiskAndOpportunityQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "pars",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedRiskAndOpportunityResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "partNumber",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "part",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Part",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "uniqueId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "partArchive",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "PartArchive",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "PartFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "PartQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "parts",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedPartResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "PartArchiveFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "PartArchiveQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "partsArchive",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedPartArchiveResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "id",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "purchaseOrder",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "PurchaseOrder",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "PurchaseOrderFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "PurchaseOrderQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "purchaseOrders",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedPurchaseOrderResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "QualityManualSectionFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "QualityManualSectionQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "qualityManual",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedQualityManualSectionResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "sectionId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "qualityManualSection",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "QualityManualSection",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "docNumber",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "qualityProcedure",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "QualityProcedure",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "QualityProcedureFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "QualityProcedureQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "qualityProcedures",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedQualityProcedureResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "quoteId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "quote",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Quote",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "QuoteFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "QuoteQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "quotes",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedQuoteResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "rmaId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "returnMaterialAuthorization",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "ReturnMaterialAuthorization",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ReturnMaterialAuthorizationFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ReturnMaterialAuthorizationQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "returnMaterialAuthorizations",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedReturnMaterialAuthorizationResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "parId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "riskAndOpportunity",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "RiskAndOpportunity",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "RiskAndOpportunityFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "RiskAndOpportunityQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "risksAndOpportunities",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedRiskAndOpportunityResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "rtaNumber",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "rta",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "RTA",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "RTAFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "RTAQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "rtas",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedRTAResult"
+                  }
+                }
+              },
+              {
+                "args": [],
+                "description": null,
+                "name": "session",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "ProShopSession",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "uniqueId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "smartTrips",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "SmartTrips",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "StandardSectionFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "StandardSectionQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "standards",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedStandardSectionResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "uniqueId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "standardSection",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "StandardSection",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "description": null,
+                "name": "systemConfig",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "ProShopSystemConfig",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ProShopGlobalSearchDefinitionFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "systemSearches",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedProShopGlobalSearchDefinitionResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "taskId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "task",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Task",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "TaskFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "TaskQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "tasks",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedTaskResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "toolNumber",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "tool",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Tool",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ToolFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ToolQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "tools",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedToolResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "trainingId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "training",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Training",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "TrainingFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "TrainingQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "trainings",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedTrainingResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "id",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "user",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "User",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "UserFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "UserQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "users",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedUserResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "id",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "vendorPO",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "PurchaseOrder",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "PurchaseOrderFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "PurchaseOrderQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "vendorPOs",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedPurchaseOrderResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "potId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "workCell",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "WorkCell",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "WorkCellFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "WorkCellQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "workCells",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedWorkCellResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "workOrderNumber",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "workOrder",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "WorkOrder",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "WorkOrderFilter"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "query",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "WorkOrderQuery"
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "workOrders",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedWorkOrderResult"
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "name": "filter",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "WriteCheckoutRecordFilter"
+                    }
+                  },
+                  {
+                    "name": "module",
+                    "type": {
+                      "kind": "ENUM",
+                      "name": "ProShopModule"
+                    }
+                  },
+                  {
+                    "name": "pageSize",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "pageStart",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int"
+                    }
+                  },
+                  {
+                    "name": "userId",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null
+                    }
+                  }
+                ],
+                "description": null,
+                "name": "writeCheckouts",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PaginatedWriteCheckoutRecordResult"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "total_queries": 87
+}

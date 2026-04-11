@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traxis — Time Tracking Status</title>
+<meta http-equiv="refresh" content="300"> <!-- Hard refresh every 5 min as fallback -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0c0e13;
+    --surface: #14171e;
+    --surface-raised: #1a1e28;
+    --border: #252a36;
+    --border-subtle: #1e222c;
+    --text: #e4e7ed;
+    --text-dim: #7a8194;
+    --text-muted: #4a5068;
+    --accent: #3b82f6;
+    --green: #22c55e;
+    --green-dim: #16a34a;
+    --green-bg: rgba(34, 197, 94, 0.08);
+    --green-border: rgba(34, 197, 94, 0.2);
+    --red: #ef4444;
+    --red-bg: rgba(239, 68, 68, 0.06);
+    --red-border: rgba(239, 68, 68, 0.15);
+    --amber: #f59e0b;
+    --amber-bg: rgba(245, 158, 11, 0.08);
+    --amber-border: rgba(245, 158, 11, 0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .logo span {
+    color: var(--accent);
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+  }
+
+  .header-title {
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .status-dot.error { background: var(--red); animation: none; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .last-update {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .refresh-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .refresh-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .clock {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+
+  /* ── SUMMARY BAR ── */
+  .summary-bar {
+    display: flex;
+    gap: 2px;
+    padding: 16px 32px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .summary-stat {
+    flex: 1;
+    text-align: center;
+    padding: 12px 16px;
+    background: var(--surface-raised);
+    border-radius: 8px;
+  }
+
+  .summary-stat:first-child { border-radius: 8px 4px 4px 8px; }
+  .summary-stat:last-child { border-radius: 4px 8px 8px 4px; }
+  .summary-stat:not(:first-child):not(:last-child) { border-radius: 4px; }
+
+  .summary-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .summary-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+
+  .summary-stat.green .summary-value { color: var(--green); }
+  .summary-stat.amber .summary-value { color: var(--amber); }
+  .summary-stat.red .summary-value { color: var(--red); }
+  .summary-stat.neutral .summary-value { color: var(--text-dim); }
+
+  /* ── EMPLOYEE GRID ── */
+  .grid-container {
+    padding: 24px 32px;
+  }
+
+  .employee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 12px;
+  }
+
+  /* ── EMPLOYEE CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 20px;
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    border-radius: 10px 0 0 10px;
+  }
+
+  .card.status-tracking::before { background: var(--green); }
+  .card.status-idle::before { background: var(--amber); }
+  .card.status-out::before { background: var(--red); opacity: 0.5; }
+
+  .card.status-out {
+    opacity: 0.5;
+    background: var(--bg);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .employee-name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+
+  .status-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .badge-tracking {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid var(--green-border);
+  }
+
+  .badge-idle {
+    background: var(--amber-bg);
+    color: var(--amber);
+    border: 1px solid var(--amber-border);
+  }
+
+  .badge-out {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid var(--red-border);
+  }
+
+  /* Active job section */
+  .active-job {
+    background: var(--surface-raised);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .job-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .job-wo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .job-detail {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .job-detail span {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .job-elapsed {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    margin-top: 6px;
+  }
+
+  /* Card metrics row */
+  .card-metrics {
+    display: flex;
+    gap: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .metric-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .metric-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Clock in/out time */
+  .punch-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .punch-time span {
+    color: var(--text-dim);
+  }
+
+  /* No active job message */
+  .no-job-msg {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 8px 0;
+  }
+
+  /* ── WO BREAKDOWN ── */
+  .wo-breakdown {
+    margin-bottom: 12px;
+  }
+
+  .wo-breakdown-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .wo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 12px;
+  }
+
+  .wo-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    min-width: 0;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .wo-hours {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 600;
+    flex-shrink: 0;
+    width: 42px;
+    text-align: right;
+  }
+
+  .wo-bar-container {
+    width: 60px;
+    height: 6px;
+    background: var(--border-subtle);
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .wo-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .wo-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    width: 36px;
+    text-align: right;
+  }
+
+  /* ── TODAY'S ENTRIES (expandable) ── */
+  .entries-toggle {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 4px 0;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s;
+    text-align: left;
+  }
+
+  .entries-toggle:hover { color: var(--accent); }
+
+  .entries-list {
+    display: none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-subtle);
+  }
+
+  .entries-list.open { display: block; }
+
+  .entry-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+    font-size: 12px;
+  }
+
+  .entry-wo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 12px;
+  }
+
+  .entry-hours {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .entry-active {
+    color: var(--green);
+  }
+
+  /* ── LOADING / ERROR ── */
+  .state-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--text-muted);
+  }
+
+  .state-message .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-box {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    border-radius: 8px;
+    padding: 16px 24px;
+    margin: 24px 32px;
+    color: var(--red);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .header { padding: 16px; }
+    .summary-bar { padding: 12px 16px; flex-wrap: wrap; }
+    .grid-container { padding: 16px; }
+    .employee-grid { grid-template-columns: 1fr; }
+    .summary-stat { min-width: calc(50% - 4px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">TRAXIS<span>.</span></div>
+    <div class="header-divider"></div>
+    <div class="header-title">Time Tracking Status</div>
+  </div>
+  <div class="header-right">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="last-update" id="lastUpdate">Connecting...</span>
+    </div>
+    <button class="refresh-btn" onclick="forceRefresh()">Refresh</button>
+    <div class="clock" id="clock"></div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary-bar" id="summaryBar">
+  <div class="summary-stat green">
+    <div class="summary-value" id="countTracking">-</div>
+    <div class="summary-label">Tracking</div>
+  </div>
+  <div class="summary-stat amber">
+    <div class="summary-value" id="countIdle">-</div>
+    <div class="summary-label">Clocked In / Idle</div>
+  </div>
+  <div class="summary-stat red">
+    <div class="summary-value" id="countOut">-</div>
+    <div class="summary-label">Clocked Out</div>
+  </div>
+  <div class="summary-stat neutral">
+    <div class="summary-value" id="totalHours">-</div>
+    <div class="summary-label">Total Shop Hours</div>
+  </div>
+  <div class="summary-stat neutral">
+    <div class="summary-value" id="avgCoverage">-</div>
+    <div class="summary-label">Avg Coverage</div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="grid-container">
+  <div id="content">
+    <div class="state-message">
+      <div class="spinner"></div>
+      <div>Connecting to ProShop...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const POLL_MS = 15000; // Refresh dashboard every 15s (backend polls ProShop every 30s)
+
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours();
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  document.getElementById('clock').textContent = `${h12}:${m} ${ampm}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Data fetch ──
+async function fetchStatus() {
+  try {
+    const resp = await fetch('/api/status');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    renderDashboard(data);
+  } catch (err) {
+    document.getElementById('statusDot').className = 'status-dot error';
+    document.getElementById('lastUpdate').textContent = 'Connection error';
+    console.error('Fetch error:', err);
+  }
+}
+
+async function forceRefresh() {
+  try {
+    await fetch('/api/refresh', { method: 'POST' });
+    // Wait a moment for backend to start refreshing, then fetch
+    setTimeout(fetchStatus, 2000);
+  } catch (e) {
+    console.error('Refresh error:', e);
+  }
+}
+
+// ── Render ──
+function renderDashboard(data) {
+  const employees = data.employees || [];
+  const dot = document.getElementById('statusDot');
+  const updateEl = document.getElementById('lastUpdate');
+
+  // Update connection status
+  if (data.error) {
+    dot.className = 'status-dot error';
+    updateEl.textContent = 'Error: ' + data.error;
+  } else if (data.lastUpdate) {
+    dot.className = 'status-dot';
+    const t = new Date(data.lastUpdate);
+    updateEl.textContent = `Updated ${t.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', second:'2-digit'})}`;
+  }
+
+  if (employees.length === 0 && !data.error) {
+    document.getElementById('content').innerHTML = `
+      <div class="state-message">
+        <div class="spinner"></div>
+        <div>Loading employee data...</div>
+      </div>`;
+    return;
+  }
+
+  if (employees.length === 0 && data.error) {
+    document.getElementById('content').innerHTML = `
+      <div class="error-box">${data.error}</div>`;
+    return;
+  }
+
+  // Categorize
+  let tracking = [], idle = [], out = [];
+  let totalHours = 0;
+
+  employees.forEach(e => {
+    totalHours += e.totalHoursToday || 0;
+    if (e.clockedIn && e.trackingActive) {
+      tracking.push(e);
+    } else if (e.clockedIn) {
+      idle.push(e);
+    } else {
+      out.push(e);
+    }
+  });
+
+  // Avg coverage (only for clocked-in employees with clocked hours)
+  const clockedInEmps = [...tracking, ...idle];
+  const withCoverage = clockedInEmps.filter(e => e.clockedHours > 0);
+  const avgCov = withCoverage.length > 0
+    ? withCoverage.reduce((s, e) => s + (e.coveragePercent || 0), 0) / withCoverage.length
+    : 0;
+
+  // Summary counts
+  document.getElementById('countTracking').textContent = tracking.length;
+  document.getElementById('countIdle').textContent = idle.length;
+  document.getElementById('countOut').textContent = out.length;
+  document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+  document.getElementById('avgCoverage').textContent = avgCov > 0 ? avgCov.toFixed(0) + '%' : '-';
+
+  // Build cards: tracking first, then idle, then out
+  const ordered = [...tracking, ...idle, ...out];
+  const grid = document.createElement('div');
+  grid.className = 'employee-grid';
+
+  ordered.forEach(emp => {
+    grid.appendChild(createCard(emp));
+  });
+
+  document.getElementById('content').innerHTML = '';
+  document.getElementById('content').appendChild(grid);
+}
+
+function createCard(emp) {
+  const card = document.createElement('div');
+
+  let statusClass, badgeClass, badgeText;
+  if (emp.clockedIn && emp.trackingActive) {
+    statusClass = 'status-tracking';
+    badgeClass = 'badge-tracking';
+    badgeText = 'Tracking';
+  } else if (emp.clockedIn) {
+    statusClass = 'status-idle';
+    badgeClass = 'badge-idle';
+    badgeText = 'Idle';
+  } else {
+    statusClass = 'status-out';
+    badgeClass = 'badge-out';
+    badgeText = 'Out';
+  }
+
+  card.className = `card ${statusClass}`;
+
+  // Format clock punches (show all for the day)
+  let punchTimeHtml = '';
+  const punches = emp.clockPunches || [];
+  if (punches.length > 0) {
+    const parts = punches.map(p => {
+      const t = new Date(p.time);
+      const ts = t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const label = p.inOrOut === 'in' ? 'In' : 'Out';
+      return `${label}: <span>${ts}</span>`;
+    });
+    punchTimeHtml = `<div class="punch-time">${parts.join(' · ')}</div>`;
+  } else if (emp.lastPunchTime) {
+    const pt = new Date(emp.lastPunchTime);
+    const timeStr = pt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const action = emp.clockedIn ? 'Clocked in' : 'Clocked out';
+    punchTimeHtml = `<div class="punch-time">${action} <span>${timeStr}</span></div>`;
+  }
+
+  // Today's entries
+  const entries = emp.todayEntries || [];
+
+  // Active job or most recent entry
+  let activeJobHtml = '';
+  if (emp.activeJob) {
+    const job = emp.activeJob;
+    const elapsed = formatHours(job.elapsedHours);
+    const opLine = job.operationNumber ? `Op ${job.operationNumber}` : '';
+    const cellLine = job.workCell ? ` · ${job.workCell}` : '';
+    const doingLine = job.spentDoing ? `<div class="job-detail">Doing: <span>${escHtml(job.spentDoing.trim())}</span></div>` : '';
+
+    activeJobHtml = `
+      <div class="active-job">
+        <div class="job-label">Active Job</div>
+        <div class="job-wo">${escHtml(job.workOrder || 'Unknown WO')}</div>
+        ${opLine || cellLine ? `<div class="job-detail">${opLine}${cellLine}</div>` : ''}
+        ${doingLine}
+        <div class="job-elapsed">⏱ ${elapsed} on this op</div>
+      </div>`;
+  } else if (entries.length > 0) {
+    // Show most recent entry as "Last Job"
+    const last = entries[entries.length - 1];
+    const opLine = last.operation ? `Op ${last.operation}` : '';
+    const cellLine = last.workCell ? ` · ${last.workCell}` : '';
+    const doingLine = last.spentDoing ? `<div class="job-detail">Doing: <span>${escHtml(last.spentDoing.trim())}</span></div>` : '';
+
+    activeJobHtml = `
+      <div class="active-job">
+        <div class="job-label">Last Job</div>
+        <div class="job-wo">${escHtml(last.workOrder || 'Unknown WO')}</div>
+        ${opLine || cellLine ? `<div class="job-detail">${opLine}${cellLine}</div>` : ''}
+        ${doingLine}
+      </div>`;
+  } else if (emp.clockedIn) {
+    activeJobHtml = `<div class="no-job-msg">No time tracking entries today</div>`;
+  }
+
+  // WO breakdown
+  let woBreakdownHtml = '';
+  const breakdown = emp.woBreakdown || [];
+  if (breakdown.length > 0) {
+    const rows = breakdown.map(wo => {
+      return `<div class="wo-row">
+        <div class="wo-name">${escHtml(wo.workOrder)}</div>
+        <div class="wo-hours">${formatHours(wo.totalHours)}</div>
+        <div class="wo-bar-container"><div class="wo-bar-fill" style="width:${wo.percent}%"></div></div>
+        <div class="wo-pct">${wo.percent.toFixed(0)}%</div>
+      </div>`;
+    }).join('');
+    woBreakdownHtml = `
+      <div class="wo-breakdown">
+        <div class="wo-breakdown-label">Time by Work Order</div>
+        ${rows}
+      </div>`;
+  }
+
+  // Today's entries toggle
+  let entriesHtml = '';
+  if (entries.length > 0) {
+    const entryId = `entries-${emp.id}`;
+    const entryRows = entries.map(e => {
+      const wo = e.workOrder || 'Unknown';
+      const hrs = formatHours(e.hours);
+      const activeClass = e.active ? ' entry-active' : '';
+      return `<div class="entry-row">
+        <div class="entry-wo">${escHtml(wo)}${e.operation ? ' · Op ' + e.operation : ''}</div>
+        <div class="entry-hours${activeClass}">${hrs}</div>
+      </div>`;
+    }).join('');
+
+    entriesHtml = `
+      <button class="entries-toggle" onclick="toggleEntries('${entryId}', this)">
+        ▸ ${entries.length} entr${entries.length === 1 ? 'y' : 'ies'} today
+      </button>
+      <div class="entries-list" id="${entryId}">${entryRows}</div>`;
+  }
+
+  // Coverage display
+  const covPct = emp.coveragePercent || 0;
+  const covColor = covPct >= 80 ? 'var(--green)' : covPct >= 50 ? 'var(--amber)' : 'var(--red)';
+
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="employee-name">${escHtml(emp.firstName)} ${escHtml(emp.lastName)}</div>
+      <div class="status-badge ${badgeClass}">${badgeText}</div>
+    </div>
+    ${punchTimeHtml}
+    ${activeJobHtml}
+    ${woBreakdownHtml}
+    <div class="card-metrics">
+      <div class="metric">
+        <div class="metric-value">${formatHours(emp.clockedHours || 0)}</div>
+        <div class="metric-label">Clocked</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">${formatHours(emp.totalHoursToday)}</div>
+        <div class="metric-label">Tracked</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" style="color:${covColor}">${emp.clockedHours > 0 ? covPct.toFixed(0) + '%' : '-'}</div>
+        <div class="metric-label">Coverage</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">${entries.length}</div>
+        <div class="metric-label">Entries</div>
+      </div>
+    </div>
+    ${entriesHtml}
+  `;
+
+  return card;
+}
+
+function toggleEntries(id, btn) {
+  const el = document.getElementById(id);
+  if (el.classList.contains('open')) {
+    el.classList.remove('open');
+    btn.textContent = btn.textContent.replace('▾', '▸');
+  } else {
+    el.classList.add('open');
+    btn.textContent = btn.textContent.replace('▸', '▾');
+  }
+}
+
+function formatHours(h) {
+  if (h === undefined || h === null) return '0.0h';
+  return h.toFixed(1) + 'h';
+}
+
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── Init ──
+fetchStatus();
+setInterval(fetchStatus, POLL_MS);
+</script>
+</body>
+</html>
