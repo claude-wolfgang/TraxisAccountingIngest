@@ -190,6 +190,21 @@ SERVICES_CONFIG = {
         "max_degraded": 10,
         "db_path": str(TOOL_KIOSK_DIR / "data" / "tooling.db"),
     },
+    "InventorySync": {
+        "display_name": "Tool Inventory Sync",
+        "service_type": "process",
+        "check_type": "database",
+        "health_url": None,
+        "port": None,
+        "start_cmd": [PYTHONW_EXE, "inventory_sync.py", "--loop", "3600"],
+        "working_dir": str(TOOL_KIOSK_DIR),
+        "env": {"PROSHOP_CLIENT_SECRET": "8A32CD4983CA93F9BE1FF0E651B9CDE9A28F55C66B74E1CDF5D6887EFE85D5B6"},
+        "auto_start": True,
+        "restart_cooldown": 300,
+        "max_failures": 3,
+        "max_degraded": 10,
+        "db_path": str(TOOL_KIOSK_DIR / "data" / "tooling.db"),
+    },
     "LabelPrintService": {
         "display_name": "Label Print Service (10.1.1.242)",
         "service_type": "remote",
@@ -461,6 +476,39 @@ def validate_tool_usage_rollup(config):
     return "healthy", f"{open_segs} open segments, {active_assigns} active assignments"
 
 
+def validate_inventory_sync(config):
+    """Check InventorySync by inspecting log freshness and sync table state."""
+    log_path = Path(config.get("working_dir", "")) / "data" / "logs" / "inventory_sync.log"
+
+    # 1. Check log file freshness (should update every ~1 hour)
+    if log_path.exists():
+        age = time.time() - log_path.stat().st_mtime
+        if age > 7200:  # 2 hours = 2 missed cycles
+            return "degraded", f"Log file stale ({int(age // 60)}m ago)"
+    else:
+        return "degraded", "Log file not found"
+
+    # 2. Check sync_log table
+    db_path = config.get("db_path")
+    if not db_path or not Path(db_path).exists():
+        return "degraded", "tooling.db not found"
+
+    try:
+        conn = sqlite3.connect(db_path, timeout=5)
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM inventory_sync_log")
+        synced = cur.fetchone()[0]
+        cur.execute("SELECT MAX(pushed_at) FROM inventory_sync_log")
+        last_push = cur.fetchone()[0] or "never"
+        conn.close()
+    except Exception as e:
+        if "no such table" in str(e):
+            return "healthy", "Not yet run (no sync table)"
+        return "degraded", f"DB error: {e}"
+
+    return "healthy", f"{synced} tools synced, last push: {last_push}"
+
+
 # Map service name -> validator function
 # For "http" check_type: validator receives parsed JSON response
 # For "database" check_type: validator receives the service config dict
@@ -472,6 +520,7 @@ VALIDATORS = {
     "MessageNotifier": validate_message_notifier,
     "ToolAssemblyKiosk": validate_tool_assembly_kiosk,
     "ToolUsageRollup": validate_tool_usage_rollup,
+    "InventorySync": validate_inventory_sync,
     "LabelPrintService": validate_label_print_service,
     "AirCompressor": validate_air_compressor,
     "ShopScheduler": validate_shop_scheduler,

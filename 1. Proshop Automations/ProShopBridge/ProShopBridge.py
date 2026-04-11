@@ -1409,14 +1409,25 @@ def push_written_description_via_clipboard(part_number, op_number, html_content)
     customer = part_number.split("-")[0] if "-" in part_number else part_number
     url = (f"https://{PROSHOP_HOST}/procnc/parts/{customer}/{part_number}"
            f"?formName=writtenDescription&opId={op_number}"
-           f"#psBridge={marker_id}&bridgePort={port}")
+           f"&psBridge={marker_id}&bridgePort={port}")
     log(f"Opening browser: {url}")
+    # Find Chrome and open in a new window to avoid tab reuse
+    chrome_paths = [
+        os.path.join(os.environ.get("PROGRAMFILES", ""), "Google", "Chrome", "Application", "chrome.exe"),
+        os.path.join(os.environ.get("PROGRAMFILES(X86)", ""), "Google", "Chrome", "Application", "chrome.exe"),
+        os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chrome", "Application", "chrome.exe"),
+    ]
+    chrome_exe = next((p for p in chrome_paths if os.path.exists(p)), None)
     try:
-        # Must quote URL — cmd.exe treats & as command separator
-        subprocess.Popen(f'cmd /c start "" "{url}"',
-                         creationflags=0x08000000)
+        if chrome_exe:
+            subprocess.Popen([chrome_exe, "--new-window", url],
+                             creationflags=0x08000000)
+        else:
+            # Fallback: quote URL for cmd.exe (& is a command separator)
+            subprocess.Popen(f'cmd /c start "" "{url}"',
+                             creationflags=0x08000000)
     except Exception as e:
-        log(f"subprocess browser open failed: {e}")
+        log(f"Browser open failed: {e}")
         try:
             os.startfile(url)
         except Exception as e2:
