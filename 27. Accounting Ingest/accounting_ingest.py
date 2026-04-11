@@ -235,15 +235,25 @@ class GraphClient:
         return {"Authorization": f"Bearer {self._get_token()}"}
 
     def get_unread_with_attachments(self):
+        """Fetch recent emails with attachments, paginating to get all."""
         url = GRAPH_MESSAGES_URL.format(mailbox=ENV["GRAPH_MAILBOX"])
+        # Only look back 30 days — old emails are already in the queue
+        cutoff = (datetime.now(timezone.utc) - __import__('datetime').timedelta(days=30)).strftime("%Y-%m-%dT00:00:00Z")
+        all_msgs = []
         params = {
-            "$filter": "hasAttachments eq true and receivedDateTime ge 2026-03-15T00:00:00Z",
+            "$filter": f"hasAttachments eq true and receivedDateTime ge {cutoff}",
             "$select": "id,subject,from,receivedDateTime,hasAttachments",
             "$top": "50",
         }
-        r = requests.get(url, headers=self._headers(), params=params)
-        r.raise_for_status()
-        return r.json().get("value", [])
+        while url:
+            r = requests.get(url, headers=self._headers(), params=params)
+            r.raise_for_status()
+            data = r.json()
+            all_msgs.extend(data.get("value", []))
+            # Follow @odata.nextLink for pagination
+            url = data.get("@odata.nextLink")
+            params = None  # nextLink includes params already
+        return all_msgs
 
     def get_attachments(self, msg_id):
         url = GRAPH_ATTACHMENTS_URL.format(
@@ -824,9 +834,12 @@ class EmailPoller:
             self._process_message(msg, subject, sender, con)
         con.close()
 
+    # Traxis addresses that forward external accounting docs — bypass internal filter
+    WHITELISTED_INTERNAL = {"tom@traxismfg.com"}
+
     def _process_message(self, msg, subject, sender, con):
-        # Skip internal Traxis emails
-        if sender.lower().endswith("@traxismfg.com"):
+        # Skip internal Traxis emails (except whitelisted forwarders)
+        if sender.lower().endswith("@traxismfg.com") and sender.lower() not in self.WHITELISTED_INTERNAL:
             self.log(f"Skipping internal email from {sender}")
             return
         # Skip blocked senders
@@ -836,12 +849,24 @@ class EmailPoller:
 
         attachments = self.graph.get_attachments(msg["id"])
         for att in attachments:
+            # Skip inline/embedded content (logos, signatures, tracking pixels)
+            if att.get("isInline"):
+                continue
             name = att.get("name", "")
-            # Email attachments: PDFs only — images from email are not accounting docs
+            content_type = (att.get("contentType") or "").lower()
+            # Skip images regardless of where they appear
+            if content_type.startswith("image/"):
+                continue
+            if name.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp", ".ico")):
+                continue
+            # Email attachments: PDFs only
             if not name.lower().endswith(".pdf"):
                 continue
             content_bytes = att.get("contentBytes")
             if not content_bytes:
+                continue
+            # Skip tiny files (< 5KB — likely blank pages)
+            if len(content_bytes) < 6800:  # ~5KB after base64
                 continue
             # Save to email folder
             safe_name = re.sub(r'[^\w\.\-]', '_', name)
