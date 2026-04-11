@@ -325,7 +325,7 @@ class ProShopClient:
     def add_packing_slip(self, data):
         gql = """
         mutation AddPackingSlip($data: AddPackingSlipInput!) {
-          addPackingSlip(data: $data) { packingSlipId proshopUrl }
+          addPackingSlip(data: $data) { id proshopUrl }
         }"""
         return self.query(gql, {"data": data})
 
@@ -339,7 +339,7 @@ class ProShopClient:
     def add_purchase_order(self, data):
         gql = """
         mutation AddPurchaseOrder($data: AddPurchaseOrderInput!) {
-          addPurchaseOrder(data: $data) { purchaseOrderId proshopUrl }
+          addPurchaseOrder(data: $data) { id proshopUrl }
         }"""
         return self.query(gql, {"data": data})
 
@@ -951,7 +951,7 @@ class ProShopUploader:
         elif doc_type == "PACKING_SLIP":
             result = self._upload_packing_slip(data, contact_name)
             rec = result.get("addPackingSlip", {})
-            return rec.get("packingSlipId"), rec.get("proshopUrl")
+            return rec.get("id"), rec.get("proshopUrl")
 
         elif doc_type == "CUSTOMER_PO":
             result = self._upload_customer_po(data, contact_name)
@@ -961,7 +961,7 @@ class ProShopUploader:
         elif doc_type == "VENDOR_PO":
             result = self._upload_purchase_order(data, contact_name)
             rec = result.get("addPurchaseOrder", {})
-            return rec.get("purchaseOrderId"), rec.get("proshopUrl")
+            return rec.get("id"), rec.get("proshopUrl")
 
         elif doc_type == "CUSTOMER_QUOTE":
             result = self._upload_quote(data, contact_name)
@@ -983,8 +983,37 @@ class ProShopUploader:
             payload["dueDate"] = data["due_date"]
         if data.get("notes"):
             payload["note"] = data["notes"]
+        # Line items
+        items = self._build_bill_items(data.get("line_items", []))
+        if items:
+            payload["items"] = items
         payload["year"] = (data.get("invoice_date") or "")[:4] or str(datetime.now().year)
         return self.proshop.add_bill(payload)
+
+    def _build_bill_items(self, line_items):
+        """Convert extracted line items to AddBillItemsDataInput format."""
+        items = []
+        for li in line_items:
+            item = {}
+            if li.get("description"):
+                item["partDescription"] = li["description"]
+            if li.get("part_number"):
+                item["part"] = li["part_number"]
+            if li.get("quantity"):
+                try:
+                    item["quantity"] = float(str(li["quantity"]).replace(",", ""))
+                except (ValueError, TypeError):
+                    pass
+            if li.get("unit_price"):
+                try:
+                    item["pricePer"] = float(str(li["unit_price"]).replace(",", "").replace("$", ""))
+                except (ValueError, TypeError):
+                    pass
+            if li.get("po_number"):
+                item["purchaseOrder"] = li["po_number"]
+            if item:
+                items.append(item)
+        return items
 
     def _upload_packing_slip(self, data, contact_name):
         payload = {}
@@ -992,10 +1021,53 @@ class ProShopUploader:
             payload["soldTo"] = contact_name
         if data.get("carrier"):
             payload["shipVia"] = data["carrier"]
+        if data.get("po_number"):
+            payload["purchaseOrder"] = data["po_number"]
+        if data.get("packing_slip_number"):
+            payload["salesOrder"] = data["packing_slip_number"]
+        if data.get("tracking_number"):
+            payload["specialInstructionRowOne"] = f"Tracking: {data['tracking_number']}"
         if data.get("notes"):
             payload["specialInstructions"] = data["notes"]
+        # Line items
+        items = self._build_ps_items(data.get("line_items", []))
+        if items:
+            payload["itemsShipped"] = items
         payload["year"] = str(datetime.now().year)
         return self.proshop.add_packing_slip(payload)
+
+    def _build_ps_items(self, line_items):
+        """Convert extracted line items to packing slip itemsShipped format."""
+        items = []
+        for li in line_items:
+            item = {}
+            if li.get("part_number"):
+                item["itemNumber"] = li["part_number"]
+            if li.get("description"):
+                item["partDescription"] = li["description"]
+            if li.get("quantity_shipped"):
+                try:
+                    item["quantity"] = float(str(li["quantity_shipped"]).replace(",", ""))
+                except (ValueError, TypeError):
+                    pass
+            elif li.get("quantity"):
+                try:
+                    item["quantity"] = float(str(li["quantity"]).replace(",", ""))
+                except (ValueError, TypeError):
+                    pass
+            if li.get("quantity_ordered"):
+                try:
+                    item["qtyOrdered"] = int(float(str(li["quantity_ordered"]).replace(",", "")))
+                except (ValueError, TypeError):
+                    pass
+            if li.get("unit_price"):
+                try:
+                    item["pricePer"] = float(str(li["unit_price"]).replace(",", "").replace("$", ""))
+                except (ValueError, TypeError):
+                    pass
+            if item:
+                items.append(item)
+        return items
 
     def _upload_customer_po(self, data, contact_name):
         payload = {}
@@ -1005,26 +1077,82 @@ class ProShopUploader:
             payload["clientPONumber"] = data["po_number"]
         if data.get("po_date"):
             payload["dateEntered"] = data["po_date"]
+        if data.get("buyer_name"):
+            payload["buyer"] = data["buyer_name"]
         if data.get("payment_terms"):
-            payload["paymentTerms"] = data["payment_terms"]
+            terms = data["payment_terms"]
+            # Extract discount days if present (e.g., "2% 10 Net 30")
+            net_match = re.search(r'[Nn]et\s*(\d+)', terms)
+            if net_match:
+                try:
+                    payload["termsDiscountDays"] = int(net_match.group(1))
+                except ValueError:
+                    pass
         if data.get("notes"):
             payload["notes"] = data["notes"]
+        if data.get("ship_to"):
+            payload["fob"] = data["ship_to"]
         payload["year"] = (data.get("po_date") or "")[:4] or str(datetime.now().year)
         return self.proshop.add_customer_po(payload)
 
     def _upload_purchase_order(self, data, contact_name):
+        """Upload vendor quote/PO to ProShop as a Purchase Order."""
         payload = {"poType": "Standard"}
         if contact_name:
             payload["supplier"] = contact_name
+        if data.get("quote_date") or data.get("po_date"):
+            payload["date"] = data.get("quote_date") or data.get("po_date")
+        if data.get("quote_number") or data.get("po_number"):
+            payload["confirmationNumber"] = data.get("quote_number") or data.get("po_number")
+        if data.get("lead_time"):
+            payload["remarks"] = f"Lead time: {data['lead_time']}"
         if data.get("notes"):
-            payload["remarks"] = data["notes"]
-        payload["year"] = (data.get("quote_date") or "")[:4] or str(datetime.now().year)
+            remarks = payload.get("remarks", "")
+            payload["remarks"] = f"{remarks}\n{data['notes']}".strip()
+        if data.get("payment_terms"):
+            payload["specialInstructions"] = data["payment_terms"]
+        # Line items
+        po_items = self._build_po_items(data.get("line_items", []))
+        if po_items:
+            payload["poItems"] = po_items
+        payload["year"] = (data.get("quote_date") or data.get("po_date") or "")[:4] or str(datetime.now().year)
         return self.proshop.add_purchase_order(payload)
+
+    def _build_po_items(self, line_items):
+        """Convert extracted line items to PO poItems format."""
+        items = []
+        for li in line_items:
+            item = {}
+            if li.get("part_number"):
+                item["itemNumber"] = li["part_number"]
+            if li.get("description"):
+                item["description"] = li["description"]
+            if li.get("quantity"):
+                item["quantity"] = str(li["quantity"])
+            if li.get("unit_price"):
+                try:
+                    item["costPer"] = float(str(li["unit_price"]).replace(",", "").replace("$", ""))
+                except (ValueError, TypeError):
+                    pass
+            if li.get("extended_price"):
+                try:
+                    item["total"] = float(str(li["extended_price"]).replace(",", "").replace("$", ""))
+                except (ValueError, TypeError):
+                    pass
+            if item:
+                items.append(item)
+        return items
 
     def _upload_quote(self, data, contact_name):
         payload = {}
         if contact_name:
             payload["client"] = contact_name
+        if data.get("quote_date"):
+            payload["date"] = data["quote_date"]
+        if data.get("valid_until"):
+            payload["dueDate"] = data["valid_until"]
+        if data.get("contact_name"):
+            payload["contact"] = data["contact_name"]
         if data.get("notes"):
             payload["notes"] = data["notes"]
         payload["year"] = (data.get("quote_date") or "")[:4] or str(datetime.now().year)
