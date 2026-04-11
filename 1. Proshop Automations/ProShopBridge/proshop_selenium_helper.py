@@ -17,16 +17,149 @@ Usage:
 
 Reads PROSHOP_USERNAME and PROSHOP_PASSWORD from ~/.traxis.env
 
-Version: 2.0
+Version: 2.1
 """
 
 import sys
 import os
 import time
 import argparse
+import logging
+import logging.handlers
+import glob as globmod
 
 BASE_URL = "https://traxismfg.adionsystems.com"
 
+# Module-level logger — configured in _setup_logging()
+_log = logging.getLogger("selenium_helper")
+
+
+# ===========================================================================
+# Logging Setup
+# ===========================================================================
+
+def _setup_logging():
+    """Configure dual logging: stdout (for parent process) + rotating file."""
+    log_dir = os.path.join(os.path.dirname(__file__), "logs")
+    try:
+        os.makedirs(log_dir, exist_ok=True)
+    except Exception:
+        pass
+
+    _log.setLevel(logging.DEBUG)
+    _log.propagate = False
+
+    # Stdout handler — INFO+ only, STATUS: prefix for parent process parsing
+    stdout_h = logging.StreamHandler(sys.stdout)
+    stdout_h.setLevel(logging.INFO)
+    stdout_h.setFormatter(logging.Formatter("STATUS: %(message)s"))
+    _log.addHandler(stdout_h)
+
+    # File handler — DEBUG+, full detail
+    log_file = os.path.join(log_dir, "selenium.log")
+    try:
+        file_h = logging.handlers.RotatingFileHandler(
+            log_file, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8")
+        file_h.setLevel(logging.DEBUG)
+        file_h.setFormatter(logging.Formatter(
+            "%(asctime)s | %(levelname)-8s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+        _log.addHandler(file_h)
+    except Exception as e:
+        print(f"WARNING: Could not create log file: {e}", file=sys.stderr)
+
+    # Cleanup old failure screenshots (>7 days)
+    try:
+        cutoff = time.time() - 7 * 86400
+        for png in globmod.glob(os.path.join(log_dir, "fail_*.png")):
+            if os.path.getmtime(png) < cutoff:
+                os.remove(png)
+    except Exception:
+        pass
+
+
+def _dump_page_state(driver, label):
+    """Capture full browser state for diagnosing failures.
+    Saves screenshot + logs URL, title, frames, buttons, CKEditor status, console errors."""
+    _log.error(f"=== PAGE STATE DUMP: {label} ===")
+
+    # URL and title
+    try:
+        _log.error(f"  URL: {driver.current_url}")
+        _log.error(f"  Title: {driver.title}")
+    except Exception as e:
+        _log.error(f"  Could not read URL/title: {e}")
+
+    # Frame inventory
+    try:
+        from selenium.webdriver.common.by import By
+        frames = driver.find_elements(By.TAG_NAME, "frame")
+        iframes = driver.find_elements(By.TAG_NAME, "iframe")
+        _log.error(f"  Frames: {len(frames)} <frame>, {len(iframes)} <iframe>")
+    except Exception as e:
+        _log.error(f"  Frame check error: {e}")
+
+    # Button inventory
+    try:
+        from selenium.webdriver.common.by import By
+        buttons = driver.find_elements(By.TAG_NAME, "button")
+        visible_buttons = []
+        for btn in buttons:
+            try:
+                if btn.is_displayed():
+                    visible_buttons.append(btn.text.strip() or "(empty)")
+            except Exception:
+                pass
+        _log.error(f"  Visible buttons ({len(visible_buttons)}): {visible_buttons}")
+    except Exception as e:
+        _log.error(f"  Button inventory error: {e}")
+
+    # CKEditor status
+    try:
+        ck_info = driver.execute_script("""
+            if (typeof CKEDITOR === 'undefined') return {present: false};
+            if (!CKEDITOR.instances) return {present: true, instances: 0};
+            var names = Object.keys(CKEDITOR.instances);
+            var details = [];
+            for (var i = 0; i < names.length; i++) {
+                var inst = CKEDITOR.instances[names[i]];
+                details.push({name: names[i], status: inst.status, dataLen: (inst.getData() || '').length});
+            }
+            return {present: true, instances: names.length, details: details};
+        """)
+        _log.error(f"  CKEditor: {ck_info}")
+    except Exception as e:
+        _log.error(f"  CKEditor check error: {e}")
+
+    # Chrome console errors
+    try:
+        browser_logs = driver.get_log("browser")
+        errors = [e for e in browser_logs if e.get("level") in ("SEVERE", "WARNING")]
+        if errors:
+            _log.error(f"  Chrome console errors ({len(errors)}):")
+            for entry in errors[:20]:
+                _log.error(f"    [{entry.get('level')}] {entry.get('message', '')[:200]}")
+        else:
+            _log.error(f"  Chrome console: no errors ({len(browser_logs)} total entries)")
+    except Exception as e:
+        _log.error(f"  Console log capture error: {e}")
+
+    # Screenshot
+    try:
+        log_dir = os.path.join(os.path.dirname(__file__), "logs")
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        safe_label = label.replace(" ", "_").replace("/", "_")[:40]
+        screenshot_path = os.path.join(log_dir, f"fail_{safe_label}_{timestamp}.png")
+        driver.save_screenshot(screenshot_path)
+        _log.error(f"  Screenshot: {screenshot_path}")
+    except Exception as e:
+        _log.error(f"  Screenshot error: {e}")
+
+    _log.error(f"=== END PAGE STATE DUMP ===")
+
+
+# ===========================================================================
+# Helpers
+# ===========================================================================
 
 def load_env():
     """Read key=value pairs from ~/.traxis.env."""
@@ -42,10 +175,9 @@ def load_env():
     return creds
 
 
-def status(msg):
-    """Print a status message (read by parent process)."""
-    print(f"STATUS: {msg}", flush=True)
-
+# ===========================================================================
+# Main
+# ===========================================================================
 
 def main():
     parser = argparse.ArgumentParser(description="ProShop Selenium helper for sequence detail and written description pages")
@@ -57,14 +189,18 @@ def main():
     parser.add_argument("--visible", action="store_true", help="Show browser window (for debugging)")
     args = parser.parse_args()
 
+    _setup_logging()
+    _log.info(f"=== Started: mode={args.mode}, part={args.part_number}, op={args.op_number}, visible={args.visible} ===")
+
     # For written-description mode, read HTML from stdin
     html_content = None
     if args.mode == "written-description":
         html_content = sys.stdin.read()
         if not html_content.strip():
+            _log.error("No HTML content provided on stdin")
             print("ERROR: No HTML content provided on stdin")
             sys.exit(1)
-        status(f"Read {len(html_content)} bytes of HTML from stdin")
+        _log.info(f"Read {len(html_content)} bytes of HTML from stdin")
 
     driver = _setup_and_login(args)
     try:
@@ -73,6 +209,8 @@ def main():
         elif args.mode == "written-description":
             _run_written_description(driver, args, html_content)
     except Exception as e:
+        _log.error(f"Unhandled exception: {e}", exc_info=True)
+        _dump_page_state(driver, "unhandled_exception")
         print(f"ERROR: {e}")
         sys.exit(1)
     finally:
@@ -90,13 +228,15 @@ def _setup_and_login(args):
     username = creds.get("PROSHOP_USERNAME", "")
     password = creds.get("PROSHOP_PASSWORD", "")
     if not username or not password:
+        _log.error("PROSHOP_USERNAME or PROSHOP_PASSWORD not found in ~/.traxis.env")
         print("ERROR: PROSHOP_USERNAME or PROSHOP_PASSWORD not found in ~/.traxis.env")
         sys.exit(1)
 
     try:
         from selenium import webdriver
-        from selenium.common.exceptions import TimeoutException, NoSuchElementException
+        from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
     except ImportError:
+        _log.error("selenium not installed")
         print("ERROR: selenium not installed. Run: pip install selenium")
         sys.exit(1)
 
@@ -107,13 +247,37 @@ def _setup_and_login(args):
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--disable-gpu")
+    # Enable browser logging for console capture
+    options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
 
-    status("Launching Chrome...")
-    driver = webdriver.Chrome(options=options)
+    t0 = time.time()
+    _log.info("Launching Chrome...")
+    try:
+        driver = webdriver.Chrome(options=options)
+    except Exception as e:
+        _log.error(f"Chrome launch FAILED: {e}", exc_info=True)
+        print(f"ERROR: Chrome launch failed: {e}")
+        sys.exit(1)
+
+    # Log Chrome + ChromeDriver versions
+    try:
+        caps = driver.capabilities
+        chrome_ver = caps.get("browserVersion", caps.get("version", "unknown"))
+        driver_ver = caps.get("chrome", {}).get("chromedriverVersion", "unknown")
+        if isinstance(driver_ver, str):
+            driver_ver = driver_ver.split(" ")[0]
+        _log.info(f"[chrome] Launched in {time.time() - t0:.1f}s — Chrome {chrome_ver}, ChromeDriver {driver_ver}")
+    except Exception as e:
+        _log.debug(f"Could not read Chrome versions: {e}")
+        _log.info(f"[chrome] Launched in {time.time() - t0:.1f}s")
+
+    # Keep page load timeout short — we use window.stop() + element polling
+    # instead of waiting for slow file-server resources to finish loading.
     driver.set_page_load_timeout(20)
 
     # Login
-    status("Logging in...")
+    t0 = time.time()
+    _log.info("Logging in...")
     _safe_navigate(driver, f"{BASE_URL}/procnc/")
     time.sleep(2)
 
@@ -127,6 +291,8 @@ def _setup_and_login(args):
         (By.CSS_SELECTOR, "input[type='password']"),
     ])
     if not username_field or not password_field:
+        _log.error("Could not find login form fields")
+        _dump_page_state(driver, "login_form_not_found")
         driver.quit()
         print("ERROR: Could not find login form fields")
         sys.exit(1)
@@ -144,6 +310,8 @@ def _setup_and_login(args):
         (By.XPATH, "//input[@value='Login']"),
     ])
     if not submit_btn:
+        _log.error("Could not find login button")
+        _dump_page_state(driver, "login_button_not_found")
         driver.quit()
         print("ERROR: Could not find login button")
         sys.exit(1)
@@ -153,11 +321,13 @@ def _setup_and_login(args):
 
     page_source = driver.page_source.lower()
     if "invalid" in page_source or "incorrect" in page_source:
+        _log.error("Login failed — invalid credentials")
+        _dump_page_state(driver, "login_failed")
         driver.quit()
         print("ERROR: Login failed — invalid credentials")
         sys.exit(1)
 
-    status("Login successful")
+    _log.info(f"[login] Completed in {time.time() - t0:.1f}s")
     return driver
 
 
@@ -166,42 +336,50 @@ def _run_sequence_detail(driver, args):
     customer = args.part_number.split("-")[0] if "-" in args.part_number else args.part_number
     url = (f"{BASE_URL}/procnc/parts/{customer}/{args.part_number}"
            f"?formName=toolDetail&opId={args.op_number}")
-    status("Navigating to sequence details...")
-    _safe_navigate(driver, url)
-    time.sleep(2)
 
-    seq_header = _find_seq_header(driver)
+    t0 = time.time()
+    _log.info("Navigating to sequence details...")
+    _log.debug(f"  URL: {url}")
+    _safe_navigate(driver, url)
+
+    # Poll for the Seq # header instead of fixed sleep
+    seq_header = _wait_for_element(driver, _find_seq_header, timeout=30)
     if not seq_header:
         url2 = (f"{BASE_URL}/procnc/parts/{args.part_number}/{args.part_number}"
                 f"?formName=toolDetail&opId={args.op_number}")
-        status("Trying alternate URL...")
+        _log.info("Trying alternate URL...")
+        _log.debug(f"  URL: {url2}")
         _safe_navigate(driver, url2)
-        time.sleep(2)
-        seq_header = _find_seq_header(driver)
+        seq_header = _wait_for_element(driver, _find_seq_header, timeout=30)
 
     if not seq_header:
+        _log.error("Could not find sequence detail table (no 'Seq #' header)")
+        _dump_page_state(driver, "seq_header_not_found")
         print("ERROR: Could not find sequence detail table (no 'Seq #' header found)")
         sys.exit(1)
 
-    status("Found sequence detail table")
+    _log.info(f"[navigate] Found sequence detail table in {time.time() - t0:.1f}s")
 
-    status("Checking out page...")
+    t0 = time.time()
+    _log.info("Checking out page...")
     if not _checkout_page(driver):
+        _log.error("Could not checkout page for editing")
+        _dump_page_state(driver, "seq_checkout_failed")
         print("ERROR: Could not checkout page for editing")
         sys.exit(1)
-    time.sleep(2)
+    _log.info(f"[checkout] Edit mode in {time.time() - t0:.1f}s")
 
-    status("Sorting rows...")
+    _log.info("Sorting rows...")
     sort_count = _sort_sequence_rows(driver)
-    status(f"Sorted {sort_count} rows")
+    _log.info(f"Sorted {sort_count} rows")
 
-    time.sleep(1)
-    status("Setting G-Code Tool numbers...")
+    _log.info("Setting G-Code Tool numbers...")
     fix_count = _fix_gcode_tool_numbers(driver)
-    status(f"Fixed {fix_count} rows")
+    _log.info(f"Fixed {fix_count} rows")
 
-    time.sleep(1)
+    t0 = time.time()
     _save_changes(driver)
+    _log.info(f"[save] Completed in {time.time() - t0:.1f}s")
 
     print(f"OK: Sequence details updated ({sort_count} sorted, {fix_count} G-Code Tool # set)")
     sys.exit(0)
@@ -212,41 +390,127 @@ def _run_written_description(driver, args, html_content):
     customer = args.part_number.split("-")[0] if "-" in args.part_number else args.part_number
     url = (f"{BASE_URL}/procnc/parts/{customer}/{args.part_number}"
            f"?formName=writtenDescription&opId={args.op_number}")
-    status("Navigating to written description page...")
+
+    t0 = time.time()
+    _log.info("Navigating to written description page...")
+    _log.debug(f"  URL: {url}")
     _safe_navigate(driver, url)
-    time.sleep(3)
+
+    # Poll for CHECKOUT or SAVE button to confirm page loaded
+    def _page_has_action_button(drv):
+        from selenium.webdriver.common.by import By
+        for btn in drv.find_elements(By.TAG_NAME, "button"):
+            try:
+                if btn.is_displayed():
+                    txt = (btn.text or "").upper()
+                    if "CHECKOUT" in txt or "SAVE" in txt:
+                        return btn
+            except Exception:
+                pass
+        return None
+
+    action_btn = _wait_for_element(driver, _page_has_action_button, timeout=45)
+    if not action_btn:
+        _log.error("Page never loaded — no CHECKOUT or SAVE button found")
+        _dump_page_state(driver, "wd_page_not_loaded")
+        print("ERROR: Written description page never loaded")
+        sys.exit(1)
+    _log.info(f"[navigate] Page ready in {time.time() - t0:.1f}s")
 
     # ProShop may use framesets — switch to the content frame if needed
     _switch_to_editor_frame(driver)
 
-    status("Checking out page...")
+    t0 = time.time()
+    _log.info("Checking out page...")
     if not _checkout_page(driver):
+        _log.error("Could not checkout written description page")
+        _dump_page_state(driver, "wd_checkout_failed")
         print("ERROR: Could not checkout written description page")
         sys.exit(1)
-    time.sleep(3)
+    _log.info(f"[checkout] Edit mode in {time.time() - t0:.1f}s")
 
-    status("Waiting for CKEditor...")
-    if not _wait_for_ckeditor(driver, timeout=15):
-        print("ERROR: CKEditor not found or not ready after 15s")
+    t0 = time.time()
+    _log.info("Waiting for CKEditor...")
+    if not _wait_for_ckeditor(driver, timeout=30):
+        _log.error("CKEditor not found or not ready after 30s")
+        _dump_page_state(driver, "ckeditor_timeout")
+        print("ERROR: CKEditor not found or not ready after 30s")
         sys.exit(1)
+    _log.info(f"[ckeditor] Ready after {time.time() - t0:.1f}s")
 
-    status("Setting written description content...")
+    t0 = time.time()
+    _log.info("Setting written description content...")
     if not _set_ckeditor_content(driver, html_content):
+        _log.error("Failed to set CKEditor content")
+        _dump_page_state(driver, "ckeditor_content_failed")
         print("ERROR: Failed to set CKEditor content")
         sys.exit(1)
+    _log.info(f"[content] Set {len(html_content)} bytes in {time.time() - t0:.1f}s")
 
-    time.sleep(1)
+    # Force updateElement to ensure textarea is synced before save
+    driver.execute_script("""
+        if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances) {
+            var names = Object.keys(CKEDITOR.instances);
+            for (var i = 0; i < names.length; i++) {
+                var editor = CKEDITOR.instances[names[i]];
+                if (editor.updateElement) editor.updateElement();
+            }
+        }
+    """)
+
+    # Generate a unique marker for this push so we can verify it saved
+    push_marker = f"push-{int(time.time())}"
+    driver.execute_script("""
+        if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances) {
+            var names = Object.keys(CKEDITOR.instances);
+            if (names.length > 0) {
+                var editor = CKEDITOR.instances[names[0]];
+                var data = editor.getData();
+                // Inject hidden marker at the end
+                editor.setData(data + '<!-- ' + arguments[0] + ' -->');
+                if (editor.updateElement) editor.updateElement();
+            }
+        }
+    """, push_marker)
+    _log.info(f"Injected verification marker: {push_marker}")
+
+    t0 = time.time()
     _save_changes(driver)
 
-    # Verify by checking editor still has content after save
-    time.sleep(2)
-    verify = driver.execute_script("""
-        if (typeof CKEDITOR === 'undefined' || !CKEDITOR.instances) return 0;
-        var names = Object.keys(CKEDITOR.instances);
-        if (names.length === 0) return 0;
-        return CKEDITOR.instances[names[0]].getData().length;
-    """) or 0
-    status(f"Post-save verification: editor has {verify} chars")
+    # JS click returns immediately. The form POST is now in flight.
+    # We need to wait for the page to reload to view mode.
+    # During this time, the browser is submitting the form and waiting
+    # for the server response. We poll gently — any Selenium command
+    # may timeout while the page is navigating, and _wait_for_element
+    # handles that by calling window.stop() and retrying.
+    _log.info("Waiting for save to complete (server processing form POST)...")
+
+    def _save_completed(drv):
+        """Returns truthy when page has left edit mode (CHECKOUT button visible)."""
+        return drv.execute_script("""
+            var buttons = document.querySelectorAll('button');
+            for (var i = 0; i < buttons.length; i++) {
+                var t = (buttons[i].textContent || '').toUpperCase();
+                if (t.indexOf('CHECKOUT') >= 0) return true;
+            }
+            return null;
+        """)
+
+    # Give ProShop up to 3 minutes to process the POST and reload
+    result = _wait_for_element(driver, _save_completed, timeout=180, poll_interval=2)
+    if result:
+        # Page is in view mode — check if our unique marker is in the page source
+        has_marker = driver.execute_script(
+            "return (document.documentElement.innerHTML || '').indexOf(arguments[0]) >= 0;",
+            push_marker)
+        if has_marker:
+            _log.info(f"[save] Verified in {time.time() - t0:.1f}s — marker found, content saved")
+        else:
+            _log.warning(f"[save] Page in view mode but marker '{push_marker}' not found")
+            _dump_page_state(driver, "save_verify_no_marker")
+    else:
+        _log.warning(f"[save] Page did not return to view mode after 180s")
+        _dump_page_state(driver, "save_verify_timeout")
 
     print(f"OK: Written description updated ({len(html_content)} bytes)")
     sys.exit(0)
@@ -259,8 +523,9 @@ def _switch_to_editor_frame(driver):
     if not frames:
         frames = driver.find_elements(By.TAG_NAME, "iframe")
     if not frames:
-        return  # No frames — page loaded directly
-    status(f"Frameset detected with {len(frames)} frames, searching for editor frame...")
+        _log.debug("No frames detected — page loaded directly")
+        return
+    _log.info(f"Frameset detected with {len(frames)} frames, searching for editor frame...")
     for i, frame in enumerate(frames):
         try:
             driver.switch_to.frame(frame)
@@ -274,12 +539,14 @@ def _switch_to_editor_frame(driver):
                 return typeof CKEDITOR !== 'undefined';
             """)
             if has_button:
-                status(f"Switched to content frame {i}")
+                _log.info(f"Switched to content frame {i}")
                 return
+            _log.debug(f"Frame {i}: no editor indicators, skipping")
             driver.switch_to.default_content()
-        except Exception:
+        except Exception as e:
+            _log.debug(f"Frame {i}: error switching — {e}")
             driver.switch_to.default_content()
-    status("No editor frame found — staying on main page")
+    _log.warning("No editor frame found — staying on main page")
 
 
 def _wait_for_ckeditor(driver, timeout=15):
@@ -296,7 +563,7 @@ def _wait_for_ckeditor(driver, timeout=15):
             return false;
         """)
         if ready:
-            status("CKEditor is ready")
+            _log.info("CKEditor is ready")
             return True
         time.sleep(0.5)
     return False
@@ -339,8 +606,10 @@ def _set_ckeditor_content(driver, html_content):
     """, html_content)
 
     if not result or result.get('error'):
-        status(f"CKEditor set failed: {result}")
+        _log.error(f"CKEditor set failed: {result}")
         return False
+
+    _log.debug(f"CKEditor insertHtml OK, editor: {result.get('editorName')}")
 
     # Step 2: Wait for editor to process
     time.sleep(2)
@@ -379,7 +648,7 @@ def _set_ckeditor_content(driver, html_content):
     ed_len = verify.get('editorLen', 0) if verify else 0
     ta_len = verify.get('textareaLen', -1) if verify else -1
     dirty = verify.get('isDirty', False) if verify else False
-    status(f"Content set: editor={ed_len} chars, textarea={ta_len} chars, dirty={dirty}")
+    _log.info(f"Content set: editor={ed_len} chars, textarea={ta_len} chars, dirty={dirty}")
 
     return ed_len > 0
 
@@ -396,7 +665,7 @@ def _safe_navigate(driver, url):
     try:
         driver.get(url)
     except TimeoutException:
-        status("Page load timed out — stopping and continuing with partial load")
+        _log.warning("Page load timed out — stopping and continuing with partial load")
         try:
             driver.execute_script("window.stop()")
         except Exception:
@@ -412,6 +681,46 @@ def _find_element(driver, selectors):
             return driver.find_element(*selector)
         except NoSuchElementException:
             continue
+    return None
+
+
+def _wait_for_element(driver, checker_fn, timeout=30, poll_interval=0.5):
+    """Poll until checker_fn(driver) returns a truthy value, or timeout.
+
+    Args:
+        driver: Selenium WebDriver instance
+        checker_fn: callable(driver) -> truthy value or None/False
+        timeout: max seconds to wait
+        poll_interval: seconds between polls
+
+    Returns:
+        The truthy value from checker_fn, or None on timeout.
+
+    If a Selenium command times out during polling (e.g. page still loading),
+    we call window.stop() to unblock the renderer and keep polling.
+    """
+    from selenium.common.exceptions import TimeoutException
+    deadline = time.time() + timeout
+    last_error = None
+    while time.time() < deadline:
+        try:
+            result = checker_fn(driver)
+            if result:
+                return result
+        except TimeoutException:
+            _log.debug("Poll attempt hit TimeoutException — calling window.stop()")
+            try:
+                driver.execute_script("window.stop()")
+            except Exception:
+                pass
+        except Exception as e:
+            # Catches WebDriverException, urllib3 ReadTimeoutError, socket
+            # TimeoutError, etc. — anything that can go wrong mid-page-load.
+            last_error = e
+            _log.debug(f"Poll attempt hit {type(e).__name__}: {e}")
+        time.sleep(poll_interval)
+    if last_error:
+        _log.debug(f"_wait_for_element timed out after {timeout}s, last error: {last_error}")
     return None
 
 
@@ -571,46 +880,98 @@ def _fix_gcode_tool_numbers(driver):
 
 
 def _checkout_page(driver):
-    """Click the CHECKOUT button to enable editing. Returns True on success."""
+    """Click the CHECKOUT button to enable editing. Returns True on success.
+
+    After clicking, polls for the SAVE button to appear (edit mode) instead
+    of using fixed sleeps. If the click triggers a page reload timeout,
+    window.stop() is called to unblock the renderer — the edit-mode form
+    loads before the slow file-server resources.
+    """
     from selenium.webdriver.common.by import By
+    from selenium.common.exceptions import TimeoutException
+
+    def _find_save_button(drv):
+        """Check if a visible SAVE button exists (indicating edit mode)."""
+        for btn in drv.find_elements(By.TAG_NAME, "button"):
+            try:
+                if btn.is_displayed() and "SAVE" in (btn.text or "").upper():
+                    return True
+            except Exception:
+                pass
+        return None
+
+    # Already in edit mode?
+    if _find_save_button(driver):
+        _log.info("Already in edit mode (SAVE button present)")
+        return True
+
+    # Find and click CHECKOUT
     buttons = driver.find_elements(By.TAG_NAME, "button")
+    checkout_btn = None
     for btn in buttons:
-        if btn.is_displayed():
-            txt = (btn.text or "").strip().upper()
-            if "CHECKOUT" in txt and "RECONCILE" not in txt:
-                btn.click()
-                time.sleep(3)
-                # Verify we're now in edit mode (SAVE CHANGES button should appear)
-                buttons2 = driver.find_elements(By.TAG_NAME, "button")
-                for b2 in buttons2:
-                    if b2.is_displayed() and "SAVE" in (b2.text or "").upper():
-                        status("Page checked out — edit mode active")
-                        return True
-                status("Checkout clicked but SAVE button not found")
-                return False
-    status("No CHECKOUT button found — page may already be checked out")
-    # Check if already in edit mode
-    buttons2 = driver.find_elements(By.TAG_NAME, "button")
-    for b2 in buttons2:
-        if b2.is_displayed() and "SAVE" in (b2.text or "").upper():
-            return True
+        try:
+            if btn.is_displayed():
+                txt = (btn.text or "").strip().upper()
+                if "CHECKOUT" in txt and "RECONCILE" not in txt:
+                    checkout_btn = btn
+                    break
+        except Exception:
+            pass
+
+    if not checkout_btn:
+        _log.warning("No CHECKOUT button found on page")
+        return False
+
+    _log.debug(f"Clicking checkout button via JS: '{checkout_btn.text.strip()}'")
+    # setTimeout(0) schedules the click on the next event loop tick,
+    # so execute_script returns before the click triggers page navigation.
+    driver.execute_script("var el = arguments[0]; setTimeout(function(){ el.click(); }, 0)", checkout_btn)
+
+    # Poll for SAVE button to appear (edit mode activated)
+    save_found = _wait_for_element(driver, _find_save_button, timeout=45)
+    if save_found:
+        _log.info("Page checked out — edit mode active (SAVE button found)")
+        return True
+
+    _log.warning("Checkout clicked but SAVE button never appeared after 45s")
     return False
 
 
 def _save_changes(driver):
-    """Click the SAVE CHANGES button (visible after checkout)."""
+    """Click the SAVE CHANGES button via JavaScript and return immediately.
+
+    Using JS click (arguments[0].click()) instead of Selenium's .click()
+    because Selenium's click waits for the page load to complete. ProShop's
+    save triggers a form POST (400KB+) that takes 2+ minutes server-side,
+    which causes Selenium's HTTP client to time out (ReadTimeoutError).
+
+    JS click fires the event and returns instantly. The caller is responsible
+    for polling to verify the save completed (e.g., CHECKOUT button reappears).
+    """
     from selenium.webdriver.common.by import By
-    status("Looking for Save button...")
+
+    _log.info("Looking for Save button...")
     buttons = driver.find_elements(By.TAG_NAME, "button")
+    save_btn = None
     for btn in buttons:
-        if btn.is_displayed():
-            txt = (btn.text or "").strip().upper()
-            if "SAVE" in txt:
-                btn.click()
-                time.sleep(3)
-                status("Saved changes")
-                return
-    status("No visible Save button found — changes may need manual save")
+        try:
+            if btn.is_displayed():
+                txt = (btn.text or "").strip().upper()
+                if "SAVE" in txt:
+                    save_btn = btn
+                    break
+        except Exception:
+            pass
+
+    if not save_btn:
+        _log.warning("No visible Save button found — changes may need manual save")
+        return
+
+    _log.debug(f"Clicking save button via JS: '{save_btn.text.strip()}'")
+    # setTimeout(0) schedules the click on the next event loop tick,
+    # so execute_script returns before the click triggers form submission.
+    driver.execute_script("var el = arguments[0]; setTimeout(function(){ el.click(); }, 0)", save_btn)
+    _log.info("Save button clicked via JS — form submission initiated")
 
 
 if __name__ == "__main__":

@@ -37,6 +37,8 @@ import queue
 import re
 import http.server
 import socketserver
+import logging
+import logging.handlers
 
 # ===========================================================================
 # Global references (prevent garbage collection)
@@ -86,9 +88,43 @@ def _resolve_env_file():
 ENV_FILE = _resolve_env_file()
 
 
+_file_logger = None
+
+
+def _init_file_logger():
+    """Set up rotating file logger (called once on first log() call)."""
+    global _file_logger
+    if _file_logger is not None:
+        return
+    _file_logger = logging.getLogger("bridge_file")
+    _file_logger.setLevel(logging.DEBUG)
+    _file_logger.propagate = False
+    # Guard: logging.getLogger returns the same object across module reloads,
+    # so handlers from previous add-in toggles may still be attached.
+    if _file_logger.handlers:
+        return
+    log_dir = os.path.join(os.path.dirname(__file__), "logs")
+    try:
+        os.makedirs(log_dir, exist_ok=True)
+        fh = logging.handlers.RotatingFileHandler(
+            os.path.join(log_dir, "bridge.log"),
+            maxBytes=5 * 1024 * 1024, backupCount=5, encoding="utf-8")
+        fh.setFormatter(logging.Formatter(
+            "%(asctime)s | %(levelname)-8s | %(threadName)-15s | %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S"))
+        _file_logger.addHandler(fh)
+    except Exception:
+        pass  # File logging unavailable — Fusion output still works
+
+
 def log(msg):
     try:
         adsk.core.Application.get().log(f"[Bridge] {msg}")
+    except Exception:
+        pass
+    try:
+        _init_file_logger()
+        _file_logger.info(msg)
     except Exception:
         pass
 
@@ -1372,9 +1408,19 @@ def push_written_description_via_clipboard(part_number, op_number, html_content)
 
     customer = part_number.split("-")[0] if "-" in part_number else part_number
     url = (f"https://{PROSHOP_HOST}/procnc/parts/{customer}/{part_number}"
-           f"?formName=writtenDescription&opId={op_number}&queriesInFrame=true"
-           f"&psBridge={marker_id}&bridgePort={port}")
-    webbrowser.open(url)
+           f"?formName=writtenDescription&opId={op_number}"
+           f"#psBridge={marker_id}&bridgePort={port}")
+    log(f"Opening browser: {url}")
+    try:
+        # Must quote URL — cmd.exe treats & as command separator
+        subprocess.Popen(f'cmd /c start "" "{url}"',
+                         creationflags=0x08000000)
+    except Exception as e:
+        log(f"subprocess browser open failed: {e}")
+        try:
+            os.startfile(url)
+        except Exception as e2:
+            log(f"os.startfile also failed: {e2}")
     return True, f"Opened browser for {part_number} Op {op_number}"
 
 
@@ -1425,7 +1471,7 @@ def _run_selenium_sequence_fix(part_number, op_number):
             [python_exe, selenium_helper,
              "--part-number", str(part_number),
              "--op-number", str(op_number)],
-            capture_output=True, text=True, timeout=60,
+            capture_output=True, text=True, timeout=120,
             creationflags=0x08000000  # CREATE_NO_WINDOW
         )
         for line in result.stdout.strip().splitlines():
@@ -1436,10 +1482,11 @@ def _run_selenium_sequence_fix(part_number, op_number):
         else:
             log(f"Selenium sequence fix FAILED (rc={result.returncode})")
             if result.stderr:
-                log(f"  stderr: {result.stderr[:300]}")
+                for line in result.stderr.strip().splitlines():
+                    log(f"  [selenium/stderr] {line}")
             return False
     except subprocess.TimeoutExpired:
-        log("Selenium helper timed out (60s)")
+        log("Selenium helper timed out (120s)")
         return False
     except Exception as e:
         log(f"Selenium helper error: {e}")
@@ -1462,7 +1509,7 @@ def _run_selenium_written_desc(part_number, op_number, html_content):
              "--part-number", str(part_number),
              "--op-number", str(op_number)],
             input=html_content,
-            capture_output=True, text=True, timeout=90,
+            capture_output=True, text=True, timeout=360,
             creationflags=0x08000000  # CREATE_NO_WINDOW
         )
         for line in result.stdout.strip().splitlines():
@@ -1471,11 +1518,13 @@ def _run_selenium_written_desc(part_number, op_number, html_content):
             log(f"Selenium written desc OK for {part_number} Op {op_number}")
             return True, "Written description set via Selenium"
         else:
-            err = result.stderr[:300] if result.stderr else "unknown error"
-            log(f"Selenium written desc FAILED (rc={result.returncode}): {err}")
-            return False, f"Selenium failed: {err}"
+            log(f"Selenium written desc FAILED (rc={result.returncode})")
+            if result.stderr:
+                for line in result.stderr.strip().splitlines():
+                    log(f"  [selenium-wd/stderr] {line}")
+            return False, f"Selenium failed (rc={result.returncode})"
     except subprocess.TimeoutExpired:
-        log("Selenium written desc timed out (90s)")
+        log("Selenium written desc timed out (360s)")
         return False, "Selenium timed out"
     except Exception as e:
         log(f"Selenium written desc error: {e}")
@@ -1698,7 +1747,7 @@ def _process_next_setup():
                                                 "total": total, "setup_name": setup.name})
             html_content = generate_written_description_html(
                 setup_data, setup_idx + 1, final_screenshots, doc_name)
-            wd_ok, wd_msg = _run_selenium_written_desc(part_number, op_number, html_content)
+            wd_ok, wd_msg = push_written_description_via_clipboard(part_number, op_number, html_content)
         else:
             wd_skipped = True
             log(f"Skipping written description push (checkbox unchecked)")
