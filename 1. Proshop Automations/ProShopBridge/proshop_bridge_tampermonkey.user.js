@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ProShop Bridge — Auto-Fill Helper
 // @namespace    https://traxismfg.adionsystems.com
-// @version      1.5.0
+// @version      1.6.0
 // @description  Auto-fills written descriptions (via localhost fetch) and fixes G-Code Tool # on Sequence Detail pages
 // @author       Traxis Manufacturing
 // @match        https://traxismfg.adionsystems.com/*
@@ -64,19 +64,21 @@
   const bridgeId = bridgeMatch ? bridgeMatch[1] : null;
 
   if (isWrittenDesc && pushedByBridge && bridgeId) {
-    // Cross-frame mutex: only one child frame should handle the paste.
-    // Use localStorage keyed by bridge ID so concurrent frames don't race.
-    const mutexKey = 'psBridge_handling_' + bridgeId;
-    if (localStorage.getItem(mutexKey)) {
-      console.log('[ProShop Bridge TM] Another frame is already handling bridge ' + bridgeId + ', skipping.');
+    // Phase tracking: checkout reloads the page, so the script runs twice.
+    // Phase 1 (no key): fetch content, click checkout → page reloads
+    // Phase 2 ("checked_out"): skip checkout, fill editor, save
+    // Phase 3 ("done"): skip everything
+    const phaseKey = 'psBridge_phase_' + bridgeId;
+    const phase = localStorage.getItem(phaseKey);
+    if (phase === 'done') {
+      console.log('[ProShop Bridge TM] Bridge ' + bridgeId + ' already completed, skipping.');
       return;
     }
-    localStorage.setItem(mutexKey, Date.now().toString());
-    // Clean up mutex after 60s (in case of errors)
-    setTimeout(() => { try { localStorage.removeItem(mutexKey); } catch(e) {} }, 60000);
+    // Clean up phase key after 120s (in case of errors)
+    setTimeout(() => { try { localStorage.removeItem(phaseKey); } catch(e) {} }, 120000);
 
     setStatus('Auto-paste ready');
-    handleWrittenDescription();
+    handleWrittenDescription(phaseKey, phase);
   }
 
   // Always check for sequence detail table on any ProShop page (content-based detection)
@@ -107,18 +109,19 @@
   // ================================================================
   //  WRITTEN DESCRIPTION — fetch from local server (clipboard-free)
   // ================================================================
-  function handleWrittenDescription() {
+  function handleWrittenDescription(phaseKey, phase) {
     const MARKER_PREFIX = '<!--PROSHOP_BRIDGE:';
     const WAIT_FOR_PAGE_MS = 2500;
-    const WAIT_AFTER_CHECKOUT_MS = 5000;
-    const WAIT_FOR_EDITOR_MS = 15000;
+    const WAIT_FOR_EDITOR_MS = 20000;
 
-    // Extract bridgePort from URL (set by Python's one-shot server)
+    // Extract bridgePort from URL (set by Python's local server)
     const portMatch = topUrl.match(/bridgePort=(\d+)/);
     const bridgePort = portMatch ? portMatch[1] : null;
 
-    console.log('[ProShop Bridge TM] Written description page detected, waiting for page load...');
-    setStatus('Waiting for page...', 'warn');
+    const isPostCheckout = (phase === 'checked_out');
+    console.log('[ProShop Bridge TM] Written description page detected' +
+                (isPostCheckout ? ' (post-checkout reload)' : ' (initial load)'));
+    setStatus(isPostCheckout ? 'Post-checkout...' : 'Waiting for page...', 'warn');
 
     // Fetch HTML content from local server (via GM_xmlhttpRequest to bypass mixed content)
     function fetchFromServer() {
@@ -151,26 +154,10 @@
       });
     }
 
-    async function fetchContent() {
-      // Primary: fetch from localhost one-shot server via GM_xmlhttpRequest
-      const serverData = await fetchFromServer();
-      if (serverData) return serverData;
-
-      // Fallback: try clipboard (may fail on newer Chrome)
-      console.log('[ProShop Bridge TM] Falling back to clipboard...');
-      setStatus('Reading clipboard...');
-      try {
-        const clipText = await navigator.clipboard.readText();
-        if (clipText && clipText.startsWith(MARKER_PREFIX)) return clipText;
-      } catch (e) {
-        console.log('[ProShop Bridge TM] Clipboard read failed:', e.message);
-      }
-      return null;
-    }
-
-    // Core logic — fetch content, checkout, set editor, save
+    // Core logic — fetch content, checkout if needed, set editor, save
     async function doPaste() {
-      const rawContent = await fetchContent();
+      // Fetch HTML from Python's local server
+      const rawContent = await fetchFromServer();
       if (!rawContent) {
         console.log('[ProShop Bridge TM] No ProShop Bridge data available, skipping.');
         setStatus('No data available', 'warn');
@@ -181,24 +168,33 @@
       const markerEnd = rawContent.indexOf('-->');
       const htmlContent = markerEnd >= 0 ? rawContent.substring(markerEnd + 4) : rawContent;
 
-      const checkoutBtn = findButtonByText('Checkout', 'CHECKOUT', 'Check Out');
-      if (checkoutBtn) {
-        setStatus('Checking out...');
-        console.log('[ProShop Bridge TM] Clicking Checkout...');
-        checkoutBtn.click();
-        await sleep(WAIT_AFTER_CHECKOUT_MS);
+      // Checkout if needed (only on initial load, not post-checkout)
+      if (!isPostCheckout) {
+        const checkoutBtn = findButtonByText('Checkout', 'CHECKOUT', 'Check Out');
+        if (checkoutBtn) {
+          // Mark phase so the post-reload script knows to skip checkout
+          localStorage.setItem(phaseKey, 'checked_out');
+          setStatus('Checking out...');
+          console.log('[ProShop Bridge TM] Clicking Checkout (page will reload)...');
+          checkoutBtn.click();
+          // If checkout causes a page reload, this script dies here.
+          // The reloaded page will re-run with phase='checked_out'.
+          // If it DOESN'T reload (AJAX checkout), continue after a wait.
+          await sleep(5000);
+          console.log('[ProShop Bridge TM] Checkout did not reload — continuing in same page');
+        } else {
+          console.log('[ProShop Bridge TM] No Checkout button found (may already be checked out)');
+        }
       } else {
-        console.log('[ProShop Bridge TM] No Checkout button found (may already be checked out)');
-        await sleep(1000);
+        console.log('[ProShop Bridge TM] Skipping checkout (post-reload)');
       }
 
-      // Wait for CKEditor to initialize (it loads after checkout)
+      // Wait for CKEditor to initialize
       setStatus('Waiting for editor...', 'warn');
       console.log('[ProShop Bridge TM] Waiting for editor to initialize...');
       const editor = await waitForCKEditor(WAIT_FOR_EDITOR_MS);
 
       if (editor) {
-        // Use CKEditor API with callback to ensure content is committed
         setStatus('Setting editor content...');
         const existing = editor.getData() || '';
         const combined = htmlContent + (existing ? '<hr>' + existing : '');
@@ -207,15 +203,12 @@
             console.log('[ProShop Bridge TM] CKEditor setData callback fired');
             resolve();
           }});
-          // Fallback in case callback doesn't fire
           setTimeout(resolve, 3000);
         });
-        // Mark editor as dirty so ProShop knows content changed
         editor.fire('change');
         if (editor.updateElement) editor.updateElement();
         console.log('[ProShop Bridge TM] Content set via CKEditor (' + editor.name + ')');
       } else {
-        // Fallback to generic editor detection
         setStatus('Setting editor content...');
         const editorSet = await setEditorContent(htmlContent);
         if (!editorSet) {
@@ -239,15 +232,14 @@
         setStatus('Save manually', 'warn');
         console.log('[ProShop Bridge TM] No Save button found — please save manually.');
       }
-      try { await navigator.clipboard.writeText(''); } catch (e) {}
-      // Release cross-frame mutex
-      if (bridgeId) { try { localStorage.removeItem('psBridge_handling_' + bridgeId); } catch(e) {} }
+      // Mark as done
+      localStorage.setItem(phaseKey, 'done');
     }
 
     setTimeout(async () => {
       setStatus('Fetching content...');
       await doPaste();
-    }, WAIT_FOR_PAGE_MS);
+    }, isPostCheckout ? 1000 : WAIT_FOR_PAGE_MS);
   }
 
   // ================================================================

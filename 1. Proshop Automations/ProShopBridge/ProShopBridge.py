@@ -1358,9 +1358,12 @@ def push_sequence_details(part_number, op_number, tools_list):
     return last_result
 
 
-def _start_oneshot_server(html_content, marker_id, timeout=60):
-    """Start a localhost HTTP server that serves html_content once, then shuts down."""
-    served = threading.Event()
+def _start_oneshot_server(html_content, marker_id, timeout=120):
+    """Start a localhost HTTP server that serves html_content until timeout.
+
+    Serves multiple requests because the Tampermonkey script may fetch twice:
+    once before clicking CHECKOUT and again after ProShop reloads the page.
+    """
 
     class Handler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
@@ -1369,7 +1372,6 @@ def _start_oneshot_server(html_content, marker_id, timeout=60):
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(html_content.encode('utf-8'))
-            served.set()
         def do_OPTIONS(self):
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -1383,9 +1385,9 @@ def _start_oneshot_server(html_content, marker_id, timeout=60):
     log(f"One-shot server on port {port} for bridge {marker_id}")
 
     def run():
-        # Serve until content is fetched or timeout expires
+        # Serve until timeout expires (multiple fetches allowed)
         deadline = time.time() + timeout
-        while not served.is_set() and time.time() < deadline:
+        while time.time() < deadline:
             server.timeout = 1
             server.handle_request()
         server.server_close()
