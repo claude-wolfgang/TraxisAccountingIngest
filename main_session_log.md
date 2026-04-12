@@ -5,6 +5,57 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-11
+
+### Project 22: Tool Assembly Management — Inventory Sync Service + Live Push
+
+**Task:** Build a service to push physical cabinet inventory counts from tooling.db to ProShop via GraphQL API, correcting systematic quantity inflation (tools rarely retired, purchases auto-add).
+
+**What was done:**
+
+1. **`inventory_sync.py`** (new file in `tool-kiosk/`) — Standalone sync script:
+   - Reads cabinet counts from `tooling.db` (518 of 542 tools counted via kiosk sessions April 6-7)
+   - Queries RTAs and work cell pockets from ProShop to get in-use tool counts
+   - Ground truth: `cabinet_total + max(rta_count, wc_count)` per tool number
+   - Pushes `qtyInBin` (usable = blue+green), `quantity` (total in shop), `purchasingNotes` (yellow/red condition data)
+   - Notes format: `[Kiosk 2026-04-07] 2 worn, 1 replace` — replaces prior kiosk lines, preserves other notes
+   - `--dry-run` and `--loop N` flags, off-hours gate (18:00-05:00 weekdays, all day weekends)
+   - Sync log table in tooling.db tracks what's been pushed to avoid redundant writes
+   - 0.1s throttle between API calls, per-tool error handling, timeout retry on large tool fetch
+
+2. **Overseer integration** (`overseer.py`) — Added `InventorySync` service config:
+   - Subprocess service with `--loop 3600` (hourly), auto-start enabled
+   - Database health validator checks sync log freshness (2h threshold) and push counts
+
+3. **Live run executed** — 485 tools updated, 242 condition notes written, 0 errors:
+   - R66: total 4→6 (cab=5 + 1 in work cell), condition notes added
+   - A1039: total 4→1 (cab=0 + 1 in work cell — correctly not zeroed)
+   - A157: bin qty set, condition notes added
+   - 16 tools in kiosk DB not found in ProShop (skipped)
+
+**Key decisions:**
+- Always overwrite ProShop quantities with ground truth (no "skip if ProShop higher" rule — ProShop is systematically inflated)
+- Use `max(rta_count, wc_count)` per tool to avoid double-counting (RTA in a work cell appears in both queries)
+- `qtyInBin` is writable but returns null via API — use `quantity` ("Total in Shop") for comparison reads
+- Standalone script sharing `proshop_client.py`, `database.py`, `config.py` with kiosk app (not part of Selenium bridge)
+
+**Status:** Complete. Live push successful. Overseer service config committed. Tool Shortages report in ProShop should show dramatically fewer false shortages.
+
+---
+
+### Project 19: Shop Scheduler — Fix Operation Block Sizing on Drag
+
+**Task:** Operations visually shortened/lengthened when dragged because raw millisecond duration was preserved instead of business hours.
+
+**What was done:**
+- Added `businessHoursBetween(start, end)` function to `scheduler.js`
+- Updated `handleBlockMove()` to compute business-hour duration of original position, then use `addBusinessHours()` to set the new end time
+- Business hours: 5 AM - 6 PM, no weekends (matches existing BH_START/BH_END constants)
+
+**Status:** Complete. Block sizing now consistent regardless of drag position.
+
+---
+
 ## 2026-04-10
 
 ### Project 27: Accounting Ingest — QBO API Integration + Git Repo Setup
