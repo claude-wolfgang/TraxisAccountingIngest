@@ -1760,6 +1760,18 @@ def _process_next_setup():
                                                 "total": total, "setup_name": setup.name})
             html_content = generate_written_description_html(
                 setup_data, setup_idx + 1, final_screenshots, doc_name)
+
+            # ProShop has a ~256KB limit on the written description field.
+            # If we're over, strip screenshots (tool list + header are always small).
+            content_bytes = len(html_content.encode("utf-8"))
+            if content_bytes > 250_000:
+                log(f"Written description too large ({content_bytes:,} bytes), "
+                    f"stripping embedded images to fit under 256KB limit")
+                html_content = generate_written_description_html(
+                    setup_data, setup_idx + 1, [], doc_name)
+                content_bytes = len(html_content.encode("utf-8"))
+                log(f"Written description without images: {content_bytes:,} bytes")
+
             wd_ok, wd_msg = _run_selenium_written_desc(part_number, op_number, html_content)
         else:
             wd_skipped = True

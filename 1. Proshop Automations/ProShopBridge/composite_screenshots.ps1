@@ -22,9 +22,17 @@ try {
     $imgRight = [System.Drawing.Image]::FromFile($rightPng)
     $imgIso   = [System.Drawing.Image]::FromFile($isoPng)
 
-    # Each quadrant matches source size (960x540), canvas is 1920x1080
-    $qw = $imgTop.Width
-    $qh = $imgTop.Height
+    # Scale quadrants to fit ProShop's ~256KB content limit.
+    # Target canvas: 1280x720 (640x360 per quadrant) at JPEG q65
+    # yields ~80-120KB base64, leaving room for the tool list HTML.
+    $maxCanvasW = 1280
+    $maxCanvasH = 720
+    $srcW = $imgTop.Width
+    $srcH = $imgTop.Height
+    $scale = [Math]::Min($maxCanvasW / ($srcW * 2), $maxCanvasH / ($srcH * 2))
+    if ($scale -gt 1.0) { $scale = 1.0 }
+    $qw = [int]($srcW * $scale)
+    $qh = [int]($srcH * $scale)
     $canvas = New-Object System.Drawing.Bitmap(($qw * 2), ($qh * 2))
     $g = [System.Drawing.Graphics]::FromImage($canvas)
     $g.SmoothingMode = 'AntiAlias'
@@ -45,7 +53,8 @@ try {
     $pen.Dispose()
 
     # Add view labels
-    $font = New-Object System.Drawing.Font('Segoe UI', 14, [System.Drawing.FontStyle]::Bold)
+    $fontSize = if ($qw -lt 500) { 10 } else { 14 }
+    $font = New-Object System.Drawing.Font('Segoe UI', $fontSize, [System.Drawing.FontStyle]::Bold)
     $textBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(240, 20, 20, 20))
     $bgBrush   = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(190, 255, 255, 255))
 
@@ -73,7 +82,7 @@ try {
         Where-Object { $_.MimeType -eq 'image/jpeg' } | Select-Object -First 1
     $encParams = New-Object System.Drawing.Imaging.EncoderParameters(1)
     $encParams.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter(
-        [System.Drawing.Imaging.Encoder]::Quality, [long]90
+        [System.Drawing.Imaging.Encoder]::Quality, [long]65
     )
     $canvas.Save($outputPath, $jpegCodec, $encParams)
 

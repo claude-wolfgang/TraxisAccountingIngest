@@ -5,6 +5,65 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-12
+
+### Project 1: ProShop Bridge — Written Description Push Fix (Session 2)
+
+**Task:** Continued debugging the written description push to ProShop, which had stopped working after ~2 weeks of successful operation.
+
+**What was done:**
+
+1. **Root cause found: URL separator `?` vs `$`** — `proshop_selenium_helper.py` used `?formName=writtenDescription` but ProShop requires `$formName=writtenDescription` for subform pages. With `?`, ProShop loaded the Part details page instead of the written description subform, so CKEditor was never found. This was introduced during the 2026-03-13 "URL fix" session which correctly changed `$`→`?` for `toolDetail` but incorrectly applied the same change to `writtenDescription`.
+
+2. **Content prepend bug fixed** — `_set_ckeditor_content()` was combining new content with existing page content (`html + '<hr>' + existing`). When the page had leftover 250KB test data from the prior debug session, the combined 366KB payload exceeded ProShop's 256KB limit and was silently discarded. Changed to replace content entirely.
+
+3. **Marker verification hardened** — `_save_via_fetch()` was treating a missing verification marker as success ("best-effort"). Now properly returns failure when the marker isn't found in the server response, giving accurate save feedback.
+
+**Files modified:** `ProShopBridge/proshop_selenium_helper.py` (3 changes: URL `$`, content replace, marker verification)
+
+**Key decisions:**
+- ProShop URL scheme is inconsistent: `toolDetail` uses `?`, `writtenDescription` uses `$` as path/query separator
+- The 256KB server-side limit (found in Session 1) is real but was NOT the reason the tool stopped working — kept size guards as defense-in-depth
+- Composite screenshots (1280x720 q65 from Session 1) produce ~108KB payloads, well under 256KB limit
+- User confirmed successful end-to-end push: Part 10130 Op 80 with composite screenshots, tool list, WCS data
+
+**Status:** Complete. Written description push working end-to-end from Fusion 360.
+
+---
+
+### Project 25: Agent Exploration — Ecosystem Ritual & Constellation Implementation
+
+**Task:** Implement the Session Close Ritual, Interface Block standard, and TRAXIS_ECOSYSTEM.md constellation file from the P25 session brief designed with Web Claude on 2026-04-11.
+
+**What was done:**
+
+1. **Root CLAUDE.md** (new file at project root) — Four-beat session close ritual, "sir" diagnostic tell, interface block standard definition. Auto-loaded by Claude Code for every session.
+
+2. **P19 Shop Scheduler / CLAUDE.md** (new file) — Created with `## Interfaces` section. Produces: scheduler.db, Flask UI (port 5080), priority/tool-demand APIs, heartbeat. Consumes: ProShop GraphQL, P22 tooling.db (read-only). Contract: reads tooling.db at relative path set in config.py:35.
+
+3. **P22 Tool Assembly Management / CLAUDE.md** (new file) — Created with `## Interfaces` section. Produces: tooling.db, Flask kiosk UI (port 5001), print-label proxy, health endpoint. Consumes: ProShop GraphQL, .traxis.env, Overseer, FocasMonitor monitoring.db, Brother printer. Contracts: P19 reads tooling.db, print_service on port 5002.
+
+4. **scan_projects.py** (modified) — Added `parse_interface_block()` for direct text parsing of `## Interfaces` sections. Added `render_ecosystem_file()` to generate TRAXIS_ECOSYSTEM.md from project_index.json. Fixed session log path mismatch (`SESSION_LOG.md` → `main_session_log.md`).
+
+5. **alerter.py** (modified) — Daily Telegram digest now includes "ACTION ITEMS" section with top 5 open items from project_index.json.
+
+6. **project_index.json** (modified) — Added `interfaces` field to P19 and P22 entries.
+
+7. **TRAXIS_ECOSYSTEM.md** (new file at project root) — Initial render with 26 projects, interface map (P19/P22), 3 critical seams, 20 open items.
+
+**Files created:** `CLAUDE.md` (root), `TRAXIS_ECOSYSTEM.md` (root), `19. Shop Scheduler/CLAUDE.md`, `22. Tool Assembly Management/CLAUDE.md`
+**Files modified:** `25. Agent Exploration/scan_projects.py`, `25. Agent Exploration/alerter.py`, `25. Agent Exploration/project_index.json`
+
+**Key decisions:**
+- Interface block parsing is pure text (no Haiku call needed) — comma-separated values under Produces/Consumes/Contracts
+- Contracts field uses free-text (not structured) since cross-project assumptions are too varied for a rigid schema
+- Scanner fix: `SESSION_LOG.md` → `main_session_log.md` to match the actual file name
+- Ecosystem file rendered at end of every non-dry-run scan
+
+**Status:** Complete. Ritual active, seed interfaces in place, scanner ready for nightly runs. Remaining projects need `## Interfaces` backfill incrementally.
+
+---
+
 ## 2026-04-11
 
 ### Project 22: Tool Assembly Management — Inventory Sync Service + Live Push

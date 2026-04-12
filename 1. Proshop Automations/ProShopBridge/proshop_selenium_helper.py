@@ -389,7 +389,7 @@ def _run_written_description(driver, args, html_content):
     """Written description mode: navigate, checkout, set CKEditor content, save."""
     customer = args.part_number.split("-")[0] if "-" in args.part_number else args.part_number
     url = (f"{BASE_URL}/procnc/parts/{customer}/{args.part_number}"
-           f"?formName=writtenDescription&opId={args.op_number}")
+           f"$formName=writtenDescription&opId={args.op_number}")
 
     t0 = time.time()
     _log.info("Navigating to written description page...")
@@ -438,6 +438,20 @@ def _run_written_description(driver, args, html_content):
         sys.exit(1)
     _log.info(f"[ckeditor] Ready after {time.time() - t0:.1f}s")
 
+    # ProShop has a ~256KB (262144 byte) server-side limit on the written
+    # description field. Content exceeding this is silently discarded.
+    # Warn if we're close; error if we're way over.
+    MAX_CONTENT_BYTES = 250_000  # conservative limit (server cuts at ~256KB)
+    content_size = len(html_content.encode("utf-8"))
+    if content_size > MAX_CONTENT_BYTES:
+        _log.error(f"Content too large: {content_size:,} bytes (limit ~{MAX_CONTENT_BYTES:,}). "
+                   f"ProShop will silently discard the save.")
+        print(f"ERROR: Content too large ({content_size:,} bytes, limit ~{MAX_CONTENT_BYTES:,}). "
+              f"Reduce image quality or resolution.")
+        sys.exit(1)
+    elif content_size > MAX_CONTENT_BYTES * 0.9:
+        _log.warning(f"Content is {content_size:,} bytes — close to the ~{MAX_CONTENT_BYTES:,} byte limit")
+
     t0 = time.time()
     _log.info("Setting written description content...")
     if not _set_ckeditor_content(driver, html_content):
@@ -445,7 +459,7 @@ def _run_written_description(driver, args, html_content):
         _dump_page_state(driver, "ckeditor_content_failed")
         print("ERROR: Failed to set CKEditor content")
         sys.exit(1)
-    _log.info(f"[content] Set {len(html_content)} bytes in {time.time() - t0:.1f}s")
+    _log.info(f"[content] Set {len(html_content)} bytes ({content_size:,} byte payload) in {time.time() - t0:.1f}s")
 
     # Force updateElement to ensure textarea is synced before save
     driver.execute_script("""
@@ -475,19 +489,17 @@ def _run_written_description(driver, args, html_content):
     _log.info(f"Injected verification marker: {push_marker}")
 
     t0 = time.time()
-    _save_changes(driver)
+    save_ok, save_msg = _save_via_fetch(driver, push_marker=push_marker)
+    _log.info(f"[save] {save_msg} in {time.time() - t0:.1f}s")
 
-    # Fire-and-forget: the JS click triggered the form POST. ProShop's server
-    # takes 120s+ to process the submission. The POST request is sent almost
-    # instantly — we just need to wait a few seconds to ensure it's fully
-    # transmitted, then exit. The server will process it regardless of whether
-    # Chrome stays open.
-    _log.info("Save clicked — waiting 5s for form POST to transmit...")
-    time.sleep(5)
-    _log.info(f"[save] Fire-and-forget in {time.time() - t0:.1f}s")
-
-    print(f"OK: Written description updated ({len(html_content)} bytes)")
-    sys.exit(0)
+    if save_ok:
+        print(f"OK: Written description updated ({len(html_content)} bytes) — {save_msg}")
+        sys.exit(0)
+    else:
+        _log.error(f"Save FAILED: {save_msg}")
+        _dump_page_state(driver, "save_fetch_failed")
+        print(f"ERROR: Save failed — {save_msg}")
+        sys.exit(1)
 
 
 def _switch_to_editor_frame(driver):
@@ -558,11 +570,7 @@ def _set_ckeditor_content(driver, html_content):
         if (names.length === 0) return {error: 'no instances'};
         var editor = CKEDITOR.instances[names[0]];
 
-        // Get existing content to prepend new content before it
-        var existing = editor.getData() || '';
-        var combined = html + (existing ? '<hr>' + existing : '');
-
-        // Use insertHtml with select-all to simulate user editing
+        // Replace all existing content with new content
         try {
             editor.focus();
             // Select all existing content
@@ -570,10 +578,10 @@ def _set_ckeditor_content(driver, html_content):
             range.selectNodeContents(editor.editable());
             editor.getSelection().selectRanges([range]);
             // Replace with new content
-            editor.insertHtml(combined);
+            editor.insertHtml(html);
         } catch(e) {
             // Fallback to setData if insertHtml fails
-            editor.setData(combined);
+            editor.setData(html);
         }
 
         return {ok: true, editorName: names[0]};
@@ -914,10 +922,8 @@ def _checkout_page(driver):
 def _save_changes(driver):
     """Click the SAVE CHANGES button via JavaScript and return immediately.
 
-    Using JS click (arguments[0].click()) instead of Selenium's .click()
-    because Selenium's click waits for the page load to complete. ProShop's
-    save triggers a form POST (400KB+) that takes 2+ minutes server-side,
-    which causes Selenium's HTTP client to time out (ReadTimeoutError).
+    Fire-and-forget save used by sequence-detail mode. For written descriptions,
+    use _save_via_fetch() instead which gives a verifiable response.
 
     JS click fires the event and returns instantly. The caller is responsible
     for polling to verify the save completed (e.g., CHECKOUT button reappears).
@@ -942,10 +948,176 @@ def _save_changes(driver):
         return
 
     _log.debug(f"Clicking save button via JS: '{save_btn.text.strip()}'")
-    # setTimeout(0) schedules the click on the next event loop tick,
-    # so execute_script returns before the click triggers form submission.
     driver.execute_script("var el = arguments[0]; setTimeout(function(){ el.click(); }, 0)", save_btn)
     _log.info("Save button clicked via JS — form submission initiated")
+
+
+def _save_via_fetch(driver, push_marker=None, timeout=180):
+    """Submit the form via fetch() API and wait for a verified server response.
+
+    Instead of clicking SAVE (which triggers a page reload Selenium can't wait
+    for), this extracts the form data and sends it via fetch(). This gives us:
+      - A real HTTP status code (200 = success)
+      - The response body (to verify our content was saved)
+      - No page reload (browser stays stable for Selenium)
+
+    Args:
+        driver: Selenium WebDriver
+        push_marker: Optional marker string to look for in the response body
+        timeout: Max seconds to wait for the server response
+
+    Returns:
+        (ok: bool, message: str) tuple
+    """
+    _log.info("Saving via fetch() — submitting form data to server...")
+
+    # Intercept the form submit and send via fetch() instead of navigating.
+    #
+    # ProShop has JavaScript handlers on both the save button (click) and the
+    # form (submit) that do preprocessing. We must let those handlers run,
+    # then intercept the final submission and send via fetch() to get a
+    # verifiable response without triggering a page navigation.
+    #
+    # Flow: sync CKEditor → install submit interceptor → requestSubmit(saveBtn)
+    #   → ProShop's click/submit handlers run → our interceptor fires →
+    #   preventDefault → fetch() with final FormData → poll for result.
+    driver.execute_script("""
+        window.__fetchResult = null;
+        var marker = arguments[0] || null;
+
+        // Sync all CKEditor instances to their textareas
+        if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances) {
+            var names = Object.keys(CKEDITOR.instances);
+            for (var i = 0; i < names.length; i++) {
+                var ed = CKEDITOR.instances[names[i]];
+                if (ed.updateElement) ed.updateElement();
+            }
+        }
+
+        var form = document.getElementById('mainEditingForm');
+        if (!form) {
+            var btns = document.querySelectorAll('button');
+            for (var j = 0; j < btns.length; j++) {
+                if (btns[j].offsetParent !== null &&
+                    (btns[j].textContent || '').toUpperCase().indexOf('SAVE') >= 0) {
+                    form = btns[j].closest('form');
+                    break;
+                }
+            }
+        }
+
+        if (!form) {
+            window.__fetchResult = {error: 'no form found'};
+            return;
+        }
+
+        var saveBtn = form.querySelector('button[name="_submitChanges_"]');
+        if (!saveBtn) {
+            window.__fetchResult = {error: 'no save button found'};
+            return;
+        }
+
+        // Install a submit interceptor that fires AFTER ProShop's own handlers.
+        // We use addEventListener (not onsubmit) so we don't overwrite ProShop's handler.
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            // Capture the final form state (after ProShop's handlers may have modified it)
+            var formData = new FormData(form);
+            // Include the submit button's name/value (browsers do this for the clicked button)
+            formData.append(saveBtn.name, saveBtn.value);
+
+            var actionUrl = form.action || window.location.href;
+
+            var totalLen = 0;
+            for (var pair of formData.entries()) {
+                totalLen += (pair[1] + '').length;
+            }
+            window.__fetchPayloadSize = totalLen;
+
+            var startTime = Date.now();
+            fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            }).then(function(resp) {
+                var elapsed = Date.now() - startTime;
+                resp.text().then(function(body) {
+                    window.__fetchResult = {
+                        status: resp.status,
+                        statusText: resp.statusText,
+                        elapsed_ms: elapsed,
+                        ok: resp.ok,
+                        bodyLen: body.length,
+                        bodyTitle: (body.match(/<title>(.*?)<\\/title>/i) || [])[1] || '',
+                        hasMarker: marker ? body.indexOf(marker) >= 0 : null
+                    };
+                });
+            }).catch(function(err) {
+                window.__fetchResult = {
+                    error: err.message,
+                    elapsed_ms: Date.now() - startTime
+                };
+            });
+        }, false);  // false = bubble phase, fires after ProShop's capture-phase handlers
+
+        // Trigger the full native form submission flow.
+        // requestSubmit(saveBtn) fires the button's click handler, then the form's
+        // submit event (including ProShop's handler and our interceptor).
+        form.requestSubmit(saveBtn);
+    """, push_marker or "")
+
+    payload_size = driver.execute_script("return window.__fetchPayloadSize;") or 0
+    _log.info(f"fetch() initiated — payload ~{payload_size} chars")
+
+    # Poll for the result
+    poll_start = time.time()
+    while time.time() - poll_start < timeout:
+        try:
+            result = driver.execute_script("return window.__fetchResult;")
+            if result is not None:
+                break
+        except Exception as e:
+            _log.debug(f"Poll error: {e}")
+
+        elapsed = int(time.time() - poll_start)
+        if elapsed > 0 and elapsed % 30 == 0:
+            _log.info(f"Still waiting for server response... ({elapsed}s)")
+        time.sleep(2)
+    else:
+        _log.error(f"fetch() timed out after {timeout}s — no server response")
+        return False, f"Save timed out after {timeout}s"
+
+    # Analyze the result
+    elapsed_s = result.get('elapsed_ms', 0) / 1000
+    if result.get('error'):
+        _log.error(f"fetch() failed: {result['error']} ({elapsed_s:.1f}s)")
+        return False, f"fetch error: {result['error']}"
+
+    status = result.get('status', 0)
+    ok = result.get('ok', False)
+    body_len = result.get('bodyLen', 0)
+    title = result.get('statusText', '')
+
+    _log.info(f"Server response: {status} {title} in {elapsed_s:.1f}s ({body_len} chars)")
+
+    if not ok:
+        _log.error(f"Server returned HTTP {status}")
+        return False, f"Server returned HTTP {status}"
+
+    # Verify marker if provided
+    if push_marker:
+        has_marker = result.get('hasMarker', False)
+        if has_marker:
+            _log.info(f"Verification marker '{push_marker}' found in response")
+        else:
+            _log.error(f"Verification marker '{push_marker}' NOT found in response — "
+                       f"content was likely discarded (payload may exceed server limit)")
+            return False, (f"Save not verified — marker not in response "
+                           f"(HTTP {status}, {body_len} chars)")
+
+    return True, f"HTTP {status} in {elapsed_s:.1f}s ({body_len} chars)"
 
 
 if __name__ == "__main__":
