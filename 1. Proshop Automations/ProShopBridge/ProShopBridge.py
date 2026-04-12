@@ -1760,7 +1760,7 @@ def _process_next_setup():
                                                 "total": total, "setup_name": setup.name})
             html_content = generate_written_description_html(
                 setup_data, setup_idx + 1, final_screenshots, doc_name)
-            wd_ok, wd_msg = push_written_description_via_clipboard(part_number, op_number, html_content)
+            wd_ok, wd_msg = _run_selenium_written_desc(part_number, op_number, html_content)
         else:
             wd_skipped = True
             log(f"Skipping written description push (checkbox unchecked)")

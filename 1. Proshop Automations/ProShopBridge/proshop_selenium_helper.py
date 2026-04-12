@@ -477,40 +477,14 @@ def _run_written_description(driver, args, html_content):
     t0 = time.time()
     _save_changes(driver)
 
-    # JS click returns immediately. The form POST is now in flight.
-    # We need to wait for the page to reload to view mode.
-    # During this time, the browser is submitting the form and waiting
-    # for the server response. We poll gently — any Selenium command
-    # may timeout while the page is navigating, and _wait_for_element
-    # handles that by calling window.stop() and retrying.
-    _log.info("Waiting for save to complete (server processing form POST)...")
-
-    def _save_completed(drv):
-        """Returns truthy when page has left edit mode (CHECKOUT button visible)."""
-        return drv.execute_script("""
-            var buttons = document.querySelectorAll('button');
-            for (var i = 0; i < buttons.length; i++) {
-                var t = (buttons[i].textContent || '').toUpperCase();
-                if (t.indexOf('CHECKOUT') >= 0) return true;
-            }
-            return null;
-        """)
-
-    # Give ProShop up to 3 minutes to process the POST and reload
-    result = _wait_for_element(driver, _save_completed, timeout=180, poll_interval=2)
-    if result:
-        # Page is in view mode — check if our unique marker is in the page source
-        has_marker = driver.execute_script(
-            "return (document.documentElement.innerHTML || '').indexOf(arguments[0]) >= 0;",
-            push_marker)
-        if has_marker:
-            _log.info(f"[save] Verified in {time.time() - t0:.1f}s — marker found, content saved")
-        else:
-            _log.warning(f"[save] Page in view mode but marker '{push_marker}' not found")
-            _dump_page_state(driver, "save_verify_no_marker")
-    else:
-        _log.warning(f"[save] Page did not return to view mode after 180s")
-        _dump_page_state(driver, "save_verify_timeout")
+    # Fire-and-forget: the JS click triggered the form POST. ProShop's server
+    # takes 120s+ to process the submission. The POST request is sent almost
+    # instantly — we just need to wait a few seconds to ensure it's fully
+    # transmitted, then exit. The server will process it regardless of whether
+    # Chrome stays open.
+    _log.info("Save clicked — waiting 5s for form POST to transmit...")
+    time.sleep(5)
+    _log.info(f"[save] Fire-and-forget in {time.time() - t0:.1f}s")
 
     print(f"OK: Written description updated ({len(html_content)} bytes)")
     sys.exit(0)
