@@ -7,6 +7,71 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-12
 
+### Project 12: TPM (Traxis Program Manager) — Startup Fix + NC Program Naming (Session 5)
+
+**Task:** Diagnose why TPM add-in won't load in Fusion 360, then review its purpose and discuss improvements.
+
+**What was done:**
+
+1. **Fixed startup crash** — `ModuleNotFoundError: No module named 'tpm'`. Root cause: Fusion's add-in loader doesn't add the add-in's directory to `sys.path`, so the `tpm/` subpackage (extracted in v1.6.0 on April 2) couldn't be found. Fix: `sys.path.insert(0, _addon_dir)` before the `from tpm import ...` line. Other add-ins (ProShopBridge, FusionToolAuditor) are single-file scripts so they never hit this.
+
+2. **Added post-completion NC Program rename** — New `_rename_nc_programs()` function runs after posting (in `PostCompletedHandler`). Catches NC Programs created during posting with default names like `NCProgram4` and renames them to `PartNumber_OPxx` format using `_naming_state`.
+
+3. **Added diagnostic logging** — `_match_nc_to_setup()` now logs which matching strategy succeeded or why it failed, so we can debug NC Program matching issues via Fusion's Text Commands panel.
+
+4. **Proposed Name/File name improvement (DEFERRED)** — The post dialog "File name" field shows the O-code (`0071`) instead of the descriptive name (`R2S1-10130_OP70`). Fix requires a paired change: TPM sets `job_programName` to filename stem + every .cps post processor's `getProgramNumber()` handles non-numeric names by extracting OP from `_OPxx` pattern. Deferred because .cps changes are production-critical and need careful testing. Writeup documented in session for future reference.
+
+**Files modified:**
+- `12. FASData Implementation/TraxisProgramManager/TraxisProgramManager.py` — sys.path fix (lines 48-55), `_rename_nc_programs()` function, improved `_match_nc_to_setup()` logging, TODO comment on job_programName
+
+**Key decisions:**
+- O-code numbering (O0061, O0071) is cosmetic since programs are transferred via Fanuc Transfer Tool — not worth changing independently
+- .cps post processor changes need careful rollout, not a quick session fix
+- Version encoding in O-codes would be lost with the proposed approach — needs consideration
+
+**Status:** TPM loads and runs. NC Program tree naming improved. File name field improvement waiting on .cps change plan.
+
+---
+
+### Projects 9/22/1: Generic Print Endpoint + WO Label Printing (Session 4)
+
+**Task:** Add a generic image print endpoint to the label print service (P22) so any project can print labels, then add WO label printing capability to Project 9.
+
+**What was done:**
+
+1. **Generic `/api/print-image` endpoint** — Added to print_service.py on 10.1.1.242. Accepts base64-encoded PNG, copies count, and optional label_name. Uses shared `_print_image_gdi()` helper refactored from the existing `_print_png()` code.
+
+2. **Remote restart endpoint** — Added `/api/restart` to print_service.py. Spawns a new process and exits, enabling remote restart from the overseer dashboard. Updated overseer.py to call `restart_url` for remote services instead of logging "cannot restart."
+
+3. **WO label printing** — Added `print_wo_label()`, `make_wo_label_image()`, and `--print` CLI flag to generate_wo_labels.py (P9). Labels include QR code (encoding `proshop://wo/{wo_number}`), bold WO number, and part number + part name from ProShop API lookup.
+
+4. **GDI print fixes** — Fixed BMP row alignment bug (image width must be padded to multiple of 4 for DWORD-aligned rows — caused 45° skew). Sized label to 128px height matching PT-P700's actual printable area (not 170px tape height). Adjusted fonts from 48pt→36pt to fit.
+
+5. **Printer driver config** — Discovered PT-P700 "cut tape after data" setting (was cutting at fixed 3.94" regardless of content). Disabled auto power off so printer stays in sleep mode and wakes on print jobs.
+
+6. **ProShop scope issue** — `contacts:r` needed for customer name on labels, but FusionConnector OAuth client rejects it despite ProShop admin showing it enabled. Fell back to part number + part name. Needs investigation.
+
+7. **Camera/tablet planning** — Discussed IP camera vs GoPro vs tablet for shop floor photo capture. Decided on Android tablet as single device for walk-around setup photos, packing station box photos, tool photos, and QR scanning. Reolink IP camera order cancelled in favor of tablet. Brother ADS-2200 scanner for multi-page docs.
+
+**Files modified:**
+- `22. Tool Assembly Management/tool-kiosk/print_service.py` — /api/print-image, /api/restart, _print_image_gdi refactor, BMP row alignment fix, DEVMODE tape length
+- `9. Shop Floor Cameras/config.py` — added PRINT_SERVICE_URL
+- `9. Shop Floor Cameras/generate_wo_labels.py` — print_wo_label(), make_wo_label_image(), --print flag, label dimensions/fonts
+- `9. Shop Floor Cameras/proshop_client.py` — added customerName field to lookup (reverted query due to scope)
+- `1. Proshop Automations/Overseer/overseer.py` — restart_url config, remote restart support
+- `C:\Users\TRAXIS\.traxis.env` — scope change attempted (reverted)
+
+**Key decisions:**
+- PT-P700 printable area is 128px tall (not 170px for 24mm tape) — labels must be sized to 128px
+- BMP row data must be DWORD-aligned (pad image width to multiple of 4)
+- "Cut tape after data" driver setting eliminates tape waste
+- Tablet replaces both GoPro and fixed IP camera for shop floor photo capture
+- Part number + part name on labels (customer name blocked by OAuth scope issue)
+
+**Status:** WO label printing fully working end-to-end. Remote restart working. Camera/tablet hardware pending order.
+
+---
+
 ### Project 1: ProShop Bridge — Orientation Cube Visual + 180° Axis Fix (Session 3)
 
 **Task:** Refine the "From Previous Op" section of the written description push. The text-based face mapping ("Right goes to Front, Back goes to Left") was confusing and the 180° rotation axis detection was wrong.
