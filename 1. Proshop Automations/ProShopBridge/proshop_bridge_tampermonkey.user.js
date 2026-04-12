@@ -196,6 +196,14 @@
 
       if (editor) {
         setStatus('Setting editor content...');
+        // Allow SVG elements through CKEditor's content filter (for orientation cubes)
+        if (editor.filter && editor.filter.allow) {
+          try {
+            editor.filter.allow('svg[*]{*}(*); polygon[*]{*}(*); text[*]{*}(*); line[*]{*}(*)');
+          } catch (e) {
+            console.log('[ProShop Bridge TM] Could not extend ACF for SVG:', e);
+          }
+        }
         const existing = editor.getData() || '';
         const combined = htmlContent + (existing ? '<hr>' + existing : '');
         await new Promise((resolve) => {

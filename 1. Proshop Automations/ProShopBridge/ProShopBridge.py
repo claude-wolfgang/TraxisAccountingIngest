@@ -408,7 +408,7 @@ def _describe_setup_transition(prev_wcs, curr_wcs):
     angle_deg = round(math.degrees(angle_rad))
 
     def _rotation_summary():
-        """Describe the rotation as 'rotate about X/Y/Z axis N degrees'."""
+        """Describe the rotation in machinist terms."""
         if angle_deg < 2:
             return None
         # Find rotation axis from skew-symmetric part of R
@@ -417,29 +417,66 @@ def _describe_setup_transition(prev_wcs, curr_wcs):
         az = R[1][0] - R[0][1]
         mag = math.sqrt(ax*ax + ay*ay + az*az)
         if mag < 0.001:
-            # 180° — axis from diagonal
-            diag = [R[0][0], R[1][1], R[2][2]]
-            max_i = diag.index(max(diag))
-            axis_name = ["X", "Y", "Z"][max_i]
-            return f"rotate part about {axis_name} axis 180&deg;"
+            # 180° — skew-symmetric method fails; use (R+I) eigenvector instead.
+            # For 180° rotation about axis n: R = 2*n*n^T - I, so (R+I) = 2*n*n^T.
+            # Any non-zero column of (R+I) is proportional to the rotation axis.
+            rpi = [[R[i][j] + (1 if i == j else 0) for j in range(3)] for i in range(3)]
+            best_col, best_norm = 0, 0
+            for j in range(3):
+                n = math.sqrt(rpi[0][j]**2 + rpi[1][j]**2 + rpi[2][j]**2)
+                if n > best_norm:
+                    best_norm = n
+                    best_col = j
+            if best_norm > 0.001:
+                col = [rpi[i][best_col] / best_norm for i in range(3)]
+                abs_c = [abs(c) for c in col]
+                max_i = abs_c.index(max(abs_c))
+                if abs_c[max_i] > 0.95:
+                    axis_name = ["X", "Y", "Z"][max_i]
+                    return f"flip about {axis_name} axis"
+            return "flip 180&deg;"
         ax /= mag; ay /= mag; az /= mag
         abs_vals = [abs(ax), abs(ay), abs(az)]
         max_i = abs_vals.index(max(abs_vals))
         if abs_vals[max_i] > 0.9:
             axis_name = ["X", "Y", "Z"][max_i]
             a = angle_deg if [ax, ay, az][max_i] > 0 else -angle_deg
-            return f"rotate part about {axis_name} axis {a}&deg;"
-        # Axis doesn't align with X/Y/Z — no useful summary
-        return None
+            return f"rotate {a}&deg; about {axis_name} axis"
+        return f"rotate {angle_deg}&deg;"
+
+    summary = _rotation_summary()
+
+    # Compute rotation axis vector for visual rendering
+    rot_axis = None
+    if angle_deg >= 2:
+        _ax = R[2][1] - R[1][2]
+        _ay = R[0][2] - R[2][0]
+        _az = R[1][0] - R[0][1]
+        _mag = math.sqrt(_ax*_ax + _ay*_ay + _az*_az)
+        if _mag > 0.001:
+            rot_axis = (_ax/_mag, _ay/_mag, _az/_mag)
+        elif angle_deg > 170:
+            rpi = [[R[i][j] + (1 if i == j else 0) for j in range(3)] for i in range(3)]
+            best_col, best_norm = 0, 0
+            for j in range(3):
+                n2 = math.sqrt(rpi[0][j]**2 + rpi[1][j]**2 + rpi[2][j]**2)
+                if n2 > best_norm:
+                    best_norm = n2
+                    best_col = j
+            if best_norm > 0.001:
+                rot_axis = tuple(rpi[i][best_col] / best_norm for i in range(3))
+
+    base = {"summary": summary, "rotation_axis": rot_axis, "rotation_angle": angle_deg}
 
     if not clean:
-        summary = _rotation_summary() or f"rotate {angle_deg}&deg;"
-        return {"text": f"Non-orthogonal reorientation &mdash; {summary} (check model)",
+        text = summary or f"rotate {angle_deg}&deg;"
+        return {**base, "text": f"Non-orthogonal reorientation &mdash; {text} (check model)",
                 "face_map": None}
 
     # Identity — no change
     if all(m[0] == m[1] and m[2] == 1 for m in mappings):
-        return {"text": "Same orientation", "face_map": None}
+        return {"text": "Same orientation", "summary": None,
+                "rotation_axis": None, "rotation_angle": 0, "face_map": None}
 
     # Build complete face map: position → what identity is now there
     face_map = {}
@@ -455,19 +492,126 @@ def _describe_setup_transition(prev_wcs, curr_wcs):
             face_map[curr_pos_name] = prev_neg_face
             face_map[curr_neg_name] = prev_pos_face
 
-    # Build text — only mention faces that moved
-    changes = []
-    for prev_idx, curr_idx, sign in mappings:
-        if prev_idx == curr_idx and sign == 1:
-            continue
-        prev_face = FACES_POS[prev_idx]
-        curr_face = face_name(curr_idx, sign)
-        changes.append(f"{prev_face} goes to {curr_face}")
+    text = summary or f"reoriented {angle_deg}&deg;"
+    return {**base, "text": text, "face_map": face_map}
 
-    face_desc = ", ".join(changes)
-    summary = _rotation_summary()
-    text = f"{face_desc} &mdash; in other words, {summary}" if summary else face_desc
-    return {"text": text, "face_map": face_map}
+
+def _render_orientation_cube_svg(highlights=None, size=100, rotation_axis=None, rotation_angle=0):
+    """Render an isometric cube as inline SVG with optional face highlights.
+
+    Args:
+        highlights: dict mapping face position names to hex colors,
+                    e.g. {"Top": "#4CAF50", "Front": "#2196F3"}
+        size: pixel dimensions (square)
+        rotation_axis: optional (x,y,z) unit vector — draws axis spear + curved arrow
+        rotation_angle: rotation in degrees (used for arc sweep)
+
+    Returns:
+        Inline SVG string.
+    """
+    if highlights is None:
+        highlights = {}
+
+    s = size * 0.33
+    cx = size / 2
+    cy = size / 2
+    COS30 = 0.866
+    SIN30 = 0.5
+
+    def proj(x, y, z):
+        px = (x - y) * COS30 * s + cx
+        py = (x + y) * SIN30 * s - z * s + cy
+        return (round(px, 1), round(py, 1))
+
+    # 8 vertices indexed as x*4 + y*2 + z
+    # 0=(0,0,0) 1=(0,0,1) 2=(0,1,0) 3=(0,1,1) 4=(1,0,0) 5=(1,0,1) 6=(1,1,0) 7=(1,1,1)
+    V = [proj(x, y, z) for x in (0, 1) for y in (0, 1) for z in (0, 1)]
+
+    def pts(*indices):
+        return " ".join(f"{V[i][0]},{V[i][1]}" for i in indices)
+
+    def hex_rgba(hx, alpha):
+        r, g, b = int(hx[1:3], 16), int(hx[3:5], 16), int(hx[5:7], 16)
+        return f"rgba({r},{g},{b},{alpha})"
+
+    # Faces: (vertex indices, is_front_facing_in_iso_view)
+    FACES = [
+        ("Bottom", [0, 4, 6, 2], False),
+        ("Back",   [2, 6, 7, 3], False),
+        ("Left",   [0, 2, 3, 1], False),
+        ("Top",    [1, 5, 7, 3], True),
+        ("Front",  [0, 4, 5, 1], True),
+        ("Right",  [4, 6, 7, 5], True),
+    ]
+    lines = [f'<svg width="{size}" height="{size}" xmlns="http://www.w3.org/2000/svg" '
+             f'style="display:inline-block;vertical-align:middle;">']
+
+    # Draw back faces first, then front faces (painter's algorithm)
+    for name, verts, front in FACES:
+        color = highlights.get(name)
+        if color:
+            fill = hex_rgba(color, 0.55 if front else 0.35)
+            stroke = color
+            sw = "2" if front else "1.5"
+        else:
+            fill = "rgba(230,230,230,0.4)" if front else "rgba(200,200,200,0.08)"
+            stroke = "#555" if front else "#aaa"
+            sw = "1" if front else "0.75"
+        lines.append(f'<polygon points="{pts(*verts)}" '
+                     f'fill="{fill}" stroke="{stroke}" stroke-width="{sw}"/>')
+
+    lines.append("</svg>")
+    return "\n".join(lines)
+
+
+def _render_transition_visual(transition):
+    """Render Before/After orientation cubes with rotation caption.
+
+    Args:
+        transition: dict with 'text', optional 'face_map' dict, and optional 'summary'.
+
+    Returns:
+        HTML string, or empty string if no transition.
+    """
+    if not transition:
+        return ""
+
+    face_map = transition.get("face_map")
+    summary = transition.get("summary", "")
+    TOP_COLOR = "#4CAF50"
+    FRONT_COLOR = "#2196F3"
+
+    rot_axis = transition.get("rotation_axis")
+    rot_angle = transition.get("rotation_angle", 0)
+    before = _render_orientation_cube_svg({"Top": TOP_COLOR, "Front": FRONT_COLOR},
+                                          rotation_axis=rot_axis, rotation_angle=rot_angle)
+
+    if face_map:
+        inv_map = {v: k for k, v in face_map.items()}
+        after_hl = {inv_map.get("Top", "Top"): TOP_COLOR,
+                    inv_map.get("Front", "Front"): FRONT_COLOR}
+        after = _render_orientation_cube_svg(after_hl)
+    else:
+        after = _render_orientation_cube_svg({"Top": TOP_COLOR, "Front": FRONT_COLOR})
+
+    h = []
+    h.append('<div style="margin:6px 0 10px 0;">')
+    h.append('  <div style="font-weight:bold; font-size:12px; margin-bottom:4px;">From Previous Op:</div>')
+    h.append('  <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">')
+    h.append(f'    <div style="text-align:center;">'
+             f'<div style="font-size:10px;font-weight:bold;color:#666;">BEFORE</div>{before}</div>')
+    h.append(f'    <div style="font-size:22px;color:#666;padding:0 2px;">&rarr;</div>')
+    h.append(f'    <div style="text-align:center;">'
+             f'<div style="font-size:10px;font-weight:bold;color:#666;">AFTER</div>{after}</div>')
+    h.append('  </div>')
+    h.append(f'  <div style="font-size:10px;color:#555;margin-top:3px;">')
+    h.append(f'    <span style="color:{TOP_COLOR};">&#9632;</span>&nbsp;Top&ensp;'
+             f'<span style="color:{FRONT_COLOR};">&#9632;</span>&nbsp;Front')
+    if summary:
+        h.append(f'&ensp;&mdash;&ensp;{summary}')
+    h.append('  </div>')
+    h.append('</div>')
+    return "\n".join(h)
 
 
 def get_cam_product():
@@ -1206,12 +1350,6 @@ def generate_written_description_html(setup_data, setup_index, screenshots_b64, 
     if stickout is not None:
         html.append(f"<tr><td style='{td_style}'><strong>Material Stick Out:</strong></td><td>{stickout:.3f}\"</td></tr>")
 
-    # Setup transition from previous op (same part)
-    transition = setup_data.get("transition")
-    if transition:
-        html.append(f"<tr><td style='{td_style}'><strong>From Previous Op:</strong></td>"
-                     f"<td>{transition['text']}</td></tr>")
-
     # Stock dimensions
     stock_bounds = setup_data.get("stock_bounds")
     if stock_bounds:
@@ -1233,6 +1371,14 @@ def generate_written_description_html(setup_data, setup_index, screenshots_b64, 
                      f"<td>{mins}m {secs}s</td></tr>")
 
     html.append("</table>")
+
+    # --- Setup transition visual (Before→After orientation cubes) ---
+    transition = setup_data.get("transition")
+    if transition:
+        transition_html = _render_transition_visual(transition)
+        if transition_html:
+            html.append(transition_html)
+
     html.append(f"<p><em>Auto-generated from Fusion 360 - {timestamp}</em></p>")
     html.append("<hr>")
 
@@ -1637,9 +1783,18 @@ def _process_next_setup():
             prev_setup = cam.setups.item(setup_idx - 1)
             prev_wcs = _decompose_wcs(prev_setup)
             if prev_wcs:
+                # Debug: log raw WCS axes for both setups
+                def _fmt_vec(v):
+                    return f"({v.x:.3f}, {v.y:.3f}, {v.z:.3f})"
+                po, px, py, pz = prev_wcs
+                co, cx, cy, cz = wcs_result
+                log(f"  WCS prev '{prev_setup.name}': X={_fmt_vec(px)} Y={_fmt_vec(py)} Z={_fmt_vec(pz)}")
+                log(f"  WCS curr '{setup.name}':      X={_fmt_vec(cx)} Y={_fmt_vec(cy)} Z={_fmt_vec(cz)}")
                 transition_info = _describe_setup_transition(prev_wcs, wcs_result)
                 if transition_info:
-                    log(f"  Setup transition (from '{prev_setup.name}'): {transition_info['text']}")
+                    log(f"  Setup transition: {transition_info['text']}")
+                    if transition_info.get('face_map'):
+                        log(f"  Face map: {transition_info['face_map']}")
         except Exception as e:
             log(f"  Could not compute setup transition: {e}")
 

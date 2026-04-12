@@ -7,6 +7,37 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-12
 
+### Project 1: ProShop Bridge — Orientation Cube Visual + 180° Axis Fix (Session 3)
+
+**Task:** Refine the "From Previous Op" section of the written description push. The text-based face mapping ("Right goes to Front, Back goes to Left") was confusing and the 180° rotation axis detection was wrong.
+
+**What was done:**
+
+1. **Fixed 180° rotation axis detection bug** — `_rotation_summary()` used `max(diagonal)` to find the rotation axis for 180° rotations, which fails for non-cardinal axes (e.g., (1,-1,0)/√2 was falsely reported as "X axis"). Replaced with proper `(R+I)` eigenvector method that correctly finds the rotation axis for all 180° cases.
+
+2. **Added isometric orientation cube SVGs** — New `_render_orientation_cube_svg()` function generates transparent isometric cube with two highlighted faces (green=Top, blue=Front). Before/After cube pair shows where those faces move after the rotation. Pure inline SVG, zero dependencies, microsecond generation time.
+
+3. **Added `_render_transition_visual()`** — Composes Before→After HTML layout with cubes, arrow, color legend, and rotation summary text caption (e.g., "flip about X axis").
+
+4. **CKEditor SVG support** — Added `editor.filter.allow()` call in Tampermonkey script to whitelist SVG/polygon/text elements through CKEditor's Advanced Content Filter. Confirmed SVG renders in ProShop.
+
+5. **WCS debug logging** — Added raw WCS axis vector logging for both setups during push, enabling diagnosis of WCS frame mismatches.
+
+6. **Iterative refinements** — Removed face labels (cluttered), removed dashed lines (means hidden edges in shop drawings), tried axis spear + curved arrow (too busy), settled on clean colored cubes only.
+
+**Files modified:** `ProShopBridge/ProShopBridge.py` (orientation cube SVG, 180° fix, WCS logging), `ProShopBridge/proshop_bridge_tampermonkey.user.js` (CKEditor SVG filter)
+
+**Key decisions:**
+- Two highlighted faces (Top + Front) disambiguate all 6 faces via right-hand rule — one face is not enough
+- Solid edges only — dashed lines imply hidden internal edges to machinists
+- Text caption kept alongside cubes for "flip about X axis" summary
+- Axis spear and curved arrow tried but removed — cubes alone are clearer
+- The WCS frames from Fusion may not correspond to a clean physical flip if the programmer also rotated XY for fixture alignment — the corrected 180° detection now honestly reports "flip 180°" instead of falsely attributing a cardinal axis
+
+**Status:** Complete. Tested end-to-end: Part 10130 Op 80 with orientation cubes rendered in ProShop written description.
+
+---
+
 ### Project 1: ProShop Bridge — Written Description Push Fix (Session 2)
 
 **Task:** Continued debugging the written description push to ProShop, which had stopped working after ~2 weeks of successful operation.
