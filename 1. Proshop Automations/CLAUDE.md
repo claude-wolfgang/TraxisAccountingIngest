@@ -69,5 +69,10 @@ Add `contacts:r+toolpots:r` to the OAuth client in ProShop Admin to enable custo
 - Credentials: C:\Users\TRAXIS\.traxis.env (local) or ~/Dropbox/MACHINE COMM Traxis/Keys/.traxis.env (shared)
 - ProShop base URL: https://traxismfg.adionsystems.com/procnc
 
+## Interfaces
+Produces: Overseer dashboard (port 8060), /api/status, /api/services/*/restart|stop|start, /api/programming-sessions, programming_time_log.jsonl, overseer.log
+Consumes: Health endpoints from 12 managed services (ports 5000-8101), FOCAS monitoring.db, ProShop GraphQL API (via managed services), P25 Agent Exploration (TelegramBot :8100, AgentScheduler :8101)
+Contracts: Overseer expects each HTTP service to expose a health URL returning JSON. Validators in VALIDATORS dict must match service names in SERVICES_CONFIG. P25 services use PYTHON_EXE (not PYTHONW_EXE) with -u flag. AGENT_DIR path must match P25 folder location.
+
 ## Version
 Current: 1.4.0 — increment version in both .manifest and .py docstring on changes

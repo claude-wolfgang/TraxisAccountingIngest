@@ -2121,6 +2121,36 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-12
+
+### Projects 1, 25: Migrate P25 Services into Overseer
+**Task:** Move Telegram bot and scheduled tasks from service_wrapper.py into Overseer-managed services, enabling remote start/stop/restart from the dashboard on port 8060.
+
+**What was done:**
+
+1. **telegram_bot.py** — Added stdlib HTTP health endpoint on port 8100 (daemon thread). Tracks uptime, messages handled, last message time, tools loaded, conversation length. No new dependencies.
+
+2. **agent_scheduler.py** (NEW) — Long-running scheduler replacing service_wrapper's scheduled task logic. Runs check_reminders.py (15min), run_audit.py (60min), scan_projects.py (daily midnight). Health endpoint on port 8101 with task status and exit codes. Supports `--once` flag for testing.
+
+3. **overseer.py** — Added `AGENT_DIR` path, two service configs (TelegramBot on :8100, AgentScheduler on :8101), and two validators (`validate_telegram_bot`, `validate_agent_scheduler`). Both use `PYTHON_EXE -u` for unbuffered output with health server threads.
+
+4. **service_wrapper.py** — Stripped bot management (`start_bot`/`check_bot`/`stop_bot`), all scheduled task logic (`_run_oneshot`, `maybe_run_*`), and related state. Now only launches Overseer + heartbeat/leader election.
+
+**Files modified:**
+- `25. Agent Exploration/telegram_bot.py` — health endpoint added
+- `25. Agent Exploration/agent_scheduler.py` — NEW file
+- `1. Proshop Automations/Overseer/overseer.py` — 2 services + 2 validators added
+- `25. Agent Exploration/service_wrapper.py` — bot + scheduled tasks removed
+
+**Key decisions:**
+- Used stdlib `http.server` for health endpoints (no new dependencies)
+- Used `PYTHON_EXE` (not `PYTHONW_EXE`) for both P25 services since they need health server threads + unbuffered stdout
+- Kept leader election and Overseer launch in service_wrapper — it's the only thing NSSM needs to start
+
+**Status:** Code complete, all 4 files pass syntax check. Needs deployment test on 10.1.1.71 after Dropbox sync.
+
+---
+
 <!-- Template for new entries:
 
 ## YYYY-MM-DD

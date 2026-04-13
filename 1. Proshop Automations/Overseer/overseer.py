@@ -78,6 +78,7 @@ TOOL_KIOSK_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Cl
 MSG_NOTIFIER_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\18. ProShop Message Notifier")
 AIR_COMPRESSOR_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\23. Air Compressor communication GUI")
 SHOP_SCHEDULER_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\19. Shop Scheduler")
+AGENT_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\25. Agent Exploration")
 
 BUSINESS_HOURS_START = (5, 15)   # (hour, minute) — 5:15 AM
 BUSINESS_HOURS_END = (18, 0)     # (hour, minute) — 6:00 PM
@@ -190,26 +191,12 @@ SERVICES_CONFIG = {
         "max_degraded": 10,
         "db_path": str(TOOL_KIOSK_DIR / "data" / "tooling.db"),
     },
-    "InventorySync": {
-        "display_name": "Tool Inventory Sync",
-        "service_type": "process",
-        "check_type": "database",
-        "health_url": None,
-        "port": None,
-        "start_cmd": [PYTHONW_EXE, "inventory_sync.py", "--loop", "3600"],
-        "working_dir": str(TOOL_KIOSK_DIR),
-        "env": {"PROSHOP_CLIENT_SECRET": "8A32CD4983CA93F9BE1FF0E651B9CDE9A28F55C66B74E1CDF5D6887EFE85D5B6"},
-        "auto_start": True,
-        "restart_cooldown": 300,
-        "max_failures": 3,
-        "max_degraded": 10,
-        "db_path": str(TOOL_KIOSK_DIR / "data" / "tooling.db"),
-    },
     "LabelPrintService": {
         "display_name": "Label Print Service (10.1.1.242)",
         "service_type": "remote",
         "check_type": "http",
         "health_url": "http://10.1.1.242:5002/api/health",
+        "restart_url": "http://10.1.1.242:5002/api/restart",
         "port": 5002,
         "auto_start": False,
         "restart_cooldown": 300,
@@ -237,6 +224,32 @@ SERVICES_CONFIG = {
         "port": 5080,
         "start_cmd": [PYTHONW_EXE, "app.py"],
         "working_dir": str(SHOP_SCHEDULER_DIR),
+        "auto_start": True,
+        "restart_cooldown": 300,
+        "max_failures": 3,
+        "max_degraded": 5,
+    },
+    "TelegramBot": {
+        "display_name": "Telegram Bot",
+        "service_type": "process",
+        "check_type": "http",
+        "health_url": "http://localhost:8100/api/health",
+        "port": 8100,
+        "start_cmd": [PYTHON_EXE, "-u", "telegram_bot.py"],
+        "working_dir": str(AGENT_DIR),
+        "auto_start": True,
+        "restart_cooldown": 300,
+        "max_failures": 3,
+        "max_degraded": 5,
+    },
+    "AgentScheduler": {
+        "display_name": "Agent Scheduler",
+        "service_type": "process",
+        "check_type": "http",
+        "health_url": "http://localhost:8101/api/health",
+        "port": 8101,
+        "start_cmd": [PYTHON_EXE, "-u", "agent_scheduler.py"],
+        "working_dir": str(AGENT_DIR),
         "auto_start": True,
         "restart_cooldown": 300,
         "max_failures": 3,
@@ -476,37 +489,37 @@ def validate_tool_usage_rollup(config):
     return "healthy", f"{open_segs} open segments, {active_assigns} active assignments"
 
 
-def validate_inventory_sync(config):
-    """Check InventorySync by inspecting log freshness and sync table state."""
-    log_path = Path(config.get("working_dir", "")) / "data" / "logs" / "inventory_sync.log"
+def validate_telegram_bot(data):
+    """Validate TelegramBot /api/health response."""
+    if data.get("status") != "ok":
+        return "degraded", f"Unhealthy: {data.get('status', 'unknown')}"
+    tools = data.get("tools_loaded", 0)
+    msgs = data.get("messages_handled", 0)
+    uptime = data.get("uptime_seconds", 0)
+    conv_len = data.get("conversation_length", 0)
+    return "healthy", f"{tools} tools, {msgs} msgs handled, {conv_len} conv, uptime {uptime}s"
 
-    # 1. Check log file freshness (should update every ~1 hour)
-    if log_path.exists():
-        age = time.time() - log_path.stat().st_mtime
-        if age > 7200:  # 2 hours = 2 missed cycles
-            return "degraded", f"Log file stale ({int(age // 60)}m ago)"
-    else:
-        return "degraded", "Log file not found"
 
-    # 2. Check sync_log table
-    db_path = config.get("db_path")
-    if not db_path or not Path(db_path).exists():
-        return "degraded", "tooling.db not found"
+def validate_agent_scheduler(data):
+    """Validate AgentScheduler /api/health response."""
+    if data.get("status") != "ok":
+        return "degraded", f"Unhealthy: {data.get('status', 'unknown')}"
 
-    try:
-        conn = sqlite3.connect(db_path, timeout=5)
-        cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM inventory_sync_log")
-        synced = cur.fetchone()[0]
-        cur.execute("SELECT MAX(pushed_at) FROM inventory_sync_log")
-        last_push = cur.fetchone()[0] or "never"
-        conn.close()
-    except Exception as e:
-        if "no such table" in str(e):
-            return "healthy", "Not yet run (no sync table)"
-        return "degraded", f"DB error: {e}"
+    issues = []
+    if not data.get("reminders_ok"):
+        issues.append(f"reminders failing (exit {data.get('reminders_exit_code', '?')})")
+    if not data.get("audit_ok"):
+        issues.append(f"audit failing (exit {data.get('audit_exit_code', '?')})")
+    if not data.get("scan_ok"):
+        issues.append(f"scanner failing (exit {data.get('scan_exit_code', '?')})")
 
-    return "healthy", f"{synced} tools synced, last push: {last_push}"
+    uptime = data.get("uptime_seconds", 0)
+    last_rem = data.get("last_reminders_run", "never")
+    last_aud = data.get("last_audit_run", "never")
+
+    if issues:
+        return "degraded", f"Issues: {', '.join(issues)} | uptime {uptime}s"
+    return "healthy", f"reminders={last_rem}, audit={last_aud}, uptime {uptime}s"
 
 
 # Map service name -> validator function
@@ -520,10 +533,11 @@ VALIDATORS = {
     "MessageNotifier": validate_message_notifier,
     "ToolAssemblyKiosk": validate_tool_assembly_kiosk,
     "ToolUsageRollup": validate_tool_usage_rollup,
-    "InventorySync": validate_inventory_sync,
     "LabelPrintService": validate_label_print_service,
     "AirCompressor": validate_air_compressor,
     "ShopScheduler": validate_shop_scheduler,
+    "TelegramBot": validate_telegram_bot,
+    "AgentScheduler": validate_agent_scheduler,
 }
 
 
@@ -768,6 +782,22 @@ class ServiceManager:
                             f"Restart skipped ({int(remaining)}s cooldown remaining)")
                 return False
 
+        # Remote services: call their restart endpoint
+        stype = state.config.get("service_type", "process")
+        restart_url = state.config.get("restart_url")
+        if stype == "remote" and restart_url:
+            self._event(name, "restarting", "Sending restart to remote service...")
+            try:
+                resp = http_requests.post(restart_url, timeout=10)
+                resp.raise_for_status()
+                state.last_restart = datetime.now()
+                state.restart_count += 1
+                self._event(name, "info", "Remote restart triggered — waiting for service")
+                return True
+            except Exception as e:
+                self._event(name, "error", f"Remote restart failed: {e}")
+                return False
+
         self._event(name, "restarting", "Restarting service...")
         self.stop_service(name)
         time.sleep(3)
@@ -975,6 +1005,28 @@ def api_start(name):
         return jsonify({"error": "Unknown service"}), 404
     threading.Thread(target=manager.start_service, args=(name,), daemon=True).start()
     return jsonify({"status": "starting"})
+
+
+@app.route("/api/overseer/restart", methods=["POST"])
+def api_overseer_restart():
+    """Restart the Overseer process itself."""
+    log.info("Overseer restart requested via API")
+    # Stop all managed services gracefully first
+    for name in list(manager.services):
+        try:
+            manager.stop_service(name)
+        except Exception:
+            pass
+    # Spawn a replacement process then exit
+    script = str(Path(__file__).resolve())
+    subprocess.Popen(
+        [sys.executable, script],
+        creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS,
+        close_fds=True,
+    )
+    # Schedule self-exit after response is sent
+    threading.Thread(target=lambda: (time.sleep(1), os._exit(0)), daemon=True).start()
+    return jsonify({"status": "restarting"})
 
 
 @app.route("/api/programming-sessions")
