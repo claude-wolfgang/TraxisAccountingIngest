@@ -7,6 +7,39 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-13
 
+### Project 28: ProShop API Usage — Batch NCR Scrap Disposition
+
+**Task:** Investigate API control over NCR (Non-Conformance Report) module and batch-disposition all outstanding NCRs as scrap.
+
+**What was done:**
+
+1. **Introspected ProShop GraphQL schema for NCR types** — mapped `NonConformanceReport`, `UpdateNCRInput`, `NCRDisposition`, `UpdateNonConformanceDispositionTableInput`, `NonConformanceReportFilter`, and related types
+2. **Discovered OAuth scope gating** — `nonconformancereports:rwdp` scope is enforced server-side (unlike some other modules). Existing clients (FusionConnector, ClaudeCodeResearch) did not have it enabled
+3. **Created new OAuth client** — `B828-32C5-5194` (2ClaudeCodeReasearch) with full scope list including NCR access. Discovered ProShop has a character limit on scope field and scopes are locked at client creation time
+4. **Queried all 277 NCRs** — found 118 Outstanding, 159 Complete. Two status values only: "Outstanding" and "Complete"
+5. **Tested single NCR update** — confirmed `updateNCR` mutation with disposition array adds "Scrap" disposition row and auto-flips status to "Complete"
+6. **Batch processed 108 Outstanding NCRs** (on or before March 13, 2026) — all dispositioned as Scrap with note "Batch scrap disposition - API cleanup April 2026". 101 moved to Complete, 6 stayed Outstanding (0 parts affected)
+7. **Processed remaining 14 NCRs** — scrapped 10 recent ones (post-March 13), deleted 4 zero-quantity NCRs
+8. **Final result: 0 Outstanding NCRs remaining**
+
+**Key findings:**
+- ProShop NCR mutations: `addNCR`, `updateNCR(ncrRefNumber, data)`, `deleteNCR(ncrRefNumber)`
+- Disposition is an array of `{data: {disposition, dispositionquantity, dispositionnotes}}` within `UpdateNCRInput`
+- ProShop auto-completes NCRs when disposition quantity > 0 is added
+- NCR dates are in `MM/DD/YYYY; HH:MM:SS AM/PM` format, not ISO
+- OAuth scope field has a character limit; scopes must be set at client creation, cannot be expanded after
+
+**Files modified:** None (all operations were API-only, no code changes)
+
+**New OAuth client created:**
+- Client ID: B828-32C5-5194
+- Name: 2ClaudeCodeReasearch
+- Scope includes: nonconformancereports:rwdp + full module access
+
+**Status:** Complete. All 277 NCRs resolved (scrapped or deleted). Zero outstanding.
+
+---
+
 ### Project 28: ProShop API Usage — Recon & Interval Reduction
 
 **Task:** Investigate why ProShop reported ~1,600 API calls/hour from Traxis, identify culprits, and reduce call volume.
