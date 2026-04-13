@@ -7,6 +7,59 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-13
 
+### Project 28: ProShop API Usage — Recon & Interval Reduction
+
+**Task:** Investigate why ProShop reported ~1,600 API calls/hour from Traxis, identify culprits, and reduce call volume.
+
+**What was done:**
+
+1. **Full recon across all projects** — identified every script making ProShop GraphQL API calls, catalogued auth approaches, query types, polling patterns, and estimated calls/hr per service
+2. **Identified top 3 culprits:**
+   - Message Notifier (P18): ~2,400–4,800 calls/hr (30s per-user polling)
+   - Time Status Display (P1): ~1,320 calls/hr (30s per-user polling)
+   - Shop Scheduler (P19): ~1,200–1,350 calls/hr (15-min full sync with per-WO fan-out)
+3. **Reduced polling intervals:**
+   - P18 Message Notifier: 30s → 30 min (config.py POLL_INTERVAL)
+   - P1 Time Status Display: 30s → 15 min (POLL_INTERVAL + dashboard.html POLL_MS)
+   - P19 Shop Scheduler: 15 min → 2 hr (config.py SYNC_INTERVAL)
+4. **Documented ProShop's response** from Joao (via Tom) — noting unfiltered bulk queries as future optimization target
+5. **Wrote RECON_REPORT.md** with full findings, per-script breakdown, and recommendations
+6. **Restarted all three services** via Overseer API
+
+**Files modified:**
+- `18. ProShop Message Notifier/config.py` — POLL_INTERVAL 30 → 1800
+- `18. ProShop Message Notifier/templates/notifier.html` — added Check Now button, conditional auto-poll
+- `18. ProShop Message Notifier/message_notifier.py` — added _single_check method
+- `1. Proshop Automations/TimeTrackerDashboard/time_status_display_v1.0.py` — POLL_INTERVAL 30 → 900
+- `1. Proshop Automations/TimeTrackerDashboard/dashboard.html` — POLL_MS 15000 → 900000
+- `19. Shop Scheduler/config.py` — SYNC_INTERVAL 900 → 7200
+- `28. Proshop API Usage/RECON_REPORT.md` — created (recon findings + ProShop reply)
+
+**Key decisions:** Kept writeback interval (120s) unchanged in P19 since it only fires when there are queued local changes. Kept "Check Now" / "Refresh" buttons for on-demand use between intervals.
+
+**Estimated result:** ~5,000–6,700 calls/hr → ~284–384 calls/hr
+
+**Follow-up work (same session):**
+
+7. **Resolved open items:**
+   - Clock Feedback Display (`clock_feedback_display_v1_0_0.py`) — confirmed not running. Not on Overseer, no process found. Non-issue.
+   - FusionToolAuditor hardcoded secret — removed `PROSHOP_CLIENT_SECRET` from source code, now loads from `.traxis.env` (same pattern as ProShopBridge). Also scrubbed secret from P16 CLAUDE.md.
+   - GraphQL Playground — introspected 7 key filter types (`WorkOrderFilter`, `PurchaseOrderFilter`, `UserFilter`, `WorkCellFilter`, `ToolFilter`, `ContactFilter`, `ClockPunchFilter`) from live API. Documented all available filter fields in RECON_REPORT.md with recommended filter changes table.
+8. **Documented Joao's (ProShop/Adion) reply** in RECON_REPORT.md — key guidance: use filters to fetch only needed records, GraphQL Playground at `/api/graphql` has full schema.
+9. **Created P28 CLAUDE.md** with interfaces section.
+10. **Added P28 to TRAXIS_ECOSYSTEM.md** project list.
+
+**Additional files modified:**
+- `16. Fusion Tool Library Product ID Changer/FusionToolAuditor/FusionToolAuditor.py` — replaced hardcoded credentials with `.traxis.env` loader
+- `16. Fusion Tool Library Product ID Changer/CLAUDE.md` — removed hardcoded secret, updated credentials section
+- `28. Proshop API Usage/CLAUDE.md` — created (interfaces)
+- `28. Proshop API Usage/RECON_REPORT.md` — added ProShop reply, filter fields reference, recommended filter changes
+- `TRAXIS_ECOSYSTEM.md` — added P28 entry
+
+**Status:** Complete. Services restarted. All open items resolved except follow-up email to Tom/Joao (Wolfgang's action).
+
+---
+
 ### Project 22: Tool Assembly Kiosk — Push to ProShop Button + Overseer Dashboard Fixes
 
 **Task:** Move inventory sync from an always-on Overseer service to an on-demand kiosk button. Fix Overseer dashboard links and add self-restart capability.

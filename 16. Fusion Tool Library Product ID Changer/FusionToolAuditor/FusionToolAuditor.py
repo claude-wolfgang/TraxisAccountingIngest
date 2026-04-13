@@ -28,16 +28,40 @@ COMMAND_NAME = 'Tool Auditor'
 COMMAND_TOOLTIP = 'Audit and edit Product IDs in tool libraries'
 PANEL_ID = 'ToolsPanel'  # Existing panel in Manufacture workspace
 
-# ProShop API credentials
-PROSHOP_CLIENT_ID = 'BA16-EFAF-B154'
-PROSHOP_CLIENT_SECRET = '2F64968E4E77FDE1CB6B587D9F92340CC3B4C82A414D77798F359A85CD4976D1'
-PROSHOP_SCOPE = 'parts:rwdp+workorders:rwdp+users:r+tools:rwdp+toolpots:r'
+# ProShop API endpoints
 PROSHOP_TOKEN_URL = 'https://traxismfg.adionsystems.com/home/member/oauth/accesstoken'
 PROSHOP_GRAPHQL_URL = 'https://traxismfg.adionsystems.com/api/graphql'
 
 # Get HTML file path (same directory as this script)
 import os
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+# Load ProShop credentials from .traxis.env (same pattern as ProShopBridge)
+_ENV_FILE_LOCAL = os.path.join(os.path.expanduser("~"), ".traxis.env")
+_ENV_FILE_SHARED = os.path.join(os.path.expanduser("~"), "Dropbox",
+                                "MACHINE COMM Traxis", "Keys", ".traxis.env")
+_ENV_FILE_PROJECT = os.path.join(SCRIPT_DIR, "..", "..", "1. Proshop Automations", ".traxis.env")
+
+
+def _load_credentials():
+    for path in [_ENV_FILE_LOCAL, _ENV_FILE_SHARED, _ENV_FILE_PROJECT]:
+        if os.path.exists(path):
+            creds = {}
+            with open(path, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if "=" in line and not line.startswith("#"):
+                        key, val = line.split("=", 1)
+                        creds[key.strip()] = val.strip()
+            if creds.get("PROSHOP_CLIENT_ID") and creds.get("PROSHOP_CLIENT_SECRET"):
+                return creds
+    return {}
+
+
+_creds = _load_credentials()
+PROSHOP_CLIENT_ID = _creds.get("PROSHOP_CLIENT_ID", "")
+PROSHOP_CLIENT_SECRET = _creds.get("PROSHOP_CLIENT_SECRET", "")
+PROSHOP_SCOPE = _creds.get("PROSHOP_SCOPE", "parts:rwdp+workorders:rwdp+users:r+tools:rwdp+toolpots:r")
 HTML_FILE_PATH = os.path.join(SCRIPT_DIR, 'palette.html')
 
 

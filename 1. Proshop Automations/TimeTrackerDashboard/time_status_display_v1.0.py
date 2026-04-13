@@ -93,7 +93,7 @@ SCOPES = "parts:rwdp+workorders:rwdp+users:r+toolpots:r"
 
 HOST = "0.0.0.0"
 PORT = 8050
-POLL_INTERVAL = 30  # seconds
+POLL_INTERVAL = 900  # 15 min — was 30s, reduced to cut API load
 
 # Employee IDs to exclude (ProShop system users, etc.)
 EXCLUDED_USER_IDS = {"124", "999"}  # System User, System Agent
@@ -486,9 +486,8 @@ class DataCollector:
             }
 
     def run_poll_loop(self):
-        """Background thread: poll forever."""
+        """Background thread: poll at POLL_INTERVAL."""
         log.info("Starting poll loop (interval=%ds)", POLL_INTERVAL)
-        # Initial load
         self.load_users()
         while True:
             try:

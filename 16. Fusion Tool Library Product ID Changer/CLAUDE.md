@@ -101,12 +101,7 @@ From Autodesk docs:
 
 ### ProShop API
 
-**Working credentials:**
-```
-Client ID: BA16-EFAF-B154
-Secret: 2F64968E4E77FDE1CB6B587D9F92340CC3B4C82A414D77798F359A85CD4976D1
-Scope: parts:rwdp+workorders:rwdp+users:r+tools:rwdp+toolpots:r
-```
+**Credentials:** Loaded from `.traxis.env` (searches `~/.traxis.env`, `~/Dropbox/MACHINE COMM Traxis/Keys/.traxis.env`, then project-relative fallback). Keys: `PROSHOP_CLIENT_ID`, `PROSHOP_CLIENT_SECRET`, `PROSHOP_SCOPE`.
 
 **Endpoints:**
 ```
