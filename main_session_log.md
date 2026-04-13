@@ -7,6 +7,40 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-13
 
+### Project 29: Rollo Printer App — Full Implementation
+
+**Task:** Implement P29 Rollo Thermal Printer system tray app from spec.
+
+**What was done:**
+
+1. **Built `rollo_printer_app.py`** — full system tray app using pystray, PyMuPDF, pywin32. Right-click menu: Print to Rollo, Test Printer, Open Log, Quit.
+2. **Smart PDF rescaling** — auto-detects ink bounding box on the page, crops to content, auto-rotates landscape→portrait, scales up to fill 4x6 label. Solves the core UPS problem where labels print tiny on thermal paper.
+3. **Created PyInstaller spec** — single .exe build (40MB), no console window.
+4. **Built .exe** — `dist/rollo_printer_app.exe` compiled successfully.
+5. **Created shortcuts** — Desktop shortcut + Windows Startup folder shortcut for auto-launch on boot.
+6. **Discovered `.pyw` not registered** on this machine — worked around with `.bat` launcher for dev, `.exe` for production.
+7. **Tested end-to-end** — printed a real UPS label (`upscarmex.pdf`) to Rollo, confirmed content fills the label correctly.
+
+**Files created:**
+- `29. Rollo Printer App/rollo_printer_app.py` — main app source
+- `29. Rollo Printer App/rollo_printer_app.spec` — PyInstaller spec
+- `29. Rollo Printer App/rollo_printer_app.pyw` — windowless launcher copy
+- `29. Rollo Printer App/Rollo Printer.bat` — bat launcher (dev fallback)
+- `29. Rollo Printer App/requirements.txt` — dependencies
+- `29. Rollo Printer App/CLAUDE.md` — project docs with interfaces
+- `29. Rollo Printer App/dist/rollo_printer_app.exe` — compiled executable
+- Desktop shortcut: `Rollo Printer.lnk`
+- Startup shortcut: `Rollo Printer.lnk`
+
+**Key decisions:**
+- Used PyMuPDF (fitz) over PyPDF2 for reliable rasterization
+- Content-aware cropping (ink bounding box detection) was critical — naive page scaling produced tiny labels
+- Auto-rotation handles landscape UPS PDFs on portrait 4x6 labels
+
+**Status:** Complete. App is running, printing correctly, and will auto-start on boot.
+
+---
+
 ### Project 28: ProShop API Usage — Batch NCR Scrap Disposition
 
 **Task:** Investigate API control over NCR (Non-Conformance Report) module and batch-disposition all outstanding NCRs as scrap.

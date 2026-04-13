@@ -4,7 +4,7 @@
 
 ## Project Status
 
-**22 active** | 2 complete | 2 retired
+**23 active** | 2 complete | 2 retired
 
 - [+] **P1: ProShop Automations** — Fusion 360 add-in connecting to ProShop ERP via GraphQL API for work order browsing.
 - [+] **P2: YCM Post Processor Development** — Custom Fusion 360 post processor for YCM NTC1600LY CNC lathe with live tooling and ERP integration.
@@ -33,6 +33,7 @@
 - [+] **P25: Agent Exploration (Data Quality Agent)** — Always-running data quality agent for Traxis Manufacturing with Telegram bot.
 - [+] **P27: Accounting Ingest** — Integrates vendor invoices with QuickBooks Online via API.
 - [+] **P28: ProShop API Usage** — Monitoring and documentation of ProShop GraphQL API usage across the ecosystem.
+- [+] **P29: Rollo Printer App** — System tray app for printing PDFs to Rollo 4x6 thermal printer with auto-crop and rescaling.
 
 ## Interface Map
 
@@ -43,6 +44,7 @@
 | P19: Shop Scheduler | scheduler.db (SQLite, local), Flask web UI (port 5080), /api/priorities/report endpoint, /api/tool-demand endpoint, heartbeat.json (Overseer health check) | ProShop GraphQL API (WOs, ops, machines, tools, toolpots, purchaseOrders), P22 tooling.db (read-only via config.KIOSK_DB_PATH), Overseer (managed service), .traxis.env (PROSHOP_CLIENT_SECRET) |
 | P22: Tool Assembly Management | tooling.db (SQLite at tool-kiosk/data/tooling.db), Flask kiosk UI (port 5001), /api/print-label proxy to print service, /api/print-inventory-label proxy, /api/print-image (generic PNG label printing for any project), /api/restart (remote process restart), /api/health endpoint, heartbeat.json (Overseer health check) | ProShop GraphQL API (tools, RTAs, work cells, pockets, users, work orders), .traxis.env (TOOLKIOSK_CLIENT_ID, TOOLKIOSK_CLIENT_SECRET, TOOLKIOSK_SCOPE), Overseer (managed service), FocasMonitor monitoring.db (read-only, for tool_usage_rollup.py), Brother PT-P700 printer (USB on 10.1.1.242) |
 | P25: Agent Exploration (Data Quality Agent) | audit.db (SQLite), reports/latest.md, project_index.json, service_heartbeat.json, Telegram bot responses, /api/health on ports 8100 (TelegramBot) and 8101 (AgentScheduler) | ProShop GraphQL API, FOCAS monitoring.db (read-only), NC Programs filesystem, Anthropic API, Telegram Bot API, Overseer (managed service on ports 8100/8101) |
+| P29: Rollo Printer App | rollo_print.log (print job history), rollo_printer_app.exe (standalone) | Windows printer subsystem ("Rollo Printer"), user-supplied PDF files |
 
 ## Critical Seams
 
