@@ -7,6 +7,28 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-13
 
+### ProShop API — Batch WO Status Update to Invoiced
+
+**Task:** Update 11 work orders to "Invoiced" status in ProShop based on QBO invoices created today.
+
+**What was done:**
+
+1. Read `wo_invoiced_today.md` — 11 WOs matched to QBO invoices created 2026-04-13
+2. Investigated ProShop GraphQL schema — found `updateWorkOrder` mutation accepts `UpdateWorkOrderInput` with a `status: WorkOrderStatus` field
+3. Verified all 11 WOs were in "Shipped" status
+4. Test-updated 25-0300 → Invoiced successfully
+5. Batch-updated remaining 10 WOs — all succeeded, zero failures
+
+**WOs updated:** 25-0300, 25-0302, 26-0057, 26-0059, 26-0093, 26-0094, 26-0116, 26-0122, 26-0123, 26-0124, 26-0125
+
+**Key discovery:** First use of `updateWorkOrder` mutation for WO status changes in the codebase. Pattern: `mutation($wn: String!, $data: UpdateWorkOrderInput) { updateWorkOrder(workOrderNumber: $wn, data: $data) { workOrderNumber status } }` with `{status: "Invoiced"}`.
+
+**Files modified:** None — all work was ad-hoc API calls, no project code changed.
+
+**Status:** Complete.
+
+---
+
 ### Project 29: Rollo Printer App — Full Implementation
 
 **Task:** Implement P29 Rollo Thermal Printer system tray app from spec.
