@@ -5,6 +5,23 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-13
+
+### Project 22: Tool Assembly Kiosk — Push to ProShop Button + Overseer Dashboard Fixes
+
+**Task:** Move inventory sync from an always-on Overseer service to an on-demand kiosk button. Fix Overseer dashboard links and add self-restart capability.
+
+**What was done:**
+
+1. **Removed InventorySync from Overseer** — deleted service config, validator, and VALIDATORS entry
+2. **Added "Push to ProShop" button to kiosk** — background thread + polling pattern for the ~15min sync; button on inventory menu and summary screens
+3. **Added Overseer self-restart button** — `POST /api/overseer/restart` spawns replacement process; dashboard polls until it comes back
+4. **Fixed Overseer "Open" links** — replaced `localhost` with `location.hostname` for remote viewing
+
+**Status:** Complete. Overseer HTML committed. Kiosk changes sync via Dropbox.
+
+---
+
 ## 2026-04-12
 
 ### Project 12: TPM (Traxis Program Manager) — Startup Fix + NC Program Naming (Session 5)

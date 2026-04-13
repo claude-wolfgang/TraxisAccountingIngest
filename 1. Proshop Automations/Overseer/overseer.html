@@ -363,6 +363,7 @@
   <h1><span>TRAXIS</span> Service Overseer</h1>
   <div class="header-right">
     <span class="overall-status" id="overallStatus">--</span>
+    <button class="btn btn-restart" onclick="restartOverseer()" style="font-size:11px">Restart Overseer</button>
     <span class="refresh-indicator" id="refreshInfo">Connecting...</span>
   </div>
 </div>
@@ -499,7 +500,7 @@ function renderServices(services) {
           ? `<button class="btn btn-start" onclick="doAction('${svc.name}','start')">Start</button>`
           : `<button class="btn btn-restart" onclick="doAction('${svc.name}','restart')">Restart</button>
              <button class="btn btn-stop" onclick="doAction('${svc.name}','stop')">Stop</button>`}
-        ${svc.healthUrl ? `<button class="btn btn-open" onclick="window.open('${svc.healthUrl.replace('/api/status','/')}','_blank')">Open</button>` : ''}
+        ${svc.healthUrl ? `<button class="btn btn-open" onclick="window.open('${svc.healthUrl.replace('localhost', location.hostname).replace(/\/api\/(status|health)$/, '/')}','_blank')">Open</button>` : ''}
       </div>
     </div>
   `).join('');
@@ -566,6 +567,28 @@ async function doAction(serviceName, action) {
     setTimeout(refresh, 5000);
   } catch (e) {
     alert(`Action failed: ${e.message}`);
+  }
+}
+
+async function restartOverseer() {
+  if (!confirm('Restart the Overseer service? All managed services will be stopped and restarted.')) return;
+  try {
+    await fetch('/api/overseer/restart', { method: 'POST' });
+    document.getElementById('refreshInfo').textContent = 'Overseer restarting...';
+    document.getElementById('refreshInfo').className = 'refresh-indicator stale';
+    // Poll until it comes back
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      try {
+        const resp = await fetch('/api/status');
+        if (resp.ok) { clearInterval(poll); refresh(); }
+      } catch (e) {
+        if (attempts > 30) { clearInterval(poll); alert('Overseer did not come back. Check the server.'); }
+      }
+    }, 2000);
+  } catch (e) {
+    alert('Restart request failed: ' + e.message);
   }
 }
 
