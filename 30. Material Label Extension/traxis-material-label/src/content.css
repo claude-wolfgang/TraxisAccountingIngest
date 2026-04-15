@@ -1,0 +1,64 @@
+/* Traxis Material Label — button injected on ProShop WO pages */
+
+.traxis-label-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  margin: 4px 6px;
+  border: none;
+  border-radius: 4px;
+  background: #2e7d32;
+  color: #fff;
+  font: bold 13px Arial, sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.traxis-label-btn:hover {
+  background: #388e3c;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.traxis-label-btn:active {
+  background: #1b5e20;
+}
+
+/* Printing state */
+.traxis-label-btn--printing {
+  background: #757575;
+  cursor: wait;
+  pointer-events: none;
+}
+
+/* Success flash */
+.traxis-label-btn--success {
+  background: #1b5e20;
+  animation: traxis-flash-success 1.5s ease-out;
+}
+
+/* Error state */
+.traxis-label-btn--error {
+  background: #c62828;
+}
+
+@keyframes traxis-flash-success {
+  0%   { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.6); }
+  50%  { box-shadow: 0 0 12px 4px rgba(46, 125, 50, 0.3); }
+  100% { box-shadow: none; }
+}
+
+/* Status text next to button */
+.traxis-label-status {
+  display: inline-block;
+  margin-left: 8px;
+  font: 12px Arial, sans-serif;
+  color: #757575;
+  vertical-align: middle;
+}
+
+.traxis-label-status--error {
+  color: #c62828;
+  font-weight: bold;
+}

@@ -2310,6 +2310,45 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-14
+
+### Project 30: Material Label Extension — Initial Build
+
+**Task:** Build a Chrome extension (MV3) that injects a "Print Material Label" button on ProShop WO pages, generates a label PNG client-side, and sends it to the Brother PT-P700 print service.
+
+**What was done:**
+
+- Created full project structure at `30. Material Label Extension/traxis-material-label/`
+- **manifest.json** — MV3 targeting `traxismfg.adionsystems.com/procnc/workorders/*`, host_permissions for print service at 10.1.1.242:5002
+- **service-worker.js** — Proxies PRINT_LABEL and CHECK_PRINTER messages to HTTP print service (bypasses HTTPS→HTTP mixed-content block)
+- **label-generator.js** — Canvas API rendering: 128px tall label matching P9 convention (QR code left encoding `proshop://wo/{woNumber}`, 4 text lines right: WO number, material, part number, quantity)
+- **content.js** — WO number from URL regex, DOM scraping for material/part/qty with GraphQL API fallback via session cookie, green button injection near Part Stock row, MutationObserver with 500ms debounce for AJAX navigation
+- **content.css** — Green button (#2e7d32) with printing/success/error state animations
+- Downloaded `qrcode-generator` library (Kazuhiko Arase) for QR code rendering
+- Iterated on button placement: moved from page top → Part Stock row area → absolute-positioned at row's right edge
+- Created project CLAUDE.md with Interfaces block
+
+**Key decisions:**
+
+- Service worker needed as HTTPS→HTTP proxy (ProShop is HTTPS, print service is HTTP)
+- Reused P9 label conventions (128px/180DPI, `proshop://wo/` QR scheme) and P22 print payload format (`{image_base64, copies, label_name}`)
+- DOM scraping first with GraphQL API fallback for material data — WO number always from URL (reliable)
+- XPath search for "Part Stock" text to anchor button placement (faster than full element scan)
+
+**Files created:**
+
+- `30. Material Label Extension/CLAUDE.md`
+- `30. Material Label Extension/traxis-material-label/manifest.json`
+- `30. Material Label Extension/traxis-material-label/background/service-worker.js`
+- `30. Material Label Extension/traxis-material-label/src/content.js`
+- `30. Material Label Extension/traxis-material-label/src/content.css`
+- `30. Material Label Extension/traxis-material-label/src/label-generator.js`
+- `30. Material Label Extension/traxis-material-label/lib/qrcode.min.js`
+
+**Status:** Needs testing — button appears on WO pages, but print functionality and DOM scraping accuracy not yet verified. Button placement needs refinement once ProShop DOM structure is inspected.
+
+---
+
 <!-- Template for new entries:
 
 ## YYYY-MM-DD

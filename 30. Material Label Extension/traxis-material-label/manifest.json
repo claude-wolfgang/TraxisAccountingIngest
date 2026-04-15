@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Traxis Material Label",
+  "version": "1.0.0",
+  "description": "Print material labels from ProShop WO pages via Brother PT-P700",
+  "permissions": ["activeTab"],
+  "host_permissions": [
+    "https://traxismfg.adionsystems.com/*",
+    "http://10.1.1.242:5002/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://traxismfg.adionsystems.com/procnc/workorders/*"],
+      "js": ["lib/qrcode.min.js", "src/label-generator.js", "src/content.js"],
+      "css": ["src/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/*", "lib/*", "assets/*"],
+      "matches": ["https://traxismfg.adionsystems.com/*"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
