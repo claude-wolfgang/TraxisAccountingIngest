@@ -5,6 +5,37 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-15
+
+### P17/P30: COTS PNG Label Generator + Chrome Extension Print Button
+
+**Task:** Replace P-touch Editor .lbx template workflow for COTS labels with programmatic PNG generation (matching P9 WO label style) and add a browser-based print button on ProShop COTS pages.
+
+**What was done:**
+
+1. **P17 — `generate_cots_labels.py`** (new file): Python CLI that generates COTS label PNGs using Pillow + qrcode. Layout: QR code left (ProShop URL), bold COTS ID (48pt) + wrapped description (28pt) right. Fixed 450px width (2.5" at 180 DPI), 128px height. 2x supersampled with LANCZOS downsample for crisp text. Supports `--print` (sends to PT-P700 via 10.1.1.242:5002), `--all` (batch from CSV), `--copies`, and `--api` (pulls item data from ProShop GraphQL API instead of CSV).
+2. **P30 — Chrome extension expanded** to also inject a "Print COTS Label" button on ProShop COTS detail pages (`/procnc/ots/*`). Added `cots-content.js` (button injection, DOM scraping for description) and `cots-label-generator.js` (Canvas-based rendering matching the Python layout). Button is fixed-positioned top-center to avoid disrupting ProShop page layout. Extension renamed to "Traxis Label Printer" v1.1.0.
+3. Test-printed THI-219 labels through multiple iterations refining font sizes, text wrapping, and resolution.
+
+**Files created:**
+- `17. COTS - Tools Crib Kiosk/generate_cots_labels.py`
+- `17. COTS - Tools Crib Kiosk/labels/` (generated PNGs)
+- `30. Material Label Extension/traxis-material-label/src/cots-content.js`
+- `30. Material Label Extension/traxis-material-label/src/cots-label-generator.js`
+
+**Files modified:**
+- `30. Material Label Extension/traxis-material-label/manifest.json` (added COTS content script, bumped version)
+
+**Key decisions:**
+- Fixed label width at 450px (2.5") per Wolfgang's constraint
+- 2x supersampling for text quality, though thermal printer dithers to 1-bit
+- Description font enlarged to 28pt with word wrapping (max 2 lines) per Wolfgang's feedback
+- Chrome button placed as fixed-position top-center to avoid ProShop DOM interference
+
+**Status:** Complete. Extension needs reload in chrome://extensions to pick up changes.
+
+---
+
 ## 2026-04-13
 
 ### ProShop API — Batch WO Status Update to Invoiced
