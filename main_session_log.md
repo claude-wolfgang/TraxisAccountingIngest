@@ -7,6 +7,53 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-16
 
+### P33: Tool Library Updater — API tool switchover D195-D198 and reusable CLI utility
+
+**Task:** Test ProShop API capability to update tool library entries when switching manufacturers (GARR to Kennametal GOdrill), then build a reusable CLI tool for future switchovers.
+
+**What was done:**
+
+1. **Manual tool updates via ProShop GraphQL API** — Updated D195, D196, D197, D198 from GARR 5xD drills to Kennametal GOdrill 3xD KC7325 drills:
+   - Queried existing tool records (description, dimensions, coating, approved brands)
+   - Fetched new tool specs from Kennametal product pages (diameter, OAL, flute length, shank, helix, coating)
+   - Found VPO pricing in ProShop (PO 263067, 4/9/2026) — prices $46.37-$47.12/ea
+   - Updated all fields: description, overallLength, lengthOfCut, shankDiameter, coating (TIALN), helixAngle (30), ansiCatalogNumber, approved brand (KENNAMETAL + new EDP + VPO cost)
+   - Preserved old GARR info in purchasingNotes with PREV: prefix, without overwriting existing notes (kiosk notes on D197 preserved)
+   - Downloaded Kennametal product images (API doesn't support picture uploads)
+
+2. **Built P33: Tool Library Updater CLI** — Reusable Python utility with subcommands:
+   - `inspect` — Query/display tool records (human + JSON output)
+   - `find-vpo` — Search Tool-type VPOs for pricing
+   - `scrape` — Fetch specs from manufacturer websites (Kennametal scraper built, extensible registry)
+   - `preview` — Dry-run diff of proposed changes
+   - `update` — Execute mutations with confirmation prompt
+   - `download-image` — Save product images for manual upload
+   - All subcommands support `--json` for Claude Code integration
+
+**Key discoveries:**
+- BA16 OAuth client accepts `purchaseorders:r` scope at token time (not pre-registered but works)
+- BA16 does NOT accept `contacts:r` — supplier names on VPOs require AccountingConnector client
+- ProShop API does NOT support picture uploads on tools (read-only field)
+- `updateTool` mutation uses selector/data pattern for nested `approvedBrands` table updates
+
+**Files created:**
+- `33. Tool Library Updater/CLAUDE.md`
+- `33. Tool Library Updater/tool_update.py` — CLI entry point
+- `33. Tool Library Updater/proshop_tools.py` — ProShop API client
+- `33. Tool Library Updater/description_format.py` — Description builder + PREV formatter
+- `33. Tool Library Updater/mfg_scrapers.py` — Manufacturer scrapers (Kennametal)
+- `Kennametal_B041A03455CPG_GOdrill.jpg` (+ 3 more product images in project root)
+
+**ProShop records modified:**
+- D195: GARR 89321 ($15.12) -> KENNAMETAL B041A03455CPG ($46.37)
+- D196: GARR 89391 ($19.06) -> KENNAMETAL B041A04217CPG ($47.12)
+- D197: GARR 89346 ($16.54) -> KENNAMETAL B041A03734CPG ($46.37)
+- D198: GARR 89281 ($13.58) -> KENNAMETAL B041A02800CPG ($46.46)
+
+**Status:** Complete. CLI tested and working against live ProShop data.
+
+---
+
 ### P31: BLE Proximity Worker Tracking — Project creation and initial hardware test
 
 **Task:** Create new project P31, move BLE proximity research from P5, and test Feasycom beacon tags with Asus USB BT dongle on 10.1.1.178.

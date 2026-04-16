@@ -4,7 +4,7 @@
 
 ## Project Status
 
-**26 active** | 2 complete | 2 retired
+**27 active** | 2 complete | 2 retired
 
 - [+] **P1: ProShop Automations** — Fusion 360 add-in connecting to ProShop ERP via GraphQL API for work order browsing.
 - [+] **P2: YCM Post Processor Development** — Custom Fusion 360 post processor for YCM NTC1600LY CNC lathe.
@@ -36,6 +36,7 @@
 - [+] **P29: Rollo Printer App** — Windows system tray app for printing PDFs to Rollo thermal printer.
 - [+] **P30: Traxis Label Printer Extension** — Chrome extension that generates and prints material and COTS labels from ProShop pages.
 - [?] **P31: BLE Proximity Worker Tracking** — Passive BLE-based system to track which worker is at which CNC machine via Feasycom beacon tags and BLE gateways.
+- [+] **P33: Tool Library Updater** — CLI utility for updating ProShop tool library entries when switching manufacturers, with VPO pricing lookup and manufacturer spec scraping.
 
 ## Interface Map
 
@@ -50,6 +51,7 @@
 | P29: Rollo Printer App | `rollo_print.log` (print job history, last 100 entries), `rollo_printer_app.exe` (standalone executable) | Windows printer subsystem (printer named "Rollo Printer"), user-supplied PDF files |
 | P17: COTS Crib Kiosk | COTS label PNGs (450px wide, 128px tall, 180 DPI), transaction log CSV, Flask kiosk UI (port 5000) | ProShop GraphQL API (OAuth), Brother PT-P700 print service at http://10.1.1.242:5002/api/print-image, COTS_Labels_All.csv |
 | P30: Traxis Label Printer Extension | Material label PNGs (128px tall, auto-width), COTS label PNGs (128px tall, 450px wide), both as base64 PNG via Canvas API | ProShop WO page DOM, ProShop COTS page DOM, ProShop GraphQL API (session cookie), Brother PT-P700 print service at http://10.1.1.242:5002 |
+| P33: Tool Library Updater | Updated tool records in ProShop (description, dimensions, coating, brand, cost, notes), downloaded product images for manual upload | ProShop GraphQL API (tools, purchaseOrders), .traxis.env credentials, manufacturer product pages (Kennametal) |
 
 ## Critical Seams
 
