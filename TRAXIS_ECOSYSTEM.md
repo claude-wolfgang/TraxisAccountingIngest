@@ -31,7 +31,7 @@
 - [+] **P23: Air Compressor Communication** — Web GUI for monitoring and controlling EMAX rotary screw air compressor via Modbus TCP.
 - [-] **P24: Digital Help For Rene** — Automate Rene Maldonado's ProShop administrative workload at Traxis Manufacturing.
 - [+] **P25: Agent Exploration (Data Quality Agent)** — Always-running data quality agent auditing manufacturing ERP and machine monitoring.
-- [+] **P27: Accounting Ingest** — Syncs vendor invoices from documents to QuickBooks Online via API.
+- [+] **P27: Accounting Ingest** — Ingests vendor invoices, bills, POs, and quotes into ProShop and QBO. VPO line items use toolNumber + orderNumber (brand+EDP) fields.
 - [+] **P28: Proshop API Usage** — Monitors ProShop GraphQL API usage patterns across Traxis projects.
 - [+] **P29: Rollo Printer App** — Windows system tray app for printing PDFs to Rollo thermal printer.
 - [+] **P30: Traxis Label Printer Extension** — Chrome extension that generates and prints material and COTS labels from ProShop pages.

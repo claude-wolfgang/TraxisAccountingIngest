@@ -23,6 +23,7 @@ import requests
 import base64
 import io
 import re
+import shutil
 from pathlib import Path
 from datetime import datetime, timezone
 import anthropic
@@ -53,17 +54,21 @@ QBO_DISCOVERY_URL = "https://developer.api.intuit.com/.well-known/openid_configu
 QBO_TOKEN_URL = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"  # fallback
 QBO_REVOKE_URL = "https://developer.api.intuit.com/v2/oauth2/tokens/revoke"  # fallback
 
-DOC_TYPES = ["VENDOR_INVOICE", "PACKING_SLIP", "CUSTOMER_PO", "VENDOR_PO", "CUSTOMER_QUOTE", "UNKNOWN"]
+DOC_TYPES = ["VENDOR_INVOICE", "PACKING_SLIP", "CUSTOMER_PO", "VENDOR_PO", "CUSTOMER_QUOTE", "PAYMENT_VOUCHER", "UNKNOWN"]
 DOC_TYPE_LABELS = {
-    "VENDOR_INVOICE": "Vendor Invoice → QBO",
-    "PACKING_SLIP":   "Packing Slip → ProShop",
-    "CUSTOMER_PO":    "Customer PO → ProShop",
-    "VENDOR_PO":      "Vendor PO / Quote → ProShop",
-    "CUSTOMER_QUOTE": "Customer Quote → ProShop",
-    "UNKNOWN":        "Unknown",
+    "VENDOR_INVOICE":   "Vendor Invoice → QBO",
+    "PACKING_SLIP":     "Packing Slip → ProShop",
+    "CUSTOMER_PO":      "Customer PO → ProShop",
+    "VENDOR_PO":        "Vendor PO / Quote → ProShop",
+    "CUSTOMER_QUOTE":   "Customer Quote → ProShop",
+    "PAYMENT_VOUCHER":  "Payment Voucher → Dropbox",
+    "UNKNOWN":          "Unknown",
 }
 # Doc types that go to QBO instead of ProShop
 QBO_DOC_TYPES = {"VENDOR_INVOICE"}
+# Doc types that save to a local folder instead of ProShop/QBO
+FILE_DOC_TYPES = {"PAYMENT_VOUCHER"}
+FILE_SAVE_ROOT = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\Filed")
 
 EMAIL_POLL_INTERVAL = 300  # seconds
 FOLDER_POLL_INTERVAL = 10  # seconds
@@ -697,6 +702,19 @@ EXTRACTION_PROMPTS = {
   "notes": "any notes or null",
   "confidence": 0.0-1.0
 }""",
+
+    "PAYMENT_VOUCHER": """Extract all data from this payment voucher or remittance advice. Return JSON:
+{
+  "payer_name": "company or person making the payment",
+  "payee_name": "company or person receiving payment",
+  "voucher_number": "voucher or reference number or null",
+  "payment_date": "date of payment (YYYY-MM-DD) or null",
+  "amount": "payment amount or null",
+  "payment_method": "check, wire, ACH, etc. or null",
+  "invoice_references": ["list of invoice numbers this payment covers"],
+  "notes": "any notes or null",
+  "confidence": 0.0-1.0
+}""",
 }
 
 CLASSIFY_PROMPT = """You are classifying documents for Traxis Manufacturing (a CNC machine shop).
@@ -707,6 +725,7 @@ PACKING_SLIP - a delivery/shipping document listing items shipped or received
 CUSTOMER_PO - a purchase order FROM a customer TO Traxis (the customer is BUYING parts/services FROM Traxis — Traxis is the supplier/vendor on this document)
 VENDOR_PO - a purchase order FROM Traxis TO a vendor, or a vendor's quote/price list for materials/tools Traxis wants to buy
 CUSTOMER_QUOTE - a quote or estimate Traxis is providing TO a customer, or an RFQ from a customer asking Traxis to quote
+PAYMENT_VOUCHER - a payment voucher, remittance advice, or payment confirmation document
 UNKNOWN - cannot determine
 
 KEY RULE: If the document is a Purchase Order and Traxis/Traxis Manufacturing/Traxis MFG appears as the VENDOR or SUPPLIER or SHIP-TO, it is a CUSTOMER_PO (the customer is ordering from Traxis). If Traxis appears as the BUYER, it is a VENDOR_PO.
@@ -744,8 +763,8 @@ class AIExtractor:
             return "PACKING_SLIP"
         if any(w in text for w in ["purchase order", " po #", "p.o. "]):
             return "CUSTOMER_PO"
-        if any(w in text for w in ["quote", "quotation", "rfq", "proposal"]):
-            return "CUSTOMER_QUOTE"
+        # "quote" is ambiguous — vendor quote (→ VENDOR_PO) vs customer quote
+        # (→ CUSTOMER_QUOTE). Let the AI classifier decide based on document content.
 
         # Fall back to Claude vision
         images = self.pdf_to_images(pdf_path, max_pages=1)
@@ -1120,17 +1139,28 @@ class ProShopUploader:
     def _upload_purchase_order(self, data, contact_name):
         """Upload vendor quote/PO to ProShop as a Purchase Order."""
         payload = {"poType": "Standard"}
-        if contact_name:
-            payload["supplier"] = contact_name
-        if data.get("quote_date") or data.get("po_date"):
-            payload["date"] = data.get("quote_date") or data.get("po_date")
-        if data.get("quote_number") or data.get("po_number"):
-            payload["confirmationNumber"] = data.get("quote_number") or data.get("po_number")
+        # Supplier: prefer matched contact, fall back to name from extracted data
+        supplier = contact_name or data.get("vendor_name") or data.get("customer_name") or ""
+        if supplier:
+            payload["supplier"] = supplier
+        date_val = data.get("quote_date") or data.get("po_date") or ""
+        if date_val:
+            payload["date"] = date_val
+        ref_val = data.get("quote_number") or data.get("po_number") or ""
+        if ref_val:
+            payload["confirmationNumber"] = ref_val
+        # Build remarks from lead time + notes
+        remarks_parts = []
         if data.get("lead_time"):
-            payload["remarks"] = f"Lead time: {data['lead_time']}"
+            remarks_parts.append(f"Lead time: {data['lead_time']}")
+        if data.get("payment_terms"):
+            remarks_parts.append(f"Terms: {data['payment_terms']}")
+        if data.get("total_amount"):
+            remarks_parts.append(f"Total: ${data['total_amount']}")
         if data.get("notes"):
-            remarks = payload.get("remarks", "")
-            payload["remarks"] = f"{remarks}\n{data['notes']}".strip()
+            remarks_parts.append(data["notes"])
+        if remarks_parts:
+            payload["remarks"] = "\n".join(remarks_parts)
         if data.get("payment_terms"):
             payload["specialInstructions"] = data["payment_terms"]
         # Line items
@@ -1142,23 +1172,32 @@ class ProShopUploader:
 
     def _build_po_items(self, line_items):
         """Convert extracted line items to PO poItems format."""
+        import re
         items = []
         for li in line_items:
             item = {}
-            if li.get("part_number"):
-                item["itemNumber"] = li["part_number"]
+            if li.get("tool_number"):
+                item["toolNumber"] = li["tool_number"]
+            elif li.get("part_number"):
+                item["toolNumber"] = li["part_number"]
             if li.get("description"):
                 item["description"] = li["description"]
             if li.get("quantity"):
-                item["quantity"] = str(li["quantity"])
+                # Strip unit suffixes (e.g. "22.000 PCS" → "22.000")
+                # ProShop expects a numeric string, not text with units
+                qty_raw = str(li["quantity"]).strip()
+                qty_match = re.match(r"^[\d,]+\.?\d*", qty_raw.replace(",", ""))
+                item["quantity"] = qty_match.group(0) if qty_match else qty_raw
             if li.get("unit_price"):
                 try:
-                    item["costPer"] = float(str(li["unit_price"]).replace(",", "").replace("$", ""))
+                    raw = re.sub(r"[^\d.]", "", str(li["unit_price"]).replace(",", ""))
+                    item["costPer"] = float(raw) if raw else None
                 except (ValueError, TypeError):
                     pass
             if li.get("extended_price"):
                 try:
-                    item["total"] = float(str(li["extended_price"]).replace(",", "").replace("$", ""))
+                    raw = re.sub(r"[^\d.]", "", str(li["extended_price"]).replace(",", ""))
+                    item["total"] = float(raw) if raw else None
                 except (ValueError, TypeError):
                     pass
             if item:
@@ -1285,6 +1324,7 @@ class AccountingIngestApp(tk.Tk):
         ttk.Button(tb, text="Poll Now", command=self._poll_now).pack(side="left", padx=2)
         ttk.Button(tb, text="Refresh", command=self._refresh_queue).pack(side="left", padx=2)
         ttk.Button(tb, text="Open QBO", command=self._open_qbo_folder).pack(side="left", padx=2)
+        ttk.Button(tb, text="Reject Selected", command=self._batch_reject).pack(side="left", padx=2)
 
         # Filter
         filter_frame = tk.Frame(parent, bg="#1e1e1e")
@@ -1299,8 +1339,11 @@ class AccountingIngestApp(tk.Tk):
                            command=self._refresh_queue).pack(side="left", padx=4)
 
         # Queue treeview
+        tree_frame = tk.Frame(parent, bg="#1e1e1e")
+        tree_frame.pack(fill="both", expand=True, padx=0, pady=0)
+
         cols = ("type", "source", "date", "confidence")
-        self._tree = ttk.Treeview(parent, columns=cols, show="headings", selectmode="browse")
+        self._tree = ttk.Treeview(tree_frame, columns=cols, show="headings", selectmode="extended")
         self._tree.heading("type", text="Type")
         self._tree.heading("source", text="Source")
         self._tree.heading("date", text="Date")
@@ -1310,7 +1353,7 @@ class AccountingIngestApp(tk.Tk):
         self._tree.column("date", width=80)
         self._tree.column("confidence", width=50, anchor="center")
 
-        vsb = ttk.Scrollbar(parent, orient="vertical", command=self._tree.yview)
+        vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self._tree.yview)
         self._tree.configure(yscrollcommand=vsb.set)
         self._tree.pack(side="left", fill="both", expand=True, padx=(8, 0), pady=4)
         vsb.pack(side="left", fill="y", pady=4)
@@ -1323,6 +1366,24 @@ class AccountingIngestApp(tk.Tk):
         self._tree.tag_configure("REJECTED", foreground="#888888")
         self._tree.tag_configure("UPLOAD_FAILED", foreground="#f44336")
         self._tree.tag_configure("QBO", foreground="#00bcd4")
+
+        # Recent activity panel
+        tk.Label(parent, text="RECENT ACTIVITY", bg="#1e1e1e", fg="#888888",
+                 font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(8, 2))
+        activity_frame = tk.Frame(parent, bg="#1e1e1e", height=140)
+        activity_frame.pack(fill="x", padx=8, pady=(0, 4))
+        activity_frame.pack_propagate(False)
+        self._activity_text = tk.Text(activity_frame, bg="#252525", fg="#aaaaaa",
+                                       font=("Segoe UI", 9), relief="flat", bd=0,
+                                       cursor="arrow", state="disabled", wrap="word",
+                                       height=7)
+        self._activity_text.pack(fill="both", expand=True)
+        self._activity_text.tag_configure("link", foreground="#0078d4", underline=True)
+        self._activity_text.tag_configure("filed", foreground="#4caf50")
+        self._activity_text.tag_configure("qbo", foreground="#00bcd4")
+        self._activity_text.tag_configure("proshop", foreground="#4caf50")
+        self._activity_text.tag_configure("date", foreground="#666666")
+        self._activity_links = {}  # tag_name -> url
 
     def _build_review_panel(self, parent):
         # Split horizontally: PDF top/left, fields top/right
@@ -1439,24 +1500,35 @@ class AccountingIngestApp(tk.Tk):
         con = db()
         if filter_val == "ALL":
             rows = con.execute(
-                "SELECT id, doc_type, source, created_at, confidence, status FROM queue ORDER BY id DESC"
+                "SELECT id, doc_type, source, created_at, confidence, status, edited_json, extracted_json FROM queue ORDER BY id DESC"
             ).fetchall()
         elif filter_val == "PENDING":
             # Show PENDING and UPLOAD_FAILED together — both need attention
             rows = con.execute(
-                "SELECT id, doc_type, source, created_at, confidence, status FROM queue WHERE status IN ('PENDING','UPLOAD_FAILED') ORDER BY id DESC"
+                "SELECT id, doc_type, source, created_at, confidence, status, edited_json, extracted_json FROM queue WHERE status IN ('PENDING','UPLOAD_FAILED') ORDER BY id DESC"
             ).fetchall()
         else:
             rows = con.execute(
-                "SELECT id, doc_type, source, created_at, confidence, status FROM queue WHERE status=? ORDER BY id DESC",
+                "SELECT id, doc_type, source, created_at, confidence, status, edited_json, extracted_json FROM queue WHERE status=? ORDER BY id DESC",
                 (filter_val,)
             ).fetchall()
         con.close()
 
         pending = 0
         for r in rows:
-            qid, doc_type, source, created_at, confidence, status = r
-            date_str = created_at[:10] if created_at else ""
+            qid, doc_type, source, created_at, confidence, status, edited_json, extracted_json = r
+            # Prefer document date from extracted data over email ingest date
+            date_str = ""
+            raw = edited_json or extracted_json
+            if raw:
+                try:
+                    d = json.loads(raw)
+                    date_str = (d.get("invoice_date") or d.get("quote_date")
+                                or d.get("po_date") or d.get("ship_date") or "")
+                except Exception:
+                    pass
+            if not date_str:
+                date_str = created_at[:10] if created_at else ""
             conf_str = f"{int((confidence or 0)*100)}%"
             label = DOC_TYPE_LABELS.get(doc_type, doc_type)
             tag = status
@@ -1466,6 +1538,88 @@ class AccountingIngestApp(tk.Tk):
                 pending += 1
 
         self._status_label.config(text=f"{pending} pending")
+        self._refresh_activity()
+
+    def _refresh_activity(self):
+        """Populate the recent activity panel with clickable links."""
+        con = db()
+        rows = con.execute("""
+            SELECT id, doc_type, status, proshop_url, edited_json, extracted_json, reviewed_at
+            FROM queue
+            WHERE status IN ('UPLOADED', 'QBO')
+            ORDER BY reviewed_at DESC
+            LIMIT 10
+        """).fetchall()
+        con.close()
+
+        self._activity_text.config(state="normal")
+        self._activity_text.delete("1.0", "end")
+        # Remove old link bindings
+        for tag_name in self._activity_links:
+            self._activity_text.tag_unbind(tag_name, "<Button-1>")
+        self._activity_links.clear()
+
+        for i, r in enumerate(rows):
+            qid, doc_type, status, url, edited_json, extracted_json, reviewed_at = r
+            # Build description
+            desc = ""
+            raw = edited_json or extracted_json
+            if raw:
+                try:
+                    d = json.loads(raw)
+                    name = (d.get("vendor_name") or d.get("customer_name")
+                            or d.get("payer_name") or "")
+                    ref = (d.get("quote_number") or d.get("invoice_number")
+                           or d.get("po_number") or d.get("voucher_number") or "")
+                    if name and ref:
+                        desc = f"{name} #{ref}"
+                    elif name:
+                        desc = name
+                    elif ref:
+                        desc = f"#{ref}"
+                except Exception:
+                    pass
+
+            # Destination label
+            if doc_type in FILE_DOC_TYPES:
+                dest = "Filed"
+                style_tag = "filed"
+            elif doc_type in QBO_DOC_TYPES:
+                dest = "QBO"
+                style_tag = "qbo"
+            else:
+                dest = DOC_TYPE_LABELS.get(doc_type, doc_type).split("→")[-1].strip()
+                style_tag = "proshop"
+
+            # Date
+            date_str = reviewed_at[:10] if reviewed_at else ""
+
+            # Write the line
+            self._activity_text.insert("end", f"  {date_str} ", "date")
+            self._activity_text.insert("end", f"{dest}: ", style_tag)
+
+            if url:
+                link_tag = f"link_{i}"
+                self._activity_links[link_tag] = url
+                self._activity_text.insert("end", desc or url.split("/")[-1], ("link", link_tag))
+                self._activity_text.tag_bind(link_tag, "<Button-1>",
+                                              lambda e, u=url: self._open_activity_link(u))
+            else:
+                self._activity_text.insert("end", desc or "(no link)")
+
+            self._activity_text.insert("end", "\n")
+
+        if not rows:
+            self._activity_text.insert("end", "  No documents pushed yet.", "date")
+
+        self._activity_text.config(state="disabled")
+
+    def _open_activity_link(self, url):
+        if Path(url).exists():
+            os.startfile(Path(url).parent)
+        else:
+            import webbrowser
+            webbrowser.open(url)
 
     def _on_queue_select(self, _event=None):
         sel = self._tree.selection()
@@ -1535,27 +1689,35 @@ class AccountingIngestApp(tk.Tk):
             except Exception:
                 pass
 
-        # View link (ProShop or QBO)
+        # View link (ProShop, QBO, or local file)
         self._proshop_url = proshop_url
         if proshop_url:
-            prefix = "View in QBO:" if doc_type in QBO_DOC_TYPES else "View in ProShop:"
+            if doc_type in FILE_DOC_TYPES:
+                prefix = "Filed to:"
+            elif doc_type in QBO_DOC_TYPES:
+                prefix = "View in QBO:"
+            else:
+                prefix = "View in ProShop:"
             self._link_label.config(text=f"{prefix} {proshop_url}")
         else:
             self._link_label.config(text="")
 
         # Button states
-        if status == "QBO":
-            self._approve_btn.config(state="disabled", text="Uploaded to QBO ✓")
-            self._reject_btn.config(state="disabled")
-        elif status == "UPLOADED":
-            self._approve_btn.config(state="disabled", text="Uploaded to ProShop ✓")
-            self._reject_btn.config(state="disabled")
+        if status in ("QBO", "UPLOADED"):
+            if status == "QBO":
+                done_label = "Uploaded to QBO ✓"
+            elif doc_type in FILE_DOC_TYPES:
+                done_label = "Filed ✓"
+            else:
+                done_label = "Uploaded to ProShop ✓"
+            self._approve_btn.config(state="disabled", text=done_label)
+            self._reject_btn.config(state="normal", text="↺  Reset to Pending")
         else:
             if doc_type in QBO_DOC_TYPES:
                 self._approve_btn.config(state="normal", text="✓  APPROVE & PUSH TO QBO")
             else:
                 self._approve_btn.config(state="normal", text="✓  APPROVE & PUSH TO PROSHOP")
-            self._reject_btn.config(state="normal")
+            self._reject_btn.config(state="normal", text="✗  Reject")
 
     # ── PDF Viewer ─────────────────────────────────────────────────────────
 
@@ -1613,8 +1775,14 @@ class AccountingIngestApp(tk.Tk):
                     label = f"{v.get('DisplayName', '')}  [ID {v.get('Id','')}]  {int(score*100)}%"
                     self._contact_listbox.insert("end", label)
                 if matches:
-                    self._contact_listbox.selection_set(0)
-                    self._update_contact_label(0)
+                    # Only auto-select if top match is strong (>80%)
+                    if matches[0][0] > 0.8:
+                        self._contact_listbox.selection_set(0)
+                        self._update_contact_label(0)
+                    else:
+                        self._contact_label.config(
+                            text="No strong match — select a vendor",
+                            fg="#f44336")
             else:
                 matches = self.proshop.fuzzy_match_contact(search)
                 self._contact_matches = matches
@@ -1623,8 +1791,13 @@ class AccountingIngestApp(tk.Tk):
                     label = f"{c['companyName']}  [{c['name']}]  {int(score*100)}%"
                     self._contact_listbox.insert("end", label)
                 if matches:
-                    self._contact_listbox.selection_set(0)
-                    self._update_contact_label(0)
+                    if matches[0][0] > 0.8:
+                        self._contact_listbox.selection_set(0)
+                        self._update_contact_label(0)
+                    else:
+                        self._contact_label.config(
+                            text="No strong match — select a contact",
+                            fg="#f44336")
         except Exception:
             pass
         self._contact_listbox.bind("<<ListboxSelect>>",
@@ -1742,13 +1915,52 @@ class AccountingIngestApp(tk.Tk):
 
             threading.Thread(target=do_qbo_upload, daemon=True).start()
 
+        elif doc_type in FILE_DOC_TYPES:
+            # ── File-save path (Dropbox) ─────────────────────────────────────
+            cur_id = self._current_id
+
+            def do_file_save():
+                try:
+                    con = db()
+                    row = con.execute("SELECT pdf_path FROM queue WHERE id=?", (cur_id,)).fetchone()
+                    con.close()
+                    if not row or not row[0]:
+                        raise FileNotFoundError("No PDF path for this queue record")
+                    src = Path(row[0])
+                    if not src.exists():
+                        raise FileNotFoundError(f"PDF not found: {src}")
+                    dest_dir = FILE_SAVE_ROOT / doc_type
+                    dest_dir.mkdir(parents=True, exist_ok=True)
+                    dest = dest_dir / src.name
+                    shutil.copy2(str(src), str(dest))
+
+                    con = db()
+                    con.execute("""
+                        UPDATE queue SET status='UPLOADED', edited_json=?,
+                        proshop_url=?, reviewed_at=? WHERE id=?
+                    """, (edited_raw, str(dest),
+                          datetime.now(timezone.utc).isoformat(), cur_id))
+                    con.commit()
+                    con.close()
+                    self._log(f"Filed: {src.name} → {dest_dir}")
+                    self.after(0, self._refresh_queue)
+                    self.after(0, lambda: self._load_record(cur_id))
+                    self.after(0, self._advance_queue)
+                except Exception as e:
+                    self._log(f"File save failed: {e}")
+                    self.after(0, lambda: messagebox.showerror("File Save Failed", str(e)))
+                    self.after(0, self._refresh_queue)
+
+            threading.Thread(target=do_file_save, daemon=True).start()
+
         else:
             # ── ProShop path ──────────────────────────────────────────────────
             contact_code = self._get_selected_contact_code()
-            if doc_type == "CUSTOMER_PO" and not contact_code:
+            if doc_type in ("CUSTOMER_PO", "VENDOR_PO") and not contact_code:
+                label_name = "Customer" if doc_type == "CUSTOMER_PO" else "Supplier"
                 messagebox.showwarning("Contact Required",
-                                       "Customer PO requires a matched contact.\n"
-                                       "Search and select the customer above.")
+                                       f"{label_name} contact is required.\n"
+                                       "Search and select a contact above.")
                 return
             cur_id = self._current_id
 
@@ -1804,26 +2016,49 @@ class AccountingIngestApp(tk.Tk):
         if not self._current_id:
             return
         con = db()
-        row = con.execute("SELECT from_addr, source FROM queue WHERE id=?",
+        row = con.execute("SELECT status FROM queue WHERE id=?",
                           (self._current_id,)).fetchone()
-        con.execute("UPDATE queue SET status='REJECTED', reviewed_at=? WHERE id=?",
-                    (datetime.now(timezone.utc).isoformat(), self._current_id))
+        if row and row[0] in ("UPLOADED", "QBO"):
+            # Reset back to PENDING for re-push
+            con.execute("UPDATE queue SET status='PENDING', proshop_id=NULL, proshop_url=NULL, upload_error=NULL WHERE id=?",
+                        (self._current_id,))
+            con.commit()
+            con.close()
+            self._log(f"Reset queue item {self._current_id} to PENDING")
+            self._refresh_queue()
+            self._load_record(self._current_id)
+        else:
+            con.execute("UPDATE queue SET status='REJECTED', reviewed_at=? WHERE id=?",
+                        (datetime.now(timezone.utc).isoformat(), self._current_id))
+            con.commit()
+            con.close()
+            self._log(f"Rejected queue item {self._current_id}")
+            self._refresh_queue()
+            self._advance_queue()
+
+    def _batch_reject(self):
+        """Reject all selected items in the queue at once."""
+        sel = list(self._tree.selection())   # snapshot before focus shifts
+        if not sel:
+            return
+        count = len(sel)
+        if count == 1:
+            # Single selection — use normal reject flow (offers sender blocking)
+            self._current_id = int(sel[0])
+            self._reject()
+            return
+        now = datetime.now(timezone.utc).isoformat()
+        con = db()
+        for iid in sel:
+            con.execute("UPDATE queue SET status='REJECTED', reviewed_at=? WHERE id=?",
+                        (now, int(iid)))
         con.commit()
         con.close()
-        self._log(f"Rejected queue item {self._current_id}")
+        self._log(f"Batch rejected {count} items")
+        self._status_label.config(text=f"{count} items rejected")
+        self.after(3000, self._refresh_queue)  # restore normal count after 3s
         self._refresh_queue()
         self._advance_queue()
-
-        # Offer to block sender if this came from email
-        if row:
-            from_addr, source = row
-            if source == "email" and from_addr and not from_addr.lower().endswith("@traxismfg.com"):
-                if messagebox.askyesno(
-                    "Block Sender?",
-                    f"Always skip future emails from:\n{from_addr}?"
-                ):
-                    add_sender_to_blocklist(from_addr, reason="rejected by user")
-                    self._log(f"Blocked sender: {from_addr}")
 
     def _advance_queue(self):
         """Select the next PENDING item in the queue."""
@@ -1901,8 +2136,12 @@ class AccountingIngestApp(tk.Tk):
 
     def _open_proshop_link(self, _event=None):
         if self._proshop_url:
-            import webbrowser
-            webbrowser.open(self._proshop_url)
+            if Path(self._proshop_url).exists():
+                # Local file — open Explorer with file selected
+                os.startfile(Path(self._proshop_url).parent)
+            else:
+                import webbrowser
+                webbrowser.open(self._proshop_url)
 
     def _open_file(self):
         path = filedialog.askopenfilename(

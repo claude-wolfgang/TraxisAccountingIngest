@@ -7,6 +7,43 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-16
 
+### P19/P27: VPO Creation Workflow — Scheduler tool demand analysis + automated vendor PO creation
+
+**Task:** Analyze WO 26-0027 tool requirements via the Shop Scheduler, create a Vendor Purchase Order to AJ Rod for low-stock tools, and update ProShop tool library pricing from the vendor order acknowledgment.
+
+**What was done:**
+
+1. **Scheduler tool demand analysis** — Queried P19 scheduler.db for WO 26-0027 (R2S1-AD163-001-022). Identified 19 unique tools across ops 50/60/70 (all mill-6). Found A34 (qty 1), A14 (qty 2), N124 (qty 2) as lowest stock. Five TiPD cobalt jobber drills not tracked in kiosk.
+
+2. **VPO creation via ProShop API** — Iterated through several PO revisions (263093→263099) to establish correct field mapping:
+   - `toolNumber` field links to COTS/Tool# library column (auto-fills description in UI only, not API)
+   - `orderNumber` field maps to Order# column — populated with manufacturer brand + EDP (e.g., "Helical 81714")
+   - `description` must be explicitly set via API (UI auto-fill doesn't work through GraphQL)
+   - `shipTo` defaults to Traxis Manufacturing, 511 E St Elmo Rd, Austin TX 78745
+   - `costPer`/`total` populated from vendor order acknowledgment
+
+3. **EDP lookup from tool library** — Discovered `approvedBrands` is a paginated result (`PaginatedToolApprovedBrandResult`) requiring `{ records { vendorToolId approvedBrand cost } }` sub-selection. Always use first (top) record per Wolfgang's preference.
+
+4. **Tool library pricing updates** — Ingested AJ Rod order ack (OrdAck1867792.pdf) and updated ProShop tool pages via `updateTool` mutation (note: `toolNumber` is a separate arg, not in the data object):
+   - A34/Helical: $54.25 (was null)
+   - A14/Gorilla: $26.78 (was $24.74)
+   - N124/Harvey Tool: $116.20 (was null)
+
+5. **Code update** — Modified `_build_po_items()` in accounting_ingest.py to use `toolNumber` instead of `itemNumber` for tool/COTS PO line items.
+
+**Files modified:**
+- `27. Accounting Ingest/accounting_ingest.py` — `_build_po_items()` field mapping change
+- Memory files: VPO defaults, toolNumber behavior, approved brand selection, PO field mapping
+
+**Key decisions:**
+- `updatePurchaseOrder` mutation blocked by same acceptNewRecord permission gate — PO status must be set to Outstanding manually
+- `updateTool` mutation works with `toolNumber` as a separate arg (not in the data input object), unlike PO mutations
+- ProShop `toolNumber` auto-fill is UI-only; API must always include explicit `description`
+
+**Status:** Complete. PO 263099 created, tool pricing updated. Manual step: set PO 263099 status to Outstanding.
+
+---
+
 ### P33: Tool Library Updater — API tool switchover D195-D198 and reusable CLI utility
 
 **Task:** Test ProShop API capability to update tool library entries when switching manufacturers (GARR to Kennametal GOdrill), then build a reusable CLI tool for future switchovers.
