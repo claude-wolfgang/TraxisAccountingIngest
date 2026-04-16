@@ -56,20 +56,41 @@
       }
     }
 
-    // Fallback: page title/header
+    // Fallback: find description text adjacent to the COTS ID cell in the top detail row
+    const cotsId = getCOTSFromUrl();
+    if (cotsId) {
+      for (const cell of allCells) {
+        const cellText = (cell.textContent || '').trim();
+        if (cellText === cotsId && cell.tagName === 'TD') {
+          // Check next sibling TD for description text
+          let sib = cell.nextElementSibling;
+          while (sib) {
+            const sibText = extractText(sib);
+            if (sibText && sibText.length > 3 && sibText !== cotsId && !/^\d+$/.test(sibText)) {
+              console.log('[Traxis COTS Label] Found description adjacent to COTS ID:', sibText);
+              return sibText;
+            }
+            sib = sib.nextElementSibling;
+          }
+        }
+      }
+    }
+
+    // Fallback: page title/header (en-dash/em-dash only — plain hyphen matches COTS IDs)
     const headerEl = document.querySelector('h1, h2, .page-title');
     if (headerEl) {
       const hText = headerEl.textContent.trim();
-      const pMatch = hText.match(/[-–—]\s*(.+)/);
+      const pMatch = hText.match(/[–—]\s*(.+)/);
       if (pMatch) return pMatch[1].trim();
     }
 
-    // ProShop puts the description in a .card-content div near the top
-    const cardContent = document.querySelector('.card-content');
-    if (cardContent) {
-      const text = cardContent.textContent.trim();
-      if (text && text.length < 300) {
-        console.log('[Traxis COTS Label] Found description via .card-content:', text);
+    // Look for a .card-content leaf node with plain description text
+    const cardContents = document.querySelectorAll('.card-content');
+    for (const card of cardContents) {
+      if (card.querySelector('h2, h3, table, form')) continue;
+      const text = (card.textContent || '').trim();
+      if (text && text.length > 3 && text.length < 300) {
+        console.log('[Traxis COTS Label] Found description via .card-content text:', text);
         return text;
       }
     }
@@ -78,10 +99,22 @@
     return '';
   }
 
+  function extractText(el) {
+    if (el.matches && el.matches('input, textarea, select')) {
+      return (el.value || el.textContent || '').trim();
+    }
+    const input = el.querySelector('input, textarea, select');
+    if (input) {
+      const val = (input.value || input.textContent || '').trim();
+      if (val) return val;
+    }
+    return (el.textContent || '').trim();
+  }
+
   function getNextValue(el) {
     let next = el.nextElementSibling;
     if (next) {
-      const text = next.textContent.trim();
+      const text = extractText(next);
       if (text && text.length < 300) return text;
     }
 
@@ -91,7 +124,7 @@
         const cells = row.querySelectorAll('td, th');
         for (let i = 0; i < cells.length; i++) {
           if (cells[i] === el && cells[i + 1]) {
-            const text = cells[i + 1].textContent.trim();
+            const text = extractText(cells[i + 1]);
             if (text && text.length < 300) return text;
           }
         }
@@ -100,7 +133,7 @@
 
     if (el.tagName === 'DT') {
       const dd = el.nextElementSibling;
-      if (dd && dd.tagName === 'DD') return dd.textContent.trim();
+      if (dd && dd.tagName === 'DD') return extractText(dd);
     }
 
     return null;

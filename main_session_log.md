@@ -125,6 +125,34 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+### P30: COTS Label Description Fix — DOM scraper missing description text
+
+**Task:** Fix missing description on COTS labels printed from the Chrome extension. TOO-220 printed without description text while THI-219 worked correctly.
+
+**What was done:**
+
+1. **Root cause identified** — The DOM scraper's header fallback regex `/[-–—]\s*(.+)/` matched the hyphen in "TOO-220", returning "220" as the description. The actual description ("TOOL, TANGLESS, M4X.7 HEX FREE-RUNNING ELECTRIC INSTALLATION") lives in a nested `.card-content` div as plain text, not in the form field labeled "Description" (which was empty).
+
+2. **Three fixes applied to `cots-content.js`:**
+   - Fixed header fallback regex to only match en-dash/em-dash (`[–—]`), not plain hyphens in COTS IDs
+   - Added `extractText()` helper that reads `.value` from input/textarea/select elements (handles JS-populated form fields)
+   - Replaced `.card-content` textarea-only fallback with a leaf-node text scan — skips structural containers (those with h2/h3/table/form) and grabs the first `.card-content` div with concise plain text
+
+3. **Added "Related Label Projects" section** to P30 CLAUDE.md linking to P17 (Python CLI batch generator) and P9/P22 (shared print service).
+
+**Files modified:**
+- `30. Material Label Extension/traxis-material-label/src/cots-content.js` — scraper fixes
+- `30. Material Label Extension/traxis-material-label/manifest.json` — version 1.1.0 → 1.2.1
+- `30. Material Label Extension/CLAUDE.md` — added Related Label Projects section
+
+**Key decisions:**
+- P17 COTS label generator kept as-is for batch printing use case; P30 is primary for day-to-day
+- ProShop COTS "Description" form field can be empty — the actual description lives in a `.card-content` div rendered separately in the page header area
+
+**Status:** Complete. TOO-220 label now prints with full description.
+
+---
+
 ## 2026-04-15
 
 ### P30: Material Label Extension — DOM scraper fixes and label layout update (Session 2)

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Traxis Label Printer",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "Print material and COTS labels from ProShop pages via Brother PT-P700",
   "permissions": ["activeTab"],
   "host_permissions": [

@@ -43,6 +43,11 @@ Service worker is needed to bypass HTTPS→HTTP mixed-content block.
 | `traxis-material-label/src/content.css` | Green button styling with states (shared) |
 | `traxis-material-label/lib/qrcode.min.js` | QR code generation library (shared) |
 
+## Related Label Projects
+
+- **P17 (`17. COTS - Tools Crib Kiosk/generate_cots_labels.py`)** — Original Python CLI COTS label generator. Uses CSV master list or ProShop GraphQL API. Supports batch printing (`--all`) and multi-copy (`--copies`). P30 supersedes P17 for day-to-day COTS label printing (no CSV dependency), but P17 remains available for batch operations.
+- **P9 / P22** — Share the same print service endpoint and payload format at `http://10.1.1.242:5002/api/print-image`.
+
 ## Installation
 
 1. Open `chrome://extensions` → Enable Developer mode
