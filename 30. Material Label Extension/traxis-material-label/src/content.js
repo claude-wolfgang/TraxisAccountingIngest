@@ -29,31 +29,38 @@
    * and grab adjacent values.
    */
   function scrapeFromDOM() {
-    const data = { material: '', partNumber: '', quantity: '' };
+    const data = { material: '', partNumber: '' };
 
-    // Strategy: find all table cells, labels, and dt/dd pairs
+    // Strategy: find all table cells and check their own direct text (not children)
     const allCells = document.querySelectorAll('td, th, dt, dd, span, label, div');
 
     for (let i = 0; i < allCells.length; i++) {
       const el = allCells[i];
-      const text = (el.textContent || '').trim();
+      // Use ownText — only the element's direct text nodes, not descendants
+      const ownText = Array.from(el.childNodes)
+        .filter(n => n.nodeType === Node.TEXT_NODE)
+        .map(n => n.textContent.trim())
+        .join(' ')
+        .trim();
+      const text = ownText || (el.textContent || '').trim();
 
-      // Material type / grade — look for labels like "Material", "Material Type"
-      if (/^Material(\s+Type)?:?\s*$/i.test(text)) {
+      // Material type / grade — "Material", "Material Type"
+      // Allow leading bullet/icon chars (◉, •, etc.)
+      if (/^[^a-z]*Material(\s+Type)?:?\s*$/i.test(text)) {
         const val = getNextValue(el);
         if (val) data.material = val;
       }
 
-      // Part number
-      if (/^Part\s*(Number|#|No\.?)?:?\s*$/i.test(text)) {
-        const val = getNextValue(el);
-        if (val) data.partNumber = val;
+      // Part Stock — grab the last/most detailed child element text
+      if (/^[^a-z]*Part\s+Stock:?\s*$/i.test(text)) {
+        const val = getLastChildValue(el);
+        if (val) data.material = val;
       }
 
-      // Order quantity
-      if (/^(Order\s+)?Qty:?\s*$/i.test(text) || /^Quantity:?\s*$/i.test(text)) {
+      // Part number — "Part #", "Part Number", "Part No" (not "Part Stock", "Part Name")
+      if (/^[^a-z]*Part\s*(Number|#|No\.?)\s*:?\s*$/i.test(text)) {
         const val = getNextValue(el);
-        if (val) data.quantity = val;
+        if (val) data.partNumber = val;
       }
     }
 
@@ -106,6 +113,36 @@
     return null;
   }
 
+  /** Get the last (most detailed) child element text from the adjacent value cell */
+  function getLastChildValue(el) {
+    // Find the value cell next to this label
+    let valueCell = el.nextElementSibling;
+    if (!valueCell || valueCell.tagName !== 'TD') {
+      const row = el.closest('tr');
+      if (row) {
+        const cells = row.querySelectorAll('td, th');
+        for (let i = 0; i < cells.length; i++) {
+          if (cells[i] === el && cells[i + 1]) {
+            valueCell = cells[i + 1];
+            break;
+          }
+        }
+      }
+    }
+    if (!valueCell) return null;
+
+    // Get all child elements with text — pick the last (most current material)
+    const children = valueCell.querySelectorAll('a, span, div, p');
+    if (children.length > 1) {
+      const last = children[children.length - 1].textContent.trim();
+      if (last.length > 1) return last;
+    }
+
+    // Fallback to full cell text
+    const text = valueCell.textContent.trim();
+    return (text && text.length < 500) ? text : null;
+  }
+
   // ─── GraphQL API Fallback ─────────────────────────────────────────
 
   /**
@@ -145,7 +182,6 @@
       return {
         material: material || '',
         partNumber: wo.partNumber || '',
-        quantity: wo.orderQty ? String(wo.orderQty) : '',
       };
     } catch (err) {
       console.warn('[Traxis Material Label] API fallback failed:', err.message);
@@ -173,7 +209,6 @@
         woNumber,
         material: dom.material || api.material,
         partNumber: dom.partNumber || api.partNumber,
-        quantity: dom.quantity || api.quantity,
       };
     }
 

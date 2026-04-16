@@ -23,7 +23,7 @@ Service worker is needed to bypass HTTPS→HTTP mixed-content block.
 **Material labels** (WO pages):
 - 128px tall, auto-width, 180 DPI
 - QR code left (encodes `proshop://wo/{woNumber}`)
-- Text: WO number (bold 36px), material (18px), part number (14px), quantity (14px)
+- Text: WO number (bold 36px), material (24px, word-wrapped at 400px), part number (14px)
 
 **COTS labels** (COTS pages):
 - 128px tall, 450px wide (2.5"), 180 DPI, 2x supersampled

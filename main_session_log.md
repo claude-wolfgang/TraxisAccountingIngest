@@ -7,6 +7,31 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-15
 
+### P30: Material Label Extension — DOM scraper fixes and label layout update (Session 2)
+
+**Task:** Test and fix the material label data scraping on ProShop WO pages, update label layout.
+
+**What was done:**
+
+1. Fixed DOM scraper not finding material — "Part Stock" label wasn't matching due to `◉` bullet prefix characters. Added `[^a-z]*` prefix to all label regexes.
+2. Fixed scraper using `el.textContent` which included all descendants — switched to own-text-node extraction so "Part Stock" label matches correctly.
+3. Fixed "Qty Ordered" not matching — original regex only handled "Order Qty" pattern, added "Qty Ordered" variant.
+4. For WOs with multiple Part Stock entries, scraper now picks the **last** material (the current/active one, since replacements are appended).
+5. Updated label layout: material font increased from 18px to 24px with word wrapping (400px max width), removed quantity line, removed separate grade line. Part number stays at 14px.
+
+**Files modified:**
+- `30. Material Label Extension/traxis-material-label/src/content.js` — DOM scraper fixes (bullet-tolerant regexes, own-text extraction, Part Stock last-child logic)
+- `30. Material Label Extension/traxis-material-label/src/label-generator.js` — enlarged material font, text wrapping, removed qty/grade lines
+
+**Key decisions:**
+- When multiple materials in Part Stock, always use the last one (replacement material supersedes original)
+- Full Part Stock string on label (including shape/dimensions) rather than trimmed material type only
+- No material selection UI — single-button print with auto-scrape
+
+**Status:** Working. Tested on WO 26-0140 (single material), WO 26-0002 (long text wrap), and WO 26-0071 (dual materials).
+
+---
+
 ### P17/P30: COTS PNG Label Generator + Chrome Extension Print Button
 
 **Task:** Replace P-touch Editor .lbx template workflow for COTS labels with programmatic PNG generation (matching P9 WO label style) and add a browser-based print button on ProShop COTS pages.
