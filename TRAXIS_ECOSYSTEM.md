@@ -4,13 +4,13 @@
 
 ## Project Status
 
-**25 active** | 2 complete | 2 retired
+**26 active** | 2 complete | 2 retired
 
 - [+] **P1: ProShop Automations** — Fusion 360 add-in connecting to ProShop ERP via GraphQL API for work order browsing.
 - [+] **P2: YCM Post Processor Development** — Custom Fusion 360 post processor for YCM NTC1600LY CNC lathe.
 - [+] **P3: Customer Portal** — Customer portal for RFQ submission, order tracking, and shop floor photo documentation.
 - [+] **P4: Inspection Print and ProShop Automation** — AI-powered balloon dimension extraction from engineering drawings to ProShop ERP.
-- [?] **P5: Hyundai Post Processor Development** — Research BLE proximity detection system for CNC machine shop worker tracking.
+- [?] **P5: Hyundai Post Processor Development** — Post processor and G/M code reference for Hyundai KF5600II CNC lathe.
 - [+] **P6: Chevalier Post Processor Development** — Fusion 360 post processor for Chevalier EM2040L milling center with Fanuc control.
 - [+] **P7: Customer Outreach** — Reduce customer concentration risk through targeted local customer acquisition.
 - [~] **P8: Catastrophe Planning** — Strategic risk planning for manufacturing business continuity and customer diversification.
@@ -35,6 +35,7 @@
 - [+] **P28: Proshop API Usage** — Monitors ProShop GraphQL API usage patterns across Traxis projects.
 - [+] **P29: Rollo Printer App** — Windows system tray app for printing PDFs to Rollo thermal printer.
 - [+] **P30: Traxis Label Printer Extension** — Chrome extension that generates and prints material and COTS labels from ProShop pages.
+- [?] **P31: BLE Proximity Worker Tracking** — Passive BLE-based system to track which worker is at which CNC machine via Feasycom beacon tags and BLE gateways.
 
 ## Interface Map
 

@@ -5,6 +5,42 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-16
+
+### P31: BLE Proximity Worker Tracking — Project creation and initial hardware test
+
+**Task:** Create new project P31, move BLE proximity research from P5, and test Feasycom beacon tags with Asus USB BT dongle on 10.1.1.178.
+
+**What was done:**
+
+1. Created `31. BLE Proximity Worker Tracking/` as a new project, moved `BLE_Proximity_Detection_Research.md` from P5 via `git mv` (preserving history).
+2. Wrote initial BLE scan test (`ble_scan_test.py`) — confirmed dongle detects both Feasycom tags.
+3. Discovered beacons use **rotating random MAC addresses** — initial monitor using hardcoded MACs only got ~2 samples/5s. Rewrote to identify beacons by **iBeacon major number** instead.
+4. Discovered both beacon slots on one tag share the same major but different minors (e.g., major=40604, minor=16178/16179). Grouped by major only.
+5. Built live RSSI monitor (`ble_rssi_monitor.py`) with zone classification and rolling averages.
+6. **Key finding:** Asus USB dongle reads -78 to -90 dBm regardless of distance (0ft vs 50ft in metal cabinet = ~4dB difference). Not enough RSSI dynamic range for proximity detection. Need a purpose-built BLE gateway.
+
+**Files created:**
+- `31. BLE Proximity Worker Tracking/CLAUDE.md`
+- `31. BLE Proximity Worker Tracking/ble_scan_test.py`
+- `31. BLE Proximity Worker Tracking/ble_rssi_monitor.py`
+- `31. BLE Proximity Worker Tracking/ble_raw_diag.py`
+
+**Files moved:**
+- `5. Hyundai post development/BLE_Proximity_Detection_Research.md` → `31. BLE Proximity Worker Tracking/`
+
+**Key decisions:**
+- Identify beacons by iBeacon major number (not MAC, which rotates)
+- Group minor variants under same major (same physical tag)
+- Asus USB dongle insufficient for production — need dedicated BLE gateway (~$35-65)
+
+**Open items:**
+- Purchase a purpose-built BLE scanning gateway (Blue Charm BCG04, MOKOSmart MKGW3, or Shelly BLU Gateway)
+- Label physical Feasycom tags with their major numbers (60285 and 40604)
+- Consider Feasycom config app to adjust beacon advertising interval
+
+---
+
 ## 2026-04-15
 
 ### P30: Material Label Extension — DOM scraper fixes and label layout update (Session 2)
