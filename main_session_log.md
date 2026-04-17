@@ -7,6 +7,38 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-16
 
+### P32: Breakeven Dashboard — Past week selector + sparkline navigation + UI polish
+
+**Task:** Add ability to click a past week in the dashboard and see the same per-machine detail view (progress bars, expandable charts) for that week. Limit sparkline to 4 visible weeks with scroll arrows.
+
+**What was done:**
+
+1. **Aggregator: daily breakdown for history weeks** — `compute_daily_breakdown()` now accepts `full_week=True` parameter for completed past weeks (generates all 7 days). History loop in `--history` flag calls this for each past week, adding `"daily"` key to each history entry — making them structurally identical to the current week.
+
+2. **Week selector via sparkline** — Clicking any sparkline bar selects that week. All dashboard components (progress bars, expandable machine charts, summary cards, pace calculations) re-render with the selected week's data. Completed weeks use full-week target (not fractional pace), show "Final" utilization, and hide live status dots.
+
+3. **Sparkline navigation** — Limited sparkline to 4 visible bars with glass-styled left/right chevron arrows to scroll through weeks. Arrows auto-disable at boundaries.
+
+4. **Actual hours on target card** — Added colored sub-value showing current/final weekly total on the "Target Hrs / Week" summary card.
+
+5. **Removed cursor glow** — Disabled specular highlight on glass panels and pooling radial gradient on machine rows.
+
+6. **T2 (YCM) data investigation** — Confirmed data collection is working correctly. T2's lower runtime (~12 hrs/wk) is real: machine was off all day Monday, and runs at 32-46% STRT vs M3's 59-72%. tool_number field is always NULL for T2 (YCM controller may not expose it via FOCAS).
+
+**Files modified:**
+- `32. Breakeven Dashboard/focas_runtime_aggregator.py` — `compute_daily_breakdown()` full_week param, history loop daily breakdown
+- `32. Breakeven Dashboard/breakeven.html` — Week selection via sparkline, sparkline nav arrows, actual hours sub-value, cursor glow removal
+- `32. Breakeven Dashboard/CLAUDE.md` — Created with Interfaces block
+
+**Key decisions:**
+- Week pills UI was added then removed in favor of sparkline-only selection (cleaner)
+- Sparkline shows 4 weeks at a time (was showing all 5); arrows to scroll
+- Past weeks use full target for % calculation (not pace-based)
+
+**Status:** Complete. Aggregator re-run verified 4 history entries each with 7 daily entries.
+
+---
+
 ### P19/P27: VPO Creation Workflow — Scheduler tool demand analysis + automated vendor PO creation
 
 **Task:** Analyze WO 26-0027 tool requirements via the Shop Scheduler, create a Vendor Purchase Order to AJ Rod for low-stock tools, and update ProShop tool library pricing from the vendor order acknowledgment.

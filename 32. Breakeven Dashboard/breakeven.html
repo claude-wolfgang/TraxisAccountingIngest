@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Traxis - Runtime Targets</title>
+<style>
+/*
+ * Apple Liquid Glass Approximation (Web/CSS)
+ * ==========================================
+ * FULLY IMPLEMENTED:
+ *   - backdrop-filter blur + saturate (frosted glass base)
+ *   - Specular edge highlights tracking cursor position
+ *   - Pooling brightness under interaction point
+ *   - 3D perspective tilt on hover (float-above effect)
+ *   - Adaptive background tinting (samples status color)
+ *   - Light / dark mode with CSS variable swap
+ *   - prefers-reduced-transparency accessibility fallback
+ *
+ * APPROXIMATED (CSS cannot replicate Metal shaders):
+ *   - Edge refraction: SVG feDisplacementMap on border gradient
+ *     (distorts the gradient organically, but does NOT refract
+ *     actual backdrop content per-pixel like Apple's .glassEffect())
+ *   - Variable blur radius: fixed blur, not content-adaptive
+ *   - Vibrancy: text-shadow halo + slight bg scrim, not true
+ *     compositing-based contrast adjustment
+ *
+ * NOT POSSIBLE on web:
+ *   - True per-pixel content refraction at edges
+ *   - Morph transitions between glass element shapes
+ *   - Content-density-adaptive blur radius
+ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #f2f2f7;
+  color: #1c1c1e;
+  min-height: 100vh;
+}
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 25% -5%, rgba(140,100,255,0.14) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 90% 20%, rgba(255,120,180,0.07) 0%, transparent 40%),
+    radial-gradient(ellipse 70% 50% at 80% 95%, rgba(60,160,255,0.10) 0%, transparent 45%),
+    radial-gradient(ellipse 40% 30% at 5% 65%, rgba(100,220,200,0.07) 0%, transparent 35%),
+    radial-gradient(ellipse 50% 35% at 50% 50%, rgba(255,200,100,0.04) 0%, transparent 40%),
+    #f2f2f7;
+  min-height: 100vh;
+}
+:root {
+  --glass-bg: rgba(255,255,255,0.18);
+  --glass-bg-hover: rgba(255,255,255,0.28);
+  --glass-border: rgba(255,255,255,0.75);
+  --glass-shine: rgba(255,255,255,0.55);
+  --glass-blur: 28px;
+  --glass-shadow:
+    0 4px 32px rgba(0,0,0,0.06),
+    0 1px 4px rgba(0,0,0,0.04),
+    0 0 0 0.5px rgba(0,0,0,0.05);
+  --glass-refraction-outer: linear-gradient(135deg,
+    rgba(255,80,80,0.28) 0%, rgba(255,180,40,0.22) 15%,
+    rgba(200,255,80,0.16) 28%, rgba(60,255,160,0.20) 42%,
+    rgba(60,180,255,0.24) 56%, rgba(120,80,255,0.22) 70%,
+    rgba(220,60,255,0.20) 84%, rgba(255,80,120,0.18) 100%);
+  --glass-refraction-inner: linear-gradient(315deg,
+    rgba(255,100,100,0.12) 0%, rgba(255,200,60,0.10) 20%,
+    rgba(100,255,180,0.10) 40%, rgba(80,180,255,0.12) 60%,
+    rgba(160,100,255,0.10) 80%, rgba(255,100,160,0.08) 100%);
+  --text-primary: #1c1c1e;
+  --text-secondary: rgba(60,60,67,0.6);
+  --text-tertiary: rgba(60,60,67,0.36);
+  --bar-red: #ff3b30;
+  --bar-red-bg: rgba(255,59,48,0.12);
+  --bar-amber: #ff9f0a;
+  --bar-amber-bg: rgba(255,159,10,0.12);
+  --bar-green: #30d158;
+  --bar-green-bg: rgba(48,209,88,0.12);
+  --bar-teal: #00c7be;
+  --bar-teal-bg: rgba(0,199,190,0.12);
+  --base-bg: #f2f2f7;
+  --input-bg: rgba(255,255,255,0.25);
+  --input-border: rgba(0,0,0,0.08);
+  --bar-track: rgba(0,0,0,0.04);
+  --bar-track-border: rgba(255,255,255,0.4);
+  --machine-bar-inset: inset 0 1px 3px rgba(0,0,0,0.06), inset 0 -0.5px 0 rgba(255,255,255,0.5);
+  --progress-track-bg: rgba(255,255,255,0.15);
+  --progress-track-border: rgba(255,255,255,0.3);
+  --progress-track-inset: inset 0 1.5px 3px rgba(0,0,0,0.05), inset 0 -1px 0 rgba(255,255,255,0.5);
+}
+
+/* Dark mode */
+html.dark {
+  --glass-bg: rgba(255,255,255,0.06);
+  --glass-bg-hover: rgba(255,255,255,0.12);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-shine: rgba(255,255,255,0.08);
+  --glass-shadow:
+    0 4px 32px rgba(0,0,0,0.3),
+    0 1px 4px rgba(0,0,0,0.2),
+    0 0 0 0.5px rgba(255,255,255,0.06);
+  --glass-refraction-outer: linear-gradient(135deg,
+    rgba(255,80,80,0.18) 0%, rgba(255,180,40,0.14) 15%,
+    rgba(200,255,80,0.10) 28%, rgba(60,255,160,0.13) 42%,
+    rgba(60,180,255,0.16) 56%, rgba(120,80,255,0.14) 70%,
+    rgba(220,60,255,0.12) 84%, rgba(255,80,120,0.10) 100%);
+  --glass-refraction-inner: linear-gradient(315deg,
+    rgba(255,100,100,0.08) 0%, rgba(255,200,60,0.06) 20%,
+    rgba(100,255,180,0.06) 40%, rgba(80,180,255,0.08) 60%,
+    rgba(160,100,255,0.06) 80%, rgba(255,100,160,0.05) 100%);
+  --text-primary: #f0f0f5;
+  --text-secondary: rgba(235,235,245,0.6);
+  --text-tertiary: rgba(235,235,245,0.35);
+  --base-bg: #111114;
+  --input-bg: rgba(255,255,255,0.08);
+  --input-border: rgba(255,255,255,0.1);
+  --bar-track: rgba(255,255,255,0.06);
+  --bar-track-border: rgba(255,255,255,0.08);
+  --machine-bar-inset: inset 0 1px 3px rgba(0,0,0,0.3), inset 0 -0.5px 0 rgba(255,255,255,0.05);
+  --progress-track-bg: rgba(255,255,255,0.08);
+  --progress-track-border: rgba(255,255,255,0.1);
+  --progress-track-inset: inset 0 1.5px 3px rgba(0,0,0,0.3), inset 0 -1px 0 rgba(255,255,255,0.05);
+}
+html.dark .glass {
+  border-color: rgba(255,255,255,0.1);
+  box-shadow: var(--glass-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.2),
+    inset 1px 0 0 rgba(255,255,255,0.04),
+    inset -1px 0 0 rgba(255,255,255,0.04);
+}
+html.dark .glass::before {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 30%, transparent 100%),
+    linear-gradient(135deg, rgba(255,200,200,0.03) 0%, rgba(200,255,220,0.02) 50%, rgba(200,220,255,0.03) 100%);
+}
+html.dark .glass-specular {
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 50%);
+}
+html.dark .machine-row {
+  border-color: rgba(255,255,255,0.08);
+  box-shadow: var(--glass-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.15);
+}
+html.dark .machine-row::before {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 35%, transparent 100%);
+}
+html.dark .machine-row:hover {
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+html.dark .status-dot.offline { background: rgba(255,255,255,0.12); }
+
+/* Glass panel */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 20px;
+  box-shadow: var(--glass-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -1px 0 rgba(0,0,0,0.04),
+    inset 1px 0 0 rgba(255,255,255,0.15),
+    inset -1px 0 0 rgba(255,255,255,0.15);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.2,0.8,0.2,1),
+              box-shadow 0.4s cubic-bezier(0.2,0.8,0.2,1);
+  transform: perspective(800px) rotateX(0deg) rotateY(0deg) scale(1);
+  transform-style: preserve-3d;
+}
+.glass:hover {
+  box-shadow:
+    0 8px 40px rgba(0,0,0,0.10),
+    0 2px 8px rgba(0,0,0,0.06),
+    0 0 0 0.5px rgba(0,0,0,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -1px 0 rgba(0,0,0,0.04);
+}
+.glass::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 55%;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.06) 30%, transparent 100%),
+    linear-gradient(135deg, rgba(255,200,200,0.04) 0%, rgba(200,255,220,0.03) 50%, rgba(200,220,255,0.04) 100%);
+  border-radius: 20px 20px 0 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s;
+}
+/* Edge refraction: SVG displacement distorts the rainbow gradient
+   to simulate organic light-bending at the glass perimeter */
+.glass::after {
+  content: '';
+  position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+  border-radius: 22px;
+  background: var(--glass-refraction-outer);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  padding: 3px;
+  pointer-events: none;
+  z-index: 2;
+  filter: url(#glass-refract);
+}
+.glass-inner-refraction {
+  position: absolute; top: 1px; left: 1px; right: 1px; bottom: 1px;
+  border-radius: 19px;
+  border: 2px solid transparent;
+  background: var(--glass-refraction-inner) border-box;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  z-index: 3;
+  filter: url(#glass-refract-sm);
+}
+/* Specular highlight — edge-weighted with pooling brightness
+   Apple's implementation: specular concentrates at glass edges
+   and "pools" under the interaction point */
+.glass-specular {
+  position: absolute;
+  width: 100%; height: 100%;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.35s cubic-bezier(0.2,0.8,0.2,1);
+  /* Default — JS overrides background-image with cursor-tracking gradient */
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.12) 0%, transparent 45%);
+  border-radius: inherit;
+  mix-blend-mode: overlay;
+}
+.glass:hover .glass-specular { opacity: 0; }
+/* Edge highlight — always-on subtle edge-lit glow from top-left light source */
+.glass-edge-light {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 5;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 0%, rgba(255,255,255,0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 100% 20%, rgba(255,255,255,0.06) 0%, transparent 60%);
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+html.dark .glass-edge-light { opacity: 0.4; }
+html.dark .glass-specular { mix-blend-mode: screen; }
+
+/* Header */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 40px 16px;
+}
+.header-left { display: flex; align-items: center; gap: 14px; }
+.logo-cat {
+  font-size: 36px; line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
+  transition: transform 0.3s;
+}
+.logo-cat:hover { transform: scale(1.15) rotate(-5deg); }
+.company {
+  font-size: 11px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.subtitle {
+  font-size: 22px; font-weight: 700; letter-spacing: -0.3px;
+  color: var(--text-primary);
+}
+.header-right { text-align: right; }
+.clock {
+  font-size: 24px; font-weight: 600; color: var(--text-secondary);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.5px;
+}
+.last-updated {
+  font-size: 11px; color: var(--text-tertiary); margin-top: 2px; font-weight: 400;
+}
+.last-updated.stale { color: var(--bar-amber); }
+
+.content { max-width: 1100px; margin: 0 auto; padding: 0 32px 32px; }
+
+/* Summary cards */
+.summary-cards {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  margin-bottom: 24px;
+}
+.summary-card { padding: 20px 24px; text-align: center; }
+.summary-card .value {
+  font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+.summary-card .sub-value {
+  font-size: 14px; font-weight: 600; margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.summary-card .label {
+  font-size: 10px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-tertiary); margin-top: 6px;
+}
+
+/* Sparkline */
+.sparkline-section { margin-bottom: 24px; }
+.section-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-tertiary);
+  margin-bottom: 10px; padding-left: 4px;
+}
+.sparkline-nav {
+  display: flex; align-items: center; gap: 8px;
+}
+.spark-arrow {
+  font-family: 'Inter', sans-serif;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: var(--text-secondary);
+  font-size: 20px; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s cubic-bezier(0.2,0.8,0.2,1);
+  box-shadow: var(--glass-shadow);
+  flex-shrink: 0;
+  padding: 0 0 2px 0;
+}
+.spark-arrow:hover {
+  background: var(--glass-bg-hover);
+  color: var(--text-primary);
+  transform: scale(1.08);
+}
+.spark-arrow:disabled {
+  opacity: 0.25; cursor: default;
+  transform: none;
+}
+html.dark .spark-arrow { border-color: rgba(255,255,255,0.1); }
+.sparkline-container {
+  padding: 20px 24px; display: flex;
+  align-items: flex-end; gap: 10px; height: 140px; position: relative;
+  flex: 1; min-width: 0;
+}
+.spark-bar-group {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 6px; height: 100%; justify-content: flex-end;
+}
+.spark-bar {
+  width: 100%; border-radius: 8px 8px 4px 4px; min-height: 3px;
+  transition: height 0.6s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+}
+.spark-label {
+  font-size: 10px; color: var(--text-tertiary); white-space: nowrap; font-weight: 500;
+}
+.spark-value { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+.target-line {
+  position: absolute; left: 20px; right: 20px;
+  border-top: 1.5px dashed rgba(255,59,48,0.4);
+  pointer-events: none;
+}
+.target-tag {
+  position: absolute; right: 4px; transform: translateY(-100%);
+  font-size: 9px; color: var(--bar-red); font-weight: 600;
+  background: var(--glass-bg); padding: 2px 6px; border-radius: 4px;
+  backdrop-filter: blur(8px);
+}
+
+/* Progress chart */
+.progress-chart-section { margin-bottom: 24px; }
+.chart-container {
+  padding: 20px 24px 16px; position: relative;
+}
+.chart-canvas-wrap {
+  position: relative; width: 100%; height: 220px;
+}
+.chart-canvas-wrap canvas {
+  width: 100%; height: 100%;
+  display: block;
+}
+
+/* Total progress */
+.total-progress { margin-bottom: 24px; }
+.progress-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 10px; padding: 0 4px;
+}
+.progress-title { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.progress-value {
+  font-size: 13px; color: var(--text-secondary);
+  font-variant-numeric: tabular-nums; font-weight: 500;
+}
+.progress-track {
+  height: 32px;
+  background: var(--progress-track-bg);
+  border: 1px solid var(--progress-track-border);
+  border-radius: 16px;
+  overflow: hidden; position: relative;
+  backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: var(--glass-shadow), var(--progress-track-inset);
+}
+.progress-fill {
+  height: 100%; border-radius: 16px;
+  transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 14px; font-size: 12px; font-weight: 700;
+  color: #fff; min-width: 52px; position: relative;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute; top: 1px; left: 4px; right: 4px; height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+  border-radius: 16px; pointer-events: none;
+}
+
+/* Machine rows */
+.machine-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.machine-row {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 16px;
+  padding: 14px 24px;
+  display: grid; grid-template-columns: 18px 180px 1fr 90px; gap: 16px;
+  align-items: center;
+  position: relative; overflow: hidden;
+  box-shadow: var(--glass-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -1px 0 rgba(0,0,0,0.03),
+    inset 1px 0 0 rgba(255,255,255,0.15),
+    inset -1px 0 0 rgba(255,255,255,0.15);
+  transition: transform 0.4s cubic-bezier(0.2,0.8,0.2,1),
+              box-shadow 0.4s cubic-bezier(0.2,0.8,0.2,1);
+  transform: perspective(800px) rotateX(0deg) rotateY(0deg);
+  transform-style: preserve-3d;
+}
+.machine-row::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 55%;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.04) 35%, transparent 100%),
+    linear-gradient(135deg, rgba(255,200,200,0.03) 0%, rgba(200,255,220,0.02) 50%, rgba(200,220,255,0.03) 100%);
+  pointer-events: none; z-index: 1;
+  transition: opacity 0.4s;
+}
+.machine-row::after {
+  content: '';
+  position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+  border-radius: 18px;
+  background: var(--glass-refraction-outer);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude; -webkit-mask-composite: xor;
+  padding: 2.5px; pointer-events: none; z-index: 2;
+  filter: url(#glass-refract-row);
+}
+.machine-row:hover {
+  box-shadow: 0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.03);
+}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.status-dot.online { background: var(--bar-green); box-shadow: 0 0 8px rgba(52,208,88,0.5); }
+.status-dot.stale { background: var(--bar-amber); box-shadow: 0 0 6px rgba(255,179,64,0.4); }
+.status-dot.offline { background: rgba(0,0,0,0.12); }
+.machine-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.machine-id { font-size: 10px; color: var(--text-tertiary); letter-spacing: 1px; font-weight: 500; margin-top: 1px; }
+.machine-bar-wrap {
+  height: 18px; background: var(--bar-track);
+  border: 1px solid var(--bar-track-border); border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--machine-bar-inset);
+}
+.machine-bar {
+  height: 100%; border-radius: 10px;
+  transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+  min-width: 3px; position: relative;
+}
+.machine-bar::after {
+  content: '';
+  position: absolute; top: 1px; left: 3px; right: 3px; height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+  border-radius: 10px; pointer-events: none;
+}
+.machine-hours { font-size: 14px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Expandable machine detail */
+.machine-row { cursor: pointer; }
+.machine-detail {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1),
+              opacity 0.3s 0.05s,
+              padding 0.3s;
+  padding: 0 0;
+  position: relative; z-index: 6;
+}
+.machine-row.expanded .machine-detail {
+  max-height: 200px;
+  opacity: 1;
+  padding: 8px 0 0;
+}
+.machine-detail canvas {
+  width: 100%; height: 160px;
+  display: block;
+  border-radius: 10px;
+}
+.machine-row.expanded {
+  border-radius: 20px;
+}
+
+/* Assumptions */
+.assumptions-toggle {
+  font-family: 'Inter', sans-serif;
+  background: var(--glass-bg); backdrop-filter: blur(12px) saturate(1.4);
+  border: 1.5px solid var(--glass-border); color: var(--text-secondary);
+  padding: 10px 20px; border-radius: 12px; cursor: pointer;
+  font-size: 12px; font-weight: 500; margin-bottom: 12px;
+  transition: all 0.3s; box-shadow: var(--glass-shadow);
+}
+.assumptions-toggle:hover {
+  background: var(--glass-bg-hover); color: var(--text-primary);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+.assumptions-panel { display: none; padding: 24px; margin-bottom: 24px; }
+.assumptions-panel.open { display: block; }
+.assumptions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.assumption-field label {
+  display: block; font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 6px;
+}
+.assumption-field input {
+  font-family: 'Inter', sans-serif;
+  width: 100%; background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  color: var(--text-primary); padding: 10px 14px; border-radius: 10px;
+  font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+}
+.assumption-field input:focus {
+  outline: none; border-color: rgba(130,100,255,0.4);
+  box-shadow: 0 0 0 3px rgba(130,100,255,0.1), inset 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.footer {
+  padding: 16px 40px;
+  display: flex; align-items: center; justify-content: center; gap: 20px;
+  font-size: 11px; color: var(--text-tertiary); font-weight: 400;
+}
+.sep { color: rgba(0,0,0,0.1); margin: 0 4px; }
+html.dark .sep { color: rgba(255,255,255,0.1); }
+
+/* Dark mode toggle — liquid glass pill */
+.dark-toggle {
+  position: relative; width: 48px; height: 26px;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 13px;
+  cursor: pointer; padding: 0;
+  transition: all 0.4s cubic-bezier(0.2,0.8,0.2,1);
+  flex-shrink: 0;
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.06),
+    0 0 0 0.5px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -0.5px 0 rgba(0,0,0,0.03);
+  overflow: hidden;
+}
+.dark-toggle::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 55%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+  border-radius: 13px 13px 0 0;
+  pointer-events: none;
+}
+.dark-toggle::after {
+  content: '';
+  position: absolute; top: 50%; left: 2px;
+  width: 22px; height: 22px; border-radius: 50%;
+  margin-top: -11px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+  border: 0.5px solid rgba(255,255,255,0.6);
+  box-shadow:
+    0 1px 4px rgba(0,0,0,0.12),
+    0 0 0 0.5px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  transition: transform 0.4s cubic-bezier(0.2,0.8,0.2,1),
+              background 0.4s, box-shadow 0.4s;
+}
+.dark-toggle:hover {
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.10),
+    0 0 0 0.5px rgba(0,0,0,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 -0.5px 0 rgba(0,0,0,0.04);
+}
+html.dark .dark-toggle {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.25),
+    0 0 0 0.5px rgba(255,255,255,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -0.5px 0 rgba(0,0,0,0.15);
+}
+html.dark .dark-toggle::before {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+}
+html.dark .dark-toggle::after {
+  transform: translateX(22px);
+  background: rgba(200,200,210,0.15);
+  border-color: rgba(255,255,255,0.15);
+  box-shadow:
+    0 1px 4px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.dark-toggle-wrap {
+  display: flex; align-items: center; gap: 8px;
+}
+.dark-toggle-icon {
+  font-size: 13px; line-height: 1;
+  transition: opacity 0.3s;
+}
+.dark-toggle-label {
+  font-size: 10px; font-weight: 500; color: var(--text-tertiary);
+  letter-spacing: 0.5px;
+}
+
+/* Vibrancy layer — approximates Apple's compositing-based contrast
+   adjustment. Uses text-shadow halo to maintain legibility as
+   background content shifts behind glass. Real vibrancy would use
+   compositing blend modes on the text layer against backdrop. */
+.summary-card .value {
+  text-shadow:
+    0 0 24px var(--glass-bg),
+    0 0 48px var(--glass-bg);
+  position: relative; z-index: 6;
+}
+.summary-card .label,
+.summary-card .sub-value,
+.section-label,
+.progress-title,
+.progress-value,
+.machine-name,
+.machine-hours {
+  position: relative; z-index: 6;
+}
+html.dark .summary-card .value {
+  text-shadow:
+    0 0 20px rgba(0,0,0,0.4),
+    0 0 40px rgba(0,0,0,0.3);
+}
+
+/* Accessibility: prefers-reduced-transparency
+   Replaces glass with solid opaque panels, disables
+   refraction effects and specular highlights */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bg: rgba(255,255,255,0.92) !important;
+    --glass-bg-hover: rgba(255,255,255,0.96) !important;
+    --glass-blur: 0px !important;
+  }
+  html.dark {
+    --glass-bg: rgba(40,40,45,0.92) !important;
+    --glass-bg-hover: rgba(50,50,55,0.96) !important;
+  }
+  .glass::after,
+  .glass-inner-refraction,
+  .glass-specular,
+  .glass-edge-light,
+  .machine-row::after { display: none !important; }
+  .glass::before,
+  .machine-row::before { opacity: 0 !important; }
+  .glass, .machine-row {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Alarm — soft throbbing vignette when critically below pace */
+@keyframes alarm-throb {
+  0%, 100% { box-shadow: 0 0 22px 6px rgba(255,59,48,0.25), 0 0 8px 2px rgba(255,59,48,0.15), var(--glass-shadow); }
+  50%      { box-shadow: 0 0 30px 10px rgba(255,59,48,0.08), 0 0 12px 4px rgba(255,59,48,0.04), var(--glass-shadow); }
+}
+body.alarm .glass,
+body.alarm .machine-row {
+  animation: alarm-throb var(--alarm-speed, 2.4s) ease-in-out infinite;
+}
+
+</style>
+</head>
+<body>
+
+<!-- SVG filters for edge refraction approximation -->
+<svg width="0" height="0" style="position:absolute;pointer-events:none">
+  <defs>
+    <!-- Large panels: gentle organic distortion of the border gradient -->
+    <filter id="glass-refract" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="1" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- Inner ring / small elements: tighter distortion -->
+    <filter id="glass-refract-sm" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="3" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- Machine rows: subtle -->
+    <filter id="glass-refract-row" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="7" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-cat" id="logoCat">&#128568;</div>
+    <div>
+      <div class="company">Traxis Manufacturing</div>
+      <div class="subtitle">Runtime Targets</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="clock" id="clock">--:--</div>
+    <div class="last-updated" id="lastUpdated">Loading...</div>
+    <div class="dark-toggle-wrap" style="margin-top:6px;justify-content:flex-end;">
+      <span class="dark-toggle-icon" id="darkIcon">&#9788;</span>
+      <button class="dark-toggle" id="darkToggle" aria-label="Toggle dark mode"></button>
+    </div>
+  </div>
+</header>
+
+<div class="content">
+
+  <div class="summary-cards">
+    <div class="summary-card glass"><div class="glass-inner-refraction"></div><div class="glass-specular"></div><div class="glass-edge-light"></div>
+      <div class="value" style="color:var(--text-primary)" id="targetHours">143 hrs</div>
+      <div class="sub-value" id="actualHours"></div>
+      <div class="label">Target Hrs / Week</div>
+    </div>
+    <div class="summary-card glass"><div class="glass-inner-refraction"></div><div class="glass-specular"></div><div class="glass-edge-light"></div>
+      <div class="value" style="color:var(--text-primary)" id="perMachineTarget">15.9 hrs</div>
+      <div class="label">Per Machine / Week</div>
+    </div>
+    <div class="summary-card glass"><div class="glass-inner-refraction"></div><div class="glass-specular"></div><div class="glass-edge-light"></div>
+      <div class="value" style="color:var(--text-primary)" id="utilTarget">31.8%</div>
+      <div class="sub-value" id="utilCurrent"></div>
+      <div class="label">Utilization</div>
+    </div>
+  </div>
+
+  <div class="progress-chart-section">
+    <div class="section-label">Weekly Progress</div>
+    <div class="chart-container glass"><div class="glass-inner-refraction"></div><div class="glass-specular"></div><div class="glass-edge-light"></div>
+      <div class="chart-canvas-wrap">
+        <canvas id="progressChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="sparkline-section">
+    <div class="section-label">Weekly Trend</div>
+    <div class="sparkline-nav">
+      <button class="spark-arrow spark-arrow-left" id="sparkLeft" aria-label="Older weeks">&#8249;</button>
+      <div class="sparkline-container glass" id="sparkline"><div class="glass-inner-refraction"></div><div class="glass-specular"></div><div class="glass-edge-light"></div></div>
+      <button class="spark-arrow spark-arrow-right" id="sparkRight" aria-label="Newer weeks">&#8250;</button>
+    </div>
+  </div>
+
+  <div class="total-progress">
+    <div class="progress-header">
+      <span class="progress-title">Total Shop Progress</span>
+      <span class="progress-value" id="totalLabel">-- / -- hrs</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="totalBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="section-label">Machines</div>
+  <div class="machine-list" id="machineList"></div>
+
+  <button class="assumptions-toggle" id="assumptionsBtn">Adjust Assumptions</button>
+  <div class="assumptions-panel glass" id="assumptionsPanel"><div class="glass-inner-refraction"></div><div class="glass-specular"></div><div class="glass-edge-light"></div>
+    <div class="assumptions-grid">
+      <div class="assumption-field">
+        <label>Billable Rate ($/hr)</label>
+        <input type="number" id="aRate" value="95" step="5">
+      </div>
+      <div class="assumption-field">
+        <label>Weekly Nut ($)</label>
+        <input type="number" id="aNut" value="13550" step="100">
+      </div>
+      <div class="assumption-field">
+        <label>Operating Hours / Week</label>
+        <input type="number" id="aOpHrs" value="50" step="1">
+      </div>
+      <div class="assumption-field">
+        <label>Revenue Machines</label>
+        <input type="number" id="aMachines" value="9" step="1">
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <span id="signalBadge">Runtime: --</span>
+  <span class="sep">|</span>
+  <span>Auto-refresh 5 min</span>
+</footer>
+
+<script src="runtime_snapshot.js"></script>
+<script>
+(function() {
+  // -- Clock --
+  function tick() {
+    var d = new Date(), h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+    var ap = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('clock').textContent =
+      h + ':' + pad(m) + ':' + pad(s) + ' ' + ap;
+  }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  tick(); setInterval(tick, 1000);
+
+  // -- Dark mode --
+  var isDark = localStorage.getItem('darkMode') === 'true';
+  if (isDark) document.documentElement.classList.add('dark');
+  var darkIcon = document.getElementById('darkIcon');
+  function updateDarkIcon() { darkIcon.textContent = isDark ? '\u263E' : '\u263C'; }
+  updateDarkIcon();
+  document.getElementById('darkToggle').addEventListener('click', function() {
+    isDark = !isDark;
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('darkMode', isDark);
+    updateDarkIcon();
+    if (lastData) render(lastData);
+  });
+
+  function isDarkMode() { return document.documentElement.classList.contains('dark'); }
+
+  // -- Glass tilt + edge-weighted specular with pooling --
+  function initGlassTilt(el) {
+    var spec = el.querySelector('.glass-specular');
+    el.addEventListener('mousemove', function(e) {
+      var rect = el.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width;
+      var y = (e.clientY - rect.top) / rect.height;
+      var rotY = (x - 0.5) * 12;
+      var rotX = (0.5 - y) * 8;
+      el.style.transform = 'perspective(800px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale(1.02)';
+      if (spec) {
+        // Edge proximity: how close cursor is to any edge (0=center, 1=edge)
+        var edgeDist = Math.max(
+          Math.abs(x - 0.5) * 2,
+          Math.abs(y - 0.5) * 2
+        );
+        // Edge specular: brighter near edges (simulates light hitting curved glass edge)
+        var edgeAlpha = isDarkMode()
+          ? (0.03 + edgeDist * 0.12)
+          : (0.06 + edgeDist * 0.18);
+        // Pooling: localized brightness under cursor
+        var poolAlpha = isDarkMode() ? 0.08 : 0.14;
+        var xPct = (x * 100).toFixed(1);
+        var yPct = (y * 100).toFixed(1);
+        spec.style.background =
+          'radial-gradient(circle at ' + xPct + '% ' + yPct + '%, rgba(255,255,255,' + poolAlpha + ') 0%, transparent 35%),' +
+          'radial-gradient(ellipse 80% 60% at ' + xPct + '% ' + yPct + '%, rgba(255,255,255,' + edgeAlpha + ') 0%, transparent 60%)';
+      }
+    });
+    el.addEventListener('mouseleave', function() {
+      el.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
+    });
+  }
+  document.querySelectorAll('.glass').forEach(initGlassTilt);
+
+  // Init tilt on machine rows with pooling highlight
+  function initRowTilt(el) {
+    el.addEventListener('mousemove', function(e) {
+      var rect = el.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width;
+      var y = (e.clientY - rect.top) / rect.height;
+      var rotY = (x - 0.5) * 8;
+      var rotX = (0.5 - y) * 6;
+      el.style.transform = 'perspective(800px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale(1.01)';
+      // (pooling glow disabled)
+    });
+    el.addEventListener('mouseleave', function() {
+      el.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
+      el.style.backgroundImage = 'none';
+    });
+  }
+
+  // -- Assumptions --
+  var aRate = document.getElementById('aRate');
+  var aNut = document.getElementById('aNut');
+  var aOpHrs = document.getElementById('aOpHrs');
+  var aMachines = document.getElementById('aMachines');
+
+  document.getElementById('assumptionsBtn').addEventListener('click', function() {
+    document.getElementById('assumptionsPanel').classList.toggle('open');
+  });
+
+  function getAssumptions() {
+    var rate = parseFloat(aRate.value) || 95;
+    var nut = parseFloat(aNut.value) || 13550;
+    var opHrs = parseFloat(aOpHrs.value) || 50;
+    var machines = parseInt(aMachines.value) || 9;
+    var targetHrs = Math.ceil(nut / rate * 10) / 10;
+    var perMachine = Math.round(targetHrs / machines * 10) / 10;
+    var utilPct = Math.round(targetHrs / (machines * opHrs) * 1000) / 10;
+    return { rate: rate, nut: nut, opHrs: opHrs, machines: machines,
+             targetHrs: targetHrs, perMachine: perMachine, utilPct: utilPct };
+  }
+
+  [aRate, aNut, aOpHrs, aMachines].forEach(function(el) {
+    el.addEventListener('input', function() { render(lastData); });
+  });
+
+  // Sparkline nav arrows
+  document.getElementById('sparkLeft').addEventListener('click', function() {
+    if (sparkOffset > 0) { sparkOffset--; render(lastData); }
+  });
+  document.getElementById('sparkRight').addEventListener('click', function() {
+    if (lastData) {
+      var total = (lastData.history || []).length + 1;
+      if (sparkOffset < total - SPARK_VISIBLE) { sparkOffset++; render(lastData); }
+    }
+  });
+
+  function barColor(pct) {
+    if (pct >= 100) return 'var(--bar-teal)';
+    if (pct >= 89)  return 'var(--bar-green)';
+    if (pct >= 70)  return 'var(--bar-amber)';
+    return 'var(--bar-red)';
+  }
+
+  // RGB values for background tinting
+  function barColorRgb(pct) {
+    if (pct >= 100) return '0,199,190';
+    if (pct >= 89)  return '48,209,88';
+    if (pct >= 70)  return '255,159,10';
+    return '255,59,48';
+  }
+
+  // Compute how many hours you should have by now (pace target)
+  function paceTargetNow(a) {
+    var now = new Date();
+    var dow = now.getDay(); // 0=Sun, 1=Mon...6=Sat
+    var monDay = dow === 0 ? 6 : dow - 1; // Mon=0...Sun=6
+    var dayFrac = (now.getHours() + now.getMinutes() / 60) / 24;
+    // Elapsed workdays (fractional), capped at 5 for weekends
+    var elapsed = monDay >= 5 ? 5 : monDay + dayFrac;
+    return a.targetHrs * elapsed / 5;
+  }
+
+  // Cat emoji based on pace %
+  function getCatEmoji(pct) {
+    if (pct >= 120) return '\u{1F63B}';  // 😻 heart eyes cat — over target
+    if (pct >= 100) return '\u{1F63A}';  // 😺 grinning cat
+    if (pct >= 80)  return '\u{1F638}';  // 😸 grinning cat with smiling eyes
+    if (pct >= 60)  return '\u{1F63E}';  // 😾 pouting cat
+    if (pct >= 40)  return '\u{1F63F}';  // 😿 crying cat
+    if (pct >= 20)  return '\u{1F640}';  // 🙀 weary cat
+    return '\u{1F648}';                   // 🙈 see-no-evil monkey
+  }
+
+  var lastData = null;
+  var selectedWeekIdx = null; // null = current week, 0..N = history index
+  var SPARK_VISIBLE = 4;     // max bars shown at once
+  var sparkOffset = -1;      // -1 = auto (show newest), else start index into allWeeks
+
+  function getSelectedWeekData(data) {
+    // Returns { machines, daily, isCompleted, weekStart, weekEnd } for the selected week
+    if (selectedWeekIdx === null) {
+      return {
+        machines: data.machines || [],
+        daily: data.daily || [],
+        isCompleted: false,
+        weekStart: data.week_start,
+        weekEnd: data.week_end
+      };
+    }
+    var h = data.history[selectedWeekIdx];
+    return {
+      machines: h.machines || [],
+      daily: h.daily || [],
+      isCompleted: true,
+      weekStart: h.week_start,
+      weekEnd: h.week_end
+    };
+  }
+
+  function render(data) {
+    if (!data) return;
+    lastData = data;
+    var a = getAssumptions();
+
+    // Validate selectedWeekIdx
+    if (selectedWeekIdx !== null && (!data.history || selectedWeekIdx >= data.history.length)) {
+      selectedWeekIdx = null;
+    }
+
+    var sel = getSelectedWeekData(data);
+    var machines = sel.machines;
+    var daily = sel.daily;
+    var isCompleted = sel.isCompleted;
+
+    document.getElementById('targetHours').textContent = a.targetHrs + ' hrs';
+    document.getElementById('perMachineTarget').textContent = a.perMachine + ' hrs';
+
+    // Compute utilization for the selected week
+    var totalHrs = 0;
+    machines.forEach(function(m) { totalHrs += m.runtime_hours; });
+    var activeMachines = machines.length || 1;
+    var currentUtil = Math.round(totalHrs / (activeMachines * a.opHrs) * 1000) / 10;
+
+    var actualSub = document.getElementById('actualHours');
+    actualSub.textContent = (isCompleted ? 'Final: ' : 'Current: ') + totalHrs.toFixed(1) + ' hrs';
+    var weekPctRaw = Math.round(totalHrs / a.targetHrs * 100);
+    actualSub.style.color = barColor(weekPctRaw);
+
+    document.getElementById('utilTarget').textContent = a.utilPct + '%';
+    var utilSub = document.getElementById('utilCurrent');
+    utilSub.textContent = (isCompleted ? 'Final: ' : 'Current: ') + currentUtil + '%';
+    utilSub.style.color = barColor(Math.round(currentUtil / a.utilPct * 100));
+
+    // Pace-based progress: for completed weeks, pace = full target
+    var paceTarget = isCompleted ? a.targetHrs : paceTargetNow(a);
+    var pacePct = paceTarget > 0 ? Math.min(Math.round(totalHrs / paceTarget * 100), 150) : 0;
+    var weekPct = Math.min(Math.round(totalHrs / a.targetHrs * 100), 150);
+
+    // Cat logo uses pace % (unless being pet)
+    if (!window._catPet) {
+      document.getElementById('logoCat').textContent = getCatEmoji(isCompleted ? weekPct : pacePct);
+    }
+
+    // Store current status color for background animation
+    window._bgRgb = barColorRgb(isCompleted ? weekPct : pacePct);
+
+    // Alarm vignette when at or below 60% of pace — pulses faster as it drops
+    var alarmPct = isCompleted ? weekPct : pacePct;
+    document.body.classList.toggle('alarm', alarmPct <= 60);
+    if (alarmPct <= 60) {
+      var speed = 0.6 + (alarmPct / 60) * 1.8;
+      document.body.style.setProperty('--alarm-speed', speed.toFixed(2) + 's');
+    }
+
+    // Last updated
+    var updEl = document.getElementById('lastUpdated');
+    if (isCompleted) {
+      updEl.textContent = 'Week of ' + sel.weekStart;
+      updEl.className = 'last-updated';
+    } else if (data.generated_at) {
+      var gen = new Date(data.generated_at);
+      var ago = Math.round((Date.now() - gen.getTime()) / 60000);
+      updEl.textContent = 'Updated ' + ago + ' min ago';
+      updEl.className = 'last-updated' + (ago > 30 ? ' stale' : '');
+    }
+
+    var sig = (data.runtime_signal || 'unknown').replace('run_status=', 'program execution (') + ')';
+    document.getElementById('signalBadge').textContent = 'Runtime: ' + sig;
+
+    renderSparkline(data, a);
+    renderProgressChart({ daily: daily }, a, isCompleted);
+
+    // Progress bar — for completed weeks show week % instead of pace %
+    if (isCompleted) {
+      document.getElementById('totalLabel').textContent =
+        totalHrs.toFixed(1) + ' / ' + a.targetHrs + ' hrs (' + weekPct + '%)';
+      var totalBar = document.getElementById('totalBar');
+      totalBar.style.width = Math.min(weekPct, 100) + '%';
+      totalBar.style.background = barColor(weekPct);
+      totalBar.textContent = weekPct + '%';
+    } else {
+      var paceHrs = Math.round(paceTarget * 10) / 10;
+      document.getElementById('totalLabel').textContent =
+        totalHrs.toFixed(1) + ' / ' + paceHrs + ' hrs pace (' + pacePct + '%)  \u2014  ' +
+        weekPct + '% of ' + a.targetHrs + 'h weekly';
+      var totalBar = document.getElementById('totalBar');
+      totalBar.style.width = Math.min(pacePct, 100) + '%';
+      totalBar.style.background = barColor(pacePct);
+      totalBar.textContent = pacePct + '%';
+    }
+
+    var list = document.getElementById('machineList');
+    list.innerHTML = '';
+    // For completed weeks, machine pace = full per-machine target
+    var paceFrac = isCompleted ? 1 : (paceTarget / a.targetHrs);
+    var machinePace = a.perMachine * paceFrac;
+    machines.forEach(function(m) {
+      var pct = machinePace > 0 ? Math.round(m.runtime_hours / machinePace * 100) : 0;
+      var row = document.createElement('div');
+      row.className = 'machine-row';
+      // For past weeks, hide live status dot (all would show current status, not historical)
+      var statusClass = isCompleted ? '' : (m.status || 'offline');
+      row.innerHTML =
+        '<div class="status-dot ' + statusClass + '"></div>' +
+        '<div><div class="machine-name">' + esc(m.name) + '</div>' +
+          '<div class="machine-id">' + esc(m.id) + '</div></div>' +
+        '<div class="machine-bar-wrap">' +
+          '<div class="machine-bar" style="width:' + Math.min(pct, 100) +
+          '%;background:' + barColor(pct) + '"></div>' +
+        '</div>' +
+        '<div class="machine-hours" style="color:' + barColor(pct) + '">' +
+          m.runtime_hours.toFixed(1) + ' hrs</div>' +
+        '<div class="machine-detail"><canvas></canvas></div>';
+      row.addEventListener('click', (function(mid) {
+        return function(e) {
+          var wasExpanded = row.classList.contains('expanded');
+          list.querySelectorAll('.machine-row.expanded').forEach(function(r) {
+            r.classList.remove('expanded');
+          });
+          if (!wasExpanded) {
+            row.classList.add('expanded');
+            setTimeout(function() {
+              var cvs = row.querySelector('.machine-detail canvas');
+              renderMachineChart(cvs, mid, { daily: daily }, a, isCompleted);
+            }, 50);
+          }
+        };
+      })(m.id));
+      list.appendChild(row);
+      initRowTilt(row);
+    });
+
+    if (data.error) {
+      var err = document.createElement('div');
+      err.className = 'glass';
+      err.style.cssText = 'color:var(--bar-red);padding:16px 24px;margin-bottom:12px;font-size:13px;font-weight:500;';
+      err.textContent = 'Database error: ' + data.error;
+      list.parentNode.insertBefore(err, list);
+    }
+  }
+
+  function renderSparkline(data, a) {
+    var container = document.getElementById('sparkline');
+    container.innerHTML = '';
+
+    // Build full week list with original indices for click mapping
+    var allWeeks = [];
+    var histLen = (data.history || []).length;
+    if (data.history) {
+      data.history.forEach(function(h, idx) {
+        allWeeks.push({ label: h.week_start.slice(5), hours: h.total_hours, histIdx: idx });
+      });
+    }
+    var curTotal = 0;
+    (data.machines || []).forEach(function(m) { curTotal += m.runtime_hours; });
+    allWeeks.push({ label: 'This week', hours: curTotal, current: true, histIdx: null });
+
+    // Resolve sparkOffset: -1 means auto (show newest SPARK_VISIBLE)
+    var total = allWeeks.length;
+    if (sparkOffset < 0 || sparkOffset > total - SPARK_VISIBLE) {
+      sparkOffset = Math.max(0, total - SPARK_VISIBLE);
+    }
+    var end = Math.min(sparkOffset + SPARK_VISIBLE, total);
+    var visible = allWeeks.slice(sparkOffset, end);
+
+    // Arrow state
+    document.getElementById('sparkLeft').disabled = (sparkOffset <= 0);
+    document.getElementById('sparkRight').disabled = (end >= total);
+
+    // Use visible weeks for max calculation (keeps bar heights relative to window)
+    var maxHrs = Math.max(a.targetHrs * 1.2, Math.max.apply(null, visible.map(function(w) { return w.hours; })));
+
+    var line = document.createElement('div');
+    line.className = 'target-line';
+    line.style.bottom = (a.targetHrs / maxHrs * 100) + '%';
+    var tag = document.createElement('span');
+    tag.className = 'target-tag';
+    tag.textContent = a.targetHrs + ' hrs target';
+    line.appendChild(tag);
+    container.appendChild(line);
+
+    visible.forEach(function(w) {
+      var isSelected = (w.histIdx !== null && selectedWeekIdx === w.histIdx) ||
+                       (w.histIdx === null && selectedWeekIdx === null);
+
+      var grp = document.createElement('div');
+      grp.className = 'spark-bar-group';
+      grp.style.cursor = 'pointer';
+      grp.style.opacity = (selectedWeekIdx !== null && !isSelected) ? '0.5' : '1';
+      grp.style.transition = 'opacity 0.3s';
+      grp.addEventListener('click', (function(idx) {
+        return function() {
+          selectedWeekIdx = idx;
+          render(lastData);
+        };
+      })(w.histIdx));
+
+      var val = document.createElement('div');
+      val.className = 'spark-value';
+      val.textContent = w.hours.toFixed(0) + 'h';
+
+      var bar = document.createElement('div');
+      bar.className = 'spark-bar';
+      var pct = w.hours / maxHrs * 75;
+      bar.style.height = pct + '%';
+      var wpct = Math.round(w.hours / a.targetHrs * 100);
+      if (wpct >= 100) {
+        bar.style.background = 'linear-gradient(180deg, rgba(0,199,190,0.85) 0%, rgba(0,199,190,0.45) 100%)';
+      } else if (wpct >= 75) {
+        bar.style.background = 'linear-gradient(180deg, rgba(48,209,88,0.85) 0%, rgba(48,209,88,0.45) 100%)';
+      } else if (wpct >= 50) {
+        bar.style.background = 'linear-gradient(180deg, rgba(255,159,10,0.85) 0%, rgba(255,159,10,0.45) 100%)';
+      } else {
+        bar.style.background = 'linear-gradient(180deg, rgba(255,59,48,0.85) 0%, rgba(255,59,48,0.45) 100%)';
+      }
+      if (isSelected) {
+        bar.style.boxShadow = '0 0 0 2px rgba(130,100,255,0.5), 0 0 12px rgba(130,100,255,0.25)';
+      }
+
+      var lbl = document.createElement('div');
+      lbl.className = 'spark-label';
+      lbl.textContent = w.label;
+      if (isSelected) { lbl.style.fontWeight = '700'; lbl.style.color = 'var(--text-primary)'; }
+
+      grp.appendChild(val);
+      grp.appendChild(bar);
+      grp.appendChild(lbl);
+      container.appendChild(grp);
+    });
+  }
+
+  function renderProgressChart(data, a, isCompleted) {
+    var canvas = document.getElementById('progressChart');
+    if (!canvas) return;
+    var wrap = canvas.parentElement;
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = wrap.offsetWidth * dpr;
+    canvas.height = wrap.offsetHeight * dpr;
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    var W = wrap.offsetWidth;
+    var H = wrap.offsetHeight;
+
+    var dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var daily = data.daily || [];
+
+    // Build cumulative data from daily breakdown
+    var cumulative = [];
+    var running = 0;
+    for (var i = 0; i < daily.length; i++) {
+      running += daily[i].hours;
+      cumulative.push({ day: daily[i].day_name, hours: round2(running) });
+    }
+
+    // Chart area with padding (padL extra for cat emoji markers)
+    var padL = 62, padR = 16, padT = 16, padB = 32;
+    var cW = W - padL - padR;
+    var cH = H - padT - padB;
+
+    // Y-axis max: whichever is larger — target or actual cumulative
+    var maxY = Math.max(a.targetHrs, running) * 1.15;
+    maxY = Math.ceil(maxY / 20) * 20; // round up to nearest 20
+
+    // X positions for each day (7 days, evenly spaced)
+    function xPos(i) { return padL + (i / 6) * cW; }
+    function yPos(v) { return padT + cH - (v / maxY) * cH; }
+
+    var dark = isDarkMode();
+    var gridColor = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+    var labelColor = dark ? 'rgba(235,235,245,0.4)' : 'rgba(60,60,67,0.4)';
+    var labelColor2 = dark ? 'rgba(235,235,245,0.5)' : 'rgba(60,60,67,0.5)';
+    var valueColor = dark ? 'rgba(240,240,245,0.85)' : 'rgba(28,28,30,0.8)';
+    var dotFill = dark ? '#222' : '#fff';
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid lines
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    var gridSteps = 5;
+    var gridStep = maxY / gridSteps;
+    for (var g = 0; g <= gridSteps; g++) {
+      var gy = yPos(g * gridStep);
+      ctx.beginPath();
+      ctx.moveTo(padL, gy);
+      ctx.lineTo(W - padR, gy);
+      ctx.stroke();
+      // Y-axis label
+      ctx.fillStyle = labelColor;
+      ctx.font = '500 10px Inter, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(Math.round(g * gridStep) + 'h', padL - 6, gy + 3);
+    }
+
+    // Cat emoji tier markers on Y-axis (evenly spaced at 20% intervals)
+    var catTiers = [
+      { pct: 120, emoji: '\u{1F63B}' },
+      { pct: 100, emoji: '\u{1F63A}' },
+      { pct: 80,  emoji: '\u{1F638}' },
+      { pct: 60,  emoji: '\u{1F63E}' },
+      { pct: 40,  emoji: '\u{1F63F}' },
+      { pct: 20,  emoji: '\u{1F640}' }
+    ];
+    for (var t = 0; t < catTiers.length; t++) {
+      var tierHrs = a.targetHrs * catTiers[t].pct / 100;
+      if (tierHrs > maxY) continue;
+      var ty = yPos(tierHrs);
+      // Faint tick line
+      ctx.strokeStyle = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(padL, ty);
+      ctx.lineTo(W - padR, ty);
+      ctx.stroke();
+      // Emoji — far left, before the hour labels
+      ctx.font = '11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(catTiers[t].emoji, 10, ty + 4);
+    }
+
+    // X-axis day labels
+    ctx.fillStyle = labelColor2;
+    ctx.font = '600 10px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    for (var d = 0; d < 7; d++) {
+      ctx.fillText(dayNames[d], xPos(d), H - 8);
+    }
+
+    // Target pace line (dashed diagonal from Mon=0 to Sun=targetHrs)
+    ctx.save();
+    ctx.setLineDash([6, 4]);
+    ctx.strokeStyle = dark ? 'rgba(255,80,70,0.6)' : 'rgba(255,59,48,0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(xPos(0), yPos(0));
+    // Target pace: linear across operating days (Mon-Fri), flat Sat-Sun
+    for (var d = 0; d < 7; d++) {
+      var targetAtDay = d <= 4
+        ? a.targetHrs * ((d + 1) / 5)  // Mon-Fri: ramp to 100%
+        : a.targetHrs;                   // Sat-Sun: already at target
+      ctx.lineTo(xPos(d), yPos(targetAtDay));
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    // Target label at the Fri position where target is reached
+    ctx.fillStyle = dark ? 'rgba(255,80,70,0.7)' : 'rgba(255,59,48,0.6)';
+    ctx.font = '600 9px Inter, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(a.targetHrs + 'h target', xPos(4) - 6, yPos(a.targetHrs) - 6);
+
+    // Actual cumulative progress area + line
+    if (cumulative.length > 0) {
+      var dayIdx = dayNames.indexOf(cumulative[0].day);
+      if (dayIdx < 0) dayIdx = 0;
+
+      // Filled area
+      ctx.beginPath();
+      ctx.moveTo(xPos(0), yPos(0));
+      // Start from Monday at 0, then go through each data point
+      for (var i = 0; i < cumulative.length; i++) {
+        var ci = dayNames.indexOf(cumulative[i].day);
+        if (ci < 0) ci = i;
+        ctx.lineTo(xPos(ci), yPos(cumulative[i].hours));
+      }
+      // Close back down
+      var lastCi = dayNames.indexOf(cumulative[cumulative.length - 1].day);
+      if (lastCi < 0) lastCi = cumulative.length - 1;
+      ctx.lineTo(xPos(lastCi), yPos(0));
+      ctx.lineTo(xPos(0), yPos(0));
+      ctx.closePath();
+
+      var pct = Math.round(running / a.targetHrs * 100);
+      var fillColor = pct >= 100 ? '0,199,190' : pct >= 75 ? '48,209,88' : pct >= 50 ? '255,159,10' : '255,59,48';
+      var grad = ctx.createLinearGradient(0, padT, 0, padT + cH);
+      grad.addColorStop(0, 'rgba(' + fillColor + ',0.35)');
+      grad.addColorStop(1, 'rgba(' + fillColor + ',0.05)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Line on top
+      ctx.beginPath();
+      ctx.moveTo(xPos(0), yPos(0));
+      for (var i = 0; i < cumulative.length; i++) {
+        var ci = dayNames.indexOf(cumulative[i].day);
+        if (ci < 0) ci = i;
+        ctx.lineTo(xPos(ci), yPos(cumulative[i].hours));
+      }
+      ctx.strokeStyle = 'rgba(' + fillColor + ',0.9)';
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Data points
+      for (var i = 0; i < cumulative.length; i++) {
+        var ci = dayNames.indexOf(cumulative[i].day);
+        if (ci < 0) ci = i;
+        var px = xPos(ci);
+        var py = yPos(cumulative[i].hours);
+
+        ctx.beginPath();
+        ctx.arc(px, py, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = dotFill;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(' + fillColor + ',0.9)';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Value label above point
+        ctx.fillStyle = valueColor;
+        ctx.font = '700 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(cumulative[i].hours.toFixed(0) + 'h', px, py - 10);
+      }
+    }
+  }
+
+  function renderMachineChart(canvas, machineId, data, a, isCompleted) {
+    if (!canvas) return;
+    var wrap = canvas.parentElement;
+    var dpr = window.devicePixelRatio || 1;
+    var W = wrap.offsetWidth;
+    var H = 160;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.height = H + 'px';
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    var dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var daily = data.daily || [];
+    var perMachineTarget = a.perMachine;
+
+    // Build cumulative data for this machine
+    var cumulative = [];
+    var running = 0;
+    for (var i = 0; i < daily.length; i++) {
+      var mHrs = (daily[i].machines && daily[i].machines[machineId]) || 0;
+      running += mHrs;
+      cumulative.push({ day: daily[i].day_name, hours: round2(running), dayHrs: round2(mHrs) });
+    }
+
+    var padL = 44, padR = 12, padT = 14, padB = 28;
+    var cW = W - padL - padR;
+    var cH = H - padT - padB;
+
+    var maxY = Math.max(perMachineTarget, running) * 1.2;
+    maxY = Math.ceil(maxY / 5) * 5;
+    if (maxY < 5) maxY = 5;
+
+    function xPos(i) { return padL + (i / 6) * cW; }
+    function yPos(v) { return padT + cH - (v / maxY) * cH; }
+
+    var dark = isDarkMode();
+    var gridColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+    var labelColor = dark ? 'rgba(235,235,245,0.35)' : 'rgba(60,60,67,0.35)';
+    var valueColor = dark ? 'rgba(240,240,245,0.8)' : 'rgba(28,28,30,0.75)';
+    var dotFill = dark ? '#222' : '#fff';
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid lines
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    var gridSteps = 4;
+    var gridStep = maxY / gridSteps;
+    for (var g = 0; g <= gridSteps; g++) {
+      var gy = yPos(g * gridStep);
+      ctx.beginPath();
+      ctx.moveTo(padL, gy);
+      ctx.lineTo(W - padR, gy);
+      ctx.stroke();
+      ctx.fillStyle = labelColor;
+      ctx.font = '500 9px Inter, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(Math.round(g * gridStep) + 'h', padL - 6, gy + 3);
+    }
+
+    // X-axis labels
+    ctx.fillStyle = labelColor;
+    ctx.font = '600 9px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    for (var d = 0; d < 7; d++) {
+      ctx.fillText(dayNames[d], xPos(d), H - 6);
+    }
+
+    // Per-machine target line (dashed)
+    ctx.save();
+    ctx.setLineDash([5, 3]);
+    ctx.strokeStyle = dark ? 'rgba(255,80,70,0.5)' : 'rgba(255,59,48,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(xPos(0), yPos(0));
+    for (var d = 0; d < 7; d++) {
+      var tgt = d <= 4 ? perMachineTarget * ((d + 1) / 5) : perMachineTarget;
+      ctx.lineTo(xPos(d), yPos(tgt));
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    // Target label
+    ctx.fillStyle = dark ? 'rgba(255,80,70,0.6)' : 'rgba(255,59,48,0.5)';
+    ctx.font = '600 8px Inter, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(perMachineTarget.toFixed(0) + 'h target', xPos(4) - 4, yPos(perMachineTarget) - 5);
+
+    // Actual progress
+    if (cumulative.length > 0) {
+      var pct = Math.round(running / perMachineTarget * 100);
+      var fillColor = pct >= 100 ? '0,199,190' : pct >= 75 ? '48,209,88' : pct >= 50 ? '255,159,10' : '255,59,48';
+
+      // Filled area
+      ctx.beginPath();
+      ctx.moveTo(xPos(0), yPos(0));
+      for (var i = 0; i < cumulative.length; i++) {
+        var ci = dayNames.indexOf(cumulative[i].day);
+        if (ci < 0) ci = i;
+        ctx.lineTo(xPos(ci), yPos(cumulative[i].hours));
+      }
+      var lastCi = dayNames.indexOf(cumulative[cumulative.length - 1].day);
+      if (lastCi < 0) lastCi = cumulative.length - 1;
+      ctx.lineTo(xPos(lastCi), yPos(0));
+      ctx.lineTo(xPos(0), yPos(0));
+      ctx.closePath();
+      var grad = ctx.createLinearGradient(0, padT, 0, padT + cH);
+      grad.addColorStop(0, 'rgba(' + fillColor + ',0.30)');
+      grad.addColorStop(1, 'rgba(' + fillColor + ',0.03)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Line
+      ctx.beginPath();
+      ctx.moveTo(xPos(0), yPos(0));
+      for (var i = 0; i < cumulative.length; i++) {
+        var ci = dayNames.indexOf(cumulative[i].day);
+        if (ci < 0) ci = i;
+        ctx.lineTo(xPos(ci), yPos(cumulative[i].hours));
+      }
+      ctx.strokeStyle = 'rgba(' + fillColor + ',0.85)';
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Data points with daily value labels
+      for (var i = 0; i < cumulative.length; i++) {
+        var ci = dayNames.indexOf(cumulative[i].day);
+        if (ci < 0) ci = i;
+        var px = xPos(ci);
+        var py = yPos(cumulative[i].hours);
+
+        ctx.beginPath();
+        ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = dotFill;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(' + fillColor + ',0.85)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Show cumulative total above dot
+        ctx.fillStyle = valueColor;
+        ctx.font = '700 10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(cumulative[i].hours.toFixed(1) + 'h', px, py - 8);
+      }
+    }
+  }
+
+  function round2(n) { return Math.round(n * 100) / 100; }
+
+  function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // Pet the cat — must keep moving mouse over it to stay happy
+  (function() {
+    var cat = document.getElementById('logoCat');
+    var stopTimer = null;
+    cat.style.cursor = 'pointer';
+    cat.addEventListener('mousemove', function() {
+      window._catPet = true;
+      cat.textContent = '\u{1F63B}';
+      clearTimeout(stopTimer);
+      stopTimer = setTimeout(function() {
+        window._catPet = false;
+        if (window.RUNTIME_DATA) render(window.RUNTIME_DATA);
+      }, 400);
+    });
+    cat.addEventListener('mouseleave', function() {
+      clearTimeout(stopTimer);
+      window._catPet = false;
+      if (window.RUNTIME_DATA) render(window.RUNTIME_DATA);
+    });
+  })();
+
+  // Animated background — gradient blobs drift on sine waves
+  (function() {
+    function animBg(t) {
+      var rgb = window._bgRgb || '255,59,48';
+      var dark = isDarkMode();
+      var base = dark ? '#111114' : '#f0f0f5';
+      var s = t / 1000;
+      // Each blob drifts on its own sine cycle
+      var x1 = 50 + 8 * Math.sin(s * 0.9);
+      var y1 = -5 + 6 * Math.sin(s * 0.6 + 1);
+      var x2 = 95 + 10 * Math.sin(s * 0.75 + 2);
+      var y2 = 100 + 8 * Math.cos(s * 0.54 + 0.5);
+      var x3 = 0 + 12 * Math.sin(s * 0.66 + 3);
+      var y3 = 45 + 10 * Math.cos(s * 0.84 + 1.5);
+      var x4 = 50 + 15 * Math.sin(s * 0.45 + 4);
+      var y4 = 50 + 12 * Math.cos(s * 0.6 + 2.5);
+      document.body.style.background =
+        'linear-gradient(180deg, rgba(' + rgb + ',0.45) 0%, rgba(' + rgb + ',0.12) 100%),' +
+        'radial-gradient(ellipse 130% 90% at ' + x1 + '% ' + y1 + '%, rgba(' + rgb + ',0.70) 0%, transparent 60%),' +
+        'radial-gradient(ellipse 110% 80% at ' + x2 + '% ' + y2 + '%, rgba(' + rgb + ',0.50) 0%, transparent 50%),' +
+        'radial-gradient(ellipse 90% 70% at ' + x3 + '% ' + y3 + '%, rgba(' + rgb + ',0.45) 0%, transparent 50%),' +
+        'radial-gradient(ellipse 100% 60% at ' + x4 + '% ' + y4 + '%, rgba(' + rgb + ',' + (dark ? 0.18 : 0.30) + ') 0%, transparent 60%),' +
+        base;
+      requestAnimationFrame(animBg);
+    }
+    requestAnimationFrame(animBg);
+  })();
+
+  function load() {
+    if (window.RUNTIME_DATA) {
+      render(window.RUNTIME_DATA);
+    } else {
+      document.getElementById('lastUpdated').textContent = 'Failed to load data';
+      document.getElementById('lastUpdated').className = 'last-updated stale';
+    }
+  }
+
+  function refresh() {
+    var old = document.getElementById('dataScript');
+    if (old) old.remove();
+    var s = document.createElement('script');
+    s.id = 'dataScript';
+    s.src = 'runtime_snapshot.js?t=' + Date.now();
+    s.onload = function() { load(); };
+    s.onerror = function() {
+      document.getElementById('lastUpdated').textContent = 'Refresh failed';
+      document.getElementById('lastUpdated').className = 'last-updated stale';
+    };
+    document.head.appendChild(s);
+  }
+
+  load();
+  setInterval(refresh, 5 * 60 * 1000);
+})();
+</script>
+</body>
+</html>
