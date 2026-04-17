@@ -39,6 +39,37 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+### P15: ProShop API — Reply to Matt Carrico (Founder/Chief Architect)
+
+**Task:** Evaluate Matt Carrico's response to our 5-item API change request, answer his questions, and draft a reply email. Matt is the founder and chief architect of ProShop ERP.
+
+**What was done:**
+
+1. **Parsed Matt's email** (.eml) — Identified his responses to all 5 items, extracted his specific questions and requests.
+
+2. **Item 1 retest (read-only scope write bug)** — Re-ran the parts:r write test against the current build (April 16, 2026). Bug confirmed NOT fixed: a `parts:r` token successfully created Part `undefined-DELETE-ME-SCOPE-TEST` in production. Matt's theory (scope parameter omitted from request) ruled out — scope was explicitly included.
+
+3. **Selenium workaround audit** — Documented the two specific ProShop pages requiring browser automation: Sequence Detail (G-Code Tool # field not writable via API, ProShop scrambles row order on API save) and Written Description (API-pushed content has display bug with legacyId="").
+
+4. **Integration landscape inventory** — Cataloged all active integrations touching ProShop API: Fusion 360, Intuit QBO, FOCAS/CNC machines, Fusion-to-ProShop tool library sync, Make.com, Programming Timer, BLE Proximity.
+
+5. **Drafted reply email** — Addresses all 5 items with fresh evidence for Item 1, specific Selenium workaround details for Item 2, acknowledgment of Recently Updated Records API for Item 3, concession on OAuth 2.0 point for Item 4, and agreement to share scope_permission_map.md for Item 5. Includes testing partnership offer.
+
+**Files created:**
+- `15. Proshop Replacement Research and Architecture/reply_to_matt_carrico.md` — Draft reply email with Web Claude conversion instructions
+- `15. Proshop Replacement Research and Architecture/01_api_discovery/retest_item1_readonly_write.py` — Minimal retest script for read-only write bug
+- `15. Proshop Replacement Research and Architecture/01_api_discovery/retest_item1_results.json` — Retest results with full payloads
+
+**Key decisions:**
+- Retested Item 1 before replying (6 weeks since original test) — confirmed still broken
+- Only tested addPart (not addWorkOrder) to avoid burning another real WO number
+- Offered testing partnership for API expansion — positions Traxis as collaborative, not adversarial
+- Corrected tool library description: Fusion 360 ↔ ProShop sync, not standalone
+
+**Status:** Draft ready for Wolfgang review. Needs: (1) paste via Web Claude for plain text conversion, (2) attach scope_permission_map.md, (3) delete test Part from ProShop.
+
+---
+
 ### P19/P27: VPO Creation Workflow — Scheduler tool demand analysis + automated vendor PO creation
 
 **Task:** Analyze WO 26-0027 tool requirements via the Shop Scheduler, create a Vendor Purchase Order to AJ Rod for low-stock tools, and update ProShop tool library pricing from the vendor order acknowledgment.
