@@ -1,0 +1,106 @@
+BLE Proximity Worker Tracking — Amazon Shopping List
+=====================================================
+Date: 2026-04-26
+
+PROBLEM: The Asus USB Bluetooth dongle only gives ~4 dB RSSI spread
+across 0-50 ft — not enough to tell "at machine" from "across the shop."
+Need dedicated BLE scanning hardware with better radio sensitivity.
+
+Already on hand: 2x Feasycom iBeacon tags (major 60285, 40604),
+                 Asus USB BT dongle (inadequate)
+
+
+=== PHASE 1: TEST KIT (validate concept with 2-3 machines) ===
+
+1. ESP32 Dev Boards (BLE gateways running ESPresense firmware)
+   - Search: "ESP32-WROOM-32 dev board" or "ESP32 DevKitC"
+   - Qty: 3
+   - ~$7-10 each
+   - NOTE: Get the basic ESP32-WROOM-32 (not the S2/S3/C3 variants).
+     The classic WROOM-32 has the best ESPresense compatibility.
+
+2. USB-A to Micro-USB cables (to power the ESP32 boards)
+   - Search: "micro USB cable 6ft" (or 10ft for reach)
+   - Qty: 3
+   - ~$2-3 each (or a multi-pack)
+   - Skip if you have spares lying around
+
+3. USB wall chargers (5V/1A minimum)
+   - Search: "USB wall charger 5V 1A"
+   - Qty: 3
+   - ~$3-5 each (or a multi-pack)
+   - Any basic phone charger works. Skip if you have spares.
+
+Phase 1 estimated total: ~$30-50
+
+
+=== PHASE 2: FULL DEPLOYMENT (14 machines, 10 workers) ===
+Order after Phase 1 proves the concept works.
+
+4. More ESP32 Dev Boards
+   - Qty: 12 more (15 total — 14 machines + 1 spare)
+   - Search: "ESP32 WROOM 32 dev board" (often sold in 3-packs or 5-packs)
+   - ~$7-10 each, less in multi-packs
+
+5. BLE Beacon Badges for workers (you have 2 Feasycom tags; need ~10 more)
+   - OPTION A: Search "iBeacon badge card" or "BLE beacon card"
+   - OPTION B: Search "MOKOSmart beacon" (sometimes listed on Amazon)
+   - OPTION C: Order direct from MOKOSmart store (not Amazon):
+     https://store.mokosmart.com — H3 Card Beacon ~$9/ea or B2 Badge ~$12/ea
+   - Qty: 10 more (12 total — 10 workers + 2 spares)
+   - ~$9-13 each
+
+6. Waterproof project enclosures (for ESP32 boards at machines)
+   - Search: "IP65 ABS project box small" or "waterproof junction box 100x68x50mm"
+   - Qty: 15
+   - ~$3-5 each (often sold in multi-packs)
+
+7. USB power supplies (for all ESP32 nodes)
+   - Search: "USB wall charger 5V multi-pack"
+   - Qty: 12 more (15 total)
+
+8. Micro-USB cables (longer runs)
+   - Search: "micro USB cable 10ft" multi-pack
+   - Qty: 12 more (15 total)
+
+Phase 2 estimated total: ~$250-350
+
+
+=== OPTIONAL / NICE-TO-HAVE ===
+
+9. PoE switch (if you want to run Ethernet to gateways instead of WiFi)
+   - Search: "16 port PoE switch"
+   - Qty: 1
+   - ~$80-120
+   - Only needed if WiFi proves unreliable in the metal shop.
+     ESP32 boards use WiFi by default with ESPresense firmware.
+
+10. Olimex ESP32-GATEWAY boards (ESP32 + Ethernet, replaces WiFi ESP32)
+    - Not typically on Amazon — order from Olimex or DigiKey
+    - ~$25 each
+    - Only needed if WiFi is unreliable and you go the PoE route
+
+
+=== SOFTWARE (free, install after hardware arrives) ===
+
+- ESPresense firmware: https://espresense.com/
+  Flash onto each ESP32 via USB. Web-based config after flashing.
+  Purpose-built for BLE room/zone presence detection.
+
+- Mosquitto MQTT broker: https://mosquitto.org/
+  Install on collector PC (10.1.1.71). Receives data from all ESP32 nodes.
+
+- Processing: Custom Python script (paho-mqtt) on collector PC
+  Subscribe to MQTT, apply RSSI filtering, assign workers to machines.
+
+
+=== TOTAL BUDGET ESTIMATE ===
+
+Phase 1 (test):        ~$30-50
+Phase 2 (full deploy): ~$250-350
+                       -----------
+Grand total:           ~$280-400
+
+This is the DIY/ESP32 route — significantly cheaper than commercial
+gateways ($490-560 for MOKOSmart MKGW3) and everything is on Amazon
+except the beacon badges (which may or may not be listed).

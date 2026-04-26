@@ -7,6 +7,31 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-26
 
+### P31: BLE Proximity Worker Tracking — Hardware shopping list for ESP32 gateways
+
+**Task:** Review status of BLE proximity project and create an Amazon shopping list for the hardware needed to replace the inadequate Asus USB Bluetooth dongle.
+
+**What was done:**
+
+1. **Reviewed project state** — Identified that the last session (2026-04-16) concluded with the Asus USB dongle giving only ~4 dB RSSI spread across 0-50 ft, insufficient for proximity zone detection. Recommendation was to purchase dedicated BLE gateways.
+
+2. **Created Amazon shopping list** — `AMAZON_SHOPPING_LIST.txt` with two phases:
+   - Phase 1 (test kit, ~$30-50): 3x ESP32-WROOM-32 dev boards + USB cables/chargers to flash with ESPresense firmware and test against existing 2 Feasycom tags
+   - Phase 2 (full deploy, ~$250-350): 12 more ESP32 boards, 10 more beacon badges, waterproof enclosures
+
+3. **Wolfgang ordered** a 3-pack of ESP32-WROOM-32 dev boards from Amazon. Other cables/chargers already on hand.
+
+**Files created:**
+- `31. BLE Proximity Worker Tracking/AMAZON_SHOPPING_LIST.txt`
+
+**Key decisions:**
+- Going with ESP32 + ESPresense DIY route (~$280-400 total) instead of commercial gateways (~$1,200+)
+- Phase 1 test with 3 boards before committing to full 14-machine deployment
+
+**Status:** Waiting for ESP32 boards to arrive. Next session: flash ESPresense, test RSSI range with Feasycom tags.
+
+---
+
 ### P1: Collector PC Network Fix — Bumped cable + static IP + firewall bat
 
 **Task:** Diagnose why Overseer dashboard (port 8060) on Collector PC was unreachable from other LAN machines after a reboot.
