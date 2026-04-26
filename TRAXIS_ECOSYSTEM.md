@@ -34,7 +34,7 @@
 - [+] **P27: Accounting Ingest** — Ingests vendor invoices, bills, POs, and quotes into ProShop and QBO. VPO line items use toolNumber + orderNumber (brand+EDP) fields.
 - [+] **P28: Proshop API Usage** — Monitors ProShop GraphQL API usage patterns across Traxis projects.
 - [+] **P29: Rollo Printer App** — Windows system tray app for printing PDFs to Rollo thermal printer.
-- [+] **P30: Traxis Label Printer Extension** — Chrome extension that generates and prints material and COTS labels from ProShop pages.
+- [+] **P30: Traxis Label Printer Extension** — Chrome extension that generates and prints material, COTS, and equipment labels from ProShop pages.
 - [?] **P31: BLE Proximity Worker Tracking** — Passive BLE-based system to track which worker is at which CNC machine via Feasycom beacon tags and BLE gateways.
 - [+] **P32: Breakeven Dashboard** — Visual dashboard showing weekly CNC machine runtime vs breakeven target hours with per-machine detail, daily charts, and weekly trend navigation.
 - [+] **P33: Tool Library Updater** — CLI utility for updating ProShop tool library entries when switching manufacturers, with VPO pricing lookup and manufacturer spec scraping.
@@ -51,7 +51,7 @@
 | P28: Proshop API Usage | RECON_REPORT.md (reference documentation for API usage patterns and vendor guidance) | All projects that call ProShop GraphQL API (P1, P11, P16, P17, P18, P19, P22, P27) |
 | P29: Rollo Printer App | `rollo_print.log` (print job history, last 100 entries), `rollo_printer_app.exe` (standalone executable) | Windows printer subsystem (printer named "Rollo Printer"), user-supplied PDF files |
 | P17: COTS Crib Kiosk | COTS label PNGs (450px wide, 128px tall, 180 DPI), transaction log CSV, Flask kiosk UI (port 5000) | ProShop GraphQL API (OAuth), Brother PT-P700 print service at http://10.1.1.242:5002/api/print-image, COTS_Labels_All.csv |
-| P30: Traxis Label Printer Extension | Material label PNGs (128px tall, auto-width), COTS label PNGs (128px tall, 450px wide), both as base64 PNG via Canvas API | ProShop WO page DOM, ProShop COTS page DOM, ProShop GraphQL API (session cookie), Brother PT-P700 print service at http://10.1.1.242:5002 |
+| P30: Traxis Label Printer Extension | Material label PNGs (128px tall, auto-width), COTS label PNGs (128px tall, 450px wide), Equipment label PNGs (128px tall, auto-width), all as base64 PNG via Canvas API | ProShop WO page DOM, ProShop COTS page DOM, ProShop Equipment page DOM, ProShop GraphQL API (session cookie), Brother PT-P700 print service at http://10.1.1.242:5002 |
 | P32: Breakeven Dashboard | runtime_snapshot.json (weekly machine runtime + daily breakdown + history), runtime_snapshot.js (same data as window.RUNTIME_DATA for file:// use) | FASData monitoring.db (C:\FASData\monitoring.db, read-only — machine_samples table), machines.json (machine list from FASData or config) |
 | P33: Tool Library Updater | Updated tool records in ProShop (description, dimensions, coating, brand, cost, notes), downloaded product images for manual upload | ProShop GraphQL API (tools, purchaseOrders), .traxis.env credentials, manufacturer product pages (Kennametal) |
 

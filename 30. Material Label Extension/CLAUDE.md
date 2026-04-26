@@ -1,19 +1,22 @@
 # Project 30 — Traxis Label Printer Extension
 
-Chrome extension (MV3) that injects print-label buttons on ProShop pages. Supports two page types:
+Chrome extension (MV3) that injects print-label buttons on ProShop pages. Supports three page types:
 
-- **WO pages** (`/procnc/workorders/*`) — "Print Material Label" button
-- **COTS pages** (`/procnc/ots/*`) — "Print COTS Label" button
+- **WO pages** (`/procnc/workorders/*`) — "Print Material Label" button (green)
+- **COTS pages** (`/procnc/ots/*`) — "Print COTS Label" button (green)
+- **Equipment pages** (`/procnc/equipment/*`) — "Print Equipment Label" button (red)
 
 ## Architecture
 
 ```
-content.js       →  scrapes WO/material data from DOM + API fallback
-                  →  LabelGenerator renders label PNG via Canvas API
-cots-content.js  →  scrapes COTS ID + description from DOM
-                  →  COTSLabelGenerator renders label PNG via Canvas API
-Both              →  chrome.runtime.sendMessage → service-worker.js
-service-worker.js →  POSTs base64 PNG to http://10.1.1.242:5002/api/print-image
+content.js            →  scrapes WO/material data from DOM + API fallback
+                       →  LabelGenerator renders label PNG via Canvas API
+cots-content.js       →  scrapes COTS ID + description from DOM
+                       →  COTSLabelGenerator renders label PNG via Canvas API
+equipment-content.js  →  scrapes equipment data from DOM + API fallback
+                       →  EquipmentLabelGenerator renders label PNG via Canvas API
+All                   →  chrome.runtime.sendMessage → service-worker.js
+service-worker.js     →  POSTs base64 PNG to http://10.1.1.242:5002/api/print-image
 ```
 
 Service worker is needed to bypass HTTPS→HTTP mixed-content block.
@@ -30,17 +33,24 @@ Service worker is needed to bypass HTTPS→HTTP mixed-content block.
 - QR code left (encodes full ProShop COTS URL)
 - Text: COTS ID (bold 48px), description (28px, word-wrapped up to 2 lines)
 
+**Equipment labels** (Equipment pages):
+- 128px tall, auto-width, 180 DPI
+- QR code left (encodes full ProShop equipment URL)
+- Text: Equipment # (bold 36px), Tool Name (24px, word-wrapped at 400px), Serial Number (14px)
+
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `traxis-material-label/manifest.json` | MV3 manifest, matches WO + COTS pages |
+| `traxis-material-label/manifest.json` | MV3 manifest, matches WO + COTS + equipment pages |
 | `traxis-material-label/background/service-worker.js` | Print service proxy |
 | `traxis-material-label/src/content.js` | WO button injection, DOM scraping, API fallback |
 | `traxis-material-label/src/label-generator.js` | WO material label renderer (Canvas) |
 | `traxis-material-label/src/cots-content.js` | COTS button injection, DOM scraping |
 | `traxis-material-label/src/cots-label-generator.js` | COTS label renderer (Canvas, 2x supersample) |
-| `traxis-material-label/src/content.css` | Green button styling with states (shared) |
+| `traxis-material-label/src/equipment-content.js` | Equipment button injection, DOM scraping, API fallback |
+| `traxis-material-label/src/equipment-label-generator.js` | Equipment label renderer (Canvas) |
+| `traxis-material-label/src/content.css` | Button styling — green (WO/COTS) + red (equipment) with states |
 | `traxis-material-label/lib/qrcode.min.js` | QR code generation library (shared) |
 
 ## Related Label Projects
@@ -52,10 +62,10 @@ Service worker is needed to bypass HTTPS→HTTP mixed-content block.
 
 1. Open `chrome://extensions` → Enable Developer mode
 2. Click "Load unpacked" → Select `traxis-material-label/` folder
-3. Navigate to any ProShop WO page or COTS detail page — green button appears
+3. Navigate to any ProShop WO page, COTS detail page, or equipment page — button appears
 
 ## Interfaces
 
-Produces: Material label PNGs (128px tall, auto-width), COTS label PNGs (128px tall, 450px wide), both as base64 PNG via Canvas API
-Consumes: ProShop WO page DOM, ProShop COTS page DOM, ProShop GraphQL API (session cookie), Brother PT-P700 print service at http://10.1.1.242:5002
-Contracts: Print payload `{image_base64, copies, label_name}` to `/api/print-image` (same as P9/P22). WO labels use QR scheme `proshop://wo/{woNumber}` (same as P9). COTS labels encode full ProShop URL. All labels 128px tall at 180 DPI (PT-P700 24mm tape).
+Produces: Material label PNGs (128px tall, auto-width), COTS label PNGs (128px tall, 450px wide), Equipment label PNGs (128px tall, auto-width), all as base64 PNG via Canvas API
+Consumes: ProShop WO page DOM, ProShop COTS page DOM, ProShop Equipment page DOM, ProShop GraphQL API (session cookie), Brother PT-P700 print service at http://10.1.1.242:5002
+Contracts: Print payload `{image_base64, copies, label_name}` to `/api/print-image` (same as P9/P22). WO labels use QR scheme `proshop://wo/{woNumber}` (same as P9). COTS and equipment labels encode full ProShop URL. All labels 128px tall at 180 DPI (PT-P700 24mm tape).

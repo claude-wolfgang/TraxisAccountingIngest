@@ -62,3 +62,20 @@
   color: #c62828;
   font-weight: bold;
 }
+
+/* Equipment button — red variant */
+.traxis-label-btn--equipment {
+  background: #c62828;
+}
+
+.traxis-label-btn--equipment:hover {
+  background: #d32f2f;
+}
+
+.traxis-label-btn--equipment:active {
+  background: #b71c1c;
+}
+
+.traxis-label-btn--equipment.traxis-label-btn--success {
+  background: #b71c1c;
+}

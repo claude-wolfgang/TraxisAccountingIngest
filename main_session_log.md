@@ -7,6 +7,40 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-26
 
+### P30: Traxis Label Printer Extension — Add equipment label support
+
+**Task:** Add a "Print Equipment Label" button to ProShop equipment pages, similar to existing WO material and COTS label buttons.
+
+**What was done:**
+
+1. **Created equipment label generator** (`equipment-label-generator.js`) — Renders 128px-tall auto-width label matching the material label design: QR code on left encoding the equipment page URL, 3 lines of text (Equipment # bold 36px, Tool Name 24px word-wrapped, Serial Number 14px), vertically centered.
+
+2. **Created equipment content script** (`equipment-content.js`) — Injects red "Print Equipment Label" button on `/procnc/equipment/*` pages. Uses DOM scraping with `ownText` extraction and `[^a-z]*` icon prefix handling (matching material script pattern), plus GraphQL API fallback querying `equipments(tool: "...")`.
+
+3. **Added red button styling** to `content.css` — `.traxis-label-btn--equipment` variant with red color scheme (#c62828) to visually distinguish from green WO/COTS buttons.
+
+4. **Updated manifest.json** — Added equipment content script entry, bumped version to 1.3.0, updated description.
+
+5. **Debugged DOM scraping** — Initial attempts using regex text matching and `data-display-name` attribute selectors failed due to ProShop's ⓘ icon elements polluting `textContent`. Final working approach uses `ownText` (direct text nodes only) + GraphQL API fallback, matching the proven material content script pattern.
+
+**Files created:**
+- `traxis-material-label/src/equipment-content.js`
+- `traxis-material-label/src/equipment-label-generator.js`
+
+**Files modified:**
+- `traxis-material-label/manifest.json` (v1.2.1 → v1.3.0, added equipment entry)
+- `traxis-material-label/src/content.css` (added red button variant)
+- `30. Material Label Extension/CLAUDE.md` (updated for 3 page types)
+
+**Key decisions:**
+- Red button color for equipment to distinguish from green WO/COTS buttons
+- Used same label layout as material labels (no supersample) rather than COTS layout
+- GraphQL API fallback ensures labels work even if DOM scraping fails
+
+**Status:** Complete — tested and printing correctly on equipment page TG151.
+
+---
+
 ### P31: BLE Proximity Worker Tracking — Hardware shopping list for ESP32 gateways
 
 **Task:** Review status of BLE proximity project and create an Amazon shopping list for the hardware needed to replace the inadequate Asus USB Bluetooth dongle.
