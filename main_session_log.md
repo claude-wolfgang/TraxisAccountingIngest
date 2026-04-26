@@ -5,6 +5,38 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-26
+
+### P1: Collector PC Network Fix — Bumped cable + static IP + firewall bat
+
+**Task:** Diagnose why Overseer dashboard (port 8060) on Collector PC was unreachable from other LAN machines after a reboot.
+
+**What was done:**
+
+1. **Reviewed COLLECTOR_PC_FIREWALL_FIX.md** — Evaluated existing firewall fix doc for clarity, safety, and effectiveness. Identified gaps (no subnet scoping, risky full-firewall disable, incomplete port list).
+
+2. **Rewrote open_traxis_firewall.bat** — New version opens ports 5000-8101 TCP + ICMP scoped to 10.1.1.0/24 LAN only. Creates a `TraxisFirewall` scheduled task (runs at startup as SYSTEM) to re-apply rules after GPO refresh. Supports `/apply` flag for silent scheduled task mode.
+
+3. **Diagnosed actual root cause** — Firewall was a red herring. Disabled firewall, Overseer was running on port 8060, but ping from other machines failed. `ipconfig` showed all adapters as "Media disconnected." **Root cause: bumped ethernet cable.**
+
+4. **Fixed DHCP drift** — After reconnecting cable, DHCP assigned .72 instead of .71. Windows Settings UI failed silently when setting static IP. Used `netsh interface ip set address "Ethernet 2" static 10.1.1.71 255.255.255.0 10.1.1.1` successfully.
+
+5. **Updated documentation** — Rewrote COLLECTOR_PC_FIREWALL_FIX.md to reflect actual root cause and static IP config. Updated MEMORY.md with network troubleshooting lesson.
+
+**Files modified:**
+- `1. Proshop Automations/open_traxis_firewall.bat` — Complete rewrite with LAN scoping + scheduled task
+- `1. Proshop Automations/COLLECTOR_PC_FIREWALL_FIX.md` — Rewritten to document actual root cause
+- `MEMORY.md` — Added Collector PC Network section and physical-layer-first lesson
+
+**Key decisions:**
+- Static IP (10.1.1.71) set via netsh, not Windows Settings UI (which fails silently)
+- Firewall bat uses single port range (5000-8101) instead of individual port rules
+- Scheduled task survives GPO refresh by re-applying rules at startup
+
+**Status:** Complete. Network restored, static IP set, firewall re-enabled with rules, scheduled task created.
+
+---
+
 ## 2026-04-16
 
 ### P32: Breakeven Dashboard — Past week selector + sparkline navigation + UI polish
