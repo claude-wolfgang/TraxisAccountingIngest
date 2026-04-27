@@ -5,6 +5,45 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-27
+
+### P30: Traxis Label Printer Extension — Box Label + User Label (v1.4.0)
+
+**Date:** 2026-04-27
+
+**Task:** Add two new label types to the Chrome extension: Box Label (for shipping) and User Label (for employee pages). Fix form submission bug across all label buttons.
+
+**What was done:**
+
+1. **Box Label** — New blue button injected on WO pages in the Shipping row's "Certified To Run" cell. On click, prompts operator for box quantity ("Enter Qty of Parts in Box"), then generates and prints a label with QR code (full ProShop URL), WO#, Customer PO, Part Number, and Qty. All four text lines use uniform bold 24px font. Data sourced from DOM scraping + GraphQL API fallback (`customerPoNumber`).
+
+2. **User Label** — New teal button injected on ProShop user pages (`/procnc/users/*`). Generates label with QR code (user page URL), Name, and User ID#. Scrapes name and ID from DOM with flexible matching (handles "Original User Id", first/last name fields, page header). Falls back to URL extraction for user ID.
+
+3. **Form submission fix** — All five label buttons (material, COTS, equipment, box, user) now set `type="button"` to prevent ProShop's surrounding `<form>` from submitting when clicked. Previously, clicking any label button would clear the left panel/page state.
+
+4. **Button placement iteration** — Box Label button moved through three positions: initially right-edge absolute (overlapped completion zone), then outside table (caused horizontal scrollbar), finally settled in the grey "Certified To Run" cell on the Shipping row.
+
+**Files modified:**
+- `30. Material Label Extension/traxis-material-label/src/box-content.js` (new)
+- `30. Material Label Extension/traxis-material-label/src/box-label-generator.js` (new)
+- `30. Material Label Extension/traxis-material-label/src/user-content.js` (new)
+- `30. Material Label Extension/traxis-material-label/src/user-label-generator.js` (new)
+- `30. Material Label Extension/traxis-material-label/manifest.json` (v1.3.0 → v1.4.0, two new content_scripts entries)
+- `30. Material Label Extension/traxis-material-label/src/content.css` (blue box + teal user button styles)
+- `30. Material Label Extension/traxis-material-label/src/content.js` (type="button" fix)
+- `30. Material Label Extension/traxis-material-label/src/cots-content.js` (type="button" fix)
+- `30. Material Label Extension/traxis-material-label/src/equipment-content.js` (type="button" fix)
+- `30. Material Label Extension/CLAUDE.md` (updated for 5 label types)
+
+**Key decisions:**
+- Box Label QR encodes full ProShop URL (not `proshop://wo/` custom scheme) so phones can scan it
+- Uniform font size on box label for readability
+- User page URL pattern set to `/procnc/users/*` — needs verification if ProShop uses a different path
+
+**Status:** Complete. Extension reloaded and Box Label tested on live WO page. User Label ready but untested (needs user page navigation).
+
+---
+
 ## 2026-04-26
 
 ### P27: Accounting Ingest — Scan-burst-receive pipeline, tool labels, VPO receiving via API

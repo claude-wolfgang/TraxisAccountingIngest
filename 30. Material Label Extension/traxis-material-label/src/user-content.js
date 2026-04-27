@@ -1,26 +1,15 @@
 (function () {
   'use strict';
 
-  const BUTTON_ATTR = 'data-traxis-equipment-label';
+  const BUTTON_ATTR = 'data-traxis-user-label';
   let lastUrl = window.location.href;
 
-  // ─── Equipment ID from URL ──────────────────────────────────────
-
-  function getToolIdFromUrl() {
-    const m = window.location.href.match(/\/procnc\/equipment\/[A-Z0-9-]+\/([A-Z0-9-]+?)(?:\$|$)/i);
-    return m ? m[1] : null;
+  function getUserUrl() {
+    return window.location.href.replace(/\$.*$/, '');
   }
-
-  function getEquipmentUrl() {
-    const m = window.location.href.match(/(https:\/\/[^/]+\/procnc\/equipment\/[A-Z0-9-]+\/[A-Z0-9-]+?)(?:\$|$)/i);
-    return m ? m[1] : window.location.href;
-  }
-
-  // ─── DOM Scraping ───────────────────────────────────────────────
 
   function scrapeFromDOM() {
-    const data = { equipmentNumber: '', toolName: '', serialNumber: '' };
-
+    const data = { name: '', userId: '' };
     const allCells = document.querySelectorAll('td, th, dt, dd, span, label, div');
 
     for (let i = 0; i < allCells.length; i++) {
@@ -32,23 +21,42 @@
         .trim();
       const text = ownText || (el.textContent || '').trim();
 
-      if (/^[^a-z]*Internal\s+Tool\s*#:?\s*$/i.test(text)) {
+      if (/^[^a-z]*(Full\s+)?Name:?\s*$/i.test(text)) {
         const val = getNextValue(el);
-        if (val) data.equipmentNumber = val;
+        if (val) data.name = val;
       }
 
-      if (/^[^a-z]*Tool\s+Name:?\s*$/i.test(text)) {
+      if (/^[^a-z]*(First\s+Name):?\s*$/i.test(text)) {
         const val = getNextValue(el);
-        if (val) data.toolName = val;
+        if (val) data.name = val;
       }
 
-      if (/^[^a-z]*Serial\s+Number:?\s*$/i.test(text)) {
+      if (/^[^a-z]*(Last\s+Name):?\s*$/i.test(text)) {
         const val = getNextValue(el);
-        if (val) data.serialNumber = val;
+        if (val && data.name) data.name = data.name + ' ' + val;
+        else if (val) data.name = val;
+      }
+
+      if (/^[^a-z]*((Original\s+)?User\s*(Id|ID|#|Number)|Employee\s*(Id|ID|#|Number)):?\s*$/i.test(text)) {
+        const val = getNextValue(el);
+        if (val) data.userId = val;
       }
     }
 
-    console.log('[Traxis Equipment Label] DOM scrape result:', data);
+    if (!data.name) {
+      const headerEl = document.querySelector('h1, h2, .page-title');
+      if (headerEl) {
+        const hText = headerEl.textContent.trim();
+        if (hText && hText.length < 100) data.name = hText;
+      }
+    }
+
+    if (!data.userId) {
+      const m = window.location.href.match(/\/procnc\/users\/(\d+)/);
+      if (m) data.userId = m[1];
+    }
+
+    console.log('[Traxis User Label] DOM scrape result:', data);
     return data;
   }
 
@@ -58,7 +66,6 @@
       const text = extractText(next);
       if (text && text.length < 200) return text;
     }
-
     if (el.tagName === 'TD' || el.tagName === 'TH') {
       const row = el.closest('tr');
       if (row) {
@@ -71,12 +78,10 @@
         }
       }
     }
-
     if (el.tagName === 'DT') {
       const dd = el.nextElementSibling;
       if (dd && dd.tagName === 'DD') return extractText(dd);
     }
-
     return null;
   }
 
@@ -92,81 +97,14 @@
     return (el.textContent || '').trim();
   }
 
-  // ─── GraphQL API Fallback ───────────────────────────────────────
-
-  async function fetchFromAPI(toolId) {
-    const query = `query {
-      equipments(tool: "${toolId}") {
-        results {
-          tool
-          toolName
-          serialNumber
-        }
-      }
-    }`;
-
-    try {
-      const res = await fetch('https://traxismfg.adionsystems.com/api/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ query }),
-      });
-
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      const json = await res.json();
-      const eq = json?.data?.equipments?.results?.[0];
-      if (!eq) throw new Error('Equipment not found in API response');
-
-      console.log('[Traxis Equipment Label] API result:', eq);
-      return {
-        equipmentNumber: eq.tool || '',
-        toolName: eq.toolName || '',
-        serialNumber: eq.serialNumber || '',
-      };
-    } catch (err) {
-      console.warn('[Traxis Equipment Label] API fallback failed:', err.message);
-      return null;
-    }
-  }
-
-  // ─── Gather All Data ────────────────────────────────────────────
-
-  async function gatherData(toolId) {
-    const dom = scrapeFromDOM();
-    const hasEquip = dom.equipmentNumber && dom.equipmentNumber.length > 0;
-    const hasName = dom.toolName && dom.toolName.length > 0;
-
-    if (hasEquip && hasName) {
-      return dom;
-    }
-
-    const api = await fetchFromAPI(toolId);
-    if (api) {
-      return {
-        equipmentNumber: dom.equipmentNumber || api.equipmentNumber,
-        toolName: dom.toolName || api.toolName,
-        serialNumber: dom.serialNumber || api.serialNumber,
-      };
-    }
-
-    return dom;
-  }
-
-  // ─── Button Injection ──────────────────────────────────────────
-
   function inject() {
     if (document.querySelector(`[${BUTTON_ATTR}]`)) return;
 
-    const toolId = getToolIdFromUrl();
-    if (!toolId) return;
-
     const btn = document.createElement('button');
-    btn.type = 'button';
     btn.setAttribute(BUTTON_ATTR, 'true');
-    btn.className = 'traxis-label-btn traxis-label-btn--equipment';
-    btn.textContent = 'Print Equipment Label';
-    btn.title = `Print label for ${toolId}`;
+    btn.className = 'traxis-label-btn traxis-label-btn--user';
+    btn.textContent = 'Print User Label';
+    btn.title = 'Print user ID label';
 
     const status = document.createElement('span');
     status.className = 'traxis-label-status';
@@ -181,18 +119,15 @@
       status.className = 'traxis-label-status';
 
       try {
-        const data = await gatherData(toolId);
-        const url = getEquipmentUrl();
-        console.log('[Traxis Equipment Label] Label data:', { ...data, url });
+        const data = scrapeFromDOM();
+        const url = getUserUrl();
+        console.log('[Traxis User Label] Label data:', { ...data, url });
 
-        const image_base64 = EquipmentLabelGenerator.generate({
-          ...data,
-          url,
-        });
+        const image_base64 = UserLabelGenerator.generate({ ...data, url });
 
-        const labelName = data.equipmentNumber
-          ? `Equipment ${data.equipmentNumber}`
-          : 'Equipment Label';
+        const labelName = data.name
+          ? `User ${data.name}`
+          : 'User Label';
 
         const result = await new Promise((resolve, reject) => {
           chrome.runtime.sendMessage(
@@ -216,7 +151,7 @@
           btn.textContent = 'Printed!';
           status.textContent = `Sent to ${result.printer || 'printer'}`;
           setTimeout(() => {
-            btn.textContent = 'Print Equipment Label';
+            btn.textContent = 'Print User Label';
             btn.classList.remove('traxis-label-btn--success');
             status.textContent = '';
           }, 3000);
@@ -224,14 +159,14 @@
           throw new Error(result.error || 'Print failed');
         }
       } catch (err) {
-        console.error('[Traxis Equipment Label] Print error:', err);
+        console.error('[Traxis User Label] Print error:', err);
         btn.classList.remove('traxis-label-btn--printing');
         btn.classList.add('traxis-label-btn--error');
         btn.textContent = 'Print Failed';
         status.textContent = err.message;
         status.className = 'traxis-label-status traxis-label-status--error';
         setTimeout(() => {
-          btn.textContent = 'Print Equipment Label';
+          btn.textContent = 'Print User Label';
           btn.classList.remove('traxis-label-btn--error');
           status.textContent = '';
           status.className = 'traxis-label-status';
@@ -245,10 +180,8 @@
     wrapper.appendChild(status);
     document.body.appendChild(wrapper);
 
-    console.log(`[Traxis Equipment Label] Button injected for ${toolId}`);
+    console.log('[Traxis User Label] Button injected');
   }
-
-  // ─── MutationObserver (AJAX navigation) ─────────────────────────
 
   let debounceTimer = null;
   const observer = new MutationObserver(() => {
@@ -270,9 +203,7 @@
     }, 500);
   });
 
-  // ─── Init ───────────────────────────────────────────────────────
-
   inject();
   observer.observe(document.body, { childList: true, subtree: true });
-  console.log('[Traxis Equipment Label] Extension loaded');
+  console.log('[Traxis User Label] Extension loaded');
 })();

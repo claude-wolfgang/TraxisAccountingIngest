@@ -79,3 +79,37 @@
 .traxis-label-btn--equipment.traxis-label-btn--success {
   background: #b71c1c;
 }
+
+/* Box label button — blue variant */
+.traxis-label-btn--box {
+  background: #1565c0;
+}
+
+.traxis-label-btn--box:hover {
+  background: #1976d2;
+}
+
+.traxis-label-btn--box:active {
+  background: #0d47a1;
+}
+
+.traxis-label-btn--box.traxis-label-btn--success {
+  background: #0d47a1;
+}
+
+/* User label button — teal variant */
+.traxis-label-btn--user {
+  background: #00796b;
+}
+
+.traxis-label-btn--user:hover {
+  background: #00897b;
+}
+
+.traxis-label-btn--user:active {
+  background: #004d40;
+}
+
+.traxis-label-btn--user.traxis-label-btn--success {
+  background: #004d40;
+}

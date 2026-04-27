@@ -148,6 +148,7 @@
     if (!cotsId) return;
 
     const btn = document.createElement('button');
+    btn.type = 'button';
     btn.setAttribute(BUTTON_ATTR, 'true');
     btn.className = 'traxis-label-btn';
     btn.textContent = 'Print COTS Label';

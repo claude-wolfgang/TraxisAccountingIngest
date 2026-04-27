@@ -226,6 +226,7 @@
     if (!woNumber) return;
 
     const btn = document.createElement('button');
+    btn.type = 'button';
     btn.setAttribute(BUTTON_ATTR, 'true');
     btn.className = 'traxis-label-btn';
     btn.textContent = 'Print Material Label';
