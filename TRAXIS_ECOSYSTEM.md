@@ -31,7 +31,7 @@
 - [+] **P23: Air Compressor Communication** — Web GUI for monitoring and controlling EMAX rotary screw air compressor via Modbus TCP.
 - [-] **P24: Digital Help For Rene** — Automate Rene Maldonado's ProShop administrative workload at Traxis Manufacturing.
 - [+] **P25: Agent Exploration (Data Quality Agent)** — Always-running data quality agent auditing manufacturing ERP and machine monitoring.
-- [+] **P27: Accounting Ingest** — Ingests vendor invoices, bills, POs, and quotes into ProShop and QBO. VPO line items use toolNumber + orderNumber (brand+EDP) fields.
+- [+] **P27: Accounting Ingest** — Ingests vendor invoices, bills, POs, and quotes into ProShop and QBO. Scan-burst-classify pipeline with Claude AI vision. Tool receiving labels via P22 print service. VPO receiving automation (updatePurchaseOrder). Customer PO mutations blocked by auth_010 permissions.
 - [+] **P28: Proshop API Usage** — Monitors ProShop GraphQL API usage patterns across Traxis projects.
 - [+] **P29: Rollo Printer App** — Windows system tray app for printing PDFs to Rollo thermal printer.
 - [+] **P30: Traxis Label Printer Extension** — Chrome extension that generates and prints material, COTS, and equipment labels from ProShop pages.
@@ -53,6 +53,7 @@
 | P17: COTS Crib Kiosk | COTS label PNGs (450px wide, 128px tall, 180 DPI), transaction log CSV, Flask kiosk UI (port 5000) | ProShop GraphQL API (OAuth), Brother PT-P700 print service at http://10.1.1.242:5002/api/print-image, COTS_Labels_All.csv |
 | P30: Traxis Label Printer Extension | Material label PNGs (128px tall, auto-width), COTS label PNGs (128px tall, 450px wide), Equipment label PNGs (128px tall, auto-width), all as base64 PNG via Canvas API | ProShop WO page DOM, ProShop COTS page DOM, ProShop Equipment page DOM, ProShop GraphQL API (session cookie), Brother PT-P700 print service at http://10.1.1.242:5002 |
 | P32: Breakeven Dashboard | runtime_snapshot.json (weekly machine runtime + daily breakdown + history), runtime_snapshot.js (same data as window.RUNTIME_DATA for file:// use) | FASData monitoring.db (C:\FASData\monitoring.db, read-only — machine_samples table), machines.json (machine list from FASData or config) |
+| P27: Accounting Ingest | VPO receiving (updatePurchaseOrder), tool receiving labels (PNG via P22), burst PDFs in Scanned/burst/, ProShop POs/bills/packing slips/quotes, QBO bills | ProShop GraphQL API (ACCOUNTING_CLIENT_ID + TOOLKIOSK_CLIENT_ID), QBO REST API, Claude AI API (Sonnet), P22 print service (10.1.1.242:5002), .traxis.env, Scanner → Pictures folder |
 | P33: Tool Library Updater | Updated tool records in ProShop (description, dimensions, coating, brand, cost, notes), downloaded product images for manual upload | ProShop GraphQL API (tools, purchaseOrders), .traxis.env credentials, manufacturer product pages (Kennametal) |
 
 ## Critical Seams

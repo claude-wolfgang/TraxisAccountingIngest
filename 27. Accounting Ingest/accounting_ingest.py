@@ -1,12 +1,12 @@
 """
-Traxis Accounting Ingest Tool v1.2.0
+Traxis Accounting Ingest Tool v1.3.0
 
 Monitors accounting@traxismfg.com (via Microsoft Graph API) and the scanned
 documents folder for incoming accounting documents. Uses Claude AI to classify
 and route documents:
 
   - Vendor invoices  → QuickBooks Online (Bills via API)
-  - Packing slips    → ProShop addPackingSlip
+  - Packing slips    → ProShop addPackingSlip + auto-print tool labels
   - Customer POs     → ProShop addCustomerPo
   - Vendor POs/quotes → ProShop addPurchaseOrder
   - Customer quotes  → ProShop addQuote
@@ -36,10 +36,11 @@ except ImportError:
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 APP_TITLE = f"Traxis Accounting Ingest v{VERSION}"
 
 SCAN_FOLDER  = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\Scanned")
+BURST_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\Scanned\burst")
 EMAIL_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\From Email")
 DB_PATH      = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\ingest_queue.db")
 
@@ -753,6 +754,89 @@ class AIExtractor:
         doc.close()
         return images
 
+    def burst_pdf(self, pdf_path):
+        """Split a multi-page scanned PDF into individual documents.
+
+        Returns list of Path objects for each split document written to BURST_FOLDER.
+        Single-page PDFs pass through unchanged (returns [original_path]).
+        """
+        if not HAS_FITZ:
+            return [Path(pdf_path)]
+        doc = fitz.open(pdf_path)
+        page_count = len(doc)
+        if page_count <= 1:
+            doc.close()
+            return [Path(pdf_path)]
+
+        # Render every page as a thumbnail for Claude to analyze boundaries
+        images = []
+        for i, page in enumerate(doc):
+            mat = fitz.Matrix(1.5, 1.5)  # 1.5x = ~108dpi for reliable boundary detection
+            pix = page.get_pixmap(matrix=mat)
+            img_bytes = pix.tobytes("png")
+            images.append(base64.standard_b64encode(img_bytes).decode())
+
+        content = []
+        for i, img in enumerate(images):
+            content.append({"type": "text", "text": f"--- PAGE {i+1} ---"})
+            content.append({"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": img}})
+
+        content.append({"type": "text", "text": f"""You are looking at {page_count} scanned pages from a mixed stack of business documents at a CNC machine shop (Traxis Manufacturing).
+
+Your job: determine which pages belong to the same document PACKAGE.
+
+Rules for grouping:
+- A packing slip / delivery note and its associated material certifications (mill certs, test reports, certificates of conformance) are ONE package — even if they look like different forms or come from different companies (e.g. a distributor's packing slip + the mill's test report for that material).
+- A shipping receipt (FedEx, UPS, freight bill) belongs with the packing slip from the same shipment. Match by shipper: if the shipping doc shows Company X as the shipper, group it with the packing slip from Company X.
+- Multi-page documents (e.g. a 3-page PO, a 2-page cert) should be grouped together.
+- If a page is the backside of the previous page (blank or continuation), group it with the previous.
+- Standalone documents (a vendor PO, an invoice, a tool vendor's packing list with no associated cert) stay separate.
+- When in doubt whether a cert or shipping doc goes with a nearby packing slip, group them together.
+
+Return ONLY a JSON array of arrays, where each inner array is the 1-based page numbers of one document package.
+Example for 7 pages: packing slip (p1-2) + mill cert (p3) = one package, shipping receipt (p4) + vendor packing slip (p5) = one package, two standalone docs (p6, p7):
+[[1,2,3],[4,5],[6],[7]]"""})
+
+        msg = self.client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1000,
+            messages=[{"role": "user", "content": content}]
+        )
+        raw = msg.content[0].text.strip()
+        # Extract JSON from response — Claude may include explanation text
+        raw = re.sub(r"^```[a-z]*\n?", "", raw)
+        raw = re.sub(r"\n?```$", "", raw)
+        # Find the JSON array in the response
+        match = re.search(r"\[\s*\[.*\]\s*\]", raw, re.DOTALL)
+        if match:
+            raw = match.group(0)
+
+        try:
+            groups = json.loads(raw)
+        except json.JSONDecodeError:
+            doc.close()
+            return [Path(pdf_path)]
+
+        if not isinstance(groups, list) or len(groups) <= 1:
+            doc.close()
+            return [Path(pdf_path)]
+
+        BURST_FOLDER.mkdir(parents=True, exist_ok=True)
+        stem = Path(pdf_path).stem
+        split_paths = []
+        for gi, page_nums in enumerate(groups, 1):
+            out_doc = fitz.open()
+            for pn in page_nums:
+                if 1 <= pn <= page_count:
+                    out_doc.insert_pdf(doc, from_page=pn-1, to_page=pn-1)
+            out_path = BURST_FOLDER / f"{stem}_doc{gi}.pdf"
+            out_doc.save(str(out_path))
+            out_doc.close()
+            split_paths.append(out_path)
+
+        doc.close()
+        return split_paths
+
     def classify(self, pdf_path, subject="", sender=""):
         """Quick classify — returns doc type string."""
         # Rule-based first
@@ -955,29 +1039,84 @@ class FolderWatcher:
                     return
                 time.sleep(1)
 
+    def _process_one(self, f):
+        """Classify, extract, and queue a single-document file."""
+        doc_type = self.extractor.classify(str(f))
+        extracted = self.extractor.extract(str(f), doc_type)
+        con = db()
+        con.execute("""
+            INSERT INTO queue (source, source_ref, doc_type, pdf_path, extracted_json, confidence, created_at)
+            VALUES (?,?,?,?,?,?,?)
+        """, ("scan", f.name, doc_type, str(f),
+              json.dumps(extracted),
+              extracted.get("confidence", 0),
+              datetime.now(timezone.utc).isoformat()))
+        con.commit()
+        con.close()
+        self.on_new_doc()
+
+        # Auto-print tool receiving labels for packing slips with a VPO reference
+        if doc_type == "PACKING_SLIP":
+            self._try_print_tool_labels(extracted)
+
+    def _try_print_tool_labels(self, extracted):
+        """If this packing slip references a VPO with tool items, print labels."""
+        po_num = extracted.get("po_number") or ""
+        # Extract just digits from PO reference (e.g. "263097" from "Ship to PO Number: 263097")
+        po_match = re.search(r"\b(2[456]\d{4})\b", po_num)
+        if not po_match:
+            # Check notes field for PO reference
+            notes = extracted.get("notes") or ""
+            po_match = re.search(r"\b(2[456]\d{4})\b", notes)
+        if not po_match:
+            return
+        vpo_number = po_match.group(1)
+        try:
+            from tool_receiving_labels import get_vpo_tool_items, make_label_image, print_label
+            items = get_vpo_tool_items(vpo_number)
+            if not items or not any(i.get("lib_number") for i in items):
+                return
+            self.log(f"VPO {vpo_number}: printing tool receiving labels")
+            for item in items:
+                if not item.get("lib_number"):
+                    continue
+                qty = int(item.get("quantity") or 1)
+                img = make_label_image(
+                    item["lib_number"], vpo_number,
+                    item["order_number"])
+                try:
+                    print_label(img, label_name=f"{item['lib_number']}_{vpo_number}", copies=qty)
+                    self.log(f"  Printed label: {item['lib_number']} {vpo_number} x{qty}")
+                except Exception as e:
+                    self.log(f"  Label print failed for {item['lib_number']}: {e}")
+        except Exception as e:
+            self.log(f"Tool label error for VPO {vpo_number}: {e}")
+
     def _check(self):
         if not SCAN_FOLDER.exists():
             return
         for f in SCAN_FOLDER.iterdir():
+            if f.is_dir():
+                continue
             if f.suffix.lower() not in (".pdf", ".png", ".jpg", ".jpeg", ".tiff", ".tif"):
                 continue
             if str(f) in self._seen:
                 continue
             self._seen.add(str(f))
             self.log(f"New scan detected: {f.name}")
-            doc_type = self.extractor.classify(str(f))
-            extracted = self.extractor.extract(str(f), doc_type)
-            con = db()
-            con.execute("""
-                INSERT INTO queue (source, source_ref, doc_type, pdf_path, extracted_json, confidence, created_at)
-                VALUES (?,?,?,?,?,?,?)
-            """, ("scan", f.name, doc_type, str(f),
-                  json.dumps(extracted),
-                  extracted.get("confidence", 0),
-                  datetime.now(timezone.utc).isoformat()))
-            con.commit()
-            con.close()
-            self.on_new_doc()
+
+            # Burst multi-page PDFs into individual documents
+            if f.suffix.lower() == ".pdf":
+                split_files = self.extractor.burst_pdf(str(f))
+                if len(split_files) > 1:
+                    self.log(f"Burst {f.name} into {len(split_files)} documents")
+                    for sf in split_files:
+                        self._seen.add(str(sf))
+                        self.log(f"  Processing split doc: {sf.name}")
+                        self._process_one(sf)
+                    continue
+
+            self._process_one(f)
 
 
 # ─── ProShop Uploader ─────────────────────────────────────────────────────────

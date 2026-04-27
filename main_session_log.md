@@ -7,6 +7,53 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-26
 
+### P27: Accounting Ingest — Scan-burst-receive pipeline, tool labels, VPO receiving via API
+
+**Date:** 2026-04-26
+
+**Task:** Process two piles of scanned paper documents end-to-end: burst multi-page scans into individual documents, classify/extract, print tool receiving labels, and mark VPOs as received/released via API.
+
+**What was done:**
+
+1. **Scan→burst→classify pipeline** — Built and ran the full flow twice: scan pile to Pictures → copy to Scanned folder → Claude AI vision boundary detection (Sonnet, 108dpi) → PyMuPDF split → auto-rename with meaningful names. Pile 1: 11 pages → 6 documents. Pile 2: 6 pages → 4 documents.
+
+2. **Manufacturing grouping rules** — Encoded domain knowledge into burst prompt: packing slips + mill certs = one group, shipping receipts belong with the packing slip they delivered (match by shipper = vendor).
+
+3. **Tool receiving labels** — Created `tool_receiving_labels.py`: two-client API pattern (accounting reads VPO items, toolkiosk resolves tool library numbers), generates 24mm Brother PT-P700 labels (bold lib#, VPO#, order#), prints via P22 print service. Wired into `accounting_ingest.py` auto-trigger on PACKING_SLIP extraction.
+
+4. **VPO receiving via API** — Discovered and used `updatePurchaseOrder` mutation to mark line items received+released:
+   - VPO 263097 (Helical/Gorilla/Harvey tools): 3 lines received → Released
+   - VPO 263091 (Hadco SS plate): 15 pcs received → Partially Released
+   - VPO 263059 (R2/Dix Ti plate): releasedQty 40→100 → Complete
+
+5. **Customer PO 208075 (Austin Pump)** — Created shell in ProShop manually (API blocked by auth_010 write permissions). Extracted all fields from scanned PO for manual fill. Confirmed updateCustomerPo is also blocked — customer POs are fully read-only via API.
+
+6. **Pile 2 processing** — Burst into 4 docs: Shars inspection report (→TG151), Hadco packing slip #1709691 (acetal plate, VPO 263092), Austin Pump PO #206083, R2Sonic PO #PO115126. All POs created, VPO 263092 resolved.
+
+7. **scan_relay.py** — Created relay script watching Pictures folder, moving stable PDFs to Scanned folder.
+
+**Files created:**
+- `27. Accounting Ingest/tool_receiving_labels.py`
+- `27. Accounting Ingest/scan_relay.py`
+- `27. Accounting Ingest/labels/` (generated label PNGs)
+
+**Files modified:**
+- `27. Accounting Ingest/accounting_ingest.py` (v1.2→v1.3: burst_pdf, _try_print_tool_labels, _process_one refactor)
+
+**Key decisions:**
+- Two-client API pattern for cross-scope data (accounting + toolkiosk)
+- updatePurchaseOrder: `id` is a separate argument, not inside `data`
+- Customer POs confirmed read-only via API (both create and update blocked by auth_010 permissions)
+- One label per tool (copies=qty), not qty on label text
+
+**Status:** Core pipeline working. VPO receiving automated for tools and materials. Customer POs remain manual.
+
+**Open items:**
+- auth_010 customer PO permissions — contact ProShop/Adion support
+- scan_relay.py — not yet tested or set up for startup
+
+---
+
 ### P30: Traxis Label Printer Extension — Add equipment label support
 
 **Task:** Add a "Print Equipment Label" button to ProShop equipment pages, similar to existing WO material and COTS label buttons.
