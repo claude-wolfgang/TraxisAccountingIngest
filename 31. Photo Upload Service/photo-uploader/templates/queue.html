@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Upload Queue{% endblock %}
+
+{% block content %}
+<h2>Upload Queue</h2>
+
+<div class="stats-bar">
+    <div class="stat">
+        <span class="stat-value">{{ stats.get('pending', 0) }}</span>
+        <span class="stat-label">Pending</span>
+    </div>
+    <div class="stat">
+        <span class="stat-value">{{ stats.get('uploading', 0) }}</span>
+        <span class="stat-label">Uploading</span>
+    </div>
+    <div class="stat">
+        <span class="stat-value">{{ stats.get('uploaded', 0) }}</span>
+        <span class="stat-label">Uploaded</span>
+    </div>
+    <div class="stat stat-error">
+        <span class="stat-value">{{ stats.get('failed', 0) }}</span>
+        <span class="stat-label">Failed</span>
+    </div>
+</div>
+
+<table class="queue-table">
+    <thead>
+        <tr>
+            <th>Photo</th>
+            <th>Entity</th>
+            <th>Status</th>
+            <th>Time</th>
+            <th>Note</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for photo in photos %}
+        <tr class="status-{{ photo.status }}">
+            <td class="thumb-cell">
+                <img src="/data/{{ photo.file_path }}" alt="photo" class="thumb">
+            </td>
+            <td>
+                <strong>{{ photo.entity_type }}</strong><br>
+                {{ photo.entity_id }}
+                {% if photo.operation_number %}<br>Op {{ photo.operation_number }}{% if photo.operation_desc %} — {{ photo.operation_desc }}{% endif %}{% endif %}
+                {% if photo.entity_name %}<br><small>{{ photo.entity_name }}</small>{% endif %}
+            </td>
+            <td>
+                <span class="status-badge status-{{ photo.status }}">{{ photo.status }}</span>
+                {% if photo.error_message %}
+                <br><small class="error-text">{{ photo.error_message }}</small>
+                {% endif %}
+                {% if photo.retry_count > 0 %}
+                <br><small>Retries: {{ photo.retry_count }}</small>
+                {% endif %}
+            </td>
+            <td><small>{{ photo.created_at[:16] }}</small></td>
+            <td><small>{{ photo.note or '' }}</small></td>
+        </tr>
+        {% endfor %}
+        {% if not photos %}
+        <tr>
+            <td colspan="5" class="empty-row">No photos yet.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

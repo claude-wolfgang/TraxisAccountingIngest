@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Upload Photo{% endblock %}
+
+{% block content %}
+<!-- Step 1: Choose entity type -->
+<section id="step-type" class="step active">
+    <h2>What is this photo of?</h2>
+    <div class="type-grid">
+        <button class="type-btn" data-type="workorder">
+            <span class="type-icon">📋</span>
+            <span class="type-label">Work Order</span>
+        </button>
+        <button class="type-btn" data-type="tool">
+            <span class="type-icon"><svg class="icon-drill" viewBox="0 0 48 48" width="48" height="48"><path d="M24 4 L26 20 L28 20 L28 36 Q28 40 24 40 Q20 40 20 36 L20 20 L22 20 Z" fill="#ccc" stroke="#999" stroke-width="1"/><path d="M22 4 L24 2 L26 4 L25 18 L23 18 Z" fill="#8ab4f8"/><line x1="23" y1="6" x2="25" y2="8" stroke="#6690cc" stroke-width="0.8"/><line x1="23" y1="10" x2="25" y2="12" stroke="#6690cc" stroke-width="0.8"/><line x1="23" y1="14" x2="25" y2="16" stroke="#6690cc" stroke-width="0.8"/></svg></span>
+            <span class="type-label">Tool</span>
+        </button>
+        <button class="type-btn" data-type="equipment">
+            <span class="type-icon">⚙️</span>
+            <span class="type-label">Equipment</span>
+        </button>
+        <button class="type-btn" data-type="part">
+            <span class="type-icon">🔩</span>
+            <span class="type-label">Part</span>
+        </button>
+        <button class="type-btn" data-type="fixture">
+            <span class="type-icon"><svg class="icon-clamp" viewBox="0 0 48 48" width="48" height="48"><rect x="8" y="18" width="32" height="12" rx="2" fill="#888" stroke="#666" stroke-width="1.5"/><rect x="12" y="12" width="6" height="6" rx="1" fill="#aaa" stroke="#666" stroke-width="1"/><rect x="30" y="12" width="6" height="6" rx="1" fill="#aaa" stroke="#666" stroke-width="1"/><rect x="12" y="30" width="6" height="6" rx="1" fill="#aaa" stroke="#666" stroke-width="1"/><rect x="30" y="30" width="6" height="6" rx="1" fill="#aaa" stroke="#666" stroke-width="1"/><circle cx="15" cy="15" r="1.5" fill="#444"/><circle cx="33" cy="15" r="1.5" fill="#444"/><circle cx="15" cy="33" r="1.5" fill="#444"/><circle cx="33" cy="33" r="1.5" fill="#444"/></svg></span>
+            <span class="type-label">Fixture</span>
+        </button>
+        <button class="type-btn" data-type="cots">
+            <span class="type-icon">📦</span>
+            <span class="type-label">COTS</span>
+        </button>
+        <button class="type-btn" id="btn-scan-qr" data-type="qr">
+            <span class="type-icon">📷</span>
+            <span class="type-label">Scan QR</span>
+        </button>
+    </div>
+</section>
+
+<!-- Step 2: Find entity -->
+<section id="step-search" class="step">
+    <div class="step-header">
+        <button class="back-btn" data-target="step-type">&larr; Back</button>
+        <h2>Find <span id="search-type-label"></span></h2>
+    </div>
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="Type WO#, tool#, part#..."
+               autocomplete="off" autocorrect="off" spellcheck="false">
+        <div id="search-spinner" class="spinner hidden"></div>
+    </div>
+    <div id="search-results" class="results-list"></div>
+</section>
+
+<!-- Step 2b: QR capture -->
+<section id="step-qr" class="step">
+    <div class="step-header">
+        <button class="back-btn" data-target="step-type">&larr; Back</button>
+        <h2>Scan QR Code</h2>
+    </div>
+    <p class="help-text">Take a photo of a ProShop QR code to auto-detect the entity.</p>
+    <label class="capture-btn">
+        <span>📷 Take Photo of QR</span>
+        <input type="file" accept="image/*" capture="environment" id="qr-capture" class="hidden-input">
+    </label>
+    <div id="qr-status" class="help-text"></div>
+</section>
+
+<!-- Step 2c: Select operation (work orders only) -->
+<section id="step-ops" class="step">
+    <div class="step-header">
+        <button class="back-btn" data-target="step-search">&larr; Back</button>
+        <h2>Select Operation</h2>
+    </div>
+    <div id="ops-entity-info" class="entity-card">
+        <div class="entity-id"></div>
+        <div class="entity-name"></div>
+    </div>
+    <div id="ops-spinner" class="spinner-center hidden">
+        <div class="spinner"></div>
+        <span>Loading operations...</span>
+    </div>
+    <div id="ops-list" class="results-list"></div>
+</section>
+
+<!-- Step 3: Take photo -->
+<section id="step-capture" class="step">
+    <div class="step-header">
+        <button class="back-btn" data-target="step-ops">&larr; Back</button>
+        <h2>Take Photo</h2>
+    </div>
+    <div id="entity-info" class="entity-card">
+        <div class="entity-id"></div>
+        <div class="entity-name"></div>
+    </div>
+    <label class="capture-btn">
+        <span>📷 Take Photo</span>
+        <input type="file" accept="image/*" capture="environment" id="photo-capture" class="hidden-input">
+    </label>
+    <div id="preview-container" class="hidden">
+        <img id="photo-preview" alt="Photo preview">
+    </div>
+    <div class="note-box">
+        <input type="text" id="photo-note" placeholder="Add a note (optional)"
+               autocomplete="off">
+    </div>
+    <button id="btn-upload" class="upload-btn hidden" disabled>Upload Photo</button>
+</section>
+
+<!-- Step 4: Success -->
+<section id="step-done" class="step">
+    <div class="success-message">
+        <span class="success-icon">✓</span>
+        <h2>Photo Saved!</h2>
+        <p>It will be uploaded to ProShop automatically.</p>
+    </div>
+    <button class="type-btn wide" id="btn-another">Take Another Photo</button>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='photo.js') }}"></script>
+{% endblock %}

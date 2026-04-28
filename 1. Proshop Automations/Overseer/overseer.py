@@ -79,6 +79,7 @@ MSG_NOTIFIER_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and 
 AIR_COMPRESSOR_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\23. Air Compressor communication GUI")
 SHOP_SCHEDULER_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\19. Shop Scheduler")
 AGENT_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\25. Agent Exploration")
+PHOTO_UPLOADER_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\31. Photo Upload Service\photo-uploader")
 
 BUSINESS_HOURS_START = (5, 15)   # (hour, minute) — 5:15 AM
 BUSINESS_HOURS_END = (18, 0)     # (hour, minute) — 6:00 PM
@@ -250,6 +251,19 @@ SERVICES_CONFIG = {
         "port": 8101,
         "start_cmd": [PYTHON_EXE, "-u", "agent_scheduler.py"],
         "working_dir": str(AGENT_DIR),
+        "auto_start": True,
+        "restart_cooldown": 300,
+        "max_failures": 3,
+        "max_degraded": 5,
+    },
+    "PhotoUploadService": {
+        "display_name": "Photo Upload Service",
+        "service_type": "process",
+        "check_type": "http",
+        "health_url": "http://localhost:5003/api/health",
+        "port": 5003,
+        "start_cmd": [PYTHONW_EXE, "app.py"],
+        "working_dir": str(PHOTO_UPLOADER_DIR),
         "auto_start": True,
         "restart_cooldown": 300,
         "max_failures": 3,
@@ -522,6 +536,20 @@ def validate_agent_scheduler(data):
     return "healthy", f"reminders={last_rem}, audit={last_aud}, uptime {uptime}s"
 
 
+def validate_photo_uploader(data):
+    """Validate PhotoUploadService /api/health response."""
+    if data.get("status") != "ok":
+        return "degraded", f"Unhealthy: {data.get('status', 'unknown')}"
+    api = data.get("proshop_api", {})
+    if not api.get("api_reachable"):
+        return "degraded", "ProShop API unreachable"
+    queue = data.get("queue", {})
+    pending = queue.get("pending", 0) + queue.get("failed", 0)
+    uploaded = queue.get("uploaded", 0)
+    worker = "alive" if data.get("worker_alive") else "DEAD"
+    return "healthy", f"{pending} pending, {uploaded} uploaded, worker {worker}"
+
+
 # Map service name -> validator function
 # For "http" check_type: validator receives parsed JSON response
 # For "database" check_type: validator receives the service config dict
@@ -538,6 +566,7 @@ VALIDATORS = {
     "ShopScheduler": validate_shop_scheduler,
     "TelegramBot": validate_telegram_bot,
     "AgentScheduler": validate_agent_scheduler,
+    "PhotoUploadService": validate_photo_uploader,
 }
 
 

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>{% block title %}Photo Upload{% endblock %} — Traxis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <h1><a href="/">Photo Upload</a></h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/queue">Queue</a>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <div id="toast" class="toast hidden"></div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
