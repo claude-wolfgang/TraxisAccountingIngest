@@ -31,7 +31,7 @@ workorder, tool, equipment, part, fixture, cots — each searchable via ProShop 
 
 - **Phase 1** (done): Tablet → Flask → local storage + entity search. Queue page.
 - **Phase 2** (done): Selenium upload worker. Logs into ProShop, navigates to WO written description, checks out page, inserts photo as base64 inline image via CKEditor insertHtml, saves via fetch(). DOM inspection (inspect_upload.py) confirmed ProShop has no filebrowserImageUploadUrl, so CKEditor's Upload tab is non-functional — base64 inline is the only viable approach. ProShop has ~256KB server-side limit on written description content; images are auto-resized (1200→600px) to fit remaining budget. Tested end-to-end on WO 26-0120 Op 60 (2026-04-27).
-- **Phase 3**: Overseer integration, QR scanning with jsQR, auto-restart.
+- **Phase 3** (done): Overseer integration (auto-start/restart via health check on :5003), jsQR CDN for QR code scanning, parseProShopUrl() fixed for proshop:// protocol, WO year segments, parts customer prefix, COTS /ots/ path.
 
 ## ProShop Written Description Upload — Technical Notes
 - CKEditor dialog: name="image", tabs=[Image Info, Link, Upload, Advanced]

@@ -71,7 +71,7 @@ Add `contacts:r+toolpots:r` to the OAuth client in ProShop Admin to enable custo
 
 ## Interfaces
 Produces: Overseer dashboard (port 8060), /api/status, /api/services/*/restart|stop|start, /api/programming-sessions, programming_time_log.jsonl, overseer.log
-Consumes: Health endpoints from 12 managed services (ports 5000-8101), FOCAS monitoring.db, ProShop GraphQL API (via managed services), P25 Agent Exploration (TelegramBot :8100, AgentScheduler :8101)
+Consumes: Health endpoints from 13 managed services (ports 5000-8101 + 5003), FOCAS monitoring.db, ProShop GraphQL API (via managed services), P25 Agent Exploration (TelegramBot :8100, AgentScheduler :8101), P31 Photo Upload Service (:5003)
 Contracts: Overseer expects each HTTP service to expose a health URL returning JSON. Validators in VALIDATORS dict must match service names in SERVICES_CONFIG. P25 services use PYTHON_EXE (not PYTHONW_EXE) with -u flag. AGENT_DIR path must match P25 folder location.
 
 ## Version

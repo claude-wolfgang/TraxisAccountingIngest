@@ -35,7 +35,8 @@
 - [+] **P28: Proshop API Usage** — Monitors ProShop GraphQL API usage patterns across Traxis projects.
 - [+] **P29: Rollo Printer App** — Windows system tray app for printing PDFs to Rollo thermal printer.
 - [+] **P30: Traxis Label Printer Extension** — Chrome extension that generates and prints material, box, COTS, equipment, and user labels from ProShop pages.
-- [?] **P31: BLE Proximity Worker Tracking** — Passive BLE-based system to track which worker is at which CNC machine via Feasycom beacon tags and BLE gateways.
+- [+] **P31: Photo Upload Service** — Tablet photo capture queued for upload to ProShop WO written descriptions via Selenium. Overseer-managed on port 5003.
+- [?] **P31b: BLE Proximity Worker Tracking** — Passive BLE-based system to track which worker is at which CNC machine via Feasycom beacon tags and BLE gateways.
 - [+] **P32: Breakeven Dashboard** — Visual dashboard showing weekly CNC machine runtime vs breakeven target hours with per-machine detail, daily charts, and weekly trend navigation.
 - [+] **P33: Tool Library Updater** — CLI utility for updating ProShop tool library entries when switching manufacturers, with VPO pricing lookup and manufacturer spec scraping.
 
@@ -43,7 +44,7 @@
 
 | Project | Produces | Consumes |
 |---------|----------|----------|
-| P1: ProShop Automations | Overseer dashboard (port 8060), /api/status, /api/services/*/restart|stop|start, /api/programming-sessions, programming_time_log.jsonl, overseer.log | Health endpoints from 12 managed services (ports 5000-8101), FOCAS monitoring.db, ProShop GraphQL API (via managed services), P25 Agent Exploration (TelegramBot :8100, AgentScheduler :8101) |
+| P1: ProShop Automations | Overseer dashboard (port 8060), /api/status, /api/services/*/restart|stop|start, /api/programming-sessions, programming_time_log.jsonl, overseer.log | Health endpoints from 13 managed services (ports 5000-8101 + 5003), FOCAS monitoring.db, ProShop GraphQL API (via managed services), P25 Agent Exploration (TelegramBot :8100, AgentScheduler :8101), P31 Photo Upload Service (:5003) |
 | P9: Shop Floor Cameras | WO label PNGs (saved to labels/), QR labels printed via P22 print service | ProShop GraphQL API (work orders, operations, parts), .traxis.env (PROSHOP_CLIENT_ID, PROSHOP_CLIENT_SECRET, PROSHOP_SCOPE), P22 print_service /api/print-image (http://10.1.1.242:5002), GoPro WiFi API (10.5.5.9) |
 | P19: Shop Scheduler | scheduler.db (SQLite, local), Flask web UI (port 5080), /api/priorities/report endpoint, /api/tool-demand endpoint, heartbeat.json (Overseer health check) | ProShop GraphQL API (WOs, ops, machines, tools, toolpots, purchaseOrders), P22 tooling.db (read-only via config.KIOSK_DB_PATH), Overseer (managed service), .traxis.env (PROSHOP_CLIENT_SECRET) |
 | P22: Tool Assembly Management | tooling.db (SQLite at tool-kiosk/data/tooling.db), Flask kiosk UI (port 5001), /api/print-label proxy to print service, /api/print-inventory-label proxy, /api/print-image (generic PNG label printing for any project), /api/restart (remote process restart), /api/health endpoint, heartbeat.json (Overseer health check) | ProShop GraphQL API (tools, RTAs, work cells, pockets, users, work orders), .traxis.env (TOOLKIOSK_CLIENT_ID, TOOLKIOSK_CLIENT_SECRET, TOOLKIOSK_SCOPE), Overseer (managed service), FocasMonitor monitoring.db (read-only, for tool_usage_rollup.py), Brother PT-P700 printer (USB on 10.1.1.242) |
@@ -54,6 +55,7 @@
 | P30: Traxis Label Printer Extension | Material label PNGs, Box label PNGs, COTS label PNGs (450px wide), Equipment label PNGs, User label PNGs — all 128px tall, as base64 PNG via Canvas API | ProShop WO page DOM, ProShop COTS page DOM, ProShop Equipment page DOM, ProShop User page DOM, ProShop GraphQL API (session cookie), Brother PT-P700 print service at http://10.1.1.242:5002 |
 | P32: Breakeven Dashboard | runtime_snapshot.json (weekly machine runtime + daily breakdown + history), runtime_snapshot.js (same data as window.RUNTIME_DATA for file:// use) | FASData monitoring.db (C:\FASData\monitoring.db, read-only — machine_samples table), machines.json (machine list from FASData or config) |
 | P27: Accounting Ingest | VPO receiving (updatePurchaseOrder), tool receiving labels (PNG via P22), burst PDFs in Scanned/burst/, ProShop POs/bills/packing slips/quotes, QBO bills | ProShop GraphQL API (ACCOUNTING_CLIENT_ID + TOOLKIOSK_CLIENT_ID), QBO REST API, Claude AI API (Sonnet), P22 print service (10.1.1.242:5002), .traxis.env, Scanner → Pictures folder |
+| P31: Photo Upload Service | Flask UI (port 5003), photos.db (SQLite), JPEG photos (data/photos/), /api/health endpoint | ProShop GraphQL API (workorders, tools, equipment, parts, cotsItems), ProShop web UI via headless Selenium, .traxis.env, Overseer (managed service) |
 | P33: Tool Library Updater | Updated tool records in ProShop (description, dimensions, coating, brand, cost, notes), downloaded product images for manual upload | ProShop GraphQL API (tools, purchaseOrders), .traxis.env credentials, manufacturer product pages (Kennametal) |
 
 ## Critical Seams

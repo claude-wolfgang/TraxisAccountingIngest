@@ -2810,3 +2810,31 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 -->
+
+## 2026-04-27
+
+### Project 31: Photo Upload Service — Phase 3 (Overseer + QR Scanning)
+
+**Task:** Add Overseer integration for auto-start/restart and jsQR scanning support to the Photo Upload Service.
+
+**What was done:**
+- Added PhotoUploadService to Overseer (`overseer.py`): path constant, service config (port 5003, HTTP health check, auto-start), validator function (checks status, ProShop API, queue counts, worker alive), VALIDATORS dict entry
+- Added jsQR 1.4.0 CDN script to `base.html` for QR code decoding on tablet
+- Fixed `parseProShopUrl()` in `photo.js`: added `proshop://wo/` protocol pattern (Project 30 material labels), WO year segment support (`/workorders/2025/25-0200`), parts customer prefix handling (`/parts/R2S1/R2S1-10020`), COTS `/ots/` path fix
+- Updated P31 CLAUDE.md Phase 3 status, P1 CLAUDE.md interfaces (13 services), MEMORY.md project map, TRAXIS_ECOSYSTEM.md
+
+**Key decisions:**
+- `proshop://wo/` pattern placed first (highest priority) to match Project 30 QR labels before generic URL patterns
+- P31 kept in "Partial / In Progress" in MEMORY.md until on-site testing confirms it works end-to-end
+
+**Files modified:**
+- `1. Proshop Automations/Overseer/overseer.py` — PhotoUploadService config + validator
+- `31. Photo Upload Service/photo-uploader/templates/base.html` — jsQR CDN
+- `31. Photo Upload Service/photo-uploader/static/photo.js` — parseProShopUrl() patterns
+- `31. Photo Upload Service/CLAUDE.md` — Phase 3 status
+- `1. Proshop Automations/CLAUDE.md` — interfaces (13 services)
+- `TRAXIS_ECOSYSTEM.md` — P31 entry + P1 interface update
+
+**Status:** Code complete, committed as c45cfd0. Needs on-site testing: Overseer dashboard, tablet QR scan, auto-restart.
+
+---
