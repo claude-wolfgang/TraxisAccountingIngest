@@ -5,6 +5,54 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-29
+
+### P31b: BLE Proximity Worker Tracking — ESP32 Gateway Deployment + Walk Test
+
+**Date:** 2026-04-29
+
+**Task:** Set up ESP32 gateways running ESPresense firmware for BLE-based worker tracking at CNC machines. Flash firmware, configure MQTT broker, calibrate zone thresholds via walk test, deploy gateways.
+
+**What was done:**
+
+1. **CP2102 driver install** — Windows couldn't find USB-serial driver. Downloaded CP210x_Universal_Windows_Driver from SiLabs, manual install via Device Manager. ESP32 appeared on COM3.
+
+2. **ESPresense firmware flash** — Flashed 3x ESP32-WROOM-32 boards with ESPresense v4.0.6 via web flasher (web.esphome.io). Initial esptool attempts failed (wrong flash offset, missing bootloader). Web flasher includes bootloader+partition table+app in one go.
+
+3. **Mosquitto MQTT broker** — Default config had duplicate listener entries causing bind errors. Created `mosquitto_clean.conf` (just `listener 1883` + `allow_anonymous true`). Runs in foreground via `start_mqtt_broker.bat`.
+
+4. **Python test script** — Built `esp32_proximity_test.py`: subscribes to ESPresense MQTT, shows live RSSI/distance/zone for known beacons, logs to CSV. Fixed paho-mqtt v2 API (CallbackAPIVersion, on_connect signature), non-dict payload crash, room extraction from topic path.
+
+5. **Beacon identification** — Original CLAUDE.md had wrong major numbers (60285, 40604). Correlated MACs via FeasyBeacon phone app to actual majors: Tag-A = 39475 (DC:0D:30:1F:90:A3), Tag-B = 10065 (DC:0D:30:48:30:3A). Configured TX power from -19.5dB to 2.5dB, interval to 1000ms.
+
+6. **Walk test** — Systematic distance test (0, 2, 3, 6, 10, 15 ft) established zone thresholds: AT MACHINE >-45 dBm, NEARBY >-58, IN AREA >-66, FAR <-66. ESP32 gateway delivers ~50dB dynamic range over 0-15ft (vs ~4dB from the USB dongle).
+
+7. **Gateway deployment** — M8 online at 10.1.1.38 (room=test_bench), reporting via MQTT. M1 and M2 flashed and physically deployed at machines but not yet connected to Wi-Fi — Google Fiber band steering forces ESP32 onto 5GHz which it can't use.
+
+8. **MOKOSmart B2 badges ordered** — 10x B2 Bluetooth Smart Badge from mokosmart.com, Order #3765, $171.48 shipped ($12/badge + $51.48 express). Combined BLE iBeacon + NFC for proximity tracking and door entry.
+
+**Files created:**
+- `esp32_proximity_test.py` — Live MQTT proximity monitor + CSV logger
+- `mosquitto_clean.conf` — Minimal MQTT broker config
+- `start_mqtt_broker.bat` — Mosquitto foreground launcher
+- `run_test.bat` — Test script wrapper
+- `serial_read.py` — ESP32 serial debug monitor
+- `ESP32_SETUP.md` — Step-by-step setup guide
+- `proximity_log_*.csv` — Walk test data
+
+**Files modified:**
+- `CLAUDE.md` — Updated hardware, beacon IDs, zone thresholds, status, next steps
+
+**Key decisions:**
+- ESP32 + ESPresense over USB BLE dongle (50dB vs 4dB dynamic range)
+- Identify beacons by iBeacon major/minor, not MAC (MACs rotate)
+- Zone thresholds calibrated for tight machine layout (0-15ft useful range)
+- MOKOSmart B2 for dual-purpose BLE+NFC badges (one card per worker)
+
+**Status:** Phase 1 complete. M8 gateway proven. M1/M2 await 2.4GHz Wi-Fi SSID.
+
+---
+
 ## 2026-04-28 / 2026-04-29
 
 ### P30: Traxis Label Printer Extension — Chrome Web Store Deployment

@@ -36,7 +36,7 @@
 - [+] **P29: Rollo Printer App** — Windows system tray app for printing PDFs to Rollo thermal printer.
 - [+] **P30: Traxis Label Printer Extension** — Chrome extension that generates and prints material, box, COTS, equipment, and user labels from ProShop pages.
 - [+] **P31: Photo Upload Service** — Tablet photo capture queued for upload to ProShop WO written descriptions via Selenium. Overseer-managed on port 5003.
-- [?] **P31b: BLE Proximity Worker Tracking** — Passive BLE-based system to track which worker is at which CNC machine via Feasycom beacon tags and BLE gateways.
+- [+] **P31b: BLE Proximity Worker Tracking** — Passive BLE-based system to track which worker is at which CNC machine via Feasycom iBeacon tags and ESP32 gateways running ESPresense. M8 gateway online; M1/M2 deployed pending Wi-Fi.
 - [+] **P32: Breakeven Dashboard** — Visual dashboard showing weekly CNC machine runtime vs breakeven target hours with per-machine detail, daily charts, and weekly trend navigation.
 - [+] **P33: Tool Library Updater** — CLI utility for updating ProShop tool library entries when switching manufacturers, with VPO pricing lookup and manufacturer spec scraping.
 
