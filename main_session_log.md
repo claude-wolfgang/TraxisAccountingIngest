@@ -5,6 +5,62 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-28 / 2026-04-29
+
+### P30: Traxis Label Printer Extension — Chrome Web Store Deployment
+
+**Date:** 2026-04-28 → 2026-04-29
+
+**Task:** Deploy the Traxis Label Printer Chrome extension to all shop floor computers automatically, replacing manual "Load unpacked" developer mode installs.
+
+**What was done:**
+
+1. **Self-hosted CRX approach (attempted, failed)** — Built a full deployment pipeline: `build.py` to pack extension as .crx via Chrome CLI, `host.py` HTTP server on 10.1.1.71:8484, `deploy_client.bat` to set Chrome `ExtensionInstallForcelist` registry policy on each shop PC. Extension ID computation from PEM had a bug (DER reconstruction mismatch) — fixed by extracting ID from CRX3 header instead. Diagnosed on shop PC via `diagnose.bat` — registry was correct and server was reachable, but Chrome refused: **"This computer is not detected as enterprise managed so policy can only automatically install extensions hosted on the Chrome Webstore."** Non-domain-joined PCs cannot force-install self-hosted extensions.
+
+2. **Pivoted to Chrome Web Store (unlisted)** — Prepared extension for CWS submission:
+   - Generated store icons (16/48/128px PNG) with Pillow
+   - Added `icons` field to manifest.json
+   - Bumped version 1.4.0 → 1.4.1
+   - Created 1280x800 store screenshot
+   - Packaged submission ZIP (`traxis-label-printer.zip`)
+   - Created `deploy_client_cws.bat` — sets registry with CWS update URL, cleans up old self-hosted entries
+
+3. **Wolfgang submitted extension to Chrome Web Store** — Registered CWS developer account ($5), filled privacy practices (single purpose, host permission justifications, activeTab justification), set publisher contact email, submitted for review. Awaiting approval.
+
+4. **Ecosystem review** — Identified P14 (Workstation Display IPC) and P18 (ProShop Message Notifier) as two other MV3 Chrome extensions that can use the same CWS + policy deployment pipeline once P30 is proven.
+
+**Files created:**
+- `30. Material Label Extension/deployment/build.py` — CRX packer + ID extractor
+- `30. Material Label Extension/deployment/host.py` — HTTP server for self-hosted approach
+- `30. Material Label Extension/deployment/host.bat` — Server launcher
+- `30. Material Label Extension/deployment/install_host.bat` — Server auto-start setup
+- `30. Material Label Extension/deployment/deploy_client.bat` — Self-hosted registry deploy
+- `30. Material Label Extension/deployment/deploy_client_cws.bat` — CWS registry deploy
+- `30. Material Label Extension/deployment/remove_client.bat` — Uninstall from client
+- `30. Material Label Extension/deployment/fix_client.bat` — Clean stale entries + restart Chrome
+- `30. Material Label Extension/deployment/diagnose.bat` — Registry/server diagnostic
+- `30. Material Label Extension/deployment/store_screenshot.png` — CWS listing image
+- `30. Material Label Extension/deployment/traxis-label-printer.zip` — CWS submission package
+- `30. Material Label Extension/deployment/signing_key.pem` — CRX signing key
+- `30. Material Label Extension/deployment/traxis-label-printer.crx` — Packed extension
+- `30. Material Label Extension/deployment/update_manifest.xml` — Self-hosted update manifest
+- `30. Material Label Extension/deployment/extension_id.txt` — CRX extension ID
+- `30. Material Label Extension/traxis-material-label/assets/icons/icon16.png`
+- `30. Material Label Extension/traxis-material-label/assets/icons/icon48.png`
+- `30. Material Label Extension/traxis-material-label/assets/icons/icon128.png`
+
+**Files modified:**
+- `30. Material Label Extension/traxis-material-label/manifest.json` (added icons, bumped to 1.4.1)
+
+**Key decisions:**
+- Self-hosted CRX requires enterprise-managed Chrome (domain-joined or cloud-managed) — not viable for standalone shop PCs
+- Chrome Web Store unlisted is the right deployment model for Traxis shop floor extensions
+- Same CWS + registry policy pattern will work for P14 and P18 when ready
+
+**Status:** Extension submitted to Chrome Web Store, awaiting approval. Once approved, need extension ID to update `deploy_client_cws.bat`, then run on each shop PC.
+
+---
+
 ## 2026-04-27
 
 ### P30: Traxis Label Printer Extension — Box Label + User Label (v1.4.0)

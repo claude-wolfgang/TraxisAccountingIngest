@@ -113,3 +113,20 @@
 .traxis-label-btn--user.traxis-label-btn--success {
   background: #004d40;
 }
+
+/* Tool label button — orange variant */
+.traxis-label-btn--tool {
+  background: #e65100;
+}
+
+.traxis-label-btn--tool:hover {
+  background: #ef6c00;
+}
+
+.traxis-label-btn--tool:active {
+  background: #bf360c;
+}
+
+.traxis-label-btn--tool.traxis-label-btn--success {
+  background: #bf360c;
+}

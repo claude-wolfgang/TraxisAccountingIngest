@@ -81,12 +81,39 @@ Service worker is needed to bypass HTTPS→HTTP mixed-content block.
 
 ## Installation
 
+### Production (Chrome Web Store — all shop PCs)
+
+Extension is published as **unlisted** on Chrome Web Store. Deployed via Chrome enterprise policy:
+
+1. Get extension ID from CWS Developer Dashboard
+2. Edit `deployment/deploy_client_cws.bat` — replace `PASTE_EXTENSION_ID_HERE` with CWS extension ID
+3. Run `deploy_client_cws.bat` as Administrator on each shop PC
+4. Restart Chrome — extension installs automatically
+
+Registry key set by deploy script:
+```
+HKLM\SOFTWARE\Policies\Google\Chrome\ExtensionInstallForcelist
+  1 = "<CWS_EXTENSION_ID>;https://clients2.google.com/service/update2/crx"
+```
+
+### Development (Load unpacked)
+
 1. Open `chrome://extensions` → Enable Developer mode
 2. Click "Load unpacked" → Select `traxis-material-label/` folder
 3. Navigate to any ProShop WO page, COTS detail page, or equipment page — button appears
+
+### Updating
+
+Bump version in `manifest.json`, rebuild ZIP (`deployment/build.py` or manual zip), upload to CWS Developer Dashboard. Chrome auto-updates on all shop PCs within a few hours.
+
+### Deployment notes
+
+- Self-hosted CRX via `ExtensionInstallForcelist` does NOT work on non-domain-joined PCs — Chrome requires enterprise management for off-store force installs.
+- CWS unlisted + registry policy works on any Windows PC regardless of domain status.
+- Same deployment pattern applies to P14 (Workstation Display) and P18 (Message Notifier) when ready.
 
 ## Interfaces
 
 Produces: Material label PNGs, Box label PNGs, COTS label PNGs (450px wide), Equipment label PNGs, User label PNGs — all 128px tall, auto-width (except COTS), as base64 PNG via Canvas API
 Consumes: ProShop WO page DOM, ProShop COTS page DOM, ProShop Equipment page DOM, ProShop User page DOM, ProShop GraphQL API (session cookie), Brother PT-P700 print service at http://10.1.1.242:5002
-Contracts: Print payload `{image_base64, copies, label_name}` to `/api/print-image` (same as P9/P22). WO and Box labels use QR scheme `proshop://wo/{woNumber}` (same as P9). COTS, equipment, and user labels encode full ProShop URL. All labels 128px tall at 180 DPI (PT-P700 24mm tape).
+Contracts: Print payload `{image_base64, copies, label_name}` to `/api/print-image` (same as P9/P22). WO and Box labels use QR scheme `proshop://wo/{woNumber}` (same as P9). COTS, equipment, and user labels encode full ProShop URL. All labels 128px tall at 180 DPI (PT-P700 24mm tape). CWS extension ID used in registry policy on all shop PCs — changing it requires re-running deploy script.
