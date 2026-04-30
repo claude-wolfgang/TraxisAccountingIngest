@@ -10,6 +10,9 @@ history in purchasing notes.
 ```bash
 cd "33. Tool Library Updater"
 
+# Double-click tool_update.py or run with no arguments for interactive menu
+python tool_update.py
+
 # Create a new tool from manufacturer catalog number (AI web search)
 python tool_update.py create --mfg iscar --catalog "16ERB 1.25 ISO IC908" --qty 4
 python tool_update.py create --mfg kennametal --catalog B041A03455CPG --qty 2 --group D

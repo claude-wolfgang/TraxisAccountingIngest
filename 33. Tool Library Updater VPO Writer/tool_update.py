@@ -240,6 +240,10 @@ def _build_create_data(args, ai_result, group):
     # Inject metadata into specs for description builder
     specs["_brand"] = brand_info
     specs["_description_hint"] = ai_result.get("description_hint")
+    if specs.get("grade"):
+        specs["_grade"] = specs["grade"]
+    if specs.get("productLine"):
+        specs["_product_line"] = specs["productLine"]
 
     data = {
         "toolGroupLetter": group,
@@ -268,6 +272,10 @@ def _build_create_data(args, ai_result, group):
         data["pitch"] = str(specs["pitch"])
     if specs.get("threadsPerInch"):
         data["threadsPerInch"] = str(specs["threadsPerInch"])
+    if specs.get("size"):
+        data["size"] = str(specs["size"])
+    if specs.get("fluteType"):
+        data["fluteType"] = str(specs["fluteType"])
 
     # Boolean fields
     if specs.get("throughCoolant") is not None:
@@ -302,11 +310,12 @@ def _build_create_data(args, ai_result, group):
         edp = brand_info.get("edp") or brand_info.get("catalog_number")
         if edp:
             brand_entry["vendorToolId"] = str(edp)
+        if brand_info.get("cost") is not None:
+            brand_entry["cost"] = float(brand_info["cost"])
         data["approvedBrands"] = [brand_entry]
 
-    # CLI overrides
-    if args.qty is not None:
-        data["quantity"] = float(args.qty)
+    # CLI overrides (quantity defaults to 0 so the field isn't blank)
+    data["quantity"] = float(args.qty) if args.qty is not None else 0.0
     if getattr(args, "location", None):
         data["location"] = args.location
 
@@ -447,12 +456,115 @@ def _truncate(s, maxlen):
     return s if len(s) <= maxlen else s[:maxlen - 3] + "..."
 
 
+def interactive_menu():
+    """Present an interactive menu when launched with no arguments."""
+    print("\n  ProShop Tool Library Updater")
+    print("  " + "=" * 40)
+    print("  1. Inspect tool(s)")
+    print("  2. Create new tool (AI search)")
+    print("  3. Find VPO pricing")
+    print("  4. Preview update (dry run)")
+    print("  5. Execute update")
+    print("  6. Scrape manufacturer page")
+    print("  7. Download product image")
+    print("  0. Exit")
+    print()
+
+    choice = input("  Select [0-7]: ").strip()
+    if choice == "0" or not choice:
+        return None
+
+    if choice == "1":
+        tools = input("  Tool number(s), space-separated: ").strip()
+        if not tools:
+            return None
+        as_json = input("  JSON output? [y/N]: ").strip().lower() == "y"
+        argv = ["inspect"] + tools.split()
+        if as_json:
+            argv.append("--json")
+        return argv
+
+    if choice == "2":
+        mfg = input("  Manufacturer (e.g. iscar, kennametal): ").strip()
+        catalog = input("  Catalog/model number: ").strip()
+        edp = ""
+        if not catalog:
+            edp = input("  EDP number: ").strip()
+        if not mfg or (not catalog and not edp):
+            print("  Manufacturer and catalog or EDP are required.")
+            return None
+        qty = input("  Quantity [blank to skip]: ").strip()
+        group = input("  Tool group override [blank for auto]: ").strip()
+        argv = ["create", "--mfg", mfg]
+        if catalog:
+            argv += ["--catalog", catalog]
+        if edp:
+            argv += ["--edp", edp]
+        if qty:
+            argv += ["--qty", qty]
+        if group:
+            argv += ["--group", group]
+        return argv
+
+    if choice == "3":
+        tools = input("  Tool number(s), space-separated: ").strip()
+        if not tools:
+            return None
+        year = input("  Year [2026]: ").strip() or "2026"
+        as_json = input("  JSON output? [y/N]: ").strip().lower() == "y"
+        argv = ["find-vpo"] + tools.split() + ["--year", year]
+        if as_json:
+            argv.append("--json")
+        return argv
+
+    if choice == "4":
+        tool = input("  Tool number: ").strip()
+        if not tool:
+            return None
+        desc = input("  New description [blank to skip]: ").strip()
+        argv = ["preview", tool]
+        if desc:
+            argv += ["--new-description", desc]
+        print("  (Add more fields via command line for full control)")
+        return argv
+
+    if choice == "5":
+        tool = input("  Tool number: ").strip()
+        if not tool:
+            return None
+        desc = input("  New description [blank to skip]: ").strip()
+        argv = ["update", tool]
+        if desc:
+            argv += ["--new-description", desc]
+        print("  (Add more fields via command line for full control)")
+        return argv
+
+    if choice == "6":
+        mfg = input("  Manufacturer (e.g. kennametal): ").strip()
+        url = input("  Product page URL: ").strip()
+        if not mfg or not url:
+            return None
+        return ["scrape", mfg, url]
+
+    if choice == "7":
+        url = input("  Image URL: ").strip()
+        output = input("  Save as (filename): ").strip()
+        if not url or not output:
+            return None
+        return ["download-image", url, "--output", output]
+
+    print("  Invalid choice.")
+    return None
+
+
 def main():
+    is_interactive = len(sys.argv) < 2
+
     parser = argparse.ArgumentParser(
         description="ProShop Tool Library Updater",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    sub = parser.add_subparsers(dest="command", required=True)
+    sub = parser.add_subparsers(dest="command", required=not is_interactive)
 
     # ── inspect ──────────────────────────────────────────────────────
     p_inspect = sub.add_parser("inspect", help="Query current tool records")
@@ -517,7 +629,13 @@ def main():
     p_img.add_argument("url", help="Image URL")
     p_img.add_argument("--output", "-o", required=True, help="Output file path")
 
-    args = parser.parse_args()
+    if is_interactive:
+        argv = interactive_menu()
+        if argv is None:
+            return
+        args = parser.parse_args(argv)
+    else:
+        args = parser.parse_args()
 
     commands = {
         "inspect": cmd_inspect,
@@ -529,7 +647,13 @@ def main():
         "download-image": cmd_download_image,
     }
 
-    sys.exit(commands[args.command](args))
+    rc = commands[args.command](args)
+
+    if is_interactive:
+        print()
+        input("Press Enter to exit...")
+
+    sys.exit(rc)
 
 
 if __name__ == "__main__":

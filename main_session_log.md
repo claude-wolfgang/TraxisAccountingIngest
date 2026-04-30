@@ -5,6 +5,40 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-30 (session 2)
+
+### P33: Tool Library Updater — Interactive menu + fill more ProShop fields
+
+**Date:** 2026-04-30
+
+**Task:** Fix double-click launching (window closes instantly) and fix tool create not populating enough fields on ProShop tool page.
+
+**What was done:**
+
+1. **Interactive menu** (`tool_update.py`) — Added `interactive_menu()` function triggered when no CLI arguments are passed. Presents numbered menu (Inspect, Create, Find VPO, Preview, Update, Scrape, Download Image). Collects required inputs interactively. Window stays open with "Press Enter to exit" after completion. Allows double-clicking the .py file on Windows.
+
+2. **More ProShop fields populated** — AI search prompt (`ai_search.py`) now also requests `size` (display size: fraction, wire gauge, thread size), `fluteType` (straight/RH spiral/LH spiral), `grade` (manufacturer substrate code), `productLine` (manufacturer product line name), and `brand.cost` (unit price from distributor sites). All new fields wired through `_build_create_data` to ProShop `addTool` mutation.
+
+3. **Brand cost** — AI now looks for pricing on distributor sites. If found, cost is included in the `approvedBrands` entry sent to ProShop.
+
+4. **Default quantity** — `quantity` now defaults to `0` instead of being omitted, so the field isn't blank on ProShop.
+
+5. **Grade/product line in descriptions** — AI-returned `grade` and `productLine` are injected as `_grade` and `_product_line` metadata for the description builder, producing richer descriptions (e.g., "KENNA GODRILL KC7325").
+
+**Files modified:**
+- `33. Tool Library Updater VPO Writer/tool_update.py` — Interactive menu, new field mapping, default quantity
+- `33. Tool Library Updater VPO Writer/ai_search.py` — Expanded AI prompt with 5 new spec fields + brand cost
+- `33. Tool Library Updater VPO Writer/CLAUDE.md` — Documented interactive menu usage
+
+**Key decisions:**
+- Interactive menu rather than .bat launcher — keeps everything in one file
+- AI asked to look for pricing on distributor sites (best-effort, may return null)
+- Quantity defaults to 0 rather than omitting (ProShop page shows the field populated)
+
+**Status:** Complete.
+
+---
+
 ## 2026-04-30
 
 ### P30: Traxis Label Printer Extension — Tool label fix + CWS privacy policy

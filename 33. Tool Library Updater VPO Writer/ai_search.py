@@ -38,7 +38,8 @@ INSTRUCTIONS:
 2. Try multiple search queries: "{manufacturer} {number}", "{number} specifications", "{number} insert/endmill/drill".
 3. Check distributor sites (MSC Direct, Penn Tool Co, Grainger, Carbide Depot, Travers Tool) — they often have better indexed product data than manufacturer sites.
 4. Identify the tool type from the product data.
-5. Extract all available specifications.
+5. Extract ALL available specifications — the more fields you fill in, the better. Leave nothing blank that the product page provides.
+6. Look for the unit price on distributor sites. Many list prices openly.
 
 CRITICAL RULES:
 - You MUST respond with ONLY a JSON object. No explanation, no apology, no text before or after the JSON.
@@ -64,6 +65,8 @@ RESPONSE FORMAT (JSON only, no other text):
     "toolMaterial": "<string or null>",
     "tipAngle": "<string degrees or null>",
     "throughCoolant": <bool or null>,
+    "fluteType": "<string: straight, RH spiral, LH spiral, or null>",
+    "size": "<display size: fraction like 1/2, wire gauge like #29, thread size like 3/8-16, or null>",
     "insertInscribedCircle": "<string fraction like 3/8 or null>",
     "insertThickness": <float inches or null>,
     "insertShape": "<string: triangle, diamond, round, square, trigon, or null>",
@@ -72,12 +75,15 @@ RESPONSE FORMAT (JSON only, no other text):
     "fullProfile": <bool or null>,
     "threadsPerInch": "<string or null>",
     "threadType": "<string or null>",
-    "centerCutting": "<string Yes/No or null>"
+    "centerCutting": "<string Yes/No or null>",
+    "grade": "<manufacturer grade/substrate code like KC7325, IC908, or null>",
+    "productLine": "<manufacturer product line name like GODRILL, CHIPBREAKER, or null>"
   },
   "brand": {
     "name": "<MANUFACTURER NAME UPPERCASE>",
     "catalog_number": "<manufacturer catalog/model number>",
-    "edp": "<EDP number if different from catalog_number>"
+    "edp": "<EDP number if different from catalog_number>",
+    "cost": <unit price in USD if found on distributor site, or null>
   },
   "description_hint": "<short description suitable for a shop tool library>",
   "source_url": "<URL where specs were found>",
