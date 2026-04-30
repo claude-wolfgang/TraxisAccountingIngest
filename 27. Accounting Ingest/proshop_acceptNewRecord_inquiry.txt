@@ -1,0 +1,43 @@
+ProShop API Support Inquiry: acceptNewRecord Permission for Customer PO Creation
+=================================================================================
+
+We are using the ProShop GraphQL API (client_credentials OAuth flow) to create
+records via mutations such as addCustomerPo, addPurchaseOrder, addBill, etc. Our
+OAuth client (ID 344C-F647-B9BC) maps to internal User #010 ("API Connector
+AccountingAPI"), license type Pkg "B".
+
+The addPurchaseOrder and addBill mutations work correctly. However, addCustomerPo
+fails with this error:
+
+    "The user auth_010 attempted to edit record CustomerPo:acceptNewRecord
+     that they don't have write permission for."
+
+We have confirmed the following:
+
+  1. The OAuth scope includes customerpos:rwdp, and the token request succeeds.
+  2. User #010's moduleAccess shows read=True and write=True for all modules.
+  3. We compared all 107 UserPermissions boolean flags between User #010 and
+     admin users (including allowCrucialEdits, isSystemAdministrator,
+     byPassOrderStatusProtection, etc.) and toggling these does not resolve
+     the error.
+  4. limitAdminAccess is unchecked for User #010.
+  5. The system setting flEnableNewRecordCreationModal is already enabled.
+  6. The updateUser and overwriteUser mutations do not expose any permissions
+     or moduleAccess fields that could be changed via API.
+
+Our questions:
+
+  1. What specifically controls the "acceptNewRecord" permission on the
+     CustomerPo module? Is this a per-user setting in the admin UI that we
+     are not finding, or is it a system-level configuration?
+
+  2. Why does addPurchaseOrder succeed for the same user while addCustomerPo
+     does not, given both modules show identical moduleAccess flags?
+
+  3. Is there a specific admin UI path (e.g., a checkbox or role assignment)
+     that grants acceptNewRecord to an API user account?
+
+Any guidance on resolving this would be appreciated. We can provide API request
+logs or diagnostic output if helpful.
+
+-- Wolfgang, Traxis Manufacturing
