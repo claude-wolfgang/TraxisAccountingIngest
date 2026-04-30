@@ -1,0 +1,5 @@
+{
+  "db_path": "C:\\FASData\\monitoring.db",
+  "machines_file": "path\\to\\focasmonitor\\machines.json",
+  "timezone": "America/Chicago"
+}

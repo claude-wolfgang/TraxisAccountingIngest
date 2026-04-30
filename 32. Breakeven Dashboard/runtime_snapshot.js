@@ -1,7 +1,7 @@
 window.RUNTIME_DATA = {
-  "generated_at": "2026-04-16T16:41:49.140138-05:00",
-  "week_start": "2026-04-13",
-  "week_end": "2026-04-19",
+  "generated_at": "2026-04-29T19:01:39.891205-05:00",
+  "week_start": "2026-04-27",
+  "week_end": "2026-05-03",
   "runtime_signal": "run_status=STRT",
   "sample_interval_config_s": 60,
   "gap_threshold_s": 120,
@@ -9,391 +9,93 @@ window.RUNTIME_DATA = {
     {
       "id": "T2",
       "name": "YCM NTC1600LY",
-      "runtime_hours": 12.34,
-      "runtime_seconds": 44406.4,
+      "runtime_hours": 5.82,
+      "runtime_seconds": 20942.4,
       "median_sample_interval_s": 60.0,
-      "samples_in_week": 4427,
-      "last_sample_at": "2026-04-16T16:41:36.296067-05:00",
+      "samples_in_week": 3118,
+      "last_sample_at": "2026-04-29T19:01:25.908085-05:00",
       "status": "online"
     },
     {
       "id": "M2",
       "name": "FANUC Mill 2",
-      "runtime_hours": 12.6,
-      "runtime_seconds": 45365.3,
+      "runtime_hours": 0.83,
+      "runtime_seconds": 3000.3,
       "median_sample_interval_s": 60.0,
-      "samples_in_week": 4427,
-      "last_sample_at": "2026-04-16T16:41:36.759053-05:00",
+      "samples_in_week": 3118,
+      "last_sample_at": "2026-04-29T19:01:28.935138-05:00",
       "status": "online"
     },
     {
       "id": "M3",
       "name": "FANUC Mill 3",
-      "runtime_hours": 29.1,
-      "runtime_seconds": 104776.4,
+      "runtime_hours": 9.75,
+      "runtime_seconds": 35105.5,
       "median_sample_interval_s": 60.0,
-      "samples_in_week": 4427,
-      "last_sample_at": "2026-04-16T16:41:37.134898-05:00",
+      "samples_in_week": 3118,
+      "last_sample_at": "2026-04-29T19:01:31.979169-05:00",
       "status": "online"
     },
     {
       "id": "M6",
       "name": "FANUC Mill 6",
-      "runtime_hours": 2.43,
-      "runtime_seconds": 8761.1,
+      "runtime_hours": 8.12,
+      "runtime_seconds": 29228.2,
       "median_sample_interval_s": 60.0,
-      "samples_in_week": 4427,
-      "last_sample_at": "2026-04-16T16:41:37.551878-05:00",
+      "samples_in_week": 3118,
+      "last_sample_at": "2026-04-29T19:01:35.009922-05:00",
       "status": "online"
     },
     {
       "id": "M8",
       "name": "Hyundai-Wia KF5600II",
-      "runtime_hours": 1.72,
-      "runtime_seconds": 6181.1,
+      "runtime_hours": 6.47,
+      "runtime_seconds": 23287.5,
       "median_sample_interval_s": 60.0,
-      "samples_in_week": 4427,
-      "last_sample_at": "2026-04-16T16:41:38.017061-05:00",
+      "samples_in_week": 3117,
+      "last_sample_at": "2026-04-29T19:00:38.077548-05:00",
       "status": "online"
     }
   ],
   "daily": [
     {
-      "date": "2026-04-13",
+      "date": "2026-04-27",
       "day_name": "Mon",
-      "hours": 17.75,
+      "hours": 11.14,
       "machines": {
-        "T2": 0.0,
-        "M2": 10.28,
-        "M3": 6.97,
-        "M6": 0.0,
-        "M8": 0.5
-      }
-    },
-    {
-      "date": "2026-04-14",
-      "day_name": "Tue",
-      "hours": 14.72,
-      "machines": {
-        "T2": 4.87,
-        "M2": 2.05,
-        "M3": 7.8,
-        "M6": 0.0,
-        "M8": 0.0
-      }
-    },
-    {
-      "date": "2026-04-15",
-      "day_name": "Wed",
-      "hours": 13.84,
-      "machines": {
-        "T2": 4.0,
-        "M2": 0.27,
-        "M3": 8.89,
-        "M6": 0.67,
-        "M8": 0.02
-      }
-    },
-    {
-      "date": "2026-04-16",
-      "day_name": "Thu",
-      "hours": 11.88,
-      "machines": {
-        "T2": 3.47,
+        "T2": 1.7,
         "M2": 0.0,
-        "M3": 5.45,
-        "M6": 1.77,
-        "M8": 1.2
+        "M3": 1.82,
+        "M6": 6.65,
+        "M8": 0.97
+      }
+    },
+    {
+      "date": "2026-04-28",
+      "day_name": "Tue",
+      "hours": 7.65,
+      "machines": {
+        "T2": 1.78,
+        "M2": 0.02,
+        "M3": 3.78,
+        "M6": 1.43,
+        "M8": 0.63
+      }
+    },
+    {
+      "date": "2026-04-29",
+      "day_name": "Wed",
+      "hours": 12.2,
+      "machines": {
+        "T2": 2.33,
+        "M2": 0.82,
+        "M3": 4.15,
+        "M6": 0.03,
+        "M8": 4.87
       }
     }
   ],
   "history": [
-    {
-      "week_start": "2026-03-16",
-      "week_end": "2026-03-22",
-      "total_hours": 55.84,
-      "machines": [
-        {
-          "id": "T2",
-          "name": "YCM NTC1600LY",
-          "runtime_hours": 8.26,
-          "runtime_seconds": 29751.1,
-          "median_sample_interval_s": 60.0,
-          "samples_in_week": 10055,
-          "last_sample_at": "2026-04-16T16:41:36.296067-05:00",
-          "status": "online"
-        },
-        {
-          "id": "M2",
-          "name": "FANUC Mill 2",
-          "runtime_hours": 1.45,
-          "runtime_seconds": 5232.6,
-          "median_sample_interval_s": 60.0,
-          "samples_in_week": 10055,
-          "last_sample_at": "2026-04-16T16:41:36.759053-05:00",
-          "status": "online"
-        },
-        {
-          "id": "M3",
-          "name": "FANUC Mill 3",
-          "runtime_hours": 11.43,
-          "runtime_seconds": 41141.2,
-          "median_sample_interval_s": 60.0,
-          "samples_in_week": 10055,
-          "last_sample_at": "2026-04-16T16:41:37.134898-05:00",
-          "status": "online"
-        },
-        {
-          "id": "M6",
-          "name": "FANUC Mill 6",
-          "runtime_hours": 3.71,
-          "runtime_seconds": 13370.4,
-          "median_sample_interval_s": 60.0,
-          "samples_in_week": 10055,
-          "last_sample_at": "2026-04-16T16:41:37.551878-05:00",
-          "status": "online"
-        },
-        {
-          "id": "M8",
-          "name": "Hyundai-Wia KF5600II",
-          "runtime_hours": 30.99,
-          "runtime_seconds": 111571.7,
-          "median_sample_interval_s": 60.0,
-          "samples_in_week": 10055,
-          "last_sample_at": "2026-04-16T16:41:38.017061-05:00",
-          "status": "online"
-        }
-      ],
-      "daily": [
-        {
-          "date": "2026-03-16",
-          "day_name": "Mon",
-          "hours": 4.82,
-          "machines": {
-            "T2": 0.0,
-            "M2": 0.0,
-            "M3": 4.77,
-            "M6": 0.05,
-            "M8": 0.0
-          }
-        },
-        {
-          "date": "2026-03-17",
-          "day_name": "Tue",
-          "hours": 3.52,
-          "machines": {
-            "T2": 1.28,
-            "M2": 0.0,
-            "M3": 1.27,
-            "M6": 0.72,
-            "M8": 0.25
-          }
-        },
-        {
-          "date": "2026-03-18",
-          "day_name": "Wed",
-          "hours": 11.77,
-          "machines": {
-            "T2": 2.33,
-            "M2": 0.12,
-            "M3": 0.0,
-            "M6": 1.72,
-            "M8": 7.6
-          }
-        },
-        {
-          "date": "2026-03-19",
-          "day_name": "Thu",
-          "hours": 15.26,
-          "machines": {
-            "T2": 1.45,
-            "M2": 0.27,
-            "M3": 1.54,
-            "M6": 1.21,
-            "M8": 10.79
-          }
-        },
-        {
-          "date": "2026-03-20",
-          "day_name": "Fri",
-          "hours": 11.49,
-          "machines": {
-            "T2": 1.02,
-            "M2": 1.07,
-            "M3": 1.77,
-            "M6": 0.02,
-            "M8": 7.62
-          }
-        },
-        {
-          "date": "2026-03-21",
-          "day_name": "Sat",
-          "hours": 9.0,
-          "machines": {
-            "T2": 2.18,
-            "M2": 0.0,
-            "M3": 2.08,
-            "M6": 0.0,
-            "M8": 4.73
-          }
-        },
-        {
-          "date": "2026-03-22",
-          "day_name": "Sun",
-          "hours": 0.0,
-          "machines": {
-            "T2": 0.0,
-            "M2": 0.0,
-            "M3": 0.0,
-            "M6": 0.0,
-            "M8": 0.0
-          }
-        }
-      ]
-    },
-    {
-      "week_start": "2026-03-23",
-      "week_end": "2026-03-29",
-      "total_hours": 49.41,
-      "machines": [
-        {
-          "id": "T2",
-          "name": "YCM NTC1600LY",
-          "runtime_hours": 13.57,
-          "runtime_seconds": 48845.7,
-          "median_sample_interval_s": 60.0,
-          "samples_in_week": 6884,
-          "last_sample_at": "2026-04-16T16:41:36.296067-05:00",
-          "status": "online"
-        },
-        {
-          "id": "M2",
-          "name": "FANUC Mill 2",
-          "runtime_hours": 8.77,
-          "runtime_seconds": 31563.8,
-          "median_sample_interval_s": 60.0,
-          "samples_in_week": 6884,
-          "last_sample_at": "2026-04-16T16:41:36.759053-05:00",
-          "status": "online"
-        },
-        {
-          "id": "M3",
-          "name": "FANUC Mill 3",
-          "runtime_hours": 9.65,
-          "runtime_seconds": 34737.4,
-          "median_sample_interval_s": 60.0,
-          "samples_in_week": 6884,
-          "last_sample_at": "2026-04-16T16:41:37.134898-05:00",
-          "status": "online"
-        },
-        {
-          "id": "M6",
-          "name": "FANUC Mill 6",
-          "runtime_hours": 0.58,
-          "runtime_seconds": 2100.1,
-          "median_sample_interval_s": 60.0,
-          "samples_in_week": 6884,
-          "last_sample_at": "2026-04-16T16:41:37.551878-05:00",
-          "status": "online"
-        },
-        {
-          "id": "M8",
-          "name": "Hyundai-Wia KF5600II",
-          "runtime_hours": 16.84,
-          "runtime_seconds": 60608.3,
-          "median_sample_interval_s": 60.0,
-          "samples_in_week": 6884,
-          "last_sample_at": "2026-04-16T16:41:38.017061-05:00",
-          "status": "online"
-        }
-      ],
-      "daily": [
-        {
-          "date": "2026-03-23",
-          "day_name": "Mon",
-          "hours": 0.0,
-          "machines": {
-            "T2": 0.0,
-            "M2": 0.0,
-            "M3": 0.0,
-            "M6": 0.0,
-            "M8": 0.0
-          }
-        },
-        {
-          "date": "2026-03-24",
-          "day_name": "Tue",
-          "hours": 15.63,
-          "machines": {
-            "T2": 4.43,
-            "M2": 0.22,
-            "M3": 6.32,
-            "M6": 0.5,
-            "M8": 4.17
-          }
-        },
-        {
-          "date": "2026-03-25",
-          "day_name": "Wed",
-          "hours": 5.07,
-          "machines": {
-            "T2": 1.57,
-            "M2": 0.03,
-            "M3": 2.78,
-            "M6": 0.02,
-            "M8": 0.67
-          }
-        },
-        {
-          "date": "2026-03-26",
-          "day_name": "Thu",
-          "hours": 15.2,
-          "machines": {
-            "T2": 5.13,
-            "M2": 3.23,
-            "M3": 0.55,
-            "M6": 0.0,
-            "M8": 6.28
-          }
-        },
-        {
-          "date": "2026-03-27",
-          "day_name": "Fri",
-          "hours": 13.5,
-          "machines": {
-            "T2": 2.43,
-            "M2": 5.28,
-            "M3": 0.0,
-            "M6": 0.07,
-            "M8": 5.72
-          }
-        },
-        {
-          "date": "2026-03-28",
-          "day_name": "Sat",
-          "hours": 0.0,
-          "machines": {
-            "T2": 0.0,
-            "M2": 0.0,
-            "M3": 0.0,
-            "M6": 0.0,
-            "M8": 0.0
-          }
-        },
-        {
-          "date": "2026-03-29",
-          "day_name": "Sun",
-          "hours": 0.0,
-          "machines": {
-            "T2": 0.0,
-            "M2": 0.0,
-            "M3": 0.0,
-            "M6": 0.0,
-            "M8": 0.0
-          }
-        }
-      ]
-    },
     {
       "week_start": "2026-03-30",
       "week_end": "2026-04-05",
@@ -406,7 +108,7 @@ window.RUNTIME_DATA = {
           "runtime_seconds": 37804.4,
           "median_sample_interval_s": 60.0,
           "samples_in_week": 9670,
-          "last_sample_at": "2026-04-16T16:41:36.296067-05:00",
+          "last_sample_at": "2026-04-29T19:01:25.908085-05:00",
           "status": "online"
         },
         {
@@ -416,7 +118,7 @@ window.RUNTIME_DATA = {
           "runtime_seconds": 70265.8,
           "median_sample_interval_s": 60.0,
           "samples_in_week": 9670,
-          "last_sample_at": "2026-04-16T16:41:36.759053-05:00",
+          "last_sample_at": "2026-04-29T19:01:28.935138-05:00",
           "status": "online"
         },
         {
@@ -426,7 +128,7 @@ window.RUNTIME_DATA = {
           "runtime_seconds": 13982.2,
           "median_sample_interval_s": 60.0,
           "samples_in_week": 9670,
-          "last_sample_at": "2026-04-16T16:41:37.134898-05:00",
+          "last_sample_at": "2026-04-29T19:01:31.979169-05:00",
           "status": "online"
         },
         {
@@ -436,7 +138,7 @@ window.RUNTIME_DATA = {
           "runtime_seconds": 18484.4,
           "median_sample_interval_s": 60.0,
           "samples_in_week": 9670,
-          "last_sample_at": "2026-04-16T16:41:37.551878-05:00",
+          "last_sample_at": "2026-04-29T19:01:35.009922-05:00",
           "status": "online"
         },
         {
@@ -446,7 +148,7 @@ window.RUNTIME_DATA = {
           "runtime_seconds": 93249.4,
           "median_sample_interval_s": 60.0,
           "samples_in_week": 9670,
-          "last_sample_at": "2026-04-16T16:41:38.017061-05:00",
+          "last_sample_at": "2026-04-29T19:01:38.035453-05:00",
           "status": "online"
         }
       ],
@@ -549,7 +251,7 @@ window.RUNTIME_DATA = {
           "runtime_seconds": 41644.7,
           "median_sample_interval_s": 60.0,
           "samples_in_week": 10079,
-          "last_sample_at": "2026-04-16T16:41:36.296067-05:00",
+          "last_sample_at": "2026-04-29T19:01:25.908085-05:00",
           "status": "online"
         },
         {
@@ -559,7 +261,7 @@ window.RUNTIME_DATA = {
           "runtime_seconds": 146479.9,
           "median_sample_interval_s": 60.0,
           "samples_in_week": 10079,
-          "last_sample_at": "2026-04-16T16:41:36.759053-05:00",
+          "last_sample_at": "2026-04-29T19:01:28.935138-05:00",
           "status": "online"
         },
         {
@@ -569,7 +271,7 @@ window.RUNTIME_DATA = {
           "runtime_seconds": 63245.2,
           "median_sample_interval_s": 60.0,
           "samples_in_week": 10079,
-          "last_sample_at": "2026-04-16T16:41:37.134898-05:00",
+          "last_sample_at": "2026-04-29T19:01:31.979169-05:00",
           "status": "online"
         },
         {
@@ -579,7 +281,7 @@ window.RUNTIME_DATA = {
           "runtime_seconds": 540.0,
           "median_sample_interval_s": 60.0,
           "samples_in_week": 10079,
-          "last_sample_at": "2026-04-16T16:41:37.551878-05:00",
+          "last_sample_at": "2026-04-29T19:01:35.009922-05:00",
           "status": "online"
         },
         {
@@ -589,7 +291,7 @@ window.RUNTIME_DATA = {
           "runtime_seconds": 37744.5,
           "median_sample_interval_s": 60.0,
           "samples_in_week": 10079,
-          "last_sample_at": "2026-04-16T16:41:38.017061-05:00",
+          "last_sample_at": "2026-04-29T19:01:38.035453-05:00",
           "status": "online"
         }
       ],
@@ -668,6 +370,292 @@ window.RUNTIME_DATA = {
         },
         {
           "date": "2026-04-12",
+          "day_name": "Sun",
+          "hours": 0.0,
+          "machines": {
+            "T2": 0.0,
+            "M2": 0.0,
+            "M3": 0.0,
+            "M6": 0.0,
+            "M8": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "week_start": "2026-04-13",
+      "week_end": "2026-04-19",
+      "total_hours": 60.98,
+      "machines": [
+        {
+          "id": "T2",
+          "name": "YCM NTC1600LY",
+          "runtime_hours": 13.07,
+          "runtime_seconds": 47046.7,
+          "median_sample_interval_s": 60.0,
+          "samples_in_week": 4581,
+          "last_sample_at": "2026-04-29T19:01:25.908085-05:00",
+          "status": "online"
+        },
+        {
+          "id": "M2",
+          "name": "FANUC Mill 2",
+          "runtime_hours": 12.6,
+          "runtime_seconds": 45365.3,
+          "median_sample_interval_s": 60.0,
+          "samples_in_week": 4581,
+          "last_sample_at": "2026-04-29T19:01:28.935138-05:00",
+          "status": "online"
+        },
+        {
+          "id": "M3",
+          "name": "FANUC Mill 3",
+          "runtime_hours": 31.16,
+          "runtime_seconds": 112162.2,
+          "median_sample_interval_s": 60.0,
+          "samples_in_week": 4581,
+          "last_sample_at": "2026-04-29T19:01:31.979169-05:00",
+          "status": "online"
+        },
+        {
+          "id": "M6",
+          "name": "FANUC Mill 6",
+          "runtime_hours": 2.43,
+          "runtime_seconds": 8761.1,
+          "median_sample_interval_s": 60.0,
+          "samples_in_week": 4581,
+          "last_sample_at": "2026-04-29T19:01:35.009922-05:00",
+          "status": "online"
+        },
+        {
+          "id": "M8",
+          "name": "Hyundai-Wia KF5600II",
+          "runtime_hours": 1.72,
+          "runtime_seconds": 6181.1,
+          "median_sample_interval_s": 60.0,
+          "samples_in_week": 4581,
+          "last_sample_at": "2026-04-29T19:01:38.035453-05:00",
+          "status": "online"
+        }
+      ],
+      "daily": [
+        {
+          "date": "2026-04-13",
+          "day_name": "Mon",
+          "hours": 17.75,
+          "machines": {
+            "T2": 0.0,
+            "M2": 10.28,
+            "M3": 6.97,
+            "M6": 0.0,
+            "M8": 0.5
+          }
+        },
+        {
+          "date": "2026-04-14",
+          "day_name": "Tue",
+          "hours": 14.72,
+          "machines": {
+            "T2": 4.87,
+            "M2": 2.05,
+            "M3": 7.8,
+            "M6": 0.0,
+            "M8": 0.0
+          }
+        },
+        {
+          "date": "2026-04-15",
+          "day_name": "Wed",
+          "hours": 13.84,
+          "machines": {
+            "T2": 4.0,
+            "M2": 0.27,
+            "M3": 8.89,
+            "M6": 0.67,
+            "M8": 0.02
+          }
+        },
+        {
+          "date": "2026-04-16",
+          "day_name": "Thu",
+          "hours": 14.67,
+          "machines": {
+            "T2": 4.2,
+            "M2": 0.0,
+            "M3": 7.5,
+            "M6": 1.77,
+            "M8": 1.2
+          }
+        },
+        {
+          "date": "2026-04-17",
+          "day_name": "Fri",
+          "hours": 0.0,
+          "machines": {
+            "T2": 0.0,
+            "M2": 0.0,
+            "M3": 0.0,
+            "M6": 0.0,
+            "M8": 0.0
+          }
+        },
+        {
+          "date": "2026-04-18",
+          "day_name": "Sat",
+          "hours": 0.0,
+          "machines": {
+            "T2": 0.0,
+            "M2": 0.0,
+            "M3": 0.0,
+            "M6": 0.0,
+            "M8": 0.0
+          }
+        },
+        {
+          "date": "2026-04-19",
+          "day_name": "Sun",
+          "hours": 0.0,
+          "machines": {
+            "T2": 0.0,
+            "M2": 0.0,
+            "M3": 0.0,
+            "M6": 0.0,
+            "M8": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "week_start": "2026-04-20",
+      "week_end": "2026-04-26",
+      "total_hours": 56.59,
+      "machines": [
+        {
+          "id": "T2",
+          "name": "YCM NTC1600LY",
+          "runtime_hours": 6.45,
+          "runtime_seconds": 23222.5,
+          "median_sample_interval_s": 60.0,
+          "samples_in_week": 2883,
+          "last_sample_at": "2026-04-29T19:01:25.908085-05:00",
+          "status": "online"
+        },
+        {
+          "id": "M2",
+          "name": "FANUC Mill 2",
+          "runtime_hours": 0.0,
+          "runtime_seconds": 0.0,
+          "median_sample_interval_s": 60.0,
+          "samples_in_week": 2883,
+          "last_sample_at": "2026-04-29T19:01:28.935138-05:00",
+          "status": "online"
+        },
+        {
+          "id": "M3",
+          "name": "FANUC Mill 3",
+          "runtime_hours": 16.12,
+          "runtime_seconds": 58035.7,
+          "median_sample_interval_s": 60.0,
+          "samples_in_week": 2883,
+          "last_sample_at": "2026-04-29T19:01:31.979169-05:00",
+          "status": "online"
+        },
+        {
+          "id": "M6",
+          "name": "FANUC Mill 6",
+          "runtime_hours": 17.07,
+          "runtime_seconds": 61447.2,
+          "median_sample_interval_s": 60.0,
+          "samples_in_week": 2883,
+          "last_sample_at": "2026-04-29T19:01:35.009922-05:00",
+          "status": "online"
+        },
+        {
+          "id": "M8",
+          "name": "Hyundai-Wia KF5600II",
+          "runtime_hours": 16.95,
+          "runtime_seconds": 61026.9,
+          "median_sample_interval_s": 60.0,
+          "samples_in_week": 2883,
+          "last_sample_at": "2026-04-29T19:01:38.035453-05:00",
+          "status": "online"
+        }
+      ],
+      "daily": [
+        {
+          "date": "2026-04-20",
+          "day_name": "Mon",
+          "hours": 6.34,
+          "machines": {
+            "T2": 0.0,
+            "M2": 0.0,
+            "M3": 2.72,
+            "M6": 2.22,
+            "M8": 1.4
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "day_name": "Tue",
+          "hours": 16.82,
+          "machines": {
+            "T2": 1.85,
+            "M2": 0.0,
+            "M3": 4.75,
+            "M6": 5.98,
+            "M8": 4.23
+          }
+        },
+        {
+          "date": "2026-04-22",
+          "day_name": "Wed",
+          "hours": 14.79,
+          "machines": {
+            "T2": 2.03,
+            "M2": 0.0,
+            "M3": 3.0,
+            "M6": 4.43,
+            "M8": 5.32
+          }
+        },
+        {
+          "date": "2026-04-23",
+          "day_name": "Thu",
+          "hours": 13.8,
+          "machines": {
+            "T2": 1.27,
+            "M2": 0.0,
+            "M3": 3.65,
+            "M6": 4.43,
+            "M8": 4.45
+          }
+        },
+        {
+          "date": "2026-04-24",
+          "day_name": "Fri",
+          "hours": 4.85,
+          "machines": {
+            "T2": 1.3,
+            "M2": 0.0,
+            "M3": 2.0,
+            "M6": 0.0,
+            "M8": 1.55
+          }
+        },
+        {
+          "date": "2026-04-25",
+          "day_name": "Sat",
+          "hours": 0.0,
+          "machines": {
+            "T2": 0.0,
+            "M2": 0.0,
+            "M3": 0.0,
+            "M6": 0.0,
+            "M8": 0.0
+          }
+        },
+        {
+          "date": "2026-04-26",
           "day_name": "Sun",
           "hours": 0.0,
           "machines": {
