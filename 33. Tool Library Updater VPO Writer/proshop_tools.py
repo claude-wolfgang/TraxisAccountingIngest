@@ -3,6 +3,7 @@ ProShop tool library API client.
 
 Handles OAuth authentication and GraphQL queries/mutations for:
 - Reading tool records
+- Creating tool records from manufacturer specs
 - Updating tool records (specs, approved brands, notes)
 - Querying vendor purchase orders for pricing
 """
@@ -36,7 +37,9 @@ TOOL_QUERY_FIELDS = """
     cutDiameter numberOfFlutes overallLength lengthOfCut
     shankDiameter helixAngle coating toolMaterial tipAngle
     throughCoolant fluteType size ansiCatalogNumber isoCatalogNumber
-    purchasingNotes status
+    purchasingNotes status quantity location
+    insertInscribedCircle insertShape insertThickness
+    numberOfCuttingCorners pitch fullProfile cornerRadius
     approvedBrands(pageSize: 10) {
         records { approvedBrand vendorToolId cost leadTime }
     }
@@ -136,6 +139,15 @@ class ProShopClient:
         if "errors" in body and not body.get("data"):
             raise GraphQLError(body["errors"])
         return body
+
+
+def get_anthropic_key():
+    """Load ANTHROPIC_API_KEY from .traxis.env."""
+    env = _load_env()
+    key = env.get("ANTHROPIC_API_KEY")
+    if not key:
+        raise RuntimeError("ANTHROPIC_API_KEY not found in .traxis.env")
+    return key
 
 
 def get_clients():
@@ -253,6 +265,27 @@ def _query_vpo_prices(client, tool_numbers, year, include_supplier=True):
                     "total": item.get("total"),
                 }
     return found
+
+
+def add_tool(client, data):
+    """Create a new tool record via the addTool mutation.
+
+    data: dict matching AddToolInput fields. Must include toolGroupLetter.
+    ProShop auto-assigns the tool number within that group.
+
+    Returns the created tool record with assigned toolNumber.
+    """
+    result = client.execute(
+        """
+        mutation AddTool($data: AddToolInput!) {
+            addTool(data: $data) {
+                %s
+            }
+        }
+        """ % TOOL_QUERY_FIELDS,
+        {"data": data},
+    )
+    return result.get("data", {}).get("addTool")
 
 
 def update_tool(client, tool_number, data):

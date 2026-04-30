@@ -4,6 +4,7 @@ Tool Library Updater — CLI for managing ProShop tool library entries.
 
 Subcommands:
     inspect     Query and display current tool records
+    create      Create a new tool from manufacturer EDP/catalog number
     find-vpo    Search vendor purchase orders for tool pricing
     scrape      Fetch specs from manufacturer website
     preview     Show before/after diff (dry run, writes nothing)
@@ -12,6 +13,8 @@ Subcommands:
 
 Usage:
     python tool_update.py inspect D195 D196 --json
+    python tool_update.py create --mfg iscar --edp 1955660 --qty 4
+    python tool_update.py create --catalog "16ERB 1.25 ISO IC908" --qty 4 --group TN
     python tool_update.py find-vpo D195 --year 2026 --json
     python tool_update.py scrape kennametal "https://kennametal.com/..." --json
     python tool_update.py preview D195 --oal 2.441 --flute-length 0.787 ...
@@ -23,9 +26,12 @@ import argparse
 import json
 import sys
 
-from proshop_tools import get_clients, get_tool, get_tools, find_tool_vpo_prices, update_tool
-from description_format import build_prev_note, append_to_purchasing_notes, map_coating
+from proshop_tools import get_clients, get_tool, get_tools, find_tool_vpo_prices, update_tool, add_tool
+from description_format import (build_prev_note, append_to_purchasing_notes, map_coating,
+                                map_material, map_inscribed_circle, map_insert_shape,
+                                build_description, MFG_SHORT)
 from mfg_scrapers import scrape_manufacturer, download_product_image
+from ai_search import search_tool_specs, map_tool_group
 
 
 def cmd_inspect(args):
@@ -138,6 +144,180 @@ def cmd_update(args):
             b = brands[0]
             print(f"  Brand: {b['approvedBrand']} | EDP: {b['vendorToolId']} | ${b['cost']}")
     return 0
+
+
+def cmd_create(args):
+    """Create a new tool from manufacturer specs."""
+    # Step 1: Get specs — either from --specs-json or AI search
+    if args.specs_json:
+        try:
+            ai_result = json.loads(args.specs_json)
+        except json.JSONDecodeError as e:
+            print(f"Invalid --specs-json: {e}", file=sys.stderr)
+            return 1
+    else:
+        if not args.mfg:
+            print("--mfg is required unless using --specs-json", file=sys.stderr)
+            return 1
+        search_id = args.catalog if args.catalog else args.edp
+        if not search_id:
+            print("--edp or --catalog is required", file=sys.stderr)
+            return 1
+
+        print(f"  Searching for {args.mfg.upper()} {search_id}...")
+        ai_result = search_tool_specs(args.mfg, args.edp or "", args.catalog)
+
+    if ai_result.get("error"):
+        print(f"Error: {ai_result['error']}", file=sys.stderr)
+        if ai_result.get("raw"):
+            print(f"Raw response:\n{ai_result['raw'][:500]}", file=sys.stderr)
+        return 1
+
+    # Step 2: Determine tool group
+    tool_type = ai_result.get("tool_type", "unknown")
+    group = args.group or map_tool_group(tool_type)
+    if not group:
+        print(f"Could not determine tool group for type '{tool_type}'.", file=sys.stderr)
+        print("Use --group to specify (e.g., --group D, --group EM, --group TN)")
+        return 1
+
+    # Step 3: Build create data
+    data = _build_create_data(args, ai_result, group)
+
+    # Step 4: Preview
+    confidence = ai_result.get("confidence", "unknown")
+    source = ai_result.get("source_url", "")
+
+    if args.json:
+        print(json.dumps({"tool_type": tool_type, "group": group,
+                          "confidence": confidence, "data": data}, indent=2))
+        if not args.confirm:
+            return 0
+    else:
+        print(f"\n  New Tool -- Preview")
+        print("-" * 60)
+        print(f"  Tool Group:  {group} (auto-numbered by ProShop)")
+        print(f"  Tool Type:   {tool_type}")
+        print(f"  Confidence:  {confidence}")
+        if source:
+            print(f"  Source:      {source}")
+        print()
+        for k, v in sorted(data.items()):
+            if k == "approvedBrands":
+                for b in v:
+                    print(f"  {'brand':25s} {b.get('approvedBrand', '?')} | "
+                          f"EDP: {b.get('vendorToolId', '?')}")
+            else:
+                print(f"  {k:25s} {v}")
+
+    # Step 5: Confirm
+    if not args.confirm:
+        answer = input("\nCreate this tool? [y/N]: ").strip().lower()
+        if answer != "y":
+            print("Aborted.")
+            return 1
+
+    # Step 6: Create
+    tools_client, _ = get_clients()
+    result = add_tool(tools_client, data)
+
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        tn = result.get("toolNumber", "?")
+        desc = result.get("description", "")
+        print(f"\n  Created {tn}: {desc}")
+        print(f"  https://traxismfg.adionsystems.com/procnc/tools/{group}/{tn}")
+    return 0
+
+
+def _build_create_data(args, ai_result, group):
+    """Build AddToolInput data from AI search results and CLI args."""
+    specs = ai_result.get("specs", {})
+    brand_info = ai_result.get("brand", {})
+    manufacturer = getattr(args, "mfg", None) or brand_info.get("name", "")
+
+    # Inject metadata into specs for description builder
+    specs["_brand"] = brand_info
+    specs["_description_hint"] = ai_result.get("description_hint")
+
+    data = {
+        "toolGroupLetter": group,
+        "status": "Active",
+    }
+
+    # Description — use AI hint or build from specs
+    desc = ai_result.get("description_hint")
+    if desc:
+        mfg_short = MFG_SHORT.get(manufacturer.lower(), manufacturer.upper()[:6]) if manufacturer else ""
+        if mfg_short and mfg_short not in desc.upper():
+            desc = f"{desc} {mfg_short}"
+        data["description"] = desc
+    else:
+        tool_type = ai_result.get("tool_type", "unknown")
+        data["description"] = build_description(tool_type, specs, manufacturer)
+
+    # Dimensional specs — pass through numeric fields directly
+    float_fields = [
+        "cutDiameter", "overallLength", "lengthOfCut", "shankDiameter",
+        "helixAngle", "cornerRadius", "insertThickness", "numberOfFlutes",
+        "numberOfCuttingCorners",
+    ]
+    for field in float_fields:
+        val = specs.get(field)
+        if val is not None:
+            data[field] = float(val)
+
+    # String fields
+    if specs.get("tipAngle"):
+        data["tipAngle"] = str(specs["tipAngle"])
+    if specs.get("pitch"):
+        data["pitch"] = str(specs["pitch"])
+    if specs.get("threadsPerInch"):
+        data["threadsPerInch"] = str(specs["threadsPerInch"])
+
+    # Boolean fields
+    if specs.get("throughCoolant") is not None:
+        data["throughCoolant"] = bool(specs["throughCoolant"])
+    if specs.get("fullProfile") is not None:
+        data["fullProfile"] = bool(specs["fullProfile"])
+
+    # Enum fields — translate from human-readable to ProShop enums
+    if specs.get("coating"):
+        data["coating"] = map_coating(specs["coating"])
+    if specs.get("toolMaterial"):
+        mapped = map_material(specs["toolMaterial"])
+        if mapped:
+            data["toolMaterial"] = mapped
+    if specs.get("insertInscribedCircle"):
+        mapped = map_inscribed_circle(specs["insertInscribedCircle"])
+        if mapped:
+            data["insertInscribedCircle"] = mapped
+    if specs.get("insertShape"):
+        mapped = map_insert_shape(specs["insertShape"])
+        if mapped:
+            data["insertShape"] = mapped
+
+    # Catalog number
+    cat_num = brand_info.get("catalog_number") or brand_info.get("edp")
+    if cat_num:
+        data["ansiCatalogNumber"] = cat_num
+
+    # Approved brand
+    if brand_info.get("name"):
+        brand_entry = {"approvedBrand": brand_info["name"].upper()}
+        edp = brand_info.get("edp") or brand_info.get("catalog_number")
+        if edp:
+            brand_entry["vendorToolId"] = str(edp)
+        data["approvedBrands"] = [brand_entry]
+
+    # CLI overrides
+    if args.qty is not None:
+        data["quantity"] = float(args.qty)
+    if getattr(args, "location", None):
+        data["location"] = args.location
+
+    return data
 
 
 def cmd_download_image(args):
@@ -298,6 +478,18 @@ def main():
     p_scrape.add_argument("url", help="Product page URL")
     p_scrape.add_argument("--json", action="store_true", help="JSON output")
 
+    # ── create ───────────────────────────────────────────────────────
+    p_create = sub.add_parser("create", help="Create a new tool from manufacturer specs")
+    p_create.add_argument("--mfg", help="Manufacturer name (e.g., iscar, kennametal)")
+    p_create.add_argument("--edp", help="EDP or product number")
+    p_create.add_argument("--catalog", help="Catalog/model number (e.g., 16ERB 1.25 ISO IC908)")
+    p_create.add_argument("--qty", type=int, default=None, help="Initial quantity")
+    p_create.add_argument("--location", help="Storage location")
+    p_create.add_argument("--group", help="Override tool group letter (e.g., D, EM, TN)")
+    p_create.add_argument("--specs-json", help="JSON string bypassing AI search")
+    p_create.add_argument("--confirm", action="store_true", help="Skip interactive confirmation")
+    p_create.add_argument("--json", action="store_true", help="JSON output")
+
     # ── Common update args (shared by preview and update) ────────────
     def add_update_args(p):
         p.add_argument("tool_number", help="Tool number to update")
@@ -336,6 +528,7 @@ def main():
 
     commands = {
         "inspect": cmd_inspect,
+        "create": cmd_create,
         "find-vpo": cmd_find_vpo,
         "scrape": cmd_scrape,
         "preview": cmd_preview,
