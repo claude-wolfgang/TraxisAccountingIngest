@@ -7,6 +7,85 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-29
 
+### P30: Traxis Label Printer Extension — Tool Label Support (v1.5.0, IN PROGRESS)
+
+**Date:** 2026-04-29
+
+**Task:** Add print label button to ProShop tool pages (`/procnc/tools/*`). The extension had content scripts for WO, COTS, equipment, box, and user pages but never supported tool pages.
+
+**What was done:**
+
+1. **Diagnostics** — Verified print service at 10.1.1.242:5002 is healthy (printer available, 16+ days uptime). Sent test payload through API successfully. Extension code and all existing label types are clean.
+
+2. **New files created:**
+   - `tool-content.js` — Content script for tool pages. Tool ID from URL (`/procnc/tools/GROUP/ID`). Scrapes description and location from iframe `data-display-name` fields. Orange "Print Tool Label" button at top center.
+   - `tool-label-generator.js` — Canvas renderer: QR code (encodes tool page URL), tool # (bold 30px), description (20px, word-wrapped), location (14px).
+
+3. **Updated files:**
+   - `manifest.json` — v1.4.0 → v1.5.0, added content_scripts entry for `/procnc/tools/*`, added icon references
+   - `content.css` — Added orange `.traxis-label-btn--tool` variant
+
+4. **ProShop tool page DOM discovery** — Tool pages render form inputs inside iframes. Top-level `document.querySelector` cannot reach `data-display-name` attributes. The debug DOM dump confirmed: field labels (Tool #, Location, etc.) exist as `.plainheader` cells in the main document, but values are in iframe inputs. Iframes are accessible (same-origin). Final approach reads `data-display-name` fields directly from iframe contentDocument.
+
+5. **Unresolved:** The correct `data-display-name` value for the tool description field is not yet confirmed. Current code tries Header, Description, and Tool Name. The debug logging in the current build will dump all iframe field names on next test — that will identify the correct field.
+
+**Files modified:**
+- `30. Material Label Extension/traxis-material-label/manifest.json` — v1.5.0
+- `30. Material Label Extension/traxis-material-label/src/tool-content.js` — NEW
+- `30. Material Label Extension/traxis-material-label/src/tool-label-generator.js` — NEW
+- `30. Material Label Extension/traxis-material-label/src/content.css` — Orange tool variant
+
+**Key decisions:**
+- Tool ID always from URL (not DOM) — ProShop tool URLs are reliable (`/procnc/tools/GROUP/ID`)
+- QR code encodes full ProShop tool URL (same pattern as equipment/COTS labels)
+- Orange button color to distinguish from other label types
+- Iframe-based scraping required — ProShop tool pages differ from other page types that use flat DOM
+
+**Status:** IN PROGRESS. Button injects and prints. Tool # and QR correct. Description and location scraping needs one more test cycle to confirm correct iframe field names.
+
+---
+
+### P27: Accounting Ingest — QBO Production, Email Body Extraction, Scheduler Concept (v1.4.0)
+
+**Date:** 2026-04-29
+
+**Task:** Activate QBO production API, add email body extraction for non-PDF bills, fix several GUI bugs, conceptualize scheduler + procurement loop, write architecture document v1.2.
+
+**What was done:**
+
+1. **QBO production activation** — Switched from sandbox to production. Used Intuit OAuth2 Playground redirect URI for token exchange (Intuit rejects localhost for production). Updated .traxis.env with production Client ID, Secret, Realm ID (123146014753554), and refresh token. Smoke-tested with a real vendor query.
+
+2. **Email body extraction** — Added `get_body()` to GraphClient, `classify_html()` (Haiku) and `extract_html()` (Sonnet) to AIExtractor. Bills from Waste Management, CIMCO, UPS, Smart Air that arrive as email text (not PDF attachments) now get classified and extracted. Changed `get_recent_emails()` to 10-day lookback window.
+
+3. **Duplicate email fix** — accounting@traxismfg.com forwards to tom@, causing every email to be processed twice. Removed WHITELISTED_INTERNAL, now skips all @traxismfg.com senders. Added intuit.com domains to BLOCKED_DOMAINS to prevent QBO notification emails from creating circular entries.
+
+4. **Vendor selection bug fix** — Programmatic `set()` on contact search var triggered repeated listbox rebuilds, clearing auto-selection. Fixed with 400ms debounce via `after()`, synchronous search in `_load_record()`, moved listbox bind to init.
+
+5. **Label printing gated** — Auto-print was firing on restart (empty `_seen` set reprocessed everything). Removed auto-print, added manual "Print Labels" button to review panel.
+
+6. **Cert PDF filing** — Added `_save_cert_for_vpo()`: copies source PDF to `Accounting Inbox/Certs/VPO-XXXXXX/` after successful packing slip upload.
+
+7. **Architecture document v1.2** — Evaluated TRAXIS_QBO_AUTOMATION_ARCHITECTURE.md against ecosystem, added existing-system context (v1.1), then added Scheduler + Procurement Loop concept (v1.2): two-view model (Floor: 9 machines, Horizon: planning punch list), closed-loop procurement cycle, PixiJS/Phaser UI notes, 5-phase implementation sequence.
+
+**Files modified:**
+- `27. Accounting Ingest/accounting_ingest.py` — v1.3.0 → v1.4.0 (all changes above)
+- `27. Accounting Ingest/qbo_auth.py` — Rewrote for production OAuth flow
+- `27. Accounting Ingest/CLAUDE.md` — Updated interfaces for v1.4.0
+- `1. Proshop Automations/.traxis.env` — QBO production credentials
+- `TRAXIS_QBO_AUTOMATION_ARCHITECTURE.md` — v1.0 → v1.2
+- `TRAXIS_ECOSYSTEM.md` — Updated P27 entry and interface map
+
+**Key decisions:**
+- QBO production uses Intuit Playground redirect URI (not localhost) — Intuit requires HTTPS for production
+- Email body extraction uses Haiku for classification (fast/cheap) and Sonnet for extraction (accurate)
+- Label printing is manual-only to prevent unsupervised printing on restart
+- auth_010 customer PO permission is permanently blocked — won't pursue API workaround
+- Scheduler reconception deferred to Web Claude brainstorming session
+
+**Status:** v1.4.0 complete. QBO production live. Architecture doc v1.2 ready for Web Claude handoff.
+
+---
+
 ### P31b: BLE Proximity Worker Tracking — ESP32 Gateway Deployment + Walk Test
 
 **Date:** 2026-04-29

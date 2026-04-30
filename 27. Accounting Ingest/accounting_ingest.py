@@ -36,7 +36,7 @@ except ImportError:
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 APP_TITLE = f"Traxis Accounting Ingest v{VERSION}"
 
 SCAN_FOLDER  = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\Scanned")
@@ -175,10 +175,19 @@ def init_db():
     con.commit()
     con.close()
 
+BLOCKED_DOMAINS = {
+    "intuit.com", "notification.intuit.com", "eq.intuit.com",
+    "autodeskcommunications.com",
+}
+
 def is_sender_blocked(from_addr):
+    addr = from_addr.lower()
+    domain = addr.split("@")[-1] if "@" in addr else ""
+    if any(domain == d or domain.endswith("." + d) for d in BLOCKED_DOMAINS):
+        return True
     con = db()
     row = con.execute("SELECT id FROM sender_blocklist WHERE from_addr=?",
-                      (from_addr.lower(),)).fetchone()
+                      (addr,)).fetchone()
     con.close()
     return row is not None
 
@@ -260,6 +269,33 @@ class GraphClient:
             url = data.get("@odata.nextLink")
             params = None  # nextLink includes params already
         return all_msgs
+
+    def get_recent_emails(self, lookback_days=10):
+        """Fetch recent emails (with or without attachments), paginating to get all."""
+        url = GRAPH_MESSAGES_URL.format(mailbox=ENV["GRAPH_MAILBOX"])
+        cutoff = (datetime.now(timezone.utc) - __import__('datetime').timedelta(days=lookback_days)).strftime("%Y-%m-%dT00:00:00Z")
+        all_msgs = []
+        params = {
+            "$filter": f"receivedDateTime ge {cutoff}",
+            "$select": "id,subject,from,receivedDateTime,hasAttachments",
+            "$top": "50",
+        }
+        while url:
+            r = requests.get(url, headers=self._headers(), params=params)
+            r.raise_for_status()
+            data = r.json()
+            all_msgs.extend(data.get("value", []))
+            url = data.get("@odata.nextLink")
+            params = None
+        return all_msgs
+
+    def get_body(self, msg_id):
+        """Fetch the HTML or text body of an email."""
+        url = f"https://graph.microsoft.com/v1.0/users/{ENV['GRAPH_MAILBOX']}/messages/{msg_id}"
+        r = requests.get(url, headers=self._headers(), params={"$select": "body"})
+        r.raise_for_status()
+        body = r.json().get("body", {})
+        return body.get("content", ""), body.get("contentType", "text")
 
     def get_attachments(self, msg_id):
         url = GRAPH_ATTACHMENTS_URL.format(
@@ -837,9 +873,8 @@ Example for 7 pages: packing slip (p1-2) + mill cert (p3) = one package, shippin
         doc.close()
         return split_paths
 
-    def classify(self, pdf_path, subject="", sender=""):
-        """Quick classify — returns doc type string."""
-        # Rule-based first
+    def _rule_classify(self, subject="", sender=""):
+        """Rule-based classification from email metadata. Returns doc type or None."""
         text = (subject + " " + sender).lower()
         if any(w in text for w in ["invoice", "inv #", "bill", "statement"]):
             return "VENDOR_INVOICE"
@@ -847,8 +882,13 @@ Example for 7 pages: packing slip (p1-2) + mill cert (p3) = one package, shippin
             return "PACKING_SLIP"
         if any(w in text for w in ["purchase order", " po #", "p.o. "]):
             return "CUSTOMER_PO"
-        # "quote" is ambiguous — vendor quote (→ VENDOR_PO) vs customer quote
-        # (→ CUSTOMER_QUOTE). Let the AI classifier decide based on document content.
+        return None
+
+    def classify(self, pdf_path, subject="", sender=""):
+        """Quick classify — returns doc type string."""
+        rule = self._rule_classify(subject, sender)
+        if rule:
+            return rule
 
         # Fall back to Claude vision
         images = self.pdf_to_images(pdf_path, max_pages=1)
@@ -863,6 +903,27 @@ Example for 7 pages: packing slip (p1-2) + mill cert (p3) = one package, shippin
                     {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": images[0]}},
                     {"type": "text", "text": CLASSIFY_PROMPT},
                 ]
+            }]
+        )
+        result = msg.content[0].text.strip().upper()
+        return result if result in DOC_TYPES else "UNKNOWN"
+
+    def classify_html(self, html_body, subject="", sender=""):
+        """Classify an email body (HTML or plain text) — returns doc type string."""
+        rule = self._rule_classify(subject, sender)
+        if rule:
+            return rule
+
+        # Strip HTML tags for a cleaner text signal, keep first 3000 chars
+        text = re.sub(r'<[^>]+>', ' ', html_body)
+        text = re.sub(r'\s+', ' ', text).strip()[:3000]
+
+        msg = self.client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=20,
+            messages=[{
+                "role": "user",
+                "content": f"Email from: {sender}\nSubject: {subject}\n\nEmail body:\n{text}\n\n{CLASSIFY_PROMPT}"
             }]
         )
         result = msg.content[0].text.strip().upper()
@@ -887,6 +948,29 @@ Example for 7 pages: packing slip (p1-2) + mill cert (p3) = one package, shippin
         )
         raw = msg.content[0].text.strip()
         # Strip markdown code fences if present
+        raw = re.sub(r"^```[a-z]*\n?", "", raw)
+        raw = re.sub(r"\n?```$", "", raw)
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {"raw": raw, "error": "JSON parse failed", "confidence": 0}
+
+    def extract_html(self, html_body, doc_type, subject="", sender=""):
+        """Extract structured data from an email body (HTML or plain text)."""
+        text = re.sub(r'<[^>]+>', ' ', html_body)
+        text = re.sub(r'\s+', ' ', text).strip()[:5000]
+
+        prompt = EXTRACTION_PROMPTS.get(doc_type, EXTRACTION_PROMPTS["VENDOR_INVOICE"])
+
+        msg = self.client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=2000,
+            messages=[{
+                "role": "user",
+                "content": f"Email from: {sender}\nSubject: {subject}\n\nEmail body:\n{text}\n\n{prompt}\n\nReturn ONLY valid JSON, no explanation."
+            }]
+        )
+        raw = msg.content[0].text.strip()
         raw = re.sub(r"^```[a-z]*\n?", "", raw)
         raw = re.sub(r"\n?```$", "", raw)
         try:
@@ -920,69 +1004,118 @@ class EmailPoller:
                 time.sleep(1)
 
     def _poll(self):
-        msgs = self.graph.get_unread_with_attachments()
+        msgs = self.graph.get_recent_emails()
         if not msgs:
             return
-        self.log(f"Found {len(msgs)} unread email(s) with attachments")
+        new_count = 0
         con = db()
         for msg in msgs:
             gid = msg["id"]
-            row = con.execute("SELECT id FROM email_log WHERE graph_id=?", (gid,)).fetchone()
-            if row:
+            row = con.execute("SELECT processed FROM email_log WHERE graph_id=?", (gid,)).fetchone()
+            if row and row[0]:
                 continue
             subject = msg.get("subject", "")
             sender = msg.get("from", {}).get("emailAddress", {}).get("address", "")
             received = msg.get("receivedDateTime", "")
-            con.execute(
-                "INSERT OR IGNORE INTO email_log (graph_id, from_addr, subject, received_at) VALUES (?,?,?,?)",
-                (gid, sender, subject, received)
-            )
-            con.commit()
-            self._process_message(msg, subject, sender, con)
+            if not row:
+                con.execute(
+                    "INSERT OR IGNORE INTO email_log (graph_id, from_addr, subject, received_at) VALUES (?,?,?,?)",
+                    (gid, sender, subject, received)
+                )
+                con.commit()
+            queued = self._process_message(msg, subject, sender, con)
+            if queued:
+                con.execute("UPDATE email_log SET processed=1 WHERE graph_id=?", (gid,))
+                con.commit()
+                new_count += 1
         con.close()
-
-    # Traxis addresses that forward external accounting docs — bypass internal filter
-    WHITELISTED_INTERNAL = {"tom@traxismfg.com"}
+        if new_count:
+            self.log(f"Processed {new_count} new email(s)")
 
     def _process_message(self, msg, subject, sender, con):
-        # Skip internal Traxis emails (except whitelisted forwarders)
-        if sender.lower().endswith("@traxismfg.com") and sender.lower() not in self.WHITELISTED_INTERNAL:
-            self.log(f"Skipping internal email from {sender}")
-            return
+        """Process an email. Returns True if at least one item was queued."""
+        # Skip all internal Traxis emails — the poller reads accounting@ directly,
+        # so Tom's forwards (FW:) are duplicates of the originals already in the inbox
+        if sender.lower().endswith("@traxismfg.com"):
+            return False
         # Skip blocked senders
         if is_sender_blocked(sender):
-            self.log(f"Skipping blocked sender: {sender}")
-            return
+            return False
 
-        attachments = self.graph.get_attachments(msg["id"])
-        for att in attachments:
-            # Skip inline/embedded content (logos, signatures, tracking pixels)
-            if att.get("isInline"):
-                continue
-            name = att.get("name", "")
-            content_type = (att.get("contentType") or "").lower()
-            # Skip images regardless of where they appear
-            if content_type.startswith("image/"):
-                continue
-            if name.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp", ".ico")):
-                continue
-            # Email attachments: PDFs only
-            if not name.lower().endswith(".pdf"):
-                continue
-            content_bytes = att.get("contentBytes")
-            if not content_bytes:
-                continue
-            # Skip tiny files (< 5KB — likely blank pages)
-            if len(content_bytes) < 6800:  # ~5KB after base64
-                continue
-            # Save to email folder
-            safe_name = re.sub(r'[^\w\.\-]', '_', name)
-            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-            out_path = EMAIL_FOLDER / f"{ts}_{safe_name}"
-            EMAIL_FOLDER.mkdir(parents=True, exist_ok=True)
-            out_path.write_bytes(base64.b64decode(content_bytes))
-            self.log(f"Saved attachment: {out_path.name}")
-            self._enqueue(str(out_path), "email", msg["id"], subject, sender, con)
+        found_pdf = False
+        if msg.get("hasAttachments"):
+            attachments = self.graph.get_attachments(msg["id"])
+            for att in attachments:
+                if att.get("isInline"):
+                    continue
+                name = att.get("name", "")
+                content_type = (att.get("contentType") or "").lower()
+                if content_type.startswith("image/"):
+                    continue
+                if name.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp", ".ico")):
+                    continue
+                if not name.lower().endswith(".pdf"):
+                    continue
+                content_bytes = att.get("contentBytes")
+                if not content_bytes:
+                    continue
+                if len(content_bytes) < 6800:
+                    continue
+                safe_name = re.sub(r'[^\w\.\-]', '_', name)
+                ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                out_path = EMAIL_FOLDER / f"{ts}_{safe_name}"
+                EMAIL_FOLDER.mkdir(parents=True, exist_ok=True)
+                out_path.write_bytes(base64.b64decode(content_bytes))
+                self.log(f"Saved attachment: {out_path.name}")
+                self._enqueue(str(out_path), "email", msg["id"], subject, sender, con)
+                found_pdf = True
+
+        if not found_pdf:
+            return self._process_email_body(msg, subject, sender, con)
+        return found_pdf
+
+    def _process_email_body(self, msg, subject, sender, con):
+        """Extract bill/invoice data from the email body itself. Returns True if queued."""
+        try:
+            html_body, content_type = self.graph.get_body(msg["id"])
+        except Exception as e:
+            self.log(f"Failed to fetch email body: {e}")
+            return False
+        if not html_body or len(html_body.strip()) < 50:
+            return False
+
+        doc_type = self.extractor.classify_html(html_body, subject, sender)
+        if doc_type == "UNKNOWN":
+            return False
+
+        extracted = self.extractor.extract_html(html_body, doc_type, subject, sender)
+        extracted["_source_type"] = "email_body"
+        extracted["_subject"] = subject
+        extracted["_sender"] = sender
+
+        doc_hash = make_doc_hash(extracted)
+        existing = check_local_duplicate(doc_hash)
+        status = "POSSIBLE_DUPLICATE" if existing else "PENDING"
+        duplicate_of = existing[0] if existing else None
+
+        con.execute("""
+            INSERT INTO queue (source, source_ref, doc_type, pdf_path, extracted_json, confidence,
+                               created_at, from_addr, doc_hash, duplicate_of, status)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?)
+        """, ("email_body", msg["id"], doc_type, None,
+              json.dumps(extracted),
+              extracted.get("confidence", 0),
+              datetime.now(timezone.utc).isoformat(),
+              sender, doc_hash, duplicate_of, status))
+        con.commit()
+        vendor = extracted.get("vendor_name", sender)
+        amount = extracted.get("total_amount", "?")
+        if existing:
+            self.log(f"Possible duplicate of #{existing[0]}: {doc_type} from {vendor} (${amount})")
+        else:
+            self.log(f"Queued (email body): {doc_type} from {vendor} — ${amount}")
+        self.on_new_doc()
+        return True
 
     def _enqueue(self, pdf_path, source, source_ref, subject, sender, con):
         doc_type = self.extractor.classify(pdf_path, subject, sender)
@@ -1055,9 +1188,7 @@ class FolderWatcher:
         con.close()
         self.on_new_doc()
 
-        # Auto-print tool receiving labels for packing slips with a VPO reference
-        if doc_type == "PACKING_SLIP":
-            self._try_print_tool_labels(extracted)
+        # Tool receiving labels are printed manually via the review queue, not on auto-ingest
 
     def _try_print_tool_labels(self, extracted):
         """If this packing slip references a VPO with tool items, print labels."""
@@ -1583,9 +1714,14 @@ class AccountingIngestApp(tk.Tk):
                                            height=4, font=("Segoe UI", 9),
                                            selectbackground="#0078d4")
         self._contact_listbox.pack(fill="x", padx=4, pady=2)
+        self._contact_listbox.bind("<<ListboxSelect>>",
+                                   lambda e: self._update_contact_label(
+                                       self._contact_listbox.curselection()[0]
+                                       if self._contact_listbox.curselection() else 0))
         self._contact_label = tk.Label(contact_frame, text="No match selected",
                                        bg="#1e1e1e", fg="#888888", font=("Segoe UI", 8))
         self._contact_label.pack(anchor="w", padx=4)
+        self._search_after_id = None
 
         # JSON editor
         json_frame = ttk.LabelFrame(parent, text="Extracted Fields (editable JSON)")
@@ -1620,7 +1756,12 @@ class AccountingIngestApp(tk.Tk):
                                      bg="#7a2a2a", fg="white", font=("Segoe UI", 10),
                                      relief="flat", padx=12, pady=8,
                                      command=self._reject)
-        self._reject_btn.pack(side="left")
+        self._reject_btn.pack(side="left", padx=(0, 4))
+        self._label_btn = tk.Button(btn_frame, text="Print Labels",
+                                    bg="#5a4a2a", fg="white", font=("Segoe UI", 10),
+                                    relief="flat", padx=12, pady=8,
+                                    command=self._print_tool_labels)
+        self._label_btn.pack(side="left")
 
         # ProShop link
         self._link_label = tk.Label(parent, text="", bg="#1e1e1e", fg="#0078d4",
@@ -1815,11 +1956,13 @@ class AccountingIngestApp(tk.Tk):
         self._json_text.insert("1.0", pretty)
         self._json_text.config(state="normal")
 
-        # Contact
+        # Contact — suppress the debounced search while we set the var programmatically
+        if hasattr(self, '_search_after_id') and self._search_after_id:
+            self.after_cancel(self._search_after_id)
+            self._search_after_id = None
         if contact_name:
             self._contact_search_var.set(contact_name)
         else:
-            # Pre-populate from extracted data
             try:
                 data = json.loads(extracted_json or "{}")
                 vendor = (data.get("vendor_name") or data.get("customer_name") or
@@ -1827,6 +1970,12 @@ class AccountingIngestApp(tk.Tk):
                 self._contact_search_var.set(vendor)
             except Exception:
                 pass
+
+        # Cancel any pending debounced search and run synchronously
+        if hasattr(self, '_search_after_id') and self._search_after_id:
+            self.after_cancel(self._search_after_id)
+            self._search_after_id = None
+        self._do_contact_search()
 
         # View link (ProShop, QBO, or local file)
         self._proshop_url = proshop_url
@@ -1900,6 +2049,12 @@ class AccountingIngestApp(tk.Tk):
     # ── Contact Search ─────────────────────────────────────────────────────
 
     def _on_contact_search(self, *_):
+        if hasattr(self, '_search_after_id') and self._search_after_id:
+            self.after_cancel(self._search_after_id)
+        self._search_after_id = self.after(400, self._do_contact_search)
+
+    def _do_contact_search(self):
+        self._search_after_id = None
         search = self._contact_search_var.get()
         self._contact_listbox.delete(0, "end")
         if len(search) < 2:
@@ -1914,7 +2069,6 @@ class AccountingIngestApp(tk.Tk):
                     label = f"{v.get('DisplayName', '')}  [ID {v.get('Id','')}]  {int(score*100)}%"
                     self._contact_listbox.insert("end", label)
                 if matches:
-                    # Only auto-select if top match is strong (>80%)
                     if matches[0][0] > 0.8:
                         self._contact_listbox.selection_set(0)
                         self._update_contact_label(0)
@@ -1939,10 +2093,6 @@ class AccountingIngestApp(tk.Tk):
                             fg="#f44336")
         except Exception:
             pass
-        self._contact_listbox.bind("<<ListboxSelect>>",
-                                   lambda e: self._update_contact_label(
-                                       self._contact_listbox.curselection()[0]
-                                       if self._contact_listbox.curselection() else 0))
 
     def _update_contact_label(self, idx):
         is_qbo = (self._current_doc_type in QBO_DOC_TYPES)
@@ -2136,6 +2286,10 @@ class AccountingIngestApp(tk.Tk):
                     con.commit()
                     con.close()
                     self._log(f"Uploaded: {doc_type} → ProShop ID {proshop_id}")
+
+                    # Copy packing slip PDFs (which contain cert pages) to Certs folder by VPO
+                    if doc_type == "PACKING_SLIP":
+                        self._save_cert_for_vpo(cur_id, edited_raw)
                     self.after(0, self._refresh_queue)
                     self.after(0, lambda: self._load_record(cur_id))
                     self.after(0, self._advance_queue)
@@ -2150,6 +2304,31 @@ class AccountingIngestApp(tk.Tk):
                     self.after(0, self._refresh_queue)
 
             threading.Thread(target=do_upload, daemon=True).start()
+
+    CERT_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\Certs")
+
+    def _save_cert_for_vpo(self, queue_id, edited_raw):
+        """Copy the packing slip PDF to Certs/VPO-XXXXXX/ for manual attachment in ProShop."""
+        try:
+            data = json.loads(edited_raw)
+            po_num = data.get("po_number") or ""
+            notes = data.get("notes") or ""
+            po_match = re.search(r"\b(2[456]\d{4})\b", po_num) or re.search(r"\b(2[456]\d{4})\b", notes)
+            if not po_match:
+                return
+            vpo = po_match.group(1)
+            con = db()
+            row = con.execute("SELECT pdf_path FROM queue WHERE id=?", (queue_id,)).fetchone()
+            con.close()
+            if not row or not row[0] or not Path(row[0]).exists():
+                return
+            dest_dir = self.CERT_FOLDER / f"VPO-{vpo}"
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            dest = dest_dir / Path(row[0]).name
+            shutil.copy2(row[0], str(dest))
+            self._log(f"Cert saved: {dest_dir.name}/{dest.name}")
+        except Exception as e:
+            self._log(f"Cert save failed: {e}")
 
     def _reject(self):
         if not self._current_id:
@@ -2174,6 +2353,18 @@ class AccountingIngestApp(tk.Tk):
             self._log(f"Rejected queue item {self._current_id}")
             self._refresh_queue()
             self._advance_queue()
+
+    def _print_tool_labels(self):
+        if not self._current_id:
+            return
+        raw = self._json_text.get("1.0", "end").strip()
+        try:
+            extracted = json.loads(raw)
+        except Exception:
+            self._log("Cannot parse JSON for label printing")
+            return
+        # Reuse the FolderWatcher method
+        self._folder_watcher._try_print_tool_labels(extracted)
 
     def _batch_reject(self):
         """Reject all selected items in the queue at once."""
@@ -2310,7 +2501,8 @@ class AccountingIngestApp(tk.Tk):
 
     def _open_qbo_folder(self):
         import webbrowser
-        webbrowser.open("https://app.sandbox.qbo.intuit.com/app/bills")
+        base = "https://app.qbo.intuit.com" if QBO_ENVIRONMENT == "production" else "https://app.sandbox.qbo.intuit.com"
+        webbrowser.open(f"{base}/app/bills")
 
     def _poll_now(self):
         self._log("Manual email poll triggered...")
