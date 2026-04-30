@@ -5,6 +5,46 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-30 (session 3)
+
+### P25/P1: CMD Window Fix + Dedicated Server Plan
+
+**Date:** 2026-04-30
+
+**Task:** Diagnose and fix CMD window popping up every 15-30 minutes on collector PC (10.1.1.71). Plan dedicated server to replace workstation-hosted services.
+
+**What was done:**
+
+1. **Root cause found** — `agent_scheduler.py` runs `check_reminders.py` every 15 minutes via `subprocess.run()` without `CREATE_NO_WINDOW` flag, causing a visible CMD flash each time. Same issue in `run_audit.py` (60min) and `scan_projects.py` (daily).
+
+2. **Fixed 4 subprocess calls** across 3 files:
+   - `25. Agent Exploration/agent_scheduler.py` — Added `creationflags=subprocess.CREATE_NO_WINDOW` to `_run_task()`
+   - `25. Agent Exploration/service_wrapper.py` — Added flag to PowerShell env-var lookup and Overseer Popen launch
+   - `25. Agent Exploration/config.py` — Added flag to PowerShell env-var lookup
+
+3. **Switched TelegramBot + AgentScheduler to pythonw.exe** — Both were the only services using `PYTHON_EXE` (console python) instead of `PYTHONW_EXE` in Overseer config. Changed `start_cmd` for both in `overseer.py`.
+
+4. **Expanded dedicated server plan** — Updated `shoestring_server_plan.md` with services migration (Overseer + 13 services off .71), git-based deployment replacing Dropbox, phased setup sequence, and Dropbox replacement matrix.
+
+5. **Hardware ordered** — Dell OptiPlex 7060 Micro (on hand) + Crucial BX500 2TB SSD ($189) + WD Elements SE 2TB USB ($108) + APC BE600M1 UPS ($86) + Cat6 cable ($8) = ~$401. ETA 2026-05-07.
+
+**Files modified:**
+- `25. Agent Exploration/agent_scheduler.py` — CREATE_NO_WINDOW on subprocess.run
+- `25. Agent Exploration/service_wrapper.py` — CREATE_NO_WINDOW on two subprocess calls
+- `25. Agent Exploration/config.py` — CREATE_NO_WINDOW on subprocess.run
+- `1. Proshop Automations/Overseer/overseer.py` — TelegramBot + AgentScheduler switched to PYTHONW_EXE
+- `E:\Downloads\shoestring_server_plan.md` — Expanded with migration phases, real prices, purchase list
+
+**Key decisions:**
+- Internal 2TB SSD for live services + 2TB USB portable for nightly backup (robocopy mirror)
+- Git-based deployment replaces Dropbox for code; Dropbox stays for shared files (NC Programs, scans)
+- Telegram `/deploy` command as initial deploy trigger, scheduled poll later
+- NSSM wraps Overseer as Windows Service on new box
+
+**Status:** Code fixes complete, syncing via Dropbox. Hardware arriving 2026-05-07. Server setup is a single afternoon once parts arrive.
+
+---
+
 ## 2026-04-30 (session 2)
 
 ### P33: Tool Library Updater — Interactive menu + fill more ProShop fields
