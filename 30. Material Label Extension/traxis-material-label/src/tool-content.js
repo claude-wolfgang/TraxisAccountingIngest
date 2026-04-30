@@ -4,11 +4,12 @@
   const BUTTON_ATTR = 'data-traxis-tool-label';
   let lastUrl = window.location.href;
 
+  // ─── Tool ID from URL ──────────────────────────────────────────
+
   function getToolIdFromUrl() {
-    // Try two-segment: /procnc/tools/GROUP/TB507
+    // /procnc/tools/GROUP/TB507 or /procnc/tools/TB507
     let m = window.location.href.match(/\/procnc\/tools\/[^/]+\/([A-Z0-9-]+?)(?:\$|$)/i);
     if (m) return m[1];
-    // Try one-segment: /procnc/tools/TB507
     m = window.location.href.match(/\/procnc\/tools\/([A-Z0-9-]+?)(?:\$|$)/i);
     return m ? m[1] : null;
   }
@@ -20,121 +21,43 @@
     return m ? m[1] : window.location.href;
   }
 
-  // ─── DOM Scraping ───────────────────────────────────────────────
+  // ─── DOM Scraping ──────────────────────────────────────────────
 
-  function scrapeFromDOM() {
-    const data = { toolNumber: '', description: '', location: '' };
+  function getIframeDocs() {
+    const docs = [];
+    try {
+      for (const iframe of document.querySelectorAll('iframe')) {
+        try {
+          if (iframe.contentDocument) docs.push(iframe.contentDocument);
+        } catch (e) {}
+      }
+    } catch (e) {}
+    return docs;
+  }
 
-    // Direct selector: input with data-display-name="Tool #"
-    const toolInput = document.querySelector('input[data-display-name="Tool #"]');
-    if (toolInput) data.toolNumber = toolInput.value.trim();
-
-    // Direct selector: tools-toolNumber row
-    if (!data.toolNumber) {
-      const toolRow = document.querySelector('tr.tools-toolNumber .plainvalue input');
-      if (toolRow) data.toolNumber = toolRow.value.trim();
-    }
-
-    // Try Header field first (the prominent tool description in ProShop)
-    const headerArea = document.querySelector('textarea[data-display-name="Header"], input[data-display-name="Header"]');
-    if (headerArea) data.description = headerArea.value.trim();
-
-    // Fallback: try Tool Name
-    if (!data.description) {
-      const nameInput = document.querySelector('input[data-display-name="Tool Name"], textarea[data-display-name="Tool Name"]');
-      if (nameInput) data.description = nameInput.value.trim();
-    }
-
-    // Location — textarea in ProShop
-    const locArea = document.querySelector('tr.tools-location .plainvalue textarea');
-    if (locArea) data.location = locArea.value.trim();
-    if (!data.location) {
-      const locInput = document.querySelector('textarea[data-display-name="Location"], input[data-display-name="Location"]');
-      if (locInput) data.location = locInput.value.trim();
-    }
-
-    // Fallback: scan all cells for label text
-    if (!data.toolNumber || !data.description) {
-      const allCells = document.querySelectorAll('td, th, dt, dd, span, label, div');
-      for (let i = 0; i < allCells.length; i++) {
-        const el = allCells[i];
-        const ownText = Array.from(el.childNodes)
-          .filter(n => n.nodeType === Node.TEXT_NODE)
-          .map(n => n.textContent.trim())
-          .join(' ')
-          .trim();
-        const text = ownText || (el.textContent || '').trim();
-
-        if (!data.toolNumber && /^[^a-z]*Tool\s*#:?\s*$/i.test(text)) {
-          const val = getNextValue(el);
-          if (val) data.toolNumber = val;
+  function scrapeFromIframes() {
+    const data = { description: '', location: '' };
+    for (const doc of getIframeDocs()) {
+      const fields = doc.querySelectorAll('[data-display-name]');
+      for (const el of fields) {
+        const name = el.getAttribute('data-display-name');
+        const val = (el.value || el.textContent || '').trim();
+        if (!val) continue;
+        if (!data.description && /^(Header|Description|Tool Name)$/i.test(name)) {
+          data.description = val;
+          console.log(`[Traxis Tool Label] iframe field "${name}" → "${val}"`);
         }
-
-        if (!data.description && /^[^a-z]*Header:?\s*$/i.test(text)) {
-          const val = getNextValue(el);
-          if (val) data.description = val;
+        if (!data.location && /^Location$/i.test(name)) {
+          data.location = val;
+          console.log(`[Traxis Tool Label] iframe field "${name}" → "${val}"`);
         }
-
+      }
+      if (fields.length > 0) {
+        console.log('[Traxis Tool Label] All iframe fields:',
+          Array.from(fields).map(f => `${f.getAttribute('data-display-name')}=${(f.value||'').substring(0,60)}`));
       }
     }
-
-    // Fallback: parse tool number from page title "TB507 (O.D. Threaders)"
-    if (!data.toolNumber) {
-      const titleEl = document.querySelector('h1, h2, .page-title');
-      if (titleEl) {
-        const m = titleEl.textContent.match(/^([A-Z0-9-]+)/i);
-        if (m) data.toolNumber = m[1].trim();
-      }
-    }
-
-    console.log('[Traxis Tool Label] DOM scrape result:', data);
     return data;
-  }
-
-  function getNextValue(el) {
-    let next = el.nextElementSibling;
-    if (next) {
-      const text = extractText(next);
-      if (text && text.length < 200) return text;
-    }
-
-    if (el.tagName === 'TD' || el.tagName === 'TH') {
-      const row = el.closest('tr');
-      if (row) {
-        const cells = row.querySelectorAll('td, th');
-        for (let i = 0; i < cells.length; i++) {
-          if (cells[i] === el && cells[i + 1]) {
-            const text = extractText(cells[i + 1]);
-            if (text && text.length < 200) return text;
-          }
-        }
-      }
-    }
-
-    if (el.tagName === 'DT') {
-      const dd = el.nextElementSibling;
-      if (dd && dd.tagName === 'DD') return extractText(dd);
-    }
-
-    return null;
-  }
-
-  function extractText(el) {
-    if (el.matches && el.matches('input, textarea, select')) {
-      return (el.value || el.textContent || '').trim();
-    }
-    const input = el.querySelector('input, textarea, select');
-    if (input) {
-      const val = (input.value || input.textContent || '').trim();
-      if (val) return val;
-    }
-    return (el.textContent || '').trim();
-  }
-
-  // ─── Gather All Data ────────────────────────────────────────────
-
-  async function gatherData() {
-    return scrapeFromDOM();
   }
 
   // ─── Button Injection ──────────────────────────────────────────
@@ -165,21 +88,20 @@
       status.className = 'traxis-label-status';
 
       try {
-        const data = await gatherData();
+        const scraped = scrapeFromIframes();
+        const description = scraped.description;
+        const location = scraped.location;
         const url = getToolUrl();
-        console.log('[Traxis Tool Label] Label data:', { ...data, url });
+        const data = { toolNumber: toolId, description, location, url };
+        console.log('[Traxis Tool Label] Label data:', data);
 
-        const image_base64 = ToolLabelGenerator.generate({ ...data, url });
-
-        const labelName = data.toolNumber
-          ? `Tool ${data.toolNumber}`
-          : 'Tool Label';
+        const image_base64 = ToolLabelGenerator.generate(data);
 
         const result = await new Promise((resolve, reject) => {
           chrome.runtime.sendMessage(
             {
               action: 'PRINT_LABEL',
-              payload: { image_base64, copies: 1, label_name: labelName },
+              payload: { image_base64, copies: 1, label_name: `Tool ${toolId}` },
             },
             (response) => {
               if (chrome.runtime.lastError) {
