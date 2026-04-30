@@ -166,25 +166,30 @@ def format_drill_description(
 
     Example: #29(.1360)3xD DR 2FL 25/32" F/L KENNA GODRILL KC7325
     """
-    # Diameter string
-    dia_str = f".{diameter_inch:.4f}"[1:]  # .1360
-
-    # Flute length as fraction
-    fl_frac = inch_to_fraction(flute_length_inch)
-    fl_str = fl_frac if fl_frac else f'{flute_length_inch:.3f}"'
-
-    # Manufacturer short name
     mfg_short = MFG_SHORT.get(manufacturer.lower(), manufacturer.upper()[:6])
 
-    parts = [
-        f"{size_name}({dia_str})",
-        f"{depth_ratio} DR",
-        f"{num_flutes}FL",
-        f'{fl_str} F/L',
-        mfg_short,
-        product_line.upper(),
-        grade.upper(),
-    ]
+    parts = []
+    if size_name and diameter_inch:
+        dia_str = f".{diameter_inch:.4f}"[1:]
+        parts.append(f"{size_name}({dia_str})")
+    elif diameter_inch:
+        dia_frac = inch_to_fraction(diameter_inch)
+        parts.append(dia_frac if dia_frac else f'{diameter_inch:.4f}"')
+    if depth_ratio:
+        parts.append(f"{depth_ratio} DR")
+    else:
+        parts.append("DR")
+    if num_flutes:
+        parts.append(f"{int(num_flutes)}FL")
+    if flute_length_inch:
+        fl_frac = inch_to_fraction(flute_length_inch)
+        fl_str = fl_frac if fl_frac else f'{flute_length_inch:.3f}"'
+        parts.append(f"{fl_str} F/L")
+    parts.append(mfg_short)
+    if product_line:
+        parts.append(product_line.upper())
+    if grade:
+        parts.append(grade.upper())
     return " ".join(parts)
 
 
@@ -213,13 +218,14 @@ def format_endmill_description(diameter_inch, num_flutes, flute_length_inch,
 
 def format_insert_description(catalog_number, manufacturer, grade=None,
                               description_hint=None):
-    """Build an insert description in shop convention format."""
+    """Build an insert description in shop convention format.
+
+    Example: 16ERB 1.25 ISO IC908 Threading Insert ISCAR
+    """
     mfg_short = MFG_SHORT.get(manufacturer.lower(), manufacturer.upper()[:6])
-    parts = []
-    if description_hint:
-        parts.append(description_hint)
-    else:
-        parts.append(catalog_number or "INSERT")
+    parts = [catalog_number or "INSERT"]
+    if description_hint and not catalog_number:
+        parts = [description_hint]
     if mfg_short not in " ".join(parts).upper():
         parts.append(mfg_short)
     if grade and grade.upper() not in " ".join(parts).upper():

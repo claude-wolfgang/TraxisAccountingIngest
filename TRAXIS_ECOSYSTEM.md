@@ -38,7 +38,7 @@
 - [+] **P31: Photo Upload Service** — Tablet photo capture queued for upload to ProShop WO written descriptions via Selenium. Overseer-managed on port 5003.
 - [+] **P31b: BLE Proximity Worker Tracking** — Passive BLE-based system to track which worker is at which CNC machine via Feasycom iBeacon tags and ESP32 gateways running ESPresense. M8 gateway online; M1/M2 deployed pending Wi-Fi.
 - [+] **P32: Breakeven Dashboard** — Visual dashboard showing weekly CNC machine runtime vs breakeven target hours with per-machine detail, daily charts, and weekly trend navigation.
-- [+] **P33: Tool Library Updater** — CLI utility for updating ProShop tool library entries when switching manufacturers, with VPO pricing lookup and manufacturer spec scraping.
+- [+] **P33: Tool Library Updater** — CLI utility for creating and updating ProShop tool library entries. AI-powered tool creation from manufacturer EDP/catalog number (web search + spec extraction). Also handles manufacturer switching, VPO pricing lookup, and spec scraping.
 
 ## Interface Map
 
@@ -56,7 +56,7 @@
 | P32: Breakeven Dashboard | runtime_snapshot.json (weekly machine runtime + daily breakdown + history), runtime_snapshot.js (same data as window.RUNTIME_DATA for file:// use) | FASData monitoring.db (C:\FASData\monitoring.db, read-only — machine_samples table), machines.json (machine list from FASData or config) |
 | P27: Accounting Ingest | VPO receiving (updatePurchaseOrder), tool receiving labels (manual, PNG via P22), cert PDFs in Certs/VPO-XXXXXX/, burst PDFs in Scanned/burst/, ProShop POs/bills/packing slips/quotes, QBO bills (production) | ProShop GraphQL API (ACCOUNTING_CLIENT_ID + TOOLKIOSK_CLIENT_ID), QBO REST API (production, realm 123146014753554), Microsoft Graph API (email attachments + body), Claude AI API (Sonnet + Haiku), P22 print service (10.1.1.242:5002), .traxis.env, Scanner → Pictures folder |
 | P31: Photo Upload Service | Flask UI (port 5003), photos.db (SQLite), JPEG photos (data/photos/), /api/health endpoint | ProShop GraphQL API (workorders, tools, equipment, parts, cotsItems), ProShop web UI via headless Selenium, .traxis.env, Overseer (managed service) |
-| P33: Tool Library Updater | Updated tool records in ProShop (description, dimensions, coating, brand, cost, notes), downloaded product images for manual upload | ProShop GraphQL API (tools, purchaseOrders), .traxis.env credentials, manufacturer product pages (Kennametal) |
+| P33: Tool Library Updater | New and updated tool records in ProShop (description, dimensions, coating, brand, cost, notes), downloaded product images for manual upload | ProShop GraphQL API (tools, purchaseOrders), Anthropic API (Claude Haiku + web_search), .traxis.env credentials, manufacturer product pages (Kennametal) |
 
 ## Critical Seams
 

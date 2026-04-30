@@ -34,20 +34,22 @@ TOOL_GROUP_MAP = {
 SYSTEM_PROMPT = """You are a cutting tool specifications expert. Your job is to search the web for a specific cutting tool product and extract its specifications into structured JSON.
 
 INSTRUCTIONS:
-1. Search for the tool using the manufacturer name and EDP/catalog number provided.
-2. Check distributor sites (MSC Direct, Penn Tool Co, Grainger, Carbide Depot) if the manufacturer site is unavailable.
-3. Identify the tool type (drill, endmill, tap, insert, reamer, holder, boring_bar, countersink, counterbore, thread_mill, face_mill, slitting_saw, chamfer_mill, spot_drill).
-4. Extract all available specifications.
-5. Return ONLY a JSON object — no other text before or after.
+1. Search for the tool using the manufacturer name and EDP/catalog number.
+2. Try multiple search queries: "{manufacturer} {number}", "{number} specifications", "{number} insert/endmill/drill".
+3. Check distributor sites (MSC Direct, Penn Tool Co, Grainger, Carbide Depot, Travers Tool) — they often have better indexed product data than manufacturer sites.
+4. Identify the tool type from the product data.
+5. Extract all available specifications.
 
 CRITICAL RULES:
+- You MUST respond with ONLY a JSON object. No explanation, no apology, no text before or after the JSON.
+- If you cannot find the product, still return the JSON with confidence "low" and fill in whatever you can infer from the catalog number itself (e.g., "16ERB 1.25 ISO IC908" tells you it's a 16-size external right-hand threading insert, 1.25mm pitch, ISO profile, IC908 grade).
 - All linear dimensions must be in INCHES. Convert from mm if needed (1 inch = 25.4 mm).
-- Do NOT guess or fabricate values. Omit any field you cannot confirm from the source.
+- Do NOT fabricate dimensional values. Use null for unknown dimensions.
 - For coating, use the manufacturer's coating name (e.g., "TiAlN", "TiCN", "AlTiN", "TiN", "DLC", "uncoated").
 - For toolMaterial, use: "Carbide", "HSS", "Cobalt HSS", "Cermet", "Ceramic", or "Tool Steel".
-- The confidence field should be "high" if you found a definitive product page, "medium" if specs came from partial sources, "low" if mostly inferred.
+- confidence: "high" = found definitive product page, "medium" = partial sources, "low" = inferred from catalog number.
 
-RESPONSE FORMAT (JSON only):
+RESPONSE FORMAT (JSON only, no other text):
 {
   "tool_type": "drill|endmill|tap|insert|reamer|holder|boring_bar|countersink|counterbore|thread_mill|face_mill|slitting_saw|chamfer_mill|spot_drill",
   "specs": {
@@ -115,7 +117,24 @@ def search_tool_specs(manufacturer, edp, catalog=None):
             tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 5}],
             messages=[{"role": "user", "content": user_message}],
         )
-        return _parse_ai_response(response)
+        result = _parse_ai_response(response)
+
+        # If first attempt failed to parse, retry with stronger instruction
+        if result.get("error") and "parse" in result["error"].lower():
+            raw = result.get("raw", "")
+            retry_msg = (
+                f"The search results are below. Based on these, return ONLY a JSON object "
+                f"matching the schema in your instructions. No other text.\n\n{raw[:3000]}"
+            )
+            response2 = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=2048,
+                system=SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": retry_msg}],
+            )
+            result = _parse_ai_response(response2)
+
+        return result
     except anthropic.APIError as e:
         return {"error": f"Anthropic API error: {e}"}
     except Exception as e:

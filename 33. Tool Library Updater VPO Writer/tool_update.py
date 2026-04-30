@@ -246,16 +246,9 @@ def _build_create_data(args, ai_result, group):
         "status": "Active",
     }
 
-    # Description — use AI hint or build from specs
-    desc = ai_result.get("description_hint")
-    if desc:
-        mfg_short = MFG_SHORT.get(manufacturer.lower(), manufacturer.upper()[:6]) if manufacturer else ""
-        if mfg_short and mfg_short not in desc.upper():
-            desc = f"{desc} {mfg_short}"
-        data["description"] = desc
-    else:
-        tool_type = ai_result.get("tool_type", "unknown")
-        data["description"] = build_description(tool_type, specs, manufacturer)
+    # Description — always use shop-convention formatter
+    tool_type = ai_result.get("tool_type", "unknown")
+    data["description"] = build_description(tool_type, specs, manufacturer)
 
     # Dimensional specs — pass through numeric fields directly
     float_fields = [

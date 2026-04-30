@@ -7,6 +7,45 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-30
 
+### P33: Tool Auto-Creator — AI-powered tool creation from EDP/catalog number
+
+**Date:** 2026-04-30
+
+**Task:** Build a reusable CLI tool that creates new ProShop tool records from a manufacturer EDP or catalog number, using AI-powered web search to extract specs and classify tool type.
+
+**What was done:**
+
+1. **`ai_search.py` (NEW)** — AI-powered spec lookup using Anthropic API + `web_search_20250305` server-side tool. Claude Haiku searches distributor sites (MSC, Grainger, Penn Tool, etc.), classifies tool type (14 types supported), extracts structured JSON specs. Includes retry logic for JSON parse failures. Cost: ~$0.02/lookup.
+
+2. **`proshop_tools.py` (MODIFIED)** — Added `add_tool()` mutation wrapper and `get_anthropic_key()` helper. Expanded `TOOL_QUERY_FIELDS` with insert-specific fields (insertInscribedCircle, insertShape, insertThickness, numberOfCuttingCorners, pitch, fullProfile, cornerRadius, quantity, location).
+
+3. **`description_format.py` (MODIFIED)** — Added enum translation dicts (MATERIAL_MAP, INSCRIBED_CIRCLE_MAP, INSERT_SHAPE_MAP) and new description formatters (format_endmill_description, format_insert_description, format_tap_description, build_description router). Fixed drill formatter crash on None flute length. Fixed insert description to use catalog number instead of verbose AI hint.
+
+4. **`tool_update.py` (MODIFIED)** — Added `create` subcommand with full workflow: AI search → tool group mapping → field mapping → preview → confirm → addTool. Supports `--mfg`, `--edp`, `--catalog`, `--qty`, `--location`, `--group`, `--specs-json`, `--confirm`, `--json`.
+
+5. **`CLAUDE.md` (UPDATED)** — Documented create subcommand, AI search section, updated interfaces.
+
+**Files modified:** ai_search.py (new), proshop_tools.py, description_format.py, tool_update.py, CLAUDE.md
+
+**Key decisions:**
+- Used Anthropic web_search server-side tool instead of direct scraping (bypasses Cloudflare, zero new dependencies)
+- AI determines tool type → maps to ProShop toolGroupLetter automatically
+- Catalog numbers work much better than internal webshop EDP numbers for web search
+- Description always uses shop-convention formatters, never raw AI description_hint
+
+**Bugs fixed:**
+- Drill formatter TypeError on None flute_length_inch
+- Description used verbose AI sentence instead of shop-convention format
+
+**Tested:**
+- ISCAR 16ERB 1.25 ISO IC908 → insert, "16ERB 1.25 ISO IC908 ISCAR"
+- Kennametal B041A03455CPG → drill, "9/64" DR 2FL 13/32" F/L KENNA"
+- Both produce correct ProShop enum values and AddToolInput data
+
+**Status:** Complete. Ready for live use with `--confirm` flag.
+
+---
+
 ### Multi-project: Git housekeeping — commit accumulated drift
 
 **Date:** 2026-04-30
