@@ -5,6 +5,34 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-04-30
+
+### Multi-project: Git housekeeping — commit accumulated drift
+
+**Date:** 2026-04-30
+
+**Task:** Clean up working tree with uncommitted changes spanning multiple prior sessions.
+
+**What was done:**
+
+1. **P24 retirement** (`4cdbf9e`) — Moved `24. Digital Help For Rene/` to `24. Digital Help For Rene - Retired/`. Git detected as renames.
+2. **P33 rename** (`637cde6`) — Moved `33. Tool Library Updater/` to `33. Tool Library Updater VPO Writer/`. Includes new `ai_search.py` and updated `tool_update.py`/`proshop_tools.py`.
+3. **P32 breakeven** (`75f97ad`) — Runtime snapshot data update + new deployment docs (`DEPLOYMENT.md`, `FOCAS_SCHEMA_NOTES.md`, `config.example.json`, `config.json`, `requirements.txt`, `run_aggregator.bat`).
+4. **P27 misc** (`df3dbc1`) — Reference docs (Rene reports moved to P27 docs/), tool receiving label PNGs, burst groups JSON, investigation notes (`acceptNewRecord` inquiry, QBO sync problem).
+5. **Housekeeping** (`b35e74b`) — Deleted stale `All Projects Monitoring/` session logs, `Fusion_360_API_Reference.md`, `PROSHOP_API_REFERENCE.md`. Added P28 `wo_invoiced_today.md`. Updated P1 ProgrammingTimer logs.
+6. **P1 gitignore** (`be1589d`) — Added `.gitignore` to `ProShopBridge/logs/` to exclude failure screenshot PNGs and log files from tracking.
+
+**Files modified:** 24 files across 7 commits (see commit messages above)
+
+**Key decisions:**
+- ProShopBridge failure screenshots gitignored rather than tracked (diagnostic, will accumulate)
+- P24 docs copied to both Retired folder and P27 docs/ (different versions — P27 has updated copies)
+- P32 config.json committed (contains paths only, no secrets)
+
+**Status:** Working tree clean. No remaining uncommitted changes.
+
+---
+
 ## 2026-04-29
 
 ### P30: Traxis Label Printer Extension — Tool Label Support (v1.5.0, IN PROGRESS)
