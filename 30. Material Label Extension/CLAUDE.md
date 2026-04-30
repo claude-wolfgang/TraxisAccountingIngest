@@ -7,7 +7,7 @@ Chrome extension (MV3) that injects print-label buttons on ProShop pages. Suppor
 - **COTS pages** (`/procnc/ots/*`) — "Print COTS Label" button (green)
 - **Equipment pages** (`/procnc/equipment/*`) — "Print Equipment Label" button (red)
 - **User pages** (`/procnc/users/*`) — "Print User Label" button (teal)
-- **Tool pages** (`/procnc/tools/*`) — "Print Tool Label" button (orange) — IN PROGRESS
+- **Tool pages** (`/procnc/tools/*`) — "Print Tool Label" button (orange)
 
 ## Architecture
 
@@ -22,13 +22,13 @@ equipment-content.js  →  scrapes equipment data from DOM + API fallback
                        →  EquipmentLabelGenerator renders label PNG via Canvas API
 user-content.js       →  scrapes user name + ID from DOM
                        →  UserLabelGenerator renders label PNG via Canvas API
-tool-content.js       →  tool ID from URL, description/location from iframe fields
+tool-content.js       →  tool ID from URL, iframe scrape + DOM scrape + API fallback
                        →  ToolLabelGenerator renders label PNG via Canvas API
 All                   →  chrome.runtime.sendMessage → service-worker.js
 service-worker.js     →  POSTs base64 PNG to http://10.1.1.242:5002/api/print-image
 ```
 
-**Note:** ProShop tool pages render form inputs inside iframes (unlike other page types). The tool content script accesses iframe `contentDocument` directly to read `data-display-name` fields.
+**Note:** ProShop tool pages render form inputs inside iframes (unlike other page types). The tool content script tries three data sources in order: iframe `contentDocument` scraping, top-level DOM scraping, then GraphQL API fallback (using session cookie, same as material/equipment labels).
 
 Service worker is needed to bypass HTTPS→HTTP mixed-content block.
 
@@ -60,7 +60,7 @@ Service worker is needed to bypass HTTPS→HTTP mixed-content block.
 - QR code left (encodes full ProShop user URL)
 - Text: Name (bold 36px), User ID (24px)
 
-**Tool labels** (Tool pages — IN PROGRESS):
+**Tool labels** (Tool pages):
 - 128px tall, auto-width, 180 DPI
 - QR code left (encodes full ProShop tool URL)
 - Text: Tool # (bold 30px), description (20px, word-wrapped), location (14px)
@@ -81,7 +81,7 @@ Service worker is needed to bypass HTTPS→HTTP mixed-content block.
 | `traxis-material-label/src/box-label-generator.js` | Box label renderer (Canvas) |
 | `traxis-material-label/src/user-content.js` | User label button injection, DOM scraping |
 | `traxis-material-label/src/user-label-generator.js` | User label renderer (Canvas) |
-| `traxis-material-label/src/tool-content.js` | Tool button injection, iframe scraping |
+| `traxis-material-label/src/tool-content.js` | Tool button injection, iframe + DOM + API scraping |
 | `traxis-material-label/src/tool-label-generator.js` | Tool label renderer (Canvas) |
 | `traxis-material-label/src/content.css` | Button styling — green (WO/COTS), red (equipment), blue (box), teal (user), orange (tool) |
 | `traxis-material-label/lib/qrcode.min.js` | QR code generation library (shared) |
@@ -128,4 +128,4 @@ Bump version in `manifest.json`, rebuild ZIP (`deployment/build.py` or manual zi
 
 Produces: Material label PNGs, Box label PNGs, COTS label PNGs (450px wide), Equipment label PNGs, User label PNGs, Tool label PNGs — all 128px tall, auto-width (except COTS), as base64 PNG via Canvas API
 Consumes: ProShop WO page DOM, ProShop COTS page DOM, ProShop Equipment page DOM, ProShop User page DOM, ProShop Tool page DOM (via iframe contentDocument), ProShop GraphQL API (session cookie), Brother PT-P700 print service at http://10.1.1.242:5002
-Contracts: Print payload `{image_base64, copies, label_name}` to `/api/print-image` (same as P9/P22). WO and Box labels use QR scheme `proshop://wo/{woNumber}` (same as P9). COTS, equipment, user, and tool labels encode full ProShop URL. All labels 128px tall at 180 DPI (PT-P700 24mm tape). Tool pages use iframe-based DOM — form inputs have `data-display-name` attributes inside iframes, not in top-level document. CWS extension ID used in registry policy on all shop PCs — changing it requires re-running deploy script.
+Contracts: Print payload `{image_base64, copies, label_name}` to `/api/print-image` (same as P9/P22). WO and Box labels use QR scheme `proshop://wo/{woNumber}` (same as P9). COTS, equipment, user, and tool labels encode full ProShop URL. All labels 128px tall at 180 DPI (PT-P700 24mm tape). Tool label uses three-layer data cascade: iframe contentDocument → top-level DOM → GraphQL API (`tools` query with session cookie). CWS extension ID used in registry policy on all shop PCs — changing it requires re-running deploy script. Privacy policy at https://claude-wolfgang.github.io/traxis-privacy/.

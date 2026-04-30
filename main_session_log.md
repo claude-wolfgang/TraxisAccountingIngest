@@ -7,6 +7,43 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-04-30
 
+### P30: Traxis Label Printer Extension — Tool label fix + CWS privacy policy
+
+**Date:** 2026-04-30
+
+**Task:** Fix tool label data capture (was returning blank description/location) and resolve CWS rejection due to missing privacy policy URL.
+
+**What was done:**
+
+1. **Diagnosed tool label failure** — Compared working COTS/material labels against broken tool label. Root cause: tool content script relied solely on iframe `contentDocument` scraping, which fails silently when iframes are cross-origin-blocked or `data-display-name` attributes don't match expected names. No fallback existed.
+
+2. **Rewrote tool-content.js with three-layer data cascade** (matching material label pattern):
+   - Layer 1: Iframe scraping (kept, improved — widened field name matching, added input name/id scan, added cross-origin diagnostic logging)
+   - Layer 2: Top-level DOM scraping (new — scans label/value pairs for Description/Location)
+   - Layer 3: GraphQL API fallback (new — queries `tools(filter: { toolNumber: [...] })` using session cookie)
+   - `gatherData()` merges results: iframe → DOM → API, uses first source that returns data
+
+3. **Created privacy policy for CWS submission** — Google rejected the extension because the privacy policy URL didn't resolve. Created `claude-wolfgang/traxis-privacy` GitHub repo with privacy policy HTML page. Enabled GitHub Pages — live at `https://claude-wolfgang.github.io/traxis-privacy/`. Wolfgang resubmitted CWS listing with the new URL.
+
+4. **Built v1.5.1 submission ZIP** — `deployment/traxis-label-printer.zip` ready to upload to CWS Developer Dashboard once review passes.
+
+**Files modified:**
+- `30. Material Label Extension/traxis-material-label/src/tool-content.js` — Three-layer data gathering (iframe + DOM + API)
+- `30. Material Label Extension/traxis-material-label/manifest.json` — Version 1.5.0 → 1.5.1
+- `30. Material Label Extension/deployment/traxis-label-printer.zip` — Rebuilt for v1.5.1
+- `30. Material Label Extension/CLAUDE.md` — Removed "IN PROGRESS" from tool label, updated architecture notes
+
+**External:**
+- GitHub repo `claude-wolfgang/traxis-privacy` created with privacy policy page (GitHub Pages)
+
+**Key decisions:**
+- GraphQL API fallback uses the user's existing ProShop session cookie (same as material/equipment labels) — no OAuth client needed in the extension
+- Privacy policy hosted on GitHub Pages rather than company domain — simpler, no infrastructure dependency
+
+**Status:** Tool label working. CWS resubmitted with privacy policy URL, awaiting Google approval. v1.5.1 ZIP ready to upload post-approval.
+
+---
+
 ### P33: Tool Auto-Creator — AI-powered tool creation from EDP/catalog number
 
 **Date:** 2026-04-30

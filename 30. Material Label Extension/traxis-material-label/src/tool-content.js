@@ -21,7 +21,7 @@
     return m ? m[1] : window.location.href;
   }
 
-  // ─── DOM Scraping ──────────────────────────────────────────────
+  // ─── DOM Scraping (iframes) ────────────────────────────────────
 
   function getIframeDocs() {
     const docs = [];
@@ -29,7 +29,9 @@
       for (const iframe of document.querySelectorAll('iframe')) {
         try {
           if (iframe.contentDocument) docs.push(iframe.contentDocument);
-        } catch (e) {}
+        } catch (e) {
+          console.warn('[Traxis Tool Label] iframe access blocked (cross-origin?):', e.message);
+        }
       }
     } catch (e) {}
     return docs;
@@ -37,17 +39,20 @@
 
   function scrapeFromIframes() {
     const data = { description: '', location: '' };
-    for (const doc of getIframeDocs()) {
+    const iframeDocs = getIframeDocs();
+    console.log(`[Traxis Tool Label] Found ${iframeDocs.length} accessible iframe(s), ${document.querySelectorAll('iframe').length} total`);
+
+    for (const doc of iframeDocs) {
       const fields = doc.querySelectorAll('[data-display-name]');
       for (const el of fields) {
         const name = el.getAttribute('data-display-name');
         const val = (el.value || el.textContent || '').trim();
         if (!val) continue;
-        if (!data.description && /^(Header|Description|Tool Name)$/i.test(name)) {
+        if (!data.description && /^(Header|Description|Tool Name|Tool Description)$/i.test(name)) {
           data.description = val;
           console.log(`[Traxis Tool Label] iframe field "${name}" → "${val}"`);
         }
-        if (!data.location && /^Location$/i.test(name)) {
+        if (!data.location && /^(Location|Tool Location)$/i.test(name)) {
           data.location = val;
           console.log(`[Traxis Tool Label] iframe field "${name}" → "${val}"`);
         }
@@ -56,8 +61,176 @@
         console.log('[Traxis Tool Label] All iframe fields:',
           Array.from(fields).map(f => `${f.getAttribute('data-display-name')}=${(f.value||'').substring(0,60)}`));
       }
+
+      if (!data.description || !data.location) {
+        const inputs = doc.querySelectorAll('input, textarea, select');
+        for (const input of inputs) {
+          const val = (input.value || '').trim();
+          if (!val) continue;
+          const nameAttr = (input.name || input.id || '').toLowerCase();
+          if (!data.description && /descr|header|toolname/i.test(nameAttr)) {
+            data.description = val;
+            console.log(`[Traxis Tool Label] iframe input "${nameAttr}" → "${val}"`);
+          }
+          if (!data.location && /location/i.test(nameAttr)) {
+            data.location = val;
+            console.log(`[Traxis Tool Label] iframe input "${nameAttr}" → "${val}"`);
+          }
+        }
+      }
     }
     return data;
+  }
+
+  // ─── DOM Scraping (top-level) ──────────────────────────────────
+
+  function scrapeFromDOM() {
+    const data = { description: '', location: '' };
+    const allCells = document.querySelectorAll('td, th, dt, dd, span, label, div');
+
+    for (let i = 0; i < allCells.length; i++) {
+      const el = allCells[i];
+      const text = (el.textContent || '').trim();
+
+      if (!data.description && /^[^a-z]*Description:?\s*$/i.test(text)) {
+        const val = getNextValue(el);
+        if (val) {
+          data.description = val;
+          console.log(`[Traxis Tool Label] DOM field "${text}" → "${val}"`);
+        }
+      }
+      if (!data.location && /^[^a-z]*Location:?\s*$/i.test(text)) {
+        const val = getNextValue(el);
+        if (val) {
+          data.location = val;
+          console.log(`[Traxis Tool Label] DOM field "${text}" → "${val}"`);
+        }
+      }
+    }
+
+    if (!data.description) {
+      const headerEl = document.querySelector('h1, h2, .page-title');
+      if (headerEl) {
+        const hText = headerEl.textContent.trim();
+        const pMatch = hText.match(/[–—]\s*(.+)/);
+        if (pMatch) {
+          data.description = pMatch[1].trim();
+          console.log(`[Traxis Tool Label] DOM header → "${data.description}"`);
+        }
+      }
+    }
+
+    return data;
+  }
+
+  function getNextValue(el) {
+    let next = el.nextElementSibling;
+    if (next) {
+      const input = next.querySelector('input, textarea, select');
+      if (input) {
+        const val = (input.value || '').trim();
+        if (val && val.length < 300) return val;
+      }
+      const text = (next.textContent || '').trim();
+      if (text && text.length < 300) return text;
+    }
+    if (el.tagName === 'TD' || el.tagName === 'TH') {
+      const row = el.closest('tr');
+      if (row) {
+        const cells = row.querySelectorAll('td, th');
+        for (let i = 0; i < cells.length; i++) {
+          if (cells[i] === el && cells[i + 1]) {
+            const input = cells[i + 1].querySelector('input, textarea, select');
+            if (input) {
+              const val = (input.value || '').trim();
+              if (val && val.length < 300) return val;
+            }
+            const text = (cells[i + 1].textContent || '').trim();
+            if (text && text.length < 300) return text;
+          }
+        }
+      }
+    }
+    if (el.tagName === 'DT') {
+      const dd = el.nextElementSibling;
+      if (dd && dd.tagName === 'DD') return (dd.textContent || '').trim();
+    }
+    return null;
+  }
+
+  // ─── GraphQL API Fallback ──────────────────────────────────────
+
+  async function fetchFromAPI(toolNumber) {
+    const query = `query {
+      tools(filter: { toolNumber: ["${toolNumber}"] }) {
+        records {
+          toolNumber
+          description
+          location
+        }
+      }
+    }`;
+
+    try {
+      const res = await fetch('https://traxismfg.adionsystems.com/api/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ query }),
+      });
+
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const json = await res.json();
+      const tool = json?.data?.tools?.records?.[0];
+      if (!tool) throw new Error('Tool not found in API response');
+
+      console.log('[Traxis Tool Label] API result:', tool);
+      return {
+        description: tool.description || '',
+        location: tool.location || '',
+      };
+    } catch (err) {
+      console.warn('[Traxis Tool Label] API fallback failed:', err.message);
+      return null;
+    }
+  }
+
+  // ─── Gather All Data ───────────────────────────────────────────
+
+  async function gatherData(toolId) {
+    const iframe = scrapeFromIframes();
+    const hasDesc = iframe.description && iframe.description.length > 1;
+    const hasLoc = iframe.location && iframe.location.length > 1;
+
+    if (hasDesc) {
+      console.log('[Traxis Tool Label] Using iframe data');
+      return { toolNumber: toolId, ...iframe, url: getToolUrl() };
+    }
+
+    const dom = scrapeFromDOM();
+    const merged = {
+      description: iframe.description || dom.description,
+      location: iframe.location || dom.location,
+    };
+
+    if (merged.description && merged.description.length > 1) {
+      console.log('[Traxis Tool Label] Using DOM data');
+      return { toolNumber: toolId, ...merged, url: getToolUrl() };
+    }
+
+    const api = await fetchFromAPI(toolId);
+    if (api) {
+      console.log('[Traxis Tool Label] Using API data');
+      return {
+        toolNumber: toolId,
+        description: merged.description || api.description,
+        location: merged.location || api.location,
+        url: getToolUrl(),
+      };
+    }
+
+    console.warn('[Traxis Tool Label] No data source returned description');
+    return { toolNumber: toolId, ...merged, url: getToolUrl() };
   }
 
   // ─── Button Injection ──────────────────────────────────────────
@@ -88,11 +261,7 @@
       status.className = 'traxis-label-status';
 
       try {
-        const scraped = scrapeFromIframes();
-        const description = scraped.description;
-        const location = scraped.location;
-        const url = getToolUrl();
-        const data = { toolNumber: toolId, description, location, url };
+        const data = await gatherData(toolId);
         console.log('[Traxis Tool Label] Label data:', data);
 
         const image_base64 = ToolLabelGenerator.generate(data);
