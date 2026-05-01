@@ -27,6 +27,8 @@
         part: "Part",
         fixture: "Fixture",
         cots: "COTS",
+        ncr: "NCR",
+        claude: "Claude",
     };
 
     // ── DOM refs ─────────────────────────────────────────────────────────
@@ -37,6 +39,7 @@
         qr: document.getElementById("step-qr"),
         ops: document.getElementById("step-ops"),
         capture: document.getElementById("step-capture"),
+        suggest: document.getElementById("step-suggest"),
         done: document.getElementById("step-done"),
     };
 
@@ -97,7 +100,18 @@
                 showStep("qr");
                 return;
             }
+            if (type === "suggest") {
+                document.getElementById("suggestion-text").value = "";
+                showStep("suggest");
+                return;
+            }
             currentType = type;
+            if (type === "claude") {
+                const ts = new Date().toISOString().slice(0, 16).replace("T", " ");
+                selectedEntity = { id: ts, name: "Claude photo", proshop_url: "" };
+                goToCapture(selectedEntity);
+                return;
+            }
             searchTypeLabel.textContent = TYPE_LABELS[type] || type;
             searchInput.value = "";
             searchResults.innerHTML = "";
@@ -109,6 +123,28 @@
     });
 
     // ── Step 2: Search ───────────────────────────────────────────────────
+
+    document.getElementById("search-qr-capture").addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            const data = await decodeQR(file);
+            if (data && handleQRResult(data)) return;
+            showToast("No QR code found", true);
+        } catch (err) {
+            showToast("QR scan failed", true);
+        }
+        e.target.value = "";
+    });
+
+    document.getElementById("btn-search").addEventListener("click", () => {
+        searchInput.blur();
+        const q = searchInput.value.trim();
+        if (q.length >= 2) doSearch(q);
+        setTimeout(() => {
+            searchResults.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 300);
+    });
 
     searchInput.addEventListener("input", () => {
         // Auto-format WO numbers: "260019" → "26-0019"
@@ -154,8 +190,8 @@
                 <div class="help-text">No results found in ProShop.</div>
                 ${q.length >= 2 ? `
                 <div class="result-item manual-entry" data-id="${esc(q)}" data-name="" data-url="">
-                    <span class="result-id">Use "${esc(q)}" as ID</span>
-                    <span class="result-name">Manual entry — photo will queue without validation</span>
+                    <span class="result-id">Use "${esc(q)}"</span>
+                    <span class="result-name">Not found in ProShop — tap to use anyway</span>
                 </div>` : ''}
             `;
             bindResultClicks();
@@ -187,8 +223,8 @@
                 };
                 selectedEntity = entity;
 
-                // Work orders go to operation selection first
-                if (currentType === "workorder") {
+                // Work orders and parts go to operation selection first
+                if (currentType === "workorder" || currentType === "part") {
                     showOpsStep(entity);
                 } else {
                     goToCapture(entity);
@@ -207,8 +243,11 @@
         showStep("ops");
 
         try {
+            const param = currentType === "part"
+                ? `part=${encodeURIComponent(entity.id)}`
+                : `wo=${encodeURIComponent(entity.id)}`;
             const resp = await fetch(
-                `/api/operations?wo=${encodeURIComponent(entity.id)}`
+                `/api/operations?${param}`
             );
             const data = await resp.json();
             renderOps(data.ops || []);
@@ -224,7 +263,7 @@
     function renderOps(ops) {
         if (ops.length === 0) {
             opsList.innerHTML =
-                '<div class="help-text">No operations found for this work order.</div>';
+                '<div class="help-text">No operations found.</div>';
             return;
         }
         opsList.innerHTML = ops
@@ -323,6 +362,12 @@
             const data = await resp.json();
 
             if (resp.ok && data.success) {
+                const doneMsg = document.getElementById("done-message");
+                if (currentType === "claude") {
+                    doneMsg.textContent = "Photo saved for Claude.";
+                } else {
+                    doneMsg.textContent = "It will be uploaded to ProShop automatically.";
+                }
                 showStep("done");
                 showToast("Photo saved!");
             } else {
@@ -340,6 +385,63 @@
 
     // ── QR Scanning ──────────────────────────────────────────────────────
 
+    async function decodeQR(file) {
+        // Try native BarcodeDetector
+        if (typeof BarcodeDetector !== "undefined") {
+            try {
+                const detector = new BarcodeDetector({ formats: ["qr_code"] });
+                const bitmap = await createImageBitmap(file);
+                const results = await detector.detect(bitmap);
+                if (results.length > 0) return results[0].rawValue;
+            } catch (e) {}
+        }
+        // Try jsQR
+        if (typeof jsQR !== "undefined") {
+            try {
+                const bitmap = await createImageBitmap(file);
+                var w = bitmap.width, h = bitmap.height;
+                if (w > 1500 || h > 1500) {
+                    var scale = 1500 / Math.max(w, h);
+                    w = Math.round(w * scale);
+                    h = Math.round(h * scale);
+                }
+                const canvas = document.createElement("canvas");
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(bitmap, 0, 0, w, h);
+                const imgData = ctx.getImageData(0, 0, w, h);
+                const code = jsQR(imgData.data, w, h);
+                if (code && code.data) return code.data;
+            } catch (e) {}
+        }
+        // Fallback: server-side decode
+        try {
+            const formData = new FormData();
+            formData.append("photo", file);
+            const resp = await fetch("/api/qr-decode", { method: "POST", body: formData });
+            const data = await resp.json();
+            if (data.found) return data.data;
+        } catch (e) {}
+        return null;
+    }
+
+    function handleQRResult(data) {
+        const parsed = parseProShopUrl(data);
+        if (parsed) {
+            currentType = parsed.type;
+            selectedEntity = { id: parsed.id, name: "", proshop_url: data };
+            if (currentType === "workorder") {
+                showOpsStep(selectedEntity);
+            } else {
+                goToCapture(selectedEntity);
+            }
+            showToast(`Found: ${TYPE_LABELS[parsed.type] || parsed.type} ${parsed.id}`);
+            return true;
+        }
+        return false;
+    }
+
     qrCapture.addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -347,43 +449,13 @@
         qrStatus.textContent = "Decoding QR code...";
 
         try {
-            if (typeof jsQR === "undefined") {
-                qrStatus.textContent =
-                    "QR decoder not available. Use manual search instead.";
-                return;
-            }
-
-            const bitmap = await createImageBitmap(file);
-            const canvas = document.createElement("canvas");
-            canvas.width = bitmap.width;
-            canvas.height = bitmap.height;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(bitmap, 0, 0);
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imgData.data, canvas.width, canvas.height);
-
-            if (!code || !code.data) {
+            const data = await decodeQR(file);
+            if (!data) {
                 qrStatus.textContent = "No QR code found. Try again or use manual search.";
                 return;
             }
-
-            const parsed = parseProShopUrl(code.data);
-            if (parsed) {
-                currentType = parsed.type;
-                const entity = {
-                    id: parsed.id,
-                    name: "",
-                    proshop_url: code.data,
-                };
-                selectedEntity = entity;
-                if (currentType === "workorder") {
-                    showOpsStep(entity);
-                } else {
-                    goToCapture(entity);
-                }
-                showToast(`Found: ${TYPE_LABELS[parsed.type] || parsed.type} ${parsed.id}`);
-            } else {
-                qrStatus.textContent = `QR says: "${code.data}" — not a recognized ProShop URL.`;
+            if (!handleQRResult(data)) {
+                qrStatus.textContent = `QR says: "${data}" — not a recognized ProShop URL.`;
             }
         } catch (err) {
             console.error("QR decode error:", err);
@@ -396,9 +468,11 @@
             { re: /proshop:\/\/wo\/([A-Za-z0-9_-]+)/, type: "workorder" },
             { re: /workorders?\/(?:\d{4}\/)?([A-Za-z0-9_-]+)/, type: "workorder" },
             { re: /tools?\/([A-Za-z0-9_-]+)/, type: "tool" },
+            { re: /equipment\/[^\/]+\/([A-Za-z0-9_-]+)/, type: "equipment" },
             { re: /equipment\/([A-Za-z0-9_-]+)/, type: "equipment" },
+            { re: /fixtures?\/([A-Za-z0-9_-]+)/, type: "fixture" },
             { re: /parts?\/[^\/]+\/([A-Za-z0-9_-]+)/, type: "part" },
-            { re: /ots\/([A-Za-z0-9_-]+)/, type: "cots" },
+            { re: /ots\/([^\/]+\/[A-Za-z0-9_-]+|[A-Za-z0-9_-]+)/, type: "cots" },
         ];
         for (const p of patterns) {
             const m = url.match(p.re);
@@ -411,22 +485,7 @@
 
     document.querySelectorAll(".back-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-            const target = btn.dataset.target;
-            if (target === "step-type") {
-                reset();
-            } else if (target === "step-search") {
-                selectedOp = null;
-                showStep("search");
-                searchInput.focus();
-            } else if (target === "step-ops") {
-                // For work orders, go back to ops; for others, go back to search
-                if (currentType === "workorder" && selectedEntity) {
-                    showStep("ops");
-                } else {
-                    showStep("search");
-                    searchInput.focus();
-                }
-            }
+            reset();
         });
     });
 
@@ -449,4 +508,29 @@
         el.textContent = str || "";
         return el.innerHTML;
     }
+
+    // ── Suggestions ─────────────────────────────────────────────────────
+
+    document.getElementById("btn-submit-suggestion").addEventListener("click", async () => {
+        const text = document.getElementById("suggestion-text").value.trim();
+        if (!text) {
+            showToast("Please type a suggestion", true);
+            return;
+        }
+        try {
+            const resp = await fetch("/api/suggest", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text }),
+            });
+            if (resp.ok) {
+                showToast("Suggestion saved — thank you!");
+                showStep("type");
+            } else {
+                showToast("Failed to save suggestion", true);
+            }
+        } catch (err) {
+            showToast("Failed to save suggestion", true);
+        }
+    });
 })();

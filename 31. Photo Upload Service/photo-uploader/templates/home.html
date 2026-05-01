@@ -30,9 +30,21 @@
             <span class="type-icon">📦</span>
             <span class="type-label">COTS</span>
         </button>
+        <button class="type-btn" data-type="ncr">
+            <span class="type-icon">⚠️</span>
+            <span class="type-label">NCR</span>
+        </button>
+        <button class="type-btn" data-type="claude">
+            <span class="type-icon">🤖</span>
+            <span class="type-label">Claude</span>
+        </button>
         <button class="type-btn" id="btn-scan-qr" data-type="qr">
             <span class="type-icon">📷</span>
             <span class="type-label">Scan QR</span>
+        </button>
+        <button class="type-btn" data-type="suggest">
+            <span class="type-icon">💡</span>
+            <span class="type-label">Suggest</span>
         </button>
     </div>
 </section>
@@ -46,6 +58,11 @@
     <div class="search-box">
         <input type="text" id="search-input" placeholder="Type WO#, tool#, part#..."
                autocomplete="off" autocorrect="off" spellcheck="false">
+        <label class="search-qr-btn" title="Scan QR">
+            📷
+            <input type="file" accept="image/*" capture="environment" id="search-qr-capture" class="hidden-input">
+        </label>
+        <button type="button" id="btn-search" class="search-go-btn">Go</button>
         <div id="search-spinner" class="spinner hidden"></div>
     </div>
     <div id="search-results" class="results-list"></div>
@@ -68,7 +85,7 @@
 <!-- Step 2c: Select operation (work orders only) -->
 <section id="step-ops" class="step">
     <div class="step-header">
-        <button class="back-btn" data-target="step-search">&larr; Back</button>
+        <button class="back-btn" data-target="step-type">&larr; Home</button>
         <h2>Select Operation</h2>
     </div>
     <div id="ops-entity-info" class="entity-card">
@@ -85,7 +102,7 @@
 <!-- Step 3: Take photo -->
 <section id="step-capture" class="step">
     <div class="step-header">
-        <button class="back-btn" data-target="step-ops">&larr; Back</button>
+        <button class="back-btn" data-target="step-type">&larr; Home</button>
         <h2>Take Photo</h2>
     </div>
     <div id="entity-info" class="entity-card">
@@ -106,12 +123,25 @@
     <button id="btn-upload" class="upload-btn hidden" disabled>Upload Photo</button>
 </section>
 
+<!-- Suggestion -->
+<section id="step-suggest" class="step">
+    <div class="step-header">
+        <button class="back-btn" data-target="step-type">&larr; Home</button>
+        <h2>App Suggestion</h2>
+    </div>
+    <div class="note-box">
+        <textarea id="suggestion-text" rows="4" placeholder="What would make this app better?"
+                  style="width:100%;font-size:1.1rem;padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a3e;color:#eee;resize:vertical;"></textarea>
+    </div>
+    <button id="btn-submit-suggestion" class="upload-btn">Submit</button>
+</section>
+
 <!-- Step 4: Success -->
 <section id="step-done" class="step">
     <div class="success-message">
         <span class="success-icon">✓</span>
         <h2>Photo Saved!</h2>
-        <p>It will be uploaded to ProShop automatically.</p>
+        <p id="done-message">It will be uploaded to ProShop automatically.</p>
     </div>
     <button class="type-btn wide" id="btn-another">Take Another Photo</button>
 </section>

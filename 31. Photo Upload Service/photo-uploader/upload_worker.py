@@ -260,34 +260,44 @@ class UploadWorker:
         log.info(f"Uploading photo #{photo_id}: {entity_type}/{entity_id} op={op_number}")
         database.update_photo_status(photo_id, "uploading")
 
-        # Only work order photos have a clear upload destination
-        if entity_type != "workorder":
-            msg = f"Upload for entity type '{entity_type}' not yet implemented"
-            log.warning(f"Photo #{photo_id}: {msg}")
-            database.update_photo_status(photo_id, "failed", msg)
-            return
+        if entity_type in ("workorder", "part"):
+            if not op_number:
+                msg = "No operation number — cannot determine upload destination"
+                log.warning(f"Photo #{photo_id}: {msg}")
+                database.update_photo_status(photo_id, "failed", msg)
+                return
 
-        if not op_number:
-            msg = "No operation number — cannot determine upload destination"
-            log.warning(f"Photo #{photo_id}: {msg}")
-            database.update_photo_status(photo_id, "failed", msg)
-            return
+            if entity_type == "workorder":
+                detail = self._proshop.get_work_order_detail(entity_id)
+                if not detail:
+                    msg = f"Work order {entity_id} not found via API"
+                    log.error(f"Photo #{photo_id}: {msg}")
+                    database.update_photo_status(photo_id, "failed", msg)
+                    database.increment_retry(photo_id)
+                    return
+            else:
+                detail = self._proshop.get_part_detail(entity_id)
+                if not detail:
+                    msg = f"Part {entity_id} not found via API"
+                    log.error(f"Photo #{photo_id}: {msg}")
+                    database.update_photo_status(photo_id, "failed", msg)
+                    database.increment_retry(photo_id)
+                    return
 
-        # Look up part number from WO
-        detail = self._proshop.get_work_order_detail(entity_id)
-        if not detail:
-            msg = f"Work order {entity_id} not found via API"
-            log.error(f"Photo #{photo_id}: {msg}")
-            database.update_photo_status(photo_id, "failed", msg)
-            database.increment_retry(photo_id)
-            return
-
-        part_number = detail["partNumber"]
-        customer = detail["customerName"]
-
-        # Build written description URL
-        url = (f"{BASE_URL}/procnc/parts/{customer}/{part_number}"
-               f"$formName=writtenDescription&opId={op_number}")
+            part_number = detail["partNumber"]
+            customer = detail["customerName"]
+            url = (f"{BASE_URL}/procnc/parts/{customer}/{part_number}"
+                   f"$formName=writtenDescription&opId={op_number}")
+        else:
+            proshop_url = photo.get("proshop_url", "")
+            if not proshop_url:
+                msg = f"No ProShop URL stored for {entity_type}/{entity_id}"
+                log.warning(f"Photo #{photo_id}: {msg}")
+                database.update_photo_status(photo_id, "failed", msg)
+                return
+            url = proshop_url
+            if not url.startswith("http"):
+                url = f"{BASE_URL}/procnc/{url}"
 
         # Resolve photo file path
         file_path = Path(config.DATA_DIR) / photo["file_path"]

@@ -87,7 +87,7 @@ def upload_photo():
     if not entity_type or not entity_id:
         return jsonify({"error": "entity_type and entity_id are required"}), 400
 
-    valid_types = {"workorder", "tool", "equipment", "part", "fixture", "cots"}
+    valid_types = {"workorder", "tool", "equipment", "part", "fixture", "cots", "ncr", "claude"}
     if entity_type not in valid_types:
         return jsonify({"error": f"Invalid entity_type. Must be one of: {', '.join(valid_types)}"}), 400
 
@@ -131,8 +131,11 @@ def upload_photo():
             operation_desc=operation_desc,
         )
 
-        # Cache entity for future lookups
-        database.cache_entity(entity_type, entity_id, entity_name, proshop_url)
+        # Claude photos are local-only — mark immediately so worker skips them
+        if entity_type == "claude":
+            database.update_photo_status(photo_id, "local_only")
+        else:
+            database.cache_entity(entity_type, entity_id, entity_name, proshop_url)
 
         return jsonify({
             "success": True,
@@ -177,21 +180,92 @@ def search_entities():
 
 @app.route("/api/operations")
 def get_operations():
-    """Fetch operations for a work order.
+    """Fetch operations for a work order or part.
 
     Query params:
       - wo: work order number (e.g., 26-0019)
+      - part: part number (e.g., R3V1-10852)
     """
     wo_number = request.args.get("wo", "").strip()
-    if not wo_number:
+    part_number = request.args.get("part", "").strip()
+
+    if not wo_number and not part_number:
         return jsonify({"ops": []})
 
     try:
-        ops = proshop.get_work_order_ops(wo_number)
+        if wo_number:
+            ops = proshop.get_work_order_ops(wo_number)
+        else:
+            ops = proshop.get_part_ops(part_number)
         return jsonify({"ops": ops})
     except Exception as e:
         log.error(f"Operations fetch failed: {e}", exc_info=True)
         return jsonify({"ops": [], "error": str(e)}), 500
+
+
+# ── API: QR Decode ──────────────────────────────────────────────────────
+
+@app.route("/api/qr-decode", methods=["POST"])
+def qr_decode():
+    """Decode QR code from an uploaded image, server-side fallback."""
+    if "photo" not in request.files:
+        return jsonify({"error": "No photo"}), 400
+
+    try:
+        from pyzbar.pyzbar import decode as pyzbar_decode
+        img = Image.open(request.files["photo"].stream)
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
+        # Try at multiple scales for small QR codes
+        results = []
+        for max_dim in [img.size[0], 2000, 1200, 800]:
+            w, h = img.size
+            if w > max_dim or h > max_dim:
+                if w > h:
+                    new_w, new_h = max_dim, int(h * max_dim / w)
+                else:
+                    new_h, new_w = max_dim, int(w * max_dim / h)
+                scaled = img.resize((new_w, new_h), Image.LANCZOS)
+            else:
+                scaled = img
+            results = pyzbar_decode(scaled)
+            if results:
+                break
+
+        if not results:
+            return jsonify({"found": False})
+
+        data = results[0].data.decode("utf-8")
+        return jsonify({"found": True, "data": data})
+    except ImportError:
+        return jsonify({"error": "pyzbar not installed"}), 500
+    except Exception as e:
+        log.error(f"QR decode error: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+
+# ── API: Suggestions ────────────────────────────────────────────────────
+
+SUGGESTIONS_FILE = Path(__file__).parent.parent / "suggestions.md"
+
+@app.route("/api/suggest", methods=["POST"])
+def submit_suggestion():
+    data = request.get_json(silent=True) or {}
+    text = (data.get("text") or "").strip()
+    if not text:
+        return jsonify({"error": "No suggestion text"}), 400
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    entry = f"- [{timestamp}] {text}\n"
+
+    is_new = not SUGGESTIONS_FILE.exists() or SUGGESTIONS_FILE.stat().st_size == 0
+    with open(SUGGESTIONS_FILE, "a", encoding="utf-8") as f:
+        if is_new:
+            f.write("# Photo Upload App — Suggestions\n\n")
+        f.write(entry)
+
+    log.info(f"Suggestion saved: {text[:80]}")
+    return jsonify({"success": True})
 
 
 # ── API: Health ──────────────────────────────────────────────────────────

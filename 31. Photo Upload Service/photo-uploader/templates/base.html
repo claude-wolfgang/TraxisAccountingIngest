@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>{% block title %}Photo Upload{% endblock %} — Traxis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a1a2e">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     {% block head %}{% endblock %}
 </head>
@@ -21,5 +25,19 @@
     </main>
     <div id="toast" class="toast hidden"></div>
     {% block scripts %}{% endblock %}
+    <script>
+    document.addEventListener("click", function(e) {
+        var a = e.target.closest("a");
+        if (!a) return;
+        var href = a.getAttribute("href") || "";
+        if (href.startsWith("http") && !href.startsWith(location.origin)) {
+            e.preventDefault();
+        }
+    });
+    history.pushState(null, "", location.href);
+    window.addEventListener("popstate", function() {
+        history.pushState(null, "", location.href);
+    });
+    </script>
 </body>
 </html>

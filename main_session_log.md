@@ -7,6 +7,57 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-01
 
+### P31: Photo Upload Service — Live tablet testing, entity expansion, NCR support
+
+**Date:** 2026-05-01 (session 2)
+
+**Task:** Live test photo upload service on Samsung tablet in shop, fix issues found during testing, expand entity type support, add new features.
+
+**What was done:**
+
+1. **Flexible WO search** — Added `_normalize_wo()` method that strips dashes and leading zeros so "26120" matches "26-0120".
+
+2. **QR scanning reliability** — Three-layer decode: BarcodeDetector (native Chrome) → jsQR (with downscaling to 1500px max) → pyzbar server-side fallback via `/api/qr-decode` endpoint. Fixed equipment QR parsing for two-segment URLs (`/equipment/GT/GT094`).
+
+3. **All entity types wired up** — Added GraphQL queries and search for fixtures (`fixtureNumber`), equipment (`equipmentNumber` with flexible digit matching), COTS (`number` with digit-only matching), and NCRs (`ncrRefNumber`). Required adding OAuth scopes `fixtures:r`, `ots:r`, `equipment:r`, `nonconformancereports:r` to client BA16-EFAF-B154.
+
+4. **Part operations** — Parts now show operation selection (like work orders) using the `operations` field on Part type. Upload worker routes part photos to written description pages using same URL pattern as WOs.
+
+5. **Equipment photo upload end-to-end** — Verified GT094 (granite table) photo uploaded to ProShop successfully via Selenium (HTTP 200).
+
+6. **Claude photo category** — New "Claude" button saves photos locally to `data/photos/claude/` (Dropbox-synced) with `local_only` status — no ProShop upload. Added global Claude Code permission to read this folder from any session.
+
+7. **Suggestion button** — "Suggest" button on home screen saves operator feedback to `31. Photo Upload Service/suggestions.md`.
+
+8. **Tablet kiosk setup** — Fully Kiosk Browser for Android configured as locked-down kiosk pointing to the service. PWA manifest and icons (orange/black PS + camera) created.
+
+9. **Photo-to-print** — Read handwritten setup procedure photo via Claude vision, transcribed to formatted text, printed to Brother MFC-L2710DW via PowerShell `Out-Printer`.
+
+10. **UI polish** — 3-column grid, larger buttons (24px padding, 100px min-height), inline QR camera button next to search, "Go" button to dismiss keyboard, all back buttons reset to home.
+
+**Files modified:**
+- `31. Photo Upload Service/photo-uploader/app.py` — Added `/api/qr-decode`, `/api/suggest`, part operations support, NCR+claude valid types
+- `31. Photo Upload Service/photo-uploader/proshop_client.py` — Added fixture, equipment, COTS, NCR, part detail/ops search methods
+- `31. Photo Upload Service/photo-uploader/upload_worker.py` — Extended to handle part and equipment uploads via proshop_url
+- `31. Photo Upload Service/photo-uploader/static/photo.js` — Three-layer QR decode, part/NCR operation selection, Claude direct-to-capture, suggestion submit, flexible search
+- `31. Photo Upload Service/photo-uploader/static/style.css` — 3-column grid, larger buttons, QR and Go button styles
+- `31. Photo Upload Service/photo-uploader/templates/home.html` — NCR, Claude, Suggest buttons; suggestion step; PWA meta tags; inline QR camera
+- `31. Photo Upload Service/photo-uploader/templates/base.html` — PWA manifest, external link blocker, back button disabler
+- `31. Photo Upload Service/photo-uploader/static/manifest.json` — PWA manifest (new)
+- `31. Photo Upload Service/photo-uploader/static/icon-192.png`, `icon-512.png` — App icons (new)
+- `1. Proshop Automations/.traxis.env` — Added fixtures:r, ots:r, equipment:r, nonconformancereports:r scopes
+- `~/.claude/settings.json` — Global read permission for claude photos folder
+
+**Key decisions:**
+- Port 5003 had a ghost TCP socket from prior session; ran on 5004 temporarily (will revert to 5003 on next restart)
+- Claude photos are local-only (no ProShop upload) — stored in Dropbox for Claude Code access
+- Parts use same written description upload pattern as work orders (same URL template)
+- The Fearless Emu is developing the customer portal (P3) — F4 Labs test client in ProShop is his
+
+**Status:** Service running on port 5004. All 9 entity types functional (work order, tool, equipment, part, fixture, COTS, NCR, Claude, QR scan). Part and equipment uploads verified end-to-end. NCR search working, upload untested. Tablet configured as kiosk via Fully Kiosk Browser.
+
+---
+
 ### P31: BLE Proximity Worker Tracking — Multi-slot beacon fix + walk test
 
 **Date:** 2026-05-01

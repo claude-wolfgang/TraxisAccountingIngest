@@ -140,15 +140,24 @@ class ProShopClient:
         self._set_cached("workorders", all_records)
         return all_records
 
+    @staticmethod
+    def _normalize_wo(text):
+        """Strip dashes and leading zeros from WO number segments for flexible matching.
+        '26-0120' → '26120', '26120' → '26120'."""
+        parts = text.replace("-", " ").split()
+        return "".join(p.lstrip("0") or "0" for p in parts)
+
     def search_work_orders(self, query_text):
         """Search work orders by number or part name (substring match in Python)."""
         records = self._fetch_work_orders()
         q = query_text.lower()
+        q_norm = self._normalize_wo(q)
         matches = []
         for r in records:
             wo_num = r.get("workOrderNumber") or ""
             part = r.get("partPlainText") or ""
-            if q in wo_num.lower() or q in part.lower():
+            wo_norm = self._normalize_wo(wo_num)
+            if q in wo_num.lower() or q in part.lower() or q_norm in wo_norm:
                 matches.append({
                     "id": wo_num,
                     "name": part,
@@ -313,20 +322,202 @@ class ProShopClient:
             ],
         }
 
-    def search_equipment(self, query_text):
-        """Equipment search — returns empty (API requires tool param, not a list query).
+    def get_part_detail(self, part_number):
+        """Fetch part info and operations for a part number.
 
-        Operators can type the equipment ID/name manually; it will be stored
-        even without API validation.
+        Same written description URL pattern as work orders:
+        {BASE_URL}/procnc/parts/{customer}/{part_number}$formName=writtenDescription&opId={op_number}
         """
-        return []
+        result = self._execute("""
+            query ($partNumber: String!) {
+                part(partNumber: $partNumber) {
+                    partNumber partName proshopUrl
+                    operations(pageSize: 50) {
+                        records {
+                            opNumber
+                            operationDescription
+                            workCenterPlainText
+                        }
+                    }
+                }
+            }
+        """, {"partNumber": part_number})
+        part = (result.get("data") or {}).get("part")
+        if not part:
+            return None
+        part_url = part.get("proshopUrl") or ""
+        part_number = part.get("partNumber") or ""
+        if "/parts/" in part_url:
+            segments = part_url.split("/parts/")[1].split("/")
+            customer = segments[0] if len(segments) >= 2 else ""
+        else:
+            customer = part_number.split("-")[0] if "-" in part_number else part_number
+        ops = (part.get("operations") or {}).get("records", [])
+        return {
+            "partNumber": part_number,
+            "partName": part.get("partName", ""),
+            "customerName": customer,
+            "partUrl": part_url,
+            "ops": [
+                {
+                    "opNumber": op["opNumber"],
+                    "description": op.get("operationDescription") or "",
+                    "workCenter": op.get("workCenterPlainText") or "",
+                }
+                for op in ops
+            ],
+        }
+
+    def get_part_ops(self, part_number):
+        """Fetch operations for a part — used by the /api/operations endpoint."""
+        detail = self.get_part_detail(part_number)
+        if not detail:
+            return []
+        return detail["ops"]
+
+    def _fetch_fixtures(self):
+        cached = self._get_cached("fixtures")
+        if cached is not None:
+            return cached
+
+        result = self._execute("""
+            { fixtures(pageSize: 500) {
+                records { fixtureNumber description }
+            }}
+        """)
+        records = result.get("data", {}).get("fixtures", {}).get("records", [])
+        self._set_cached("fixtures", records)
+        return records
+
+    def search_fixtures(self, query_text):
+        records = self._fetch_fixtures()
+        q = query_text.lower()
+        matches = []
+        for r in records:
+            fn = r.get("fixtureNumber") or ""
+            desc = r.get("description") or ""
+            if q in fn.lower() or q in desc.lower():
+                matches.append({
+                    "id": fn,
+                    "name": desc,
+                    "detail": "",
+                    "proshop_url": f"{self.base_url}/fixtures/{fn}",
+                })
+        return matches[:20]
+
+    def _fetch_equipment(self):
+        cached = self._get_cached("equipment")
+        if cached is not None:
+            return cached
+
+        result = self._execute("""
+            { equipments(pageSize: 500) {
+                records { equipmentNumber description location type }
+            }}
+        """)
+        records = result.get("data", {}).get("equipments", {}).get("records", [])
+        self._set_cached("equipment", records)
+        return records
+
+    def search_equipment(self, query_text):
+        records = self._fetch_equipment()
+        q = query_text.lower()
+        q_digits = "".join(c for c in q if c.isdigit()).lstrip("0") or "0"
+        matches = []
+        for r in records:
+            num = str(r.get("equipmentNumber") or "")
+            desc = r.get("description") or ""
+            loc = r.get("location") or ""
+            etype = r.get("type") or ""
+            searchable = f"{num} {desc} {loc} {etype}".lower()
+            if q in searchable or q_digits == num:
+                matches.append({
+                    "id": num,
+                    "name": desc.split("\n")[0],
+                    "detail": f"{loc} | {etype}" if loc else etype,
+                    "proshop_url": f"{self.base_url}/equipment/{num}",
+                })
+        return matches[:20]
+
+    def _fetch_cots(self):
+        cached = self._get_cached("cots")
+        if cached is not None:
+            return cached
+
+        result = self._execute("""
+            { cotsItems(pageSize: 500) {
+                records { number description }
+            }}
+        """)
+        records = result.get("data", {}).get("cotsItems", {}).get("records", [])
+        self._set_cached("cots", records)
+        return records
 
     def search_cots(self, query_text):
-        """COTS search — requires 'ots' scope which is not in current client.
+        records = self._fetch_cots()
+        q = query_text.lower().lstrip("0")
+        q_digits = "".join(c for c in q if c.isdigit())
+        matches = []
+        for r in records:
+            num = str(r.get("number") or "")
+            desc = r.get("description") or ""
+            num_digits = "".join(c for c in num if c.isdigit())
+            if q in num.lower() or q in desc.lower() or (q_digits and q_digits in num_digits):
+                matches.append({
+                    "id": num,
+                    "name": desc.split("\n")[0],
+                    "detail": "",
+                    "proshop_url": f"{self.base_url}/ots/{num}",
+                })
+        return matches[:20]
 
-        Operators can type the COTS ID manually.
-        """
-        return []
+    def _fetch_ncrs(self):
+        cached = self._get_cached("ncrs")
+        if cached is not None:
+            return cached
+
+        all_records = []
+        for status in ["Open", "Pending Disposition", "Complete"]:
+            try:
+                result = self._execute("""
+                    query ($status: String!) {
+                        nonConformanceReports(
+                            pageSize: 500,
+                            query: { status: { exactly: $status } }
+                        ) {
+                            records {
+                                ncrRefNumber status type
+                                workOrderPlainText opNumber
+                                proshopUrl notes
+                            }
+                        }
+                    }
+                """, {"status": status})
+                records = result.get("data", {}).get("nonConformanceReports", {}).get("records", [])
+                all_records.extend(records)
+            except Exception:
+                pass
+        self._set_cached("ncrs", all_records)
+        return all_records
+
+    def search_ncrs(self, query_text):
+        records = self._fetch_ncrs()
+        q = query_text.lower()
+        matches = []
+        for r in records:
+            ref = r.get("ncrRefNumber") or ""
+            wo = r.get("workOrderPlainText") or ""
+            notes = r.get("notes") or ""
+            ncr_type = r.get("type") or ""
+            searchable = f"{ref} {wo} {notes} {ncr_type}".lower()
+            if q in searchable:
+                matches.append({
+                    "id": ref,
+                    "name": f"WO {wo}" if wo else ncr_type,
+                    "detail": r.get("status", ""),
+                    "proshop_url": r.get("proshopUrl") or "",
+                })
+        return matches[:20]
 
     def search_entity(self, entity_type, query_text):
         """Dispatch search to the appropriate method based on entity_type."""
@@ -335,8 +526,9 @@ class ProShopClient:
             "tool": self.search_tools,
             "equipment": self.search_equipment,
             "part": self.search_parts,
-            "fixture": self.search_parts,  # fixtures are ProShop parts
+            "fixture": self.search_fixtures,
             "cots": self.search_cots,
+            "ncr": self.search_ncrs,
         }
         method = dispatch.get(entity_type)
         if not method:

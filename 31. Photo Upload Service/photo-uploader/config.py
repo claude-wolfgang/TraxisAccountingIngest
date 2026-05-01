@@ -29,7 +29,7 @@ PROSHOP_CLIENT_ID = os.environ.get("PROSHOP_CLIENT_ID", "BA16-EFAF-B154")
 PROSHOP_CLIENT_SECRET = os.environ.get("PROSHOP_CLIENT_SECRET")
 PROSHOP_SCOPE = os.environ.get(
     "PROSHOP_SCOPE",
-    "parts:rwdp+workorders:rwdp+users:r+tools:rwdp+toolpots:r",
+    "parts:rwdp+workorders:rwdp+users:r+tools:rwdp+toolpots:r+fixtures:r",
 )
 
 # Selenium login (for Phase 2 upload worker)
