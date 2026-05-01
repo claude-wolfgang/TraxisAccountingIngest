@@ -5,6 +5,40 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-01
+
+### P31: BLE Proximity Worker Tracking — Multi-slot beacon fix + walk test
+
+**Date:** 2026-05-01
+
+**Task:** Fix proximity logger to recognize all Feasycom iBeacon broadcast slots, backfill historical data, and validate with walk test.
+
+**What was done:**
+
+1. **Fixed multi-slot beacon identification** — Feasycom tags broadcast 2-3 iBeacon slots simultaneously with different major numbers. Updated `proximity_logger.py` to map all slots: Tag-A (39475, 40604, 10065), Tag-B (35540, 60285, 10065). Added MAC-based disambiguation for shared major 10065.
+
+2. **Filtered ESP32 self-detection** — Gateways detect each other as iBeacon majors 72, 116, 252. Added IGNORE_MAJORS filter to skip these, deleted 125 junk rows from DB.
+
+3. **Backfilled 12,628 historical records** — Updated tag_name from NULL to correct tag for majors 35540 (Tag-B), 40604 (Tag-A), 60285 (Tag-B). DB now has 48,556 clean readings, zero NULLs.
+
+4. **Walk test M8→M1→M2** — Successfully identified the correct machine visit order from RSSI data using strongest-gateway-wins analysis in 15-second windows. Feasycom tags at 2.5dB TX power show only 3-15 dB contrast between gateways — workable but marginal. MOKOSmart B2 badges expected to improve this significantly.
+
+5. **Updated CLAUDE.md** — Documented all multi-slot major numbers per tag, gateway self-detection filtering, walk test results, and updated interfaces.
+
+**Files modified:**
+- `31. BLE Proximity Worker Tracking/proximity_logger.py` — Multi-slot beacon mapping, MAC disambiguation, IGNORE_MAJORS filter
+- `31. BLE Proximity Worker Tracking/proximity.db` — Backfilled 12,628 records, deleted 125 ESP32 self-detection rows
+- `31. BLE Proximity Worker Tracking/CLAUDE.md` — Updated hardware, technical notes, status, interfaces
+
+**Key decisions:**
+- "Strongest gateway wins" relative ranking is more reliable than absolute RSSI thresholds for machine assignment
+- Need debounce logic (30-60s sustained lead) before switching assignments in production
+- Feasycom tags are marginal for time tracking — MOKOSmart B2 badges are the real test
+
+**Status:** Logger running as background service, all three gateways reporting, beacon identification complete. Awaiting MOKOSmart B2 badges for production-viable signal strength.
+
+---
+
 ## 2026-04-30 (session 3)
 
 ### P25/P1: CMD Window Fix + Dedicated Server Plan
