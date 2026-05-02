@@ -1,6 +1,6 @@
 # Project 34: Chrome Web Store Ops Watcher
 
-Status: **Phase 2 implemented — scheduled task running every 4h with heartbeat file.**
+Status: **Phase 2 implemented — scheduled task running every 4h on .71 (DESKTOP-NU8H1LI / TRAXIS user) with heartbeat file. Will migrate to traxis-srv-01 when that hardware comes online (drives ETA 2026-05-07).**
 
 Polls a Microsoft 365 mailbox via Microsoft Graph API for CWS lifecycle event emails (submissions, policy notices, suspensions, deprecations), classifies them, and logs to SQLite with flag files for high/critical events. Monitors the Traxis Chrome extension fleet — currently P30 (Label Printer), with P14 (Workstation Display) and P18 (Message Notifier) coming.
 
@@ -20,12 +20,16 @@ P30 has already hit two CWS rejections in a row; without a watcher, each rejecti
 
 | File | Purpose |
 |------|---------|
-| `cws_watcher.py` | Main poller. Thin Graph client + classifier + SQLite logger + flag writer + heartbeat. ~240 lines, single file. |
-| `setup_schedule.bat` | Idempotent installer for the Windows Task Scheduler entry (4-hour cadence, runs as current user, no admin required). |
+| `cws_watcher.py` | Main poller. Thin Graph client + classifier + SQLite logger + flag writer + heartbeat. ~240 lines, single file. Env-path discovery is portable across user accounts and drive letters (script-relative). |
+| `setup_schedule.bat` | Idempotent installer for the Windows Task Scheduler entry (4-hour cadence, runs as current user, no admin required). Discovers pythonw.exe at install time. |
+| `test_run.bat` | Double-click verification helper — triggers the scheduled task and prints the resulting heartbeat. Useful for non-typist operators. |
+| `diagnose.bat` | Read-only diagnostic. Runs cws_watcher with regular python.exe (visible output) and captures to `diagnose_output.txt` (Dropbox-synced for cross-PC debug). |
+| `enable_ssh_server.bat` | One-time helper to enable Windows OpenSSH Server and authorize Superuser@.178's ed25519 control key. Self-elevates via UAC. **Belongs in a general ops folder eventually** — shop-wide infrastructure, not P34-specific. |
 | `requirements.txt` | Just `requests`. |
 | `cws_events.db` (gitignored) | SQLite event log. Idempotent on Graph `message_id`. |
 | `flags/*.flag` (gitignored) | Per-event text files for Overseer pickup; only written for `high` / `critical` priority. |
 | `last_run.json` (gitignored) | Heartbeat written every successful run: timestamp + mailbox + message counts + open flag counts. Polled by Overseer (Phase 3). |
+| `diagnose_output.txt` (gitignored) | Output capture from `diagnose.bat`, written to script dir for Dropbox-synced visibility. |
 
 ## Architecture
 

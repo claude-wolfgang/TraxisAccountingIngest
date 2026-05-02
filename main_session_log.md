@@ -7,6 +7,43 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-02
 
+### P34: deployment to .71 (corrected from .178), env-path bug fix, SSH remote-control channel
+
+**Date:** 2026-05-02 (session 2 continued after first close)
+
+**Task:** Move P34 from .178 (where I'd installed it by mistake) to .71 (production server). Surfaced an env-path bug along the way. Established a permanent SSH channel from .178 to .71 so future cross-PC tasks don't require Wolfgang to manually run .bats.
+
+**What was done:**
+
+1. **Realized I was on .178, not .71** — `setup_schedule.bat` had been run on the dev workstation, not the production server. Removed the scheduled task from .178 (`schtasks /Delete`).
+
+2. **Made `setup_schedule.bat` portable across user accounts (commit 5d2b04a)** — original hardcoded pythonw path under Superuser's profile would fail for TRAXIS user on .71. Rewrote to discover pythonw via `where` then fall back to common LOCALAPPDATA / Program Files locations.
+
+3. **Created helper .bats for double-clickable verification on .71** — `test_run.bat` triggers the scheduled task and prints heartbeat; `diagnose.bat` runs cws_watcher with regular python.exe so errors are visible AND captures output to `diagnose_output.txt` for cross-PC visibility via Dropbox sync.
+
+4. **Found and fixed env-path bug (commit c61af5b)** — diagnose output showed `KeyError: 'GRAPH_TENANT_ID'`. Root cause: `cws_watcher.py` hardcoded `ENV_PATHS` to `C:\Users\Superuser\Dropbox\...` which doesn't exist on .71 (TRAXIS user, D:\ drive). Fell through to `C:\Users\TRAXIS\.traxis.env` which exists but has no Graph keys. Rewrote `load_env()` to derive paths from the script's own location: `../1. Proshop Automations/.traxis.env` plus `USERPROFILE` fallbacks. Drive letter and username no longer matter. Forward-compatible with the dedicated server migration.
+
+5. **SSH remote-control channel (commit d33f624)** — Probed .178→.71 channels; only SMB (445) was open, no SSH/WinRM/PsExec. Generated ed25519 key for Superuser@.178 (~/.ssh/id_ed25519), wrote `enable_ssh_server.bat` that self-elevates via UAC, installs Windows OpenSSH Server, opens firewall port 22, and authorizes my pubkey in both user and `administrators_authorized_keys`. Wolfgang ran it on .71. Verified end-to-end from .178: `ssh TRAXIS@10.1.1.71` works, `python cws_watcher.py --print-only` runs cleanly remote, `schtasks /Run` triggers the scheduled task and the heartbeat refreshes within ~30s.
+
+6. **Confirmed dedicated server plan (5/7 hardware delivery)** — Read `E:\Downloads\shoestring_server_plan.md`. Plan is solid: Windows + NSSM + git deploy + Tailscale + `C:\traxis\services\` as canonical service root. Single pre-5/7 blocker visible in the plan's open-items list: project code needs to be pushed to a real git remote before the OptiPlex can clone. Repo `claude-wolfgang/TraxisAccountingIngest` mentioned in earlier remote-routine setup but not verified to exist.
+
+**Files modified/created (all in `34. Chrome Web Store Ops Watcher/`):**
+- `cws_watcher.py` — `load_env()` rewritten to use script-relative paths
+- `setup_schedule.bat` — portable pythonw discovery; pauses on success/error so output is visible
+- `test_run.bat` — new, double-click verification helper
+- `diagnose.bat` — new, captures output to file for cross-PC debug
+- `enable_ssh_server.bat` — new, one-time SSH server enable + key authorization
+- `.gitignore` — added `diagnose_output.txt`
+
+**Key decisions:**
+- Own thin GraphClient pattern survives unchanged — env discovery was the only bug.
+- SSH for Claude → .71 (and eventually → traxis-srv-01); Tailscale for Wolfgang's own off-LAN access. Both stay useful.
+- `enable_ssh_server.bat` parked in P34 folder for now; should migrate to a general ops folder when one exists (it's shop-wide infrastructure, not P34-specific).
+
+**Status:** P34 watcher running every 4h on .71 (next: 22:00 UTC). Heartbeat fresh. Cloud verdict-check agent unchanged (fires Tue 5 PM CDT). SSH channel permanent — future cross-PC plumbing becomes a one-liner.
+
+---
+
 ### P34: CWS Ops Watcher — Phase 1 + Phase 2 implementation, plus cloud verdict-check routine
 
 **Date:** 2026-05-02 (session 2 continued)
