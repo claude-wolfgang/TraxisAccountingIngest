@@ -1,0 +1,4 @@
+cws_events.db
+cws_events.db-journal
+flags/
+__pycache__/
