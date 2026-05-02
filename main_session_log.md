@@ -7,6 +7,45 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-02
 
+### P34: CWS Ops Watcher — Phase 1 + Phase 2 implementation, plus cloud verdict-check routine
+
+**Date:** 2026-05-02 (session 2 continued)
+
+**Task:** Implement P34 from spec to scheduled production. Watcher polls the M365 mailbox via Microsoft Graph for CWS lifecycle events, classifies them, logs to SQLite, writes flag files for high-priority events. Phase 2 wires it into Windows Task Scheduler with a heartbeat file.
+
+**What was done:**
+
+1. **Phase 1 — watcher implementation (commit c47ad9b)**
+   - `cws_watcher.py` (~210 lines): thin Microsoft Graph client (app-only OAuth, same shape as P27's), classifier with priority levels (critical / high / low / info), SQLite event log idempotent on Graph `message_id`, flag file writer for high+critical priority.
+   - Architectural deviation from spec: P34 ships its own ~30-line GraphClient instead of importing from P27. Reason: P27's `accounting_ingest.py` is a 2549-line monolith that pulls `tkinter` and `anthropic` on import — would balloon P34 startup. The shared resource is `.traxis.env` credentials, not the code. Documented in P34 CLAUDE.md with the trigger condition for promoting to a `shared/graph_client.py` (third consumer appears).
+   - Smoke test against `tom@traxismfg.com` over 90 days: found 4 CWS-sender events including both prior P30 rejection emails, correctly classified `high / submission_rejected`. DB seeded.
+
+2. **Phase 2 — scheduling + heartbeat (commit 4bf0ea4)**
+   - `cws_watcher.py` now writes `last_run.json` heartbeat each run: timestamp, mailbox, message counts, open flag-file counts.
+   - `setup_schedule.bat` — idempotent installer for Windows Task Scheduler entry `Traxis - CWS Ops Watcher`. Runs `pythonw.exe cws_watcher.py` every 4 hours starting 06:00. No console flash (per P32 lesson — direct pythonw.exe, no .bat wrapper). No admin required.
+   - End-to-end validated: `schtasks /Run` kicked off pythonw.exe silently, heartbeat refreshed within ~30s.
+
+3. **Cloud verdict-check remote agent**
+   - Created one-time scheduled remote agent (id `trig_017DycuAAU5iFZmGWbyaVTn8`) firing 2026-05-05 22:00 UTC (Tue 5 PM CDT). It will WebFetch the public CWS detail page for the P30 extension, classify the verdict by published version string (1.5.2 = approved, 1.5.1 = inconclusive, 404 = suspended), and PushNotification Wolfgang.
+   - Cloud agent is independent of the local watcher — both will catch the verdict when Google reviews v1.5.2. Belt-and-suspenders.
+   - New environment `Default` (id `env_016KpgnJbrqXfSzekZHLLJcN`) auto-created during routine setup since none existed.
+
+**Files modified/created (all in `34. Chrome Web Store Ops Watcher/`):**
+- `cws_watcher.py` — new, full implementation
+- `requirements.txt` — new (just `requests`)
+- `setup_schedule.bat` — new, Task Scheduler installer
+- `CLAUDE.md` — updated to Phase 2 status, deviation documented, Phase 3 backlog added
+- `.gitignore` — covers `cws_events.db`, `flags/`, `last_run.json`
+
+**Key decisions:**
+- Own thin GraphClient, not direct import of P27's. Trigger to refactor: third Graph consumer.
+- Heartbeat file (`last_run.json`) instead of HTTP `/health` endpoint, since P34 is a periodic batch task not a long-running service. Phase 3 will wire Overseer to read it as a file-freshness validator.
+- Cloud verdict-check agent uses public CWS detail URL — no inbox access needed, no GitHub or MCP needed.
+
+**Status:** P34 is live. Watcher running every 4 hours on MainPC (next scheduled run today 6 PM, then 10 PM, etc.). Cloud verdict-check routine armed for Tue 5 PM CDT. Phase 3 backlog (Overseer config wiring for file-freshness validator, Telegram routing, auto-clear logic, multi-extension reporting) deferred.
+
+---
+
 ### P30: Label Printer Extension — CWS rejection fix + P34 spec drafted
 
 **Date:** 2026-05-02 (session 2)

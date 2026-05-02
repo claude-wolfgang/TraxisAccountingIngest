@@ -4,7 +4,7 @@
 
 ## Project Status
 
-**27 active** | 2 complete | 2 retired
+**28 active** | 2 complete | 2 retired
 
 - [+] **P1: ProShop Automations** — Fusion 360 add-in connecting to ProShop ERP via GraphQL API for work order browsing.
 - [+] **P2: YCM Post Processor Development** — Custom Fusion 360 post processor for YCM NTC1600LY CNC lathe.
@@ -39,6 +39,7 @@
 - [+] **P31b: BLE Proximity Worker Tracking** — Passive BLE-based system to track which worker is at which CNC machine via Feasycom iBeacon tags and ESP32 gateways running ESPresense. All 3 gateways (M8/M1/M2) online, persistent logger running, walk test validated strongest-gateway-wins routing. Awaiting MOKOSmart B2 badges for production signal strength.
 - [+] **P32: Breakeven Dashboard** — Visual dashboard showing weekly CNC machine runtime vs breakeven target hours with per-machine detail, daily charts, and weekly trend navigation.
 - [+] **P33: Tool Library Updater** — CLI utility for creating and updating ProShop tool library entries. AI-powered tool creation from manufacturer EDP/catalog number (web search + spec extraction). Also handles manufacturer switching, VPO pricing lookup, and spec scraping.
+- [+] **P34: Chrome Web Store Ops Watcher** — Polls M365 mailbox via Microsoft Graph for CWS lifecycle events (submission decisions, policy notices, suspensions, deprecations) for the Traxis Chrome extension fleet (P30 live, P14 + P18 upcoming). Classifies events, logs to SQLite, writes flag files for high-priority items. Runs every 4h via Windows Task Scheduler. Phase 2 implemented; Overseer integration deferred to Phase 3.
 
 ## Interface Map
 
