@@ -7,6 +7,32 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-02
 
+### P30: Label Printer Extension — CWS rejection fix + P34 spec drafted
+
+**Date:** 2026-05-02 (session 2)
+
+**Task:** Resolve second CWS rejection of Traxis Label Printer; draft P34 spec for ongoing CWS lifecycle monitoring.
+
+**What was done:**
+
+1. **P30 fix** — Google rejected v1.5.1 for unused `activeTab` permission. Confirmed via grep that `activeTab` was declared in `manifest.json:11` only; no `chrome.tabs.*` or `chrome.action.*` calls anywhere. Content scripts inject via static `content_scripts` (no permission needed) and the service worker only does `fetch()` to the local print service. Removed the permission and bumped version 1.5.1 → 1.5.2. Rebuilt `deployment/traxis-label-printer.zip` (42 KB). Wolfgang submitted the new build to CWS Developer Dashboard during the session.
+
+2. **P34 spec** — Drafted `34. Chrome Web Store Ops Watcher/CLAUDE.md`. Decision: own project (not subset of P27) because domain, stakeholders, and failure consequences differ — P27 is accounting; P34 is dev-ops for the extension fleet (P30 live, P14 + P18 upcoming). Shared piece is just Microsoft Graph client (P27 already integrates Graph for vendor email body extraction). Starts with direct import of P27's GraphClient; promote to shared module only if a third consumer appears.
+
+**Files modified:**
+- `30. Material Label Extension/traxis-material-label/manifest.json` — removed activeTab, bumped to 1.5.2
+- `30. Material Label Extension/deployment/traxis-label-printer.zip` — rebuilt
+- `34. Chrome Web Store Ops Watcher/CLAUDE.md` — new spec file
+
+**Key decisions:**
+- P30 fix: vestigial permission only; no code changes needed. Host permissions remain (actively used).
+- P34: own project, not P27 subset. Direct import of P27 Graph client initially.
+- New feedback memory saved: audit MV3 manifest permissions against actual code use before every CWS submission (second rejection in this pattern).
+
+**Status:** P30 v1.5.2 submitted to CWS, awaiting Google review. P34 spec complete; implementation deferred to next session per Path A (clean separation of close commit from build commit).
+
+---
+
 ### P17: COTS Crib Kiosk — Search upgrade matching photo uploader pattern
 
 **Date:** 2026-05-02 (session crossed midnight from 2026-05-01)
