@@ -30,6 +30,7 @@ import requests
 SCRIPT_DIR = Path(__file__).resolve().parent
 DB_PATH = SCRIPT_DIR / "cws_events.db"
 FLAGS_DIR = SCRIPT_DIR / "flags"
+HEARTBEAT_PATH = SCRIPT_DIR / "last_run.json"
 
 ENV_PATHS = [
     Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\1. Proshop Automations\.traxis.env"),
@@ -172,6 +173,15 @@ def db_insert_event(con, ev):
 
 # ── Flag files (Overseer pickup) ──────────────────────────────────────────
 
+def write_heartbeat(stats):
+    """Write last_run.json so Overseer (P1) can read freshness + counts."""
+    payload = {
+        "ran_at": datetime.now(timezone.utc).isoformat(),
+        **stats,
+    }
+    HEARTBEAT_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
 def write_flag(ev):
     if ev["priority"] not in ("high", "critical"):
         return
@@ -222,7 +232,19 @@ def main():
                 if is_cws_sender(m.get("from", {}).get("emailAddress", {}).get("address", ""))]
     print(f"  fetched {len(msgs)} total, {len(cws_msgs)} from CWS senders")
 
+    stats = {
+        "mailbox": mailbox,
+        "since": since_iso,
+        "total_messages_seen": len(msgs),
+        "cws_messages_seen": len(cws_msgs),
+        "new_events": 0,
+        "high_priority_count": 0,
+        "critical_priority_count": 0,
+    }
+
     if not cws_msgs:
+        if not args.print_only:
+            write_heartbeat(stats)
         return 0
 
     con = None if args.print_only else db_open()
@@ -257,6 +279,15 @@ def main():
         con.commit()
         con.close()
         print(f"\n  {new_count} new event(s) logged to {DB_PATH.name}")
+
+    if not args.print_only:
+        # Count current open high/critical flag files (post-run state)
+        if FLAGS_DIR.exists():
+            stats["high_priority_count"] = len(list(FLAGS_DIR.glob("*_high_*.flag")))
+            stats["critical_priority_count"] = len(list(FLAGS_DIR.glob("*_critical_*.flag")))
+        stats["new_events"] = new_count
+        write_heartbeat(stats)
+
     return 0
 
 

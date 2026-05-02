@@ -1,4 +1,5 @@
 cws_events.db
 cws_events.db-journal
 flags/
+last_run.json
 __pycache__/
