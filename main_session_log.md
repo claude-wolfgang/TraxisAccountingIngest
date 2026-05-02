@@ -5,7 +5,62 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-02
+
+### P17: COTS Crib Kiosk — Search upgrade matching photo uploader pattern
+
+**Date:** 2026-05-02 (session crossed midnight from 2026-05-01)
+
+**Task:** Apply the photo uploader's better search mechanism to the COTS kiosk browse page.
+
+**What was done:**
+
+1. **Backend rewrite** — Replaced server-side ProShop `COTSQuery` filter (which only matched the `aka` field via `contains`) with a fetch-all + cache + Python-filter pattern adapted from P31. Added 120s TTL cache, `_fetch_all_cots()` method (pageSize 1000), and rewrote `get_cots_items()` to do Python-side substring matching across 7 fields (otsId, number, aka, description, location, type, subclass) with digit-only matching for number lookups.
+
+2. **Live debounced search** — Added 350ms debounced `input` event listener to `browse.js` so search updates as you type. Enter key still works for immediate search.
+
+3. **Cache busting** — Added `?v=20260501-livesearch` query string to `browse.js` reference in `browse.html` so kiosk Chrome doesn't serve stale JS.
+
+**Files modified:**
+- `17. COTS - Tools Crib Kiosk/cots-kiosk/proshop_client.py` — Added `_get_cached`/`_set_cached` helpers, `_fetch_all_cots()`, rewrote `get_cots_items()` for local search
+- `17. COTS - Tools Crib Kiosk/cots-kiosk/static/browse.js` — Added debounced input event listener
+- `17. COTS - Tools Crib Kiosk/cots-kiosk/templates/browse.html` — Cache-bust query string on browse.js
+
+**Key decisions:**
+- Same pattern as P31 photo uploader (fetch all + Python filter), since ProShop's `StringQueryInput` only supports `exactly`, `in`, `not` — no real substring/multi-field search.
+- Cache TTL of 120s matches P31; balances API load against staleness.
+- Frontend pagination still works against the locally-filtered set.
+
+**Status:** Service deployed via Dropbox sync to MainPC (.71). `__pycache__` regenerated at 15:29 confirms backend reloaded after Overseer restart. Cache-bust on `browse.html` ensures the kiosk Chrome picks up new `browse.js` on next page load. User reported the new behavior wasn't visible during testing — most likely browser cache (now addressed by cache-bust); to verify on next session.
+
+---
+
 ## 2026-05-01
+
+### P32: Breakeven Dashboard — Fix CMD window flash from scheduled task
+
+**Date:** 2026-05-01 (session 3)
+
+**Task:** Diagnose and fix a CMD window briefly popping up on the desktop from a background service.
+
+**What was done:**
+
+1. **Diagnosed root cause** — Audited all running Python processes, the overseer service tree, and Windows scheduled tasks. Found that "Traxis - FOCAS Runtime Aggregator" scheduled task was running `run_aggregator.bat` (which calls `python.exe`) directly every 15 minutes. Unlike the FASData tasks which use `wscript.exe` + `.vbs` wrappers, this one had no window suppression.
+
+2. **Fixed scheduled task** — Updated the task to run `pythonw.exe focas_runtime_aggregator.py --history 4` directly instead of going through the `.bat` file. `pythonw.exe` has no console window, eliminating the flash entirely.
+
+3. **Audit findings** — All other Python subprocess calls in the codebase (overseer, agent_scheduler, service_wrapper) correctly use `CREATE_NO_WINDOW` flags. The three FASData scheduled tasks correctly use `wscript.exe` + VBS wrappers. The `Proshop Scheduling Probe` task is a legacy one-time task from Feb 2026 (not repeating, not causing flashes).
+
+**Files modified:**
+- Windows scheduled task "Traxis - FOCAS Runtime Aggregator" — changed Task To Run from `.bat` to direct `pythonw.exe` invocation
+
+**Key decisions:**
+- Used `pythonw.exe` directly in the scheduled task rather than adding a VBS wrapper — simpler approach, no intermediary files needed
+- Left `run_aggregator.bat` on disk for manual use if needed
+
+**Status:** Fix applied. Next task execution at ~5:16 PM will verify no CMD flash.
+
+---
 
 ### P31: Photo Upload Service — Live tablet testing, entity expansion, NCR support
 
