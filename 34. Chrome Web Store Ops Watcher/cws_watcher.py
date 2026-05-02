@@ -18,6 +18,7 @@ Usage:
 import argparse
 import html
 import json
+import os
 import re
 import sqlite3
 import sys
@@ -32,9 +33,16 @@ DB_PATH = SCRIPT_DIR / "cws_events.db"
 FLAGS_DIR = SCRIPT_DIR / "flags"
 HEARTBEAT_PATH = SCRIPT_DIR / "last_run.json"
 
+# Resolve .traxis.env via paths that work across both PCs (.178 Superuser /
+# C: drive, .71 TRAXIS / D: drive). Walks from this script's location, so
+# drive letter and username don't matter.
+PROJECT_ROOT = SCRIPT_DIR.parent
+USERPROFILE = Path(os.environ.get("USERPROFILE", ""))
+
 ENV_PATHS = [
-    Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\1. Proshop Automations\.traxis.env"),
-    Path(r"C:\Users\TRAXIS\.traxis.env"),
+    PROJECT_ROOT / "1. Proshop Automations" / ".traxis.env",
+    USERPROFILE / ".traxis.env",
+    USERPROFILE / "Dropbox" / "MACHINE COMM Traxis" / "Keys" / ".traxis.env",
 ]
 
 CWS_SENDERS = [

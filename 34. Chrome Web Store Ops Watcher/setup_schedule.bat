@@ -35,11 +35,13 @@ if not defined PYTHONW (
 
 if not defined PYTHONW (
     echo ERROR: pythonw.exe not found. Install Python 3.12+ or add it to PATH.
+    pause
     exit /b 1
 )
 
 if not exist "%SCRIPT%" (
     echo ERROR: cws_watcher.py not found at %SCRIPT%
+    pause
     exit /b 1
 )
 
@@ -63,17 +65,17 @@ schtasks /Create /F ^
 if errorlevel 1 (
     echo.
     echo ERROR: schtasks /Create failed.
+    pause
     exit /b 1
 )
 
 echo.
-echo Task created. Verify with:
-echo   schtasks /Query /TN "%TASK_NAME%"
+echo Task created successfully.
+echo   Using pythonw: %PYTHONW%
+echo   Script:        %SCRIPT%
 echo.
-echo Run once now to confirm:
-echo   schtasks /Run /TN "%TASK_NAME%"
+echo To verify it works, run test_run.bat next.
 echo.
-echo Remove later with:
-echo   schtasks /Delete /TN "%TASK_NAME%" /F
+pause
 
 endlocal
