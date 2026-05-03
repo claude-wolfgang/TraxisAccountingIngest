@@ -5,6 +5,51 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-03
+
+### P31: server-side label printing + WO part-number search
+
+**Date:** 2026-05-03
+
+**Task:** Add label printing to the photo-uploader (so the shop tablet can do what P30's Chrome extension does on desktop), then revise the search so part-number lookups work in WO mode.
+
+**What was done:**
+
+1. **Server-side label rendering (`label_generator.py`, new)** — Pillow port of P30's Canvas-based generators for all five label types: material, box, equipment, tool, COTS. Auto-width 128px tall for the first four; fixed 450×128 with 2× supersample for COTS. QR via `qrcode` lib, fonts via Windows Arial fallback chain. Renderers return base64 PNG ready for the print service. Avoided porting JS to JS in Fully Kiosk — keeps label logic in one place (Python) so design tweaks don't need tablet cache busting.
+
+2. **Per-type label data fetcher (`proshop_client.get_label_data`)** — Single dispatch method that runs an OAuth GraphQL query per entity type (`workOrder`, `equipments`, `tools`, `cotsItems`) with graceful field fallback: tries enriched fields first (`materialType`, `materialGrade`, `serialNumber`, tool `location`), retries with minimum guaranteed fields if any unknown-field error, returns at least the entity_id so a degraded label still prints.
+
+3. **`POST /api/print-label` endpoint (`app.py`)** — Accepts `{label_type, entity_id, box_qty?, copies?}`, looks up data, renders, POSTs `{image_base64, copies, label_name}` to `http://10.1.1.242:5002/api/print-image` (same payload as P30/P9/P22). Smoke-tested: material WO 26-0120 and COTS THI-219 both printed on Brother PT-P700.
+
+4. **Print-label bar in capture step (`home.html`, `photo.js`, `style.css`)** — Buttons appear above "Take Photo" for entities that support a label: workorder gets two (Material + Box), tool/equipment/cots each get one. Box label prompts for qty in the browser. Buttons hidden for part/fixture/ncr/claude (no P30 equivalent).
+
+5. **WO search by part number** — Two original bugs:
+   - **Frontend forced `XX-YYYY` digit-only formatting** on the WO search input, so "ABC-1234" became "12-34". Removed the auto-format. Also dropped `inputMode="numeric"` so the tablet keyboard surfaces letters by default. Placeholder updated to "Type WO number or part number...".
+   - **Backend never had part-number data to match against.** `partPlainText` is free-text descriptive (e.g. "R2S1-rework 10469 Housing-DL"), so true part numbers like "10130" rarely appear. Added `part { partNumber partName }` to the bulk `workOrders` query and matched against it in `search_work_orders`.
+
+6. **Newest-first WO sort + Complete status** — Added `Complete` to the status list `_fetch_work_orders` queries (was Active/Queued/Scheduled only — recently-finished WOs were invisible). Added `matches.sort(key=lambda m: m["id"], reverse=True)` so results come back newest-first (lexical descending on WO number works because year prefix dominates).
+
+7. **Ghost socket dance, twice** — Each Flask restart via `taskkill /F` left port 5003 with a "ghost listener" (Windows TCP keeps the dead PID's socket bound while CLOSE_WAIT connections from other clients drain). Workaround: switch to a temporary port (5004 / 5007) for testing, reboot MainPC to clear the ghost. Went through this for the label-printing deploy and again for the search revision. After each reboot the autostarted Flask comes back clean on 5003 with the new code (Dropbox-synced from .178).
+
+**Files modified/created (all in `31. Photo Upload Service/photo-uploader/`):**
+- `label_generator.py` — new, ~210 lines, 5 renderers
+- `proshop_client.py` — `get_label_data()` + per-type `_*_label_data()` helpers; bulk WO query now pulls `part {partNumber partName}`; `Complete` added to status list; `search_work_orders` matches against linked-part fields and sorts newest-first
+- `app.py` — `/api/print-label` route, `requests` import, `LABEL_TYPES` map
+- `static/photo.js` — print-bar handlers, `LABELS_FOR_TYPE` map, removed WO digit-only forcing, `inputMode="text"` always, broader placeholder
+- `templates/home.html` — `print-label-bar` div with 5 buttons in capture step
+- `static/style.css` — `.print-label-bar` + `.print-label-btn` (printed/failed states)
+- `requirements.txt` — `qrcode[pil]>=7.4`
+- `CLAUDE.md` — architecture/key-files/interfaces updated
+
+**Key decisions:**
+- Server-side render over porting Canvas to Fully Kiosk's Android WebView. Tradeoff: rewrite once in Python instead of dropping P30 JS in. Worth it because label logic stays in one place and tablet is a thin client.
+- Use field-fallback (try enriched then minimal) on label data queries instead of probing schema first. Rationale: some ProShop field names from P30's session-cookie API may not exist in the OAuth API; degrading gracefully is cheaper than a full schema discovery.
+- Stop using `taskkill /F` on Flask going forward — every kill creates the ghost socket. Better workflow is edit → save (Dropbox syncs to .71) → reboot when convenient. Acceptable for this project because shop tablet usage is intermittent.
+
+**Status:** Flask back on 5003 after second reboot, new code live, search verified (`?q=10163` returns 4 WOs newest-first with linked part numbers visible). Print buttons not yet user-verified from the tablet — only confirmed via curl smoke tests.
+
+---
+
 ## 2026-05-02
 
 ### P34: deployment to .71 (corrected from .178), env-path bug fix, SSH remote-control channel

@@ -447,6 +447,34 @@ h2 { margin-bottom: 20px; font-size: 1.3rem; }
 
 .hidden { display: none !important; }
 
+/* ── Print Label Bar ───────────────────────────────────── */
+
+.print-label-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 16px;
+}
+.print-label-bar.hidden { display: none; }
+
+.print-label-btn {
+    flex: 1 1 auto;
+    min-width: 130px;
+    padding: 14px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+}
+.print-label-btn:active { background: var(--surface-hover); }
+.print-label-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.print-label-btn.hidden { display: none; }
+.print-label-btn.printed { background: var(--green); color: #082; border-color: var(--green); }
+.print-label-btn.failed  { background: var(--accent); color: #fff; border-color: var(--accent); }
+
 /* ── Responsive ────────────────────────────────────────── */
 
 @media (max-width: 400px) {

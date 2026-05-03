@@ -115,8 +115,8 @@
             searchTypeLabel.textContent = TYPE_LABELS[type] || type;
             searchInput.value = "";
             searchResults.innerHTML = "";
-            searchInput.inputMode = (type === "workorder") ? "numeric" : "text";
-            searchInput.placeholder = (type === "workorder") ? "Type WO number (e.g. 260019)..." : "Search by name or ID...";
+            searchInput.inputMode = "text";
+            searchInput.placeholder = (type === "workorder") ? "Type WO number or part number..." : "Search by name or ID...";
             showStep("search");
             searchInput.focus();
         });
@@ -147,16 +147,6 @@
     });
 
     searchInput.addEventListener("input", () => {
-        // Auto-format WO numbers: "260019" → "26-0019"
-        if (currentType === "workorder") {
-            let raw = searchInput.value.replace(/[^0-9]/g, "");
-            if (raw.length > 2) {
-                searchInput.value = raw.slice(0, 2) + "-" + raw.slice(2);
-            } else {
-                searchInput.value = raw;
-            }
-        }
-
         clearTimeout(searchTimeout);
         const q = searchInput.value.trim();
         if (q.length < 2) {
@@ -295,6 +285,32 @@
 
     // ── Proceed to photo capture ─────────────────────────────────────────
 
+    // Map entity type → list of label_type strings the print bar should show
+    const LABELS_FOR_TYPE = {
+        workorder: ["material", "box"],
+        tool: ["tool"],
+        equipment: ["equipment"],
+        cots: ["cots"],
+    };
+
+    function showPrintBarFor(type) {
+        const bar = document.getElementById("print-label-bar");
+        const labels = LABELS_FOR_TYPE[type] || [];
+        if (!labels.length) {
+            bar.classList.add("hidden");
+            return;
+        }
+        bar.classList.remove("hidden");
+        bar.querySelectorAll(".print-label-btn").forEach((btn) => {
+            const show = labels.includes(btn.dataset.label);
+            btn.classList.toggle("hidden", !show);
+            btn.classList.remove("printed", "failed");
+            btn.disabled = false;
+            btn.textContent = btn.dataset.defaultLabel || btn.textContent;
+            btn.dataset.defaultLabel = btn.dataset.defaultLabel || btn.textContent;
+        });
+    }
+
     function goToCapture(entity) {
         // Build display text
         let label = entity.id;
@@ -312,7 +328,62 @@
         uploadBtn.textContent = "Upload Photo";
         photoCapture.value = "";
         photoNote.value = "";
+        showPrintBarFor(currentType);
         showStep("capture");
+    }
+
+    // ── Print Label buttons ──────────────────────────────────────────────
+
+    document.querySelectorAll(".print-label-btn").forEach((btn) => {
+        btn.dataset.defaultLabel = btn.textContent;
+        btn.addEventListener("click", () => printLabel(btn));
+    });
+
+    async function printLabel(btn) {
+        if (!selectedEntity) return;
+        const labelType = btn.dataset.label;
+
+        let boxQty = "";
+        if (labelType === "box") {
+            boxQty = window.prompt("Enter Qty of Parts in Box");
+            if (boxQty === null || boxQty.trim() === "") return;
+            boxQty = boxQty.trim();
+        }
+
+        btn.disabled = true;
+        btn.classList.remove("printed", "failed");
+        btn.textContent = "Printing…";
+
+        try {
+            const resp = await fetch("/api/print-label", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    label_type: labelType,
+                    entity_id: selectedEntity.id,
+                    box_qty: boxQty,
+                }),
+            });
+            const data = await resp.json();
+            if (resp.ok && data.success) {
+                btn.classList.add("printed");
+                btn.textContent = "✓ Printed";
+                showToast(`Printed ${data.label_name || labelType}`);
+            } else {
+                throw new Error(data.error || `HTTP ${resp.status}`);
+            }
+        } catch (err) {
+            console.error("Print error:", err);
+            btn.classList.add("failed");
+            btn.textContent = "✗ Failed";
+            showToast(err.message || "Print failed", true);
+        } finally {
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.classList.remove("printed", "failed");
+                btn.textContent = btn.dataset.defaultLabel;
+            }, 3000);
+        }
     }
 
     // ── Step 3: Photo capture ────────────────────────────────────────────

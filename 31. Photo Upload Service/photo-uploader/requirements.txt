@@ -2,6 +2,7 @@ flask>=3.0
 requests>=2.31
 Pillow>=10.0
 python-dotenv>=1.0
+qrcode[pil]>=7.4
 # Phase 2 (Selenium upload worker):
 selenium>=4.15
 webdriver-manager>=4.0

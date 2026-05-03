@@ -12,13 +12,17 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
+import requests
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from PIL import Image
 
 import config
 import database
+import label_generator
 from proshop_client import ProShopClient
 from upload_worker import UploadWorker
+
+PRINT_SERVICE_URL = "http://10.1.1.242:5002"
 
 # ── Logging ───────────────────────────────────────────────────────────────
 
@@ -266,6 +270,110 @@ def submit_suggestion():
 
     log.info(f"Suggestion saved: {text[:80]}")
     return jsonify({"success": True})
+
+
+# ── API: Print Label ─────────────────────────────────────────────────────
+
+LABEL_TYPES = {
+    "material": "workorder",
+    "box": "workorder",
+    "tool": "tool",
+    "equipment": "equipment",
+    "cots": "cots",
+}
+
+
+@app.route("/api/print-label", methods=["POST"])
+def print_label():
+    """Render a label for an entity and POST it to the Brother print service.
+
+    Body (JSON):
+      label_type: material | box | tool | equipment | cots
+      entity_id: WO number, tool number, etc.
+      box_qty:   (box labels only) operator-entered quantity
+      copies:    (optional) defaults to 1
+    """
+    data = request.get_json(silent=True) or {}
+    label_type = (data.get("label_type") or "").strip().lower()
+    entity_id = (data.get("entity_id") or "").strip()
+    box_qty = (data.get("box_qty") or "").strip()
+    copies = int(data.get("copies") or 1)
+
+    if label_type not in LABEL_TYPES:
+        return jsonify({"error": f"Unknown label_type '{label_type}'"}), 400
+    if not entity_id:
+        return jsonify({"error": "entity_id required"}), 400
+
+    entity_type = LABEL_TYPES[label_type]
+
+    try:
+        info = proshop.get_label_data(entity_type, entity_id)
+    except Exception as e:
+        log.error(f"Label data lookup failed: {e}", exc_info=True)
+        return jsonify({"error": f"ProShop lookup failed: {e}"}), 502
+
+    try:
+        if label_type == "material":
+            image_b64 = label_generator.material_label(
+                info.get("wo_number") or entity_id,
+                info.get("material") or "",
+                info.get("part_number") or "",
+            )
+            label_name = f"Material WO {entity_id}"
+        elif label_type == "box":
+            if not box_qty:
+                return jsonify({"error": "box_qty required for box labels"}), 400
+            image_b64 = label_generator.box_label(
+                info.get("wo_number") or entity_id,
+                info.get("customer_po") or "",
+                info.get("part_number") or "",
+                box_qty,
+                url=f"{config.PROSHOP_BASE_URL}/workorders/{entity_id}",
+            )
+            label_name = f"Box WO {entity_id}"
+        elif label_type == "tool":
+            image_b64 = label_generator.tool_label(
+                info.get("tool_number") or entity_id,
+                info.get("description") or "",
+                info.get("location") or "",
+                info.get("url") or f"{config.PROSHOP_BASE_URL}/tools/{entity_id}",
+            )
+            label_name = f"Tool {entity_id}"
+        elif label_type == "equipment":
+            image_b64 = label_generator.equipment_label(
+                info.get("equipment_number") or entity_id,
+                info.get("tool_name") or "",
+                info.get("serial_number") or "",
+                info.get("url") or f"{config.PROSHOP_BASE_URL}/equipment/{entity_id}",
+            )
+            label_name = f"Equipment {entity_id}"
+        elif label_type == "cots":
+            image_b64 = label_generator.cots_label(
+                info.get("cots_id") or entity_id,
+                info.get("description") or "",
+                info.get("url") or f"{config.PROSHOP_BASE_URL}/ots/{entity_id}",
+            )
+            label_name = f"COTS {entity_id}"
+    except Exception as e:
+        log.error(f"Label render failed: {e}", exc_info=True)
+        return jsonify({"error": f"Render failed: {e}"}), 500
+
+    try:
+        resp = requests.post(
+            f"{PRINT_SERVICE_URL}/api/print-image",
+            json={"image_base64": image_b64, "copies": copies, "label_name": label_name},
+            timeout=15,
+        )
+        body = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+    except requests.RequestException as e:
+        log.error(f"Print service request failed: {e}")
+        return jsonify({"error": f"Print service unreachable: {e}"}), 502
+
+    if not resp.ok:
+        return jsonify({"error": body.get("error") or f"HTTP {resp.status_code}"}), 502
+
+    log.info(f"Printed {label_name} ({label_type}) — copies={copies}")
+    return jsonify({"success": True, "label_name": label_name, **body})
 
 
 # ── API: Health ──────────────────────────────────────────────────────────

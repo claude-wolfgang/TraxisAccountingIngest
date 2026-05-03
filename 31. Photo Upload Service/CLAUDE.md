@@ -4,23 +4,25 @@ Simple photo capture from shop floor Samsung tablet, queued for upload to ProSho
 
 ## Architecture
 
-- Flask app on MainPC, port 5003 (currently 5004 due to ghost socket — revert on next restart)
+- Flask app on MainPC, port 5003
 - Tablet connects over LAN via Fully Kiosk Browser (Android kiosk lockdown)
 - Camera access via `<input type="file" capture="environment">` (works over HTTP)
 - Photos resized to max 2000px, JPEG 85% quality
 - SQLite tracks photo metadata and upload queue
 - Background worker (Phase 2) uploads to ProShop via headless Selenium
 - Three-layer QR decode: BarcodeDetector → jsQR → pyzbar server-side
+- Label printing via Pillow + Brother PT-P700 print service (P30 designs ported server-side)
 
 ## Key Files
 
-- `photo-uploader/app.py` — Flask app + routes (including /api/qr-decode, /api/suggest)
+- `photo-uploader/app.py` — Flask app + routes (including /api/qr-decode, /api/suggest, /api/print-label)
 - `photo-uploader/config.py` — Ports, paths, ProShop URLs
 - `photo-uploader/database.py` — SQLite schema + CRUD
-- `photo-uploader/proshop_client.py` — OAuth GraphQL client for entity search (all 7 ProShop types)
+- `photo-uploader/proshop_client.py` — OAuth GraphQL client; `get_label_data()` fetches per-type label fields
+- `photo-uploader/label_generator.py` — Pillow renderers (material, box, equipment, tool, COTS) — port of P30 Canvas generators
 - `photo-uploader/upload_worker.py` — Selenium upload worker (headless Chrome → CKEditor image upload)
 - `photo-uploader/inspect_upload.py` — Visible-mode CKEditor discovery script (run once to inspect dialog DOM)
-- `photo-uploader/static/photo.js` — Frontend logic (search, QR decode, capture, upload, suggestions)
+- `photo-uploader/static/photo.js` — Frontend logic (search, QR decode, capture, upload, suggestions, print-label)
 - `photo-uploader/static/style.css` — Kiosk-style dark theme CSS, 3-column grid
 - `photo-uploader/static/manifest.json` — PWA manifest
 - `photo-uploader/templates/` — Jinja2 templates (home, queue)
@@ -55,6 +57,6 @@ Simple photo capture from shop floor Samsung tablet, queued for upload to ProSho
 
 ## Interfaces
 
-Produces: Flask UI (port 5003), photos.db (SQLite at photo-uploader/data/photos.db), JPEG photos (photo-uploader/data/photos/{type}/{id}/), /api/health endpoint, suggestions.md (operator feedback)
-Consumes: ProShop GraphQL API (workorders, tools, equipment, parts, fixtures, cotsItems, nonConformanceReports), ProShop web UI via headless Selenium, .traxis.env (PROSHOP_CLIENT_ID, PROSHOP_CLIENT_SECRET, PROSHOP_SCOPE, PROSHOP_USERNAME, PROSHOP_PASSWORD)
-Contracts: Port 5003 must not conflict with other services. Photo storage at photo-uploader/data/photos/ syncs via Dropbox. Upload worker consumes ProShop web UI via headless Selenium. Written description URL pattern: `{BASE}/procnc/parts/{customer}/{partNumber}$formName=writtenDescription&opId={opNumber}`. OAuth scope requires: parts:rwdp, workorders:rwdp, users:r, tools:rwdp, toolpots:r, fixtures:r, ots:r, equipment:r, nonconformancereports:r.
+Produces: Flask UI (port 5003), photos.db (SQLite at photo-uploader/data/photos.db), JPEG photos (photo-uploader/data/photos/{type}/{id}/), /api/health endpoint, /api/print-label endpoint (renders + sends PNG to Brother PT-P700), suggestions.md (operator feedback)
+Consumes: ProShop GraphQL API (workorders, tools, equipment, parts, fixtures, cotsItems, nonConformanceReports), ProShop web UI via headless Selenium, Brother PT-P700 print service at http://10.1.1.242:5002/api/print-image (shared with P9/P22/P30), .traxis.env (PROSHOP_CLIENT_ID, PROSHOP_CLIENT_SECRET, PROSHOP_SCOPE, PROSHOP_USERNAME, PROSHOP_PASSWORD)
+Contracts: Port 5003 must not conflict with other services. Photo storage at photo-uploader/data/photos/ syncs via Dropbox. Upload worker consumes ProShop web UI via headless Selenium. Written description URL pattern: `{BASE}/procnc/parts/{customer}/{partNumber}$formName=writtenDescription&opId={opNumber}`. OAuth scope requires: parts:rwdp, workorders:rwdp, users:r, tools:rwdp, toolpots:r, fixtures:r, ots:r, equipment:r, nonconformancereports:r. Print label endpoint POSTs `{image_base64, copies, label_name}` to print service (same payload as P30). Label designs match P30 exactly: material/equipment/tool/box auto-width 128px tall, COTS fixed 450×128px, all at 180 DPI for 24mm tape.

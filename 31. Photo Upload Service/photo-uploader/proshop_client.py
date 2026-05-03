@@ -118,7 +118,7 @@ class ProShopClient:
             return cached
 
         all_records = []
-        for status in ["Active", "Queued", "Scheduled"]:
+        for status in ["Active", "Queued", "Scheduled", "Complete"]:
             try:
                 result = self._execute("""
                     query ($status: String!) {
@@ -129,6 +129,7 @@ class ProShopClient:
                             records {
                                 workOrderNumber status partPlainText
                                 quantityOrdered
+                                part { partNumber partName }
                             }
                         }
                     }
@@ -148,22 +149,29 @@ class ProShopClient:
         return "".join(p.lstrip("0") or "0" for p in parts)
 
     def search_work_orders(self, query_text):
-        """Search work orders by number or part name (substring match in Python)."""
+        """Search work orders by WO number, plain-text part description, or
+        the linked part's partNumber/partName. Returned newest-first
+        (lexical descending on WO number)."""
         records = self._fetch_work_orders()
         q = query_text.lower()
         q_norm = self._normalize_wo(q)
         matches = []
         for r in records:
             wo_num = r.get("workOrderNumber") or ""
-            part = r.get("partPlainText") or ""
+            part_plain = r.get("partPlainText") or ""
+            part_ref = r.get("part") or {}
+            part_num = part_ref.get("partNumber") or ""
+            part_name = part_ref.get("partName") or ""
             wo_norm = self._normalize_wo(wo_num)
-            if q in wo_num.lower() or q in part.lower() or q_norm in wo_norm:
+            haystack = f"{wo_num} {part_plain} {part_num} {part_name}".lower()
+            if q in haystack or q_norm in wo_norm:
                 matches.append({
                     "id": wo_num,
-                    "name": part,
+                    "name": part_num or part_plain,
                     "detail": f"Qty: {r.get('quantityOrdered', '?')} | {r.get('status', '')}",
                     "proshop_url": f"{self.base_url}/workorders/{wo_num}",
                 })
+        matches.sort(key=lambda m: m["id"], reverse=True)
         return matches[:20]
 
     def _fetch_tools(self):
@@ -534,6 +542,165 @@ class ProShopClient:
         if not method:
             return []
         return method(query_text)
+
+    # ── Label Data ────────────────────────────────────────────────────────
+
+    def get_label_data(self, entity_type, entity_id):
+        """Fetch full label data for an entity.
+
+        Returns a dict with the fields the matching label_generator expects,
+        plus an "error" key if the lookup partially failed. Always returns
+        at least entity_id so a degraded label can still print.
+        """
+        if entity_type == "workorder":
+            return self._wo_label_data(entity_id)
+        if entity_type == "equipment":
+            return self._equipment_label_data(entity_id)
+        if entity_type == "tool":
+            return self._tool_label_data(entity_id)
+        if entity_type == "cots":
+            return self._cots_label_data(entity_id)
+        return {"error": f"No label support for entity type '{entity_type}'"}
+
+    def _wo_label_data(self, wo_number):
+        """Material+box label data for a WO. Tries enriched fields first,
+        falls back to the minimum guaranteed fields if the schema differs."""
+        # Try with all material+PO fields. If unknown fields, retry minimal.
+        for query in (
+            """query ($wo: String!) {
+                workOrder(workOrderNumber: $wo) {
+                    workOrderNumber partPlainText
+                    materialType materialGrade customerPoNumber
+                }
+            }""",
+            """query ($wo: String!) {
+                workOrder(workOrderNumber: $wo) {
+                    workOrderNumber partPlainText
+                }
+            }""",
+        ):
+            try:
+                result = self._execute(query, {"wo": wo_number})
+                wo = (result.get("data") or {}).get("workOrder") or {}
+                if wo:
+                    material = " ".join(
+                        v for v in (wo.get("materialType"), wo.get("materialGrade")) if v
+                    ).strip()
+                    return {
+                        "wo_number": wo.get("workOrderNumber") or wo_number,
+                        "part_number": wo.get("partPlainText") or "",
+                        "material": material,
+                        "customer_po": wo.get("customerPoNumber") or "",
+                    }
+            except GraphQLError:
+                continue
+            except Exception:
+                break
+        return {"wo_number": wo_number, "part_number": "", "material": "", "customer_po": ""}
+
+    def _equipment_label_data(self, equipment_number):
+        for query in (
+            """query ($num: String!) {
+                equipments(query: { equipmentNumber: { exactly: $num } }) {
+                    records {
+                        equipmentNumber description serialNumber
+                    }
+                }
+            }""",
+            """query ($num: String!) {
+                equipments(query: { equipmentNumber: { exactly: $num } }) {
+                    records { equipmentNumber description }
+                }
+            }""",
+        ):
+            try:
+                result = self._execute(query, {"num": str(equipment_number)})
+                records = (result.get("data") or {}).get("equipments", {}).get("records", [])
+                if records:
+                    eq = records[0]
+                    return {
+                        "equipment_number": str(eq.get("equipmentNumber") or equipment_number),
+                        "tool_name": (eq.get("description") or "").split("\n")[0],
+                        "serial_number": eq.get("serialNumber") or "",
+                        "url": f"{self.base_url}/equipment/{equipment_number}",
+                    }
+            except GraphQLError:
+                continue
+            except Exception:
+                break
+        return {
+            "equipment_number": str(equipment_number),
+            "tool_name": "",
+            "serial_number": "",
+            "url": f"{self.base_url}/equipment/{equipment_number}",
+        }
+
+    def _tool_label_data(self, tool_number):
+        for query in (
+            """query ($num: String!) {
+                tools(query: { toolNumber: { exactly: $num } }) {
+                    records { toolNumber description location }
+                }
+            }""",
+            """query ($num: String!) {
+                tools(query: { toolNumber: { exactly: $num } }) {
+                    records { toolNumber description }
+                }
+            }""",
+        ):
+            try:
+                result = self._execute(query, {"num": tool_number})
+                records = (result.get("data") or {}).get("tools", {}).get("records", [])
+                if records:
+                    t = records[0]
+                    return {
+                        "tool_number": t.get("toolNumber") or tool_number,
+                        "description": t.get("description") or "",
+                        "location": t.get("location") or "",
+                        "url": f"{self.base_url}/tools/{tool_number}",
+                    }
+            except GraphQLError:
+                continue
+            except Exception:
+                break
+        return {
+            "tool_number": tool_number,
+            "description": "",
+            "location": "",
+            "url": f"{self.base_url}/tools/{tool_number}",
+        }
+
+    def _cots_label_data(self, cots_id):
+        """Look up a COTS item by either its full ID (THI-219) or just the number.
+        Returns the prefixed ID (matches P17 / P30 label convention)."""
+        # cots_id may already be prefixed ("THI-219") or just a number ("219")
+        try:
+            result = self._execute("""
+                query ($id: String!) {
+                    cotsItems(query: { number: { exactly: $id } }) {
+                        records { number type description }
+                    }
+                }
+            """, {"id": str(cots_id)})
+            records = (result.get("data") or {}).get("cotsItems", {}).get("records", [])
+            if records:
+                c = records[0]
+                num = c.get("number") or cots_id
+                ctype = c.get("type") or ""
+                full_id = f"{ctype}-{num}" if ctype and not str(num).startswith(f"{ctype}-") else str(num)
+                url = f"{self.base_url}/ots/{ctype}/{full_id}" if ctype else f"{self.base_url}/ots/{num}"
+                return {
+                    "cots_id": full_id,
+                    "description": c.get("description") or "",
+                    "url": url,
+                }
+        except Exception:
+            pass
+        return {
+            "cots_id": str(cots_id),
+            "description": "",
+            "url": f"{self.base_url}/ots/{cots_id}",
+        }
 
     # ── Health Check ──────────────────────────────────────────────────────
 
