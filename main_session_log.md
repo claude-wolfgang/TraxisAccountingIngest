@@ -7,6 +7,32 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-03
 
+### Root: close ritual extended to reconcile to-do lists
+
+**Date:** 2026-05-03
+
+**Task:** Examine whether the session close ritual could also curate Wolfgang's saved to-do lists. p25 was the motivating example (its `Next Steps` section had items 4/5/6/8 marked DONE-but-still-listed, never cleaned up).
+
+**What was done:**
+
+1. **Mapped the to-do surfaces** — found three: hardcoded `Next Steps` sections in each project's CLAUDE.md (the main offender), `reminders` table in audit.db (Telegram-driven, 0 pending), and free-form `notes` table (scratch). Step 4 of the existing close ritual already produced an "Open items requiring Wolfgang" section but it was per-session and evaporated.
+
+2. **Drafted a two-step extension, then collapsed it on Wolfgang's instruction** — first added step 5 "Backlog reconciliation" alongside the existing step 4 "Open items." Wolfgang flagged that two to-do-shaped outputs was one too many for him to scan. Merged into a single step 4 "To-do reconciliation": one consolidated view at beat 4, per-project blocks of proposed `Next Steps` edits, urgent items tagged `[NEEDS WOLFGANG]` and sorted to top, cross-cutting items in root CLAUDE.md's `Next Steps` (lazy-created). Step 5 became Git commit (was 6).
+
+3. **Clarified scope** — the new ritual touches CLAUDE.md `Next Steps` sections only. It does NOT affect the daily Telegram audit digest from `alerter.py`, which is a separate system surfacing audit findings on a schedule. Wolfgang flagged the long Telegram message as a real concern; logged it as a follow-up.
+
+**Files modified:**
+- `CLAUDE.md` (root) — close ritual steps section: merged steps 4 + 5 into a single step 4 "To-do reconciliation"; renumbered Git commit; updated review-line.
+
+**Key decisions:**
+- One output for to-dos, not multiple. Single source of truth = each project's `Next Steps` section. Cross-cutting items get a root `Next Steps` section.
+- Urgency preserved within the flat list via `[NEEDS WOLFGANG]` tag + top-sort, instead of a separate "Open items" surface.
+- "Touched OR discussed this session" — catches to-dos surfaced in conversation about projects whose code didn't change (like p25 today).
+
+**Status:** Ritual change live. First test is this very close. Telegram digest length is a separate, deferred ask.
+
+---
+
 ### P31: server-side label printing + WO part-number search
 
 **Date:** 2026-05-03

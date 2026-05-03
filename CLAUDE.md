@@ -40,7 +40,15 @@ In this order — each step informs the next:
 
 3. **Constellation file** — Propagate any interface changes to `TRAXIS_ECOSYSTEM.md` at this root. Update the relevant project entry. If no interface changes, skip.
 
-4. **Open items** — Output a section titled "Open items requiring Wolfgang" listing: decisions deferred, things blocked on external input, anything needing human action before the next session.
+4. **To-do reconciliation** — This is the **only** to-do-shaped output Wolfgang sees at close. There is no separate "Open items" section. For each project touched or discussed this session, sweep its CLAUDE.md `Next Steps` (or equivalent backlog) section against actual session work and `git diff`, then propose inline edits in one pass:
+   - **Strike or remove** items now DONE.
+   - **Drop** items that became OBSOLETE.
+   - **Reorder** if priorities shifted.
+   - **Add** new items surfaced this session — including decisions deferred, blockers, and anything needing Wolfgang's human action. Tag urgent ones `[NEEDS WOLFGANG]` and sort to the top of the section so urgency is not lost in a flat list.
+   - **Cross-cutting items** that don't belong to a single project go in the root CLAUDE.md's `Next Steps` section (create it if absent).
+   - If a touched project has no `Next Steps` section, add one.
+
+   Be conservative on done-judgment: when unsure an item is fully complete, leave it and flag at beat 4. The presentation at beat 4 is one consolidated to-do view — per-project blocks of proposed `Next Steps` edits — not a separate open-items list plus a separate backlog sweep.
 
 5. **Git commit** — After "authorized" at beat 5, stage and commit all session changes to the repo. Use a concise commit message summarizing the session's work.
 
