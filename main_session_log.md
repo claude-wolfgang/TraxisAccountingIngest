@@ -7,6 +7,76 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-03
 
+### P25 + P12: digest shortening, lathe bootstrap, FOCAS program_directory fix
+
+**Date:** 2026-05-03 (later, same day — followed the close-ritual session)
+
+**Task:** Multi-thread session driven by Wolfgang's morning Telegram digest reading as a catastrophe. Trace from "shorten the digest" through "what's making it look bad" through "fix the underlying noise sources." Bonus: bootstrap p25's `lathe_programs.json` and fix the FOCAS `program_directory` polling that's been silently broken.
+
+**What was done:**
+
+1. **Diagnosed why the digest read as catastrophic** — three buckets: (a) overrun metrics aggregated lifetime, no time window; (b) known-noisy checks (NC program lookup false positives, all-alarm count, FOCAS stale on .178); (c) action items pulled from a Haiku-summarized index that was unreliable.
+
+2. **Time-windowed and threshold-tightened the audit** (`25. Agent Exploration/audit_engine.py`):
+   - `check_overrun_patterns`: now computes both lifetime metrics (kept for trend) AND last-90-day metrics (`recent_overrun_rate_pct`, `severe_overrun_rate_pct`, `recent_hours_over_target`, `recent_severe_overrun_count`). Severity now driven by severe-rate (>30% failure, >15% warning) on the recent window. Headline switched from "any overrun" to "severe (>20% over)" — which is the actionable signal that doesn't punish tight quoting.
+   - `check_overdue_work_orders`: 3-day grace window. <3 days late counted in metric for trend but no finding emitted. New `overdue_wo_3plus` metric drives digest.
+   - `check_uncertified`: window 7→3 days for digest-actionable findings. Both 3-day and 7-day counts recorded.
+
+3. **Rewrote the digest format** (`25. Agent Exploration/alerter.py`):
+   - Compact 4-6 line message vs 25-30 lines before. One headline of real signals, optional worst/action/secondary lines, summary counts.
+   - Suppressed `nc_program_missing` (known false-positive engine), `alarms_7day` (mostly benign), generic `overrun_rate_pct`.
+   - Replaced `_get_open_items()` to scan each project's CLAUDE.md `[NEEDS WOLFGANG]` lines directly. Single source of truth = the project Next Steps maintained by the close ritual. Drops dependency on Haiku-generated `project_index.json` action items.
+
+4. **Bootstrapped `lathe_programs.json` from FOCAS history** — merged local Dropbox-synced data + live data (pulled via SSH from .71) into 38 distinct T2 O-numbers spanning Feb 2 → May 1, 2026. Each entry seeded with sample/date metadata in description, `part_number` left blank for Garrett/Thomas. Two entries (O2004 → suggested `10-2004`; O4256 → suggested `10042 or 10164`) auto-extracted from FOCAS `active_block_content` comments — TPM-posted programs whose headers were captured during execution.
+
+5. **Built `inspect_programs.py`** (`25. Agent Exploration/inspect_programs.py`) — CLI that dumps every captured `(comment)` block per machine or per program. `--all`, machine-id arg, or `--o O####`. Garrett/Thomas can run it on .71 to see what FOCAS already knows about each program before keying through the YCM directory.
+
+6. **Fixed FOCAS `program_directory` polling** (project 12 / focasmonitor) — the table was empty across all machines because `cnc_rdprogdir2(handle, 0, ref count, dir)` was failing silently (LogDebug). Replaced with two-tier strategy in `MonitoringService.ReadProgramDirectory`: primary `cnc_rdprogdir3` type=0 enumeration, fallback `cnc_rdprogdir3` type=1 for the running program from `cnc_rdprgnum`. Added `cnc_rdprogdir3` + `PRGDIR3` + `PRGDATE` to `Focas.cs`. Added PRGDIR3 insert overload + single-row helper to `Database.cs`. Bumped error logging from LogDebug → LogWarning so silent failure can't recur.
+
+7. **Deployed to .71** — `dotnet publish -c Release` (initially failed because csproj had `SelfContained=false` and .71 has no x86 .NET 10 runtime; rebuilt with `--self-contained true` and changed csproj default to true going forward). Service stopped, 235 self-contained files copied, service restarted, RUNNING confirmed. Sunday machine-off state means no immediate verification — `program_directory` still empty because all 5 FOCAS machines show `connected=0` in samples. Fix is deployed but unverified.
+
+8. **Built verification toolkit on .71**:
+   - `verify_program_directory.bat` + `.py` — manual run, prints service status + DB state + recent warnings. ASCII-only output (Windows console encoding).
+   - `report_focas_verification.py` — gathers same data, computes verdict (WORKING/PARTIAL/NOT WORKING/INCONCLUSIVE), sends to P25 Telegram bot using p25 config for credentials.
+   - `run_focas_verification.bat` + `schedule_tuesday_verification.bat` — wrapper + scheduler. The schedule .bat creates a Windows scheduled task firing Tuesday 2026-05-05 at 9 AM Chicago, with `/Z` + `/ET 10:00` so the task auto-deletes after firing. Verified working via SSH; task is in place on .71 (`Next Run Time: 5/5/2026 9:00:00 AM`).
+
+**Files modified/created:**
+
+p25 (`25. Agent Exploration/`):
+- `audit_engine.py` — time-windowed overrun + grace-windowed overdue/uncertified metrics
+- `alerter.py` — compact digest + CLAUDE.md-based action item scanner
+- `lathe_programs.json` — bootstrapped 38 entries with FOCAS-extracted candidates
+- `inspect_programs.py` — new CLI helper
+- `CLAUDE.md` — Next Steps reconciled (digest-shorten DONE; FOCAS fix added at item 7)
+
+p12 (`12. FASData Implementation/focasmonitor/`):
+- `Focas.cs` — added cnc_rdprogdir3 + PRGDIR3 + PRGDATE
+- `Database.cs` — PRGDIR3 overload + InsertProgramDirectoryEntry helper
+- `MonitoringService.cs` — rewrote ReadProgramDirectory with two-tier fallback + visible logging
+- `FocasMonitor.csproj` — `SelfContained=true` default
+- `verify_program_directory.bat` + `.py` — manual verification toolkit
+- `report_focas_verification.py` — scheduled-task verifier with Telegram report
+- `run_focas_verification.bat` — Task Scheduler wrapper (avoids cmd quoting hell)
+- `schedule_tuesday_verification.bat` — one-shot scheduler
+
+Deployed: focasmonitor self-contained build to `C:\FocasMonitor\` on 10.1.1.71; service restarted; running.
+
+**Key decisions:**
+- **Severe-overrun rate (>20% over) replaces any-overrun rate as digest headline** — a healthy shop with tight quotes naturally has 50%+ "any overrun." Severe rate is the real shop-health signal.
+- **Suppress, don't fix, the noisy checks in the digest** — keep them in audit.db for trend analysis but stop them screaming each morning. NC missing fix and benign alarm filter are still on the backlog (p25 items 2 and 6); their digest re-enable comes after.
+- **`[NEEDS WOLFGANG]` is the single source of truth for action items** — alerter scans CLAUDE.md files directly. Eliminates the unreliable Haiku-summarized intermediary.
+- **FOCAS polling fix uses cnc_rdprogdir3 with type=0 + type=1 fallback** — backup code only used type=1 (per-program), but type=0 enumeration is more efficient when supported. Two-tier with both gives best chance of working across the YCM 0i-TF and the various Mill controls.
+- **Self-contained .NET publish, not framework-dependent** — .71 doesn't have x86 .NET 10 runtime installed; deploying framework-dependent meant immediate service crash. Self-contained adds ~80MB but eliminates this brittleness.
+- **Tuesday morning verification via scheduled Telegram report** — Sunday machines off makes today's deploy unverifiable. Tuesday gives a full Monday business day for the fix to populate `program_directory`. Auto-self-deleting task means no cleanup.
+
+**Status:** All edits live. P25 audit + alerter changes will manifest in tomorrow morning's digest. FOCAS polling fix deployed but unverified — Tuesday 9 AM Telegram report will say WORKING / PARTIAL / NOT WORKING / INCONCLUSIVE.
+
+**Open verification windows:**
+- Tomorrow (Mon 5/4) AM: first compact digest, will show whether new metrics are populated correctly.
+- Tuesday (Tue 5/5) 9 AM: scheduled FOCAS verification fires automatically to Telegram.
+
+---
+
 ### Root: close ritual extended to reconcile to-do lists
 
 **Date:** 2026-05-03
