@@ -7,6 +7,25 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-03
 
+### P25: Garrett/Thomas onboarding doc + VS Code on .178
+
+**Date:** 2026-05-03 (third close — short)
+
+**Task:** Wrap the lathe program review with a Garrett/Thomas-facing doc, then walk Wolfgang through installing VS Code on .178 for editing project files.
+
+**What was done:**
+
+1. **Created `25. Agent Exploration/LATHE_PROGRAM_REVIEW.md`** — onboarding doc for Garrett/Thomas to fill in `lathe_programs.json`. Covers: file location, fields to edit (`part_number`, `description`, `op_number`), the two FOCAS-extracted candidates (O2004, O4256) to verify first, how to use `inspect_programs.py --o O####`, how to read the YCM CRT (`MDI > PROG > DIR`), part-number lookup guidance ("don't invent part numbers"), and a quick checklist. One page, picks up cold.
+
+2. **VS Code install on .178** — guided Wolfgang through downloading from `code.visualstudio.com`, choosing user-install, checking "Add to PATH" + "Register as editor." Confirmed the Ready-to-Install screen via screenshot. Recommended Python extension + integrated terminal as the two productivity moves.
+
+**Files created:**
+- `25. Agent Exploration/LATHE_PROGRAM_REVIEW.md` — Garrett/Thomas onboarding (gitignored, Dropbox-synced)
+
+**Status:** Both done. Garrett/Thomas have a self-contained entry point. Wolfgang has VS Code on .178.
+
+---
+
 ### P25 + P12: digest shortening, lathe bootstrap, FOCAS program_directory fix
 
 **Date:** 2026-05-03 (later, same day — followed the close-ritual session)
