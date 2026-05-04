@@ -71,6 +71,7 @@ Simple photo capture from shop floor Samsung tablet, queued for upload to ProSho
 - **COTS Cost-scrape brittleness** — heuristic in P30's `buy-content.js` worked for LUB-116 but missed for THI-17. Inspect the THI-17 page DOM and tighten the column-finder so the auto-quote path stops being the default for items that DO have a price on screen.
 - **Email name-extraction polish** — `purchasing/vendors.first_name_of()` only confidently extracts a first name when the local part has a dot (e.g. jaime.gomez). For `briannab@`-style addresses it falls back to "Hello,". Consider adding an optional `first_name` field to `vendor_map.json` entries.
 - **Outlook draft delete via Graph returns 404** — observed on synthetic order cleanup; uncertain if it's a permission scope issue (app token may not delete sent items) or a folder-routing quirk. Investigate next time the queue needs cleanup.
+- **Graph `from`/`sender` override on draft silently ignored** — discovered 2026-05-04 while drafting an email for Wolfgang's `wolfgang@` alias. PATCH returns 200 but the From sticks at tom@. Needs `Mail.Send` permission added to the Graph app + Send-As granted on tom@'s mailbox (Exchange admin: `Add-MailboxPermission tom@ -User <app-principal> -AccessRights SendAs`). Not blocking — Wolfgang picks From in Outlook UI before sending — but if we want full programmatic identity routing for purchasing emails, fix this. See `reference_wolfgang_alias.md` in memory.
 
 ## Interfaces
 

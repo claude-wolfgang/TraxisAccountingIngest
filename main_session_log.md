@@ -7,6 +7,54 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-04
 
+### P26: SMC AW40-04DG-A equipment record creation via ProShop API + spare-parts quote workflow
+
+**Date:** 2026-05-04 (later, same day)
+
+**Task:** Create the SMC AW40-04DG-A pneumatic filter regulator as a real ProShop equipment record (the markdown reference doc had been sitting as a stub), duplicate it for the second SMT machine, and draft a vendor quote-request email for spare parts. First-ever use of ProShop's `addEquipment` mutation from this codebase.
+
+**What was done:**
+
+1. **`addEquipment` mutation discovery + first call** — Introspected `AddEquipmentInput` (12 fields, only `equipmentType` required). Inventoried existing `equipmentType` prefix codes (Cal, TG, MT, OM, 5S, CA, REG, PUMP, etc.) and chose `CA` for the SMC unit since it lives downstream of the air compressor. Initial mutation blocked by OAuth scope (`equipment:r` only) — Wolfgang appended `equipment:rwdp` to the BA16-EFAF-B154 client; mutation then succeeded. **No `acceptNewRecord` block** on equipment (unlike CustomerPo / PurchaseOrder), so once scope was granted the path was clean. Created **CA152** for SMT machine M2.
+
+2. **JSON-escape passthrough bug surfaced** — em-dashes and `\n` in the original payload came back stored as literal `—` and `\n` text. ProShop's GraphQL doesn't unescape JSON escapes server-side. Fixed by patching the record with ASCII-only content and ` | ` separators instead of newlines. Saved as memory `project_proshop_equipment_api_quirks.md` to avoid relearning.
+
+3. **`updateEquipment` / `deleteEquipment` identifier asymmetry** — Both mutations key on the **Tool #** field (`tool: String!`), NOT `equipmentNumber`. ProShop auto-builds Tool # as `equipmentType + equipmentNumber` (so CA152 → "CA152"). `EquipmentQuery` filter has no `equipmentNumber` field at all — to look records up by record ID, query by `tool` or paginate. ProShop URL pattern is `/equipment/{equipmentType}/{tool}` (so CA152 lives at `/equipment/CA/CA152`, not `/equipment/152` as the photo-uploader's `search_equipment()` constructs).
+
+4. **CA153 created as duplicate for M3** — Same payload, location updated to "SMT machine M3 - pneumatic prep panel..." Updated CA152's location to explicitly call out M2.
+
+5. **OC Pneumatics quote-request email drafted** — Vendor not in `vendor_map.json`; sales address resolved to `sales@ocaire.com` via web. Drafted via P31's `email_draft.create_draft()` into tom@'s "Purchasing - To Review" Outlook folder. Multiple iterations: address corrected, drain port confirmed as one-touch ø6 (so AD48-A → AD48-6-A on the BOM, but with hedging language since the one-touch is a separately-threaded adapter), made-up "Bldg 2 / Ste C" removed, signature switched to Wolfgang Griffith with `wolfgang@traxismfg.com`. Wolfgang added `wolfgang@traxismfg.com` as an Exchange alias on tom@'s mailbox via GoDaddy's M365 admin; **Graph app credential cannot programmatically override `from`/`sender`** (PATCH returns 200 but silently ignored — needs `Mail.Send` + Send-As, which app currently lacks). Wolfgang switched From manually in Outlook UI before sending. Saved alias mapping + Graph limitation as memory `reference_wolfgang_alias.md`.
+
+6. **Image copy to CA153 attempted, abandoned** — CA152's images sub-table has IMG_3383 (assembly) + IMG_3492 (model label) uploaded directly via the ProShop UI. ProShop GraphQL has **zero image mutations** — images sub-table is UI-only. Tried 4 download paths (API token, session cookie, in-page fetch, top-level navigate + canvas read); all blocked by file-server's separate auth on `:8181` subdomain. Wolfgang opted to copy manually rather than spend the half-day on Selenium discovery for two photos.
+
+**Files modified:**
+
+- `26. SMT Post Processor Development/SMT Maintenance/SMC_AW40-04DG-A_equipment.md` — drain port confirmed one-touch (no longer "verify on disassembly"); AD48-A → AD48-6-A throughout BOM, failure modes, replacement procedure, and stock-qty TODO; barb-vs-one-touch language replaced with installed-fact statements
+- `26. SMT Post Processor Development/SMT Maintenance/probe_create_equipment.py` — NEW (working introspection + create template; runs `--execute` to actually call mutation)
+- `26. SMT Post Processor Development/SMT Maintenance/probe_create_m3_duplicate.py` — NEW (the actual M3 duplication call, kept as record)
+- `26. SMT Post Processor Development/SMT Maintenance/probe_fix_unicode.py` — NEW (documents the unicode workaround via updateEquipment)
+- `26. SMT Post Processor Development/SMT Maintenance/draft_oc_pneumatics_quote.py` — NEW (initial quote-request drafter; subsequent edits done via direct Graph PATCH and not kept as scripts)
+- `26. SMT Post Processor Development/CLAUDE.md` — NEW (created at session close — first CLAUDE.md for this project)
+- `1. Proshop Automations/.traxis.env` — appended `+equipment:rwdp` to PROSHOP_SCOPE on the BA16-EFAF-B154 client
+- (memory) `project_proshop_equipment_api_quirks.md` — NEW
+- (memory) `reference_wolfgang_alias.md` — NEW
+- (memory) `MEMORY.md` — added two index entries
+
+**ProShop side-effects (not in repo):**
+
+- Equipment record `CA152` created (SMT M2 SMC AW40-04DG-A) — https://traxismfg.adionsystems.com/procnc/equipment/CA/CA152
+- Equipment record `CA153` created (SMT M3 SMC AW40-04DG-A) — https://traxismfg.adionsystems.com/procnc/equipment/CA/CA153
+- Both records have full notes (parts list, vendor, drain-fitting confirmation, install location)
+
+**M365 side-effects:**
+
+- `wolfgang@traxismfg.com` Exchange alias added to tom@'s mailbox via GoDaddy
+- One Outlook draft created and patched repeatedly in tom@'s "Purchasing - To Review" folder; sent by Wolfgang from his alias
+
+**Status:** Complete. Awaiting OC Pneumatics quote response — once received, update spare parts BOM with actual prices and add `ocaire.com` to `vendor_map.json` so future SMC orders auto-route.
+
+---
+
 ### P31/P35: tool-page Buy — AJ Rod auto-routing + MFG+EDP email enrichment
 
 **Date:** 2026-05-04

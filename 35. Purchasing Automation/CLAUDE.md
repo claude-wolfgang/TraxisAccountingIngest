@@ -37,6 +37,7 @@ The Flask code, queue DB, rules, vendor lookup, and email-draft helper all live 
 - **CWS approval cycle** — P30 v1.6.0 (with the new Buy button) needs to be re-published to Chrome Web Store. Sideload-tested only.
 - **Proactive reorder sweep (v2)** — see PLAN.md v2/future. Scheduled job that scans ProShop COTS for low-inventory items not already on an open VPO and drafts quote requests automatically.
 - **McMaster price scraper (v2)** — short-circuit the email-quote loop for the highest-volume catalog vendor.
+- **Add `ocaire.com` to `vendor_map.json`** once OC Pneumatics replies to the SMC AW40-04DG-A quote request (drafted 2026-05-04 from P26, sent by Wolfgang). Reply will confirm preferred contact; this is also the first SMC/pneumatic vendor in the map, so future spare orders for SMC parts (drains, filters, regulators across the floor) auto-route there.
 
 **Done this session (2026-05-04):** AJ Rod auto-routing for tool requests (server-side default); MFG+EDP+description enrichment in tool quote-request emails (replaces internal tool numbers).
 
