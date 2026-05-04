@@ -87,51 +87,168 @@ def find_rollo_printer() -> str | None:
     return None
 
 
+def _split_axis(
+    bw: Image.Image,
+    bbox: tuple[int, int, int, int],
+    axis: str,
+    min_gap_pct: float,
+) -> list[tuple[int, int, int, int]]:
+    """Split bbox of a threshold image into sub-bboxes wherever a strip of
+    full-axis whitespace at least min_gap_pct of the axis length appears.
+    Returns [bbox] unchanged if no qualifying split is found.
+    """
+    left, top, _right, _bottom = bbox
+    region = bw.crop(bbox)
+    rw, rh = region.size
+    if rw == 0 or rh == 0:
+        return [bbox]
+
+    # Transpose so columns become rows for fast bytes-comparison scanning.
+    scan_img = region.transpose(Image.TRANSPOSE) if axis == "cols" else region
+    sw, sh = scan_img.size
+    data = scan_img.tobytes()
+    zero_row = b"\x00" * sw
+    has_content = [
+        data[y * sw:(y + 1) * sw] != zero_row for y in range(sh)
+    ]
+
+    min_gap = max(int(sh * min_gap_pct), 10)
+
+    runs: list[tuple[int, int]] = []
+    run_start = -1
+    last_content = -1
+    for i, has in enumerate(has_content):
+        if has:
+            if run_start < 0:
+                run_start = i
+            last_content = i
+        elif run_start >= 0 and (i - last_content) >= min_gap:
+            runs.append((run_start, last_content))
+            run_start = -1
+    if run_start >= 0 and last_content >= run_start:
+        runs.append((run_start, last_content))
+
+    if len(runs) <= 1:
+        return [bbox]
+
+    out: list[tuple[int, int, int, int]] = []
+    for s, e in runs:
+        crop = (0, s, rw, e + 1) if axis == "rows" else (s, 0, e + 1, rh)
+        sub = region.crop(crop)
+        sb = sub.getbbox()
+        if not sb:
+            continue
+        sl, st, sr, sbot = sb
+        if axis == "rows":
+            out.append((left + sl, top + s + st, left + sr, top + s + sbot))
+        else:
+            out.append((left + s + sl, top + st, left + s + sr, top + sbot))
+    return out or [bbox]
+
+
+def _find_label_region(
+    bw: Image.Image,
+    outer_bbox: tuple[int, int, int, int],
+    min_gap_pct: float = 0.04,
+) -> tuple[int, int, int, int] | None:
+    """Detect distinct content regions inside outer_bbox separated by full-axis
+    whitespace strips on either axis (handles UPS small-label-on-letter,
+    FedEx label+doc-tab stacked, and FedEx label+instructions side-by-side).
+    Returns the bbox of the largest region by area, or None if content is one
+    contiguous block.
+    """
+    row_blocks = _split_axis(bw, outer_bbox, "rows", min_gap_pct)
+    leaves: list[tuple[int, int, int, int]] = []
+    for rb in row_blocks:
+        leaves.extend(_split_axis(bw, rb, "cols", min_gap_pct))
+
+    if len(leaves) <= 1:
+        return None
+
+    return max(leaves, key=lambda b: (b[2] - b[0]) * (b[3] - b[1]))
+
+
+def _region_is_upside_down(
+    page: "fitz.Page",
+    region_bbox_px: tuple[int, int, int, int],
+    dpi: int,
+) -> bool:
+    """True if text inside region_bbox_px is predominantly rotated 180°.
+    FedEx ship-manager labels are rendered upside-down on the page so a user
+    can fold and tuck for laser printing — for thermal we flip them back.
+    """
+    scale = 72.0 / dpi
+    x0, y0, x1, y1 = region_bbox_px
+    pdf_rect = fitz.Rect(x0 * scale, y0 * scale, x1 * scale, y1 * scale)
+    try:
+        text_dict = page.get_text("dict")
+    except Exception:
+        return False
+    upright = upside_down = 0
+    for block in text_dict.get("blocks", []):
+        if block.get("type") != 0:
+            continue
+        bbox = block.get("bbox")
+        if not bbox or not pdf_rect.intersects(fitz.Rect(*bbox)):
+            continue
+        for line in block.get("lines", []):
+            cos_t = line.get("dir", (1.0, 0.0))[0]
+            if cos_t > 0.9:
+                upright += 1
+            elif cos_t < -0.9:
+                upside_down += 1
+    return upside_down > upright
+
+
 def render_pdf_to_images(pdf_path: str) -> list[Image.Image]:
     """Render each page of *pdf_path* to a PIL Image scaled for the Rollo label.
 
-    Auto-detects the actual content area (ink bounding box) and crops to it
-    before scaling, so an 8.5x11 UPS PDF with a small label fills the 4x6.
+    Crops to the actual ink area so an 8.5x11 carrier PDF (UPS, FedEx) fills
+    the 4x6. When content is split by whitespace (FedEx page-header + label,
+    or label + doc tab), picks the largest block as the label and corrects
+    upside-down orientation via PyMuPDF text direction.
     """
     doc = fitz.open(pdf_path)
     images: list[Image.Image] = []
+    preview_dpi = 300
     for page in doc:
-        # First render at high DPI to detect content bounding box
-        preview_dpi = 300
+        # FedEx ship-manager PDFs are authored with page.rotation set so the
+        # label sits sideways/upside-down on a fold-and-tuck laser sheet.
+        # Render in PDF-native space so the label is upright and text-direction
+        # checks below match the rendered pixmap's coordinate frame.
+        if page.rotation:
+            page.set_rotation(0)
         mat = fitz.Matrix(preview_dpi / 72.0, preview_dpi / 72.0)
         pix = page.get_pixmap(matrix=mat, alpha=False)
         img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
 
-        # Find bounding box of non-white pixels (content area)
-        # Convert to grayscale, invert so content is white, get bbox
         gray = img.convert("L")
-        # Threshold: anything darker than 250 is "content"
         bw = gray.point(lambda x: 255 if x < 250 else 0)
         bbox = bw.getbbox()
 
         if bbox is None:
-            # Blank page, skip
             continue
 
-        # Add a small margin (5% of content size) around the detected content
-        margin_x = int((bbox[2] - bbox[0]) * 0.03)
-        margin_y = int((bbox[3] - bbox[1]) * 0.03)
+        label_bbox = _find_label_region(bw, bbox) or bbox
+
+        margin_x = int((label_bbox[2] - label_bbox[0]) * 0.03)
+        margin_y = int((label_bbox[3] - label_bbox[1]) * 0.03)
         crop_box = (
-            max(bbox[0] - margin_x, 0),
-            max(bbox[1] - margin_y, 0),
-            min(bbox[2] + margin_x, img.width),
-            min(bbox[3] + margin_y, img.height),
+            max(label_bbox[0] - margin_x, 0),
+            max(label_bbox[1] - margin_y, 0),
+            min(label_bbox[2] + margin_x, img.width),
+            min(label_bbox[3] + margin_y, img.height),
         )
         cropped = img.crop(crop_box)
 
-        # Auto-rotate: if content is landscape (wider than tall), rotate to
-        # portrait so it matches the 4x6 label orientation
+        if _region_is_upside_down(page, crop_box, preview_dpi):
+            cropped = cropped.rotate(180, expand=True)
+
         crop_w, crop_h = cropped.size
         if crop_w > crop_h:
             cropped = cropped.rotate(90, expand=True)
             crop_w, crop_h = cropped.size
 
-        # Scale cropped content to fill the 4x6 label, maintaining aspect ratio
         scale_x = LABEL_WIDTH_PX / crop_w
         scale_y = LABEL_HEIGHT_PX / crop_h
         scale = min(scale_x, scale_y)
@@ -140,7 +257,6 @@ def render_pdf_to_images(pdf_path: str) -> list[Image.Image]:
         new_h = int(crop_h * scale)
         resized = cropped.resize((new_w, new_h), Image.LANCZOS)
 
-        # Center on a blank 4x6 label
         label = Image.new("RGB", (LABEL_WIDTH_PX, LABEL_HEIGHT_PX), (255, 255, 255))
         offset_x = (LABEL_WIDTH_PX - new_w) // 2
         offset_y = (LABEL_HEIGHT_PX - new_h) // 2

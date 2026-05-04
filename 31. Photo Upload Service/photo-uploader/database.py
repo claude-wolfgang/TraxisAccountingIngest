@@ -120,6 +120,55 @@ def update_photo_status(photo_id, status, error_message=None):
     conn.close()
 
 
+_UPDATABLE_FIELDS = {
+    "entity_type", "entity_id", "entity_name",
+    "operation_number", "operation_desc",
+    "note", "proshop_url",
+}
+
+
+def update_photo_fields(photo_id, **fields):
+    """Partial update on photo metadata. Unknown fields are ignored.
+    If `reset_status` is truthy, also clears error_message and resets status
+    to 'pending' with retry_count=0 so the worker re-attempts upload.
+    """
+    reset_status = fields.pop("reset_status", False)
+    sets = {k: v for k, v in fields.items() if k in _UPDATABLE_FIELDS}
+    if not sets and not reset_status:
+        return False
+    now = _now()
+    cols = list(sets.keys())
+    vals = [sets[c] for c in cols]
+    if reset_status:
+        cols += ["status", "error_message", "retry_count"]
+        vals += ["pending", None, 0]
+    cols.append("updated_at")
+    vals.append(now)
+    set_clause = ", ".join(f"{c}=?" for c in cols)
+    conn = get_connection()
+    conn.execute(f"UPDATE photos SET {set_clause} WHERE id=?", (*vals, photo_id))
+    conn.commit()
+    conn.close()
+    return True
+
+
+def delete_photo(photo_id):
+    """Delete the photo row. Returns the file_path so the caller can also
+    unlink the on-disk file. Returns None if the row didn't exist.
+    """
+    conn = get_connection()
+    row = conn.execute(
+        "SELECT file_path FROM photos WHERE id=?", (photo_id,)
+    ).fetchone()
+    if not row:
+        conn.close()
+        return None
+    conn.execute("DELETE FROM photos WHERE id=?", (photo_id,))
+    conn.commit()
+    conn.close()
+    return row["file_path"]
+
+
 def increment_retry(photo_id):
     now = _now()
     conn = get_connection()

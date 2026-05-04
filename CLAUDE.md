@@ -70,3 +70,7 @@ Contracts: <cross-project assumptions — paths, formats, schemas — that anoth
 ```
 
 These are parsed by the nightly scanner (`25. Agent Exploration/scan_projects.py`) and aggregated into `TRAXIS_ECOSYSTEM.md`.
+
+## Next Steps
+
+- **Cross-cutting: roll all Flask services off Werkzeug onto waitress** — every service Overseer manages via `pythonw app.py` (P17 COTS, P31 Photo, P5/Tool Kiosk, P34 Shop Scheduler, etc.) shares the same restart-fragility surfaced 2026-05-04: Werkzeug's dev server has no graceful shutdown, so `Popen.terminate()` leaves zombie LISTEN sockets when there are pending CLOSE_WAITs. A standard pattern: `from waitress import serve; serve(app, host=..., port=..., channel_timeout=30)` plus a shared `POST /api/shutdown` route. Worth doing as a single sweep across all of them rather than per-service. Overseer's `_stop_process` should call `/api/shutdown` first (5s budget) before `terminate()`. P31 Next Steps has the detailed fix plan.

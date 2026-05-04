@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{% if photo %}Edit Photo #{{ photo.id }}{% else %}Photo not found{% endif %}{% endblock %}
+
+{% block content %}
+{% if not photo %}
+<h2>Photo not found</h2>
+<p><a href="/queue" class="btn-secondary">Back to queue</a></p>
+{% else %}
+
+<h2>Photo #{{ photo.id }}</h2>
+
+<div class="edit-grid">
+    <img src="/data/{{ photo.file_path }}" alt="photo" class="edit-photo">
+
+    <div class="edit-meta">
+        <div><strong>{{ photo.entity_type }}</strong> &middot; {{ photo.entity_id }}</div>
+        {% if photo.entity_name %}<div class="muted">{{ photo.entity_name }}</div>{% endif %}
+        {% if photo.operation_number %}
+        <div>Op {{ photo.operation_number }}{% if photo.operation_desc %} — {{ photo.operation_desc }}{% endif %}</div>
+        {% endif %}
+        <div>Status: <span class="status-badge status-{{ photo.status }}">{{ photo.status }}</span>{% if photo.retry_count %} <small>(retries: {{ photo.retry_count }})</small>{% endif %}</div>
+        {% if photo.error_message %}
+        <div class="error-text">{{ photo.error_message }}</div>
+        {% endif %}
+        <div class="muted"><small>{{ photo.created_at[:16] }}</small></div>
+    </div>
+</div>
+
+{% if photo.entity_type in ('workorder', 'part') %}
+<form id="edit-form"
+      data-photo-id="{{ photo.id }}"
+      data-entity-type="{{ photo.entity_type }}"
+      data-entity-id="{{ photo.entity_id }}"
+      data-current-op="{{ photo.operation_number or '' }}">
+    <label class="field">
+        <span>Operation</span>
+        <select id="operation_select" name="operation_number" required>
+            <option value="">Loading…</option>
+        </select>
+    </label>
+    <button type="submit" class="btn-primary">Save & Retry Upload</button>
+</form>
+{% endif %}
+
+<div class="actions-row">
+    <a href="/queue" class="btn-secondary">Back</a>
+    <button id="delete-btn" data-photo-id="{{ photo.id }}" class="btn-danger">Delete Photo</button>
+</div>
+
+<script src="{{ url_for('static', filename='photo_edit.js') }}"></script>
+{% endif %}
+{% endblock %}

@@ -646,6 +646,37 @@ class ServiceManager:
     # ---- Process helpers ---------------------------------------------------
 
     @staticmethod
+    def _pid_alive(pid):
+        """True iff `pid` exists AND has not yet exited.
+
+        On Windows, a force-killed process with pending socket I/O (CLOSE_WAITs
+        from hung clients) can keep its kernel object — and its listening
+        socket attribution in netstat — long after the process is gone.
+        OpenProcess may still succeed for such zombies, so GetExitCodeProcess
+        is needed to distinguish "STILL_ACTIVE" from "exited but not reaped".
+        """
+        if not pid or pid <= 0:
+            return False
+        try:
+            import ctypes
+            PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+            STILL_ACTIVE = 259
+            h = ctypes.windll.kernel32.OpenProcess(
+                PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid))
+            if not h:
+                return False
+            try:
+                exit_code = ctypes.c_ulong()
+                if not ctypes.windll.kernel32.GetExitCodeProcess(
+                        h, ctypes.byref(exit_code)):
+                    return False
+                return exit_code.value == STILL_ACTIVE
+            finally:
+                ctypes.windll.kernel32.CloseHandle(h)
+        except Exception:
+            return False
+
+    @staticmethod
     def _find_pid_by_port(port):
         if not port:
             return None
@@ -658,8 +689,16 @@ class ServiceManager:
             for line in result.stdout.splitlines():
                 if f":{port} " in line and "LISTENING" in line:
                     parts = line.strip().split()
-                    if parts:
-                        return int(parts[-1])
+                    if not parts:
+                        continue
+                    try:
+                        pid = int(parts[-1])
+                    except ValueError:
+                        continue
+                    if ServiceManager._pid_alive(pid):
+                        return pid
+                    # Zombie listener (dead PID still attributed to socket) —
+                    # skip and keep scanning; a fresh listener may also exist.
         except Exception:
             pass
         return None

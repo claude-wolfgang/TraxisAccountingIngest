@@ -35,7 +35,7 @@
     </thead>
     <tbody>
         {% for photo in photos %}
-        <tr class="status-{{ photo.status }}">
+        <tr class="status-{{ photo.status }} queue-row" data-href="/photo/{{ photo.id }}">
             <td class="thumb-cell">
                 <img src="/data/{{ photo.file_path }}" alt="photo" class="thumb">
             </td>
@@ -65,4 +65,10 @@
         {% endif %}
     </tbody>
 </table>
+
+<script>
+document.querySelectorAll('.queue-row').forEach(row => {
+    row.addEventListener('click', () => { window.location = row.dataset.href; });
+});
+</script>
 {% endblock %}

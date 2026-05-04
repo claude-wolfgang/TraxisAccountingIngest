@@ -7,6 +7,50 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-04
 
+### P29 + P31 + P1 (Overseer): FedEx label support, photo-queue fix-page, Overseer zombie-PID adoption fix
+
+**Date:** 2026-05-04 (evening, same day)
+
+**Task:** Three threads chained off each other: (1) make the Rollo printer auto-resizer handle FedEx labels alongside UPS, (2) make failed-upload rows in the P31 queue clickable so the operator can fix the missing-op-number error and retry, (3) when (2) led to deploying via service-restart, surface and fix a latent Overseer bug that was making restarts permanently brittle.
+
+**What was done:**
+
+1. **P29 — FedEx labels.** FedEx Ship Manager 8.5x11 PDFs differ from UPS in two ways: (a) page authored with `page.rotation == 270` so PyMuPDF's pixmap renders sideways, and (b) the actual 4×6 label is a separate content block from a small page-header summary (and sometimes from a doc tab). Existing UPS-tuned bbox crop pulled in everything together, shrinking the label to ~1/3 size, and rendered it upside-down. Added:
+   - `page.set_rotation(0)` before render so we work in PDF-native coordinate space — text-direction analysis below would otherwise reference a different frame than the pixmap.
+   - `_split_axis()` + `_find_label_region()` — two-axis whitespace-strip detection that splits the bbox into distinct content blocks (handles label+doc-tab stacked AND label+instructions side-by-side, which is what FedEx's laser fold-and-tuck format produces). Picks the largest block by area.
+   - `_region_is_upside_down()` — reads PyMuPDF per-line `dir` cosine inside the chosen region; if predominantly `cos_t < -0.9` (180° rotated), flips the cropped image. FedEx ship-manager labels are intentionally upside-down on the page so a user folds the sheet for laser-print pouches.
+   - Verified with sample `2026-05-04T20_32_39-FedEx-Shipping-Label.pdf` — clean 4×6 output, addresses upright, 2D barcode + tracking + ZIP barcode all readable. UPS path unchanged because multi-block detection is no-op when content is one contiguous block.
+
+2. **P31 — queue rows clickable + per-photo fix page.** Failed photos #5 and #6 (parts R3V1-10852, ICO1-10-02004) had no `operation_number`, which the upload worker logs as a warning every 60s and can't recover from. Rows in `/queue` were previously inert. Added:
+   - `database.update_photo_fields(photo_id, **kwargs)` (partial update with optional `reset_status` flag that clears error + resets retry_count) and `database.delete_photo(photo_id)` (returns file_path for caller to unlink).
+   - `GET /photo/<id>` route + `templates/photo_edit.html` — shows photo, status, error, current entity, and (for workorder/part) an Operation dropdown loaded from `/api/operations`. Save & Retry sets the op + flips status back to pending so the worker re-attempts upload on its next 60s cycle.
+   - `POST /api/photos/<id>/update` and `POST /api/photos/<id>/delete` — JSON endpoints driven by `static/photo_edit.js`.
+   - `templates/queue.html` — added `data-href` + `.queue-row` class with a tiny inline script that navigates to `/photo/<id>` on click.
+   - CSS additions for clickable rows (cursor + hover/active states), edit-grid layout (image left / metadata right), and tablet-friendly button sizes.
+
+3. **P1 (Overseer) — zombie-PID adoption bug.** Trying to deploy the P31 changes meant restarting the Flask service. That surfaced a runaway loop: when the photo uploader was force-killed, Werkzeug's listening socket lingered as a "zombie" (kernel kept attributing it to the dead PID because of pending CLOSE_WAIT connections). Overseer's `_find_pid_by_port()` returned the zombie PID first, `_start_process()` "adopted" it as the running service, health checks then timed out forever, restarts kept re-adopting the same corpse. **Fix:** added `_pid_alive()` static method on `ServiceManager` using Win32 `OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION)` + `GetExitCodeProcess` (distinguishes `STILL_ACTIVE` from "exited but kernel hasn't reaped" — `OpenProcess` alone can succeed on a zombie). `_find_pid_by_port` now scans netstat output, skips dead PIDs, returns the first alive listener. Verified: after Overseer restart, log shows `[PhotoUploadService] started: PID NNNN` (true spawn) instead of `adopted: Found existing process PID 15884` (zombie).
+
+4. **Where it stands as of close.** Overseer fix is good and was load-bearing — without it, future "service force-killed → zombie socket" events would put PhotoUploadService in the same flapping loop. **However**, today's specific zombie state didn't recover: 2h+ uptime, port 5003 has 9 listeners (1 alive, 8 zombies) because Overseer's restart cycles each created a fresh-then-killed process and Werkzeug + force-kill always leaves a zombie. Connections to port 5003 hash across all 9 listeners; only ~1/9 reach the alive process, so HTTP probes and tablet uploads still time out. **Wolfgang said "rebooted" but `LastBootUpTime` showed 16:01:09 — the original boot, not a fresh one.** The new edit-page code is on disk and correct; it'll go live the moment a real OS reboot clears the zombies and Overseer starts the photo uploader cleanly. Not done this session: switching the photo uploader from Werkzeug dev server to waitress (would prevent the original tablet-upload-hangs-process scenario that started this whole chain), and a stopgap in Overseer to suppress restart attempts when fewer than X connections out of Y listeners are reaching the alive PID.
+
+**Files modified:**
+
+- `29. Rollo Printer App/rollo_printer_app.py` — added `_split_axis()`, `_find_label_region()`, `_region_is_upside_down()`; modified `render_pdf_to_images()` to clear page rotation, run multi-block detection, and 180° auto-correct via text-direction
+- `1. Proshop Automations/Overseer/overseer.py` — added `_pid_alive()` static method on `ServiceManager`; modified `_find_pid_by_port()` to verify aliveness and skip zombies
+- `31. Photo Upload Service/photo-uploader/database.py` — added `update_photo_fields()`, `delete_photo()`; added `_UPDATABLE_FIELDS` whitelist
+- `31. Photo Upload Service/photo-uploader/templates/queue.html` — added `.queue-row` data-href + click handler
+- `31. Photo Upload Service/photo-uploader/templates/photo_edit.html` — NEW per-photo edit page
+- `31. Photo Upload Service/photo-uploader/static/photo_edit.js` — NEW (loads ops, save+retry, delete handlers)
+- `31. Photo Upload Service/photo-uploader/static/style.css` — clickable-row hover state + edit-page layout (.edit-grid, .edit-photo, .edit-meta, .actions-row, btn-primary/secondary/danger, mobile breakpoint)
+- (Note: `app.py` already contained the `/photo/<id>`, `/api/photos/<id>/update`, `/api/photos/<id>/delete` route handlers in HEAD — `git diff` shows no change. Either committed earlier or my Edit was idempotent against pre-existing identical content. End state of the file is correct either way.)
+
+**Status:** Code complete on disk. Two open blockers below.
+
+**[NEEDS WOLFGANG]:**
+- Real OS reboot of `.71` to clear all 9 zombie listeners on port 5003. Until then, photo upload service is unreachable from the tablet, and the new fix-page can't be exercised.
+- Decide whether to switch P31 to waitress before the next deploy of the photo uploader, to prevent this whole chain happening again the next time the tablet stalls mid-upload.
+
+---
+
 ### P26: SMC AW40-04DG-A equipment record creation via ProShop API + spare-parts quote workflow
 
 **Date:** 2026-05-04 (later, same day)
