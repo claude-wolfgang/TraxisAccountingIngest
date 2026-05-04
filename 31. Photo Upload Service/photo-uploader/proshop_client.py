@@ -702,6 +702,49 @@ class ProShopClient:
             "url": f"{self.base_url}/ots/{cots_id}",
         }
 
+    # ── Purchasing Info ───────────────────────────────────────────────────
+
+    def get_purchasing_info(self, entity_type, entity_id):
+        """Fetch the fields needed to compose a vendor-facing quote-request email.
+
+        Returns {description, brand, edp, cost} — top approvedBrand record per
+        Wolfgang's convention. brand/edp/cost may be None if the tool has no
+        approvedBrands records on file. Caller should fall back to description
+        + entity_id when brand/edp are missing.
+        """
+        if entity_type == "tool":
+            return self._tool_purchasing_info(entity_id)
+        return {"description": "", "brand": None, "edp": None, "cost": None}
+
+    def _tool_purchasing_info(self, tool_number):
+        try:
+            result = self._execute("""
+                query ($num: String!) {
+                    tools(query: { toolNumber: { exactly: $num } }) {
+                        records {
+                            toolNumber description
+                            approvedBrands(pageSize: 5) {
+                                records { approvedBrand vendorToolId cost }
+                            }
+                        }
+                    }
+                }
+            """, {"num": tool_number})
+            records = (result.get("data") or {}).get("tools", {}).get("records", [])
+            if not records:
+                return {"description": "", "brand": None, "edp": None, "cost": None}
+            t = records[0]
+            brands = ((t.get("approvedBrands") or {}).get("records") or [])
+            top = brands[0] if brands else {}
+            return {
+                "description": t.get("description") or "",
+                "brand": top.get("approvedBrand") or None,
+                "edp": top.get("vendorToolId") or None,
+                "cost": top.get("cost"),
+            }
+        except Exception:
+            return {"description": "", "brand": None, "edp": None, "cost": None}
+
     # ── Health Check ──────────────────────────────────────────────────────
 
     def check_health(self):

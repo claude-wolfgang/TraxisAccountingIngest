@@ -28,13 +28,17 @@ The Flask code, queue DB, rules, vendor lookup, and email-draft helper all live 
 
 ## Next Steps
 
-- **Phase 2: Selenium VPO creation** — write `inspect_vpo_form.py` first (visible-mode driver of ProShop's "New VPO" form) to discover selectors before building the VPO worker
+- **[NEEDS WOLFGANG] Service-restart fragility** — see P31 Next Steps. Until the dev-server zombie-socket pattern is fixed, deploys that require a Flask restart can wedge port 5003 and force a reboot of .71. Scoped to P31 because all P35 runtime lives there.
+- **Phase 2: Selenium VPO creation** — write `inspect_vpo_form.py` first (visible-mode driver of ProShop's "New VPO" form) to discover selectors before building the VPO worker.
+- **MFG+EDP enrichment for COTS and parts** — tool-page Buy clicks now use approvedBrands data in the quote-request email; mirror the same in COTS and parts paths. (See P31 Next Steps for the implementation pointer.)
 - **Fix folder lookup** — `email_draft._ensure_folder()` only searches root-level mail folders; if the "Purchasing - To Review" folder gets nested under another folder (Wolfgang's organizational impulse), Flask will create a duplicate at root on next restart. Either walk childFolders recursively or persist the folder ID across restarts.
 - **Cost-scrape brittleness** — the COTS-page Cost-column heuristic in P30's `buy-content.js` worked for LUB-116 but missed for THI-17. Inspect the THI-17 page DOM and tighten the column-finder.
 - **Email name-extraction** — `vendors.first_name_of()` only confidently extracts a first name when the local part has a dot (e.g. jaime.gomez). For `briannab@`-style addresses we fall back to "Hello," — losing real name info. Optional: add a `first_name` field to `vendor_map.json` entries and prefer that.
 - **CWS approval cycle** — P30 v1.6.0 (with the new Buy button) needs to be re-published to Chrome Web Store. Sideload-tested only.
 - **Proactive reorder sweep (v2)** — see PLAN.md v2/future. Scheduled job that scans ProShop COTS for low-inventory items not already on an open VPO and drafts quote requests automatically.
 - **McMaster price scraper (v2)** — short-circuit the email-quote loop for the highest-volume catalog vendor.
+
+**Done this session (2026-05-04):** AJ Rod auto-routing for tool requests (server-side default); MFG+EDP+description enrichment in tool quote-request emails (replaces internal tool numbers).
 
 ## Interfaces
 

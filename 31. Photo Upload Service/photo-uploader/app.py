@@ -65,6 +65,45 @@ def queue_page():
     return render_template("queue.html", photos=photos, stats=stats)
 
 
+@app.route("/photo/<int:photo_id>")
+def photo_edit_page(photo_id):
+    photo = database.get_photo(photo_id)
+    if not photo:
+        return render_template("photo_edit.html", photo=None), 404
+    return render_template("photo_edit.html", photo=photo)
+
+
+@app.route("/api/photos/<int:photo_id>/update", methods=["POST"])
+def update_photo(photo_id):
+    photo = database.get_photo(photo_id)
+    if not photo:
+        return jsonify({"error": "photo not found"}), 404
+    data = request.get_json(silent=True) or {}
+    fields = {}
+    for k in ("entity_id", "entity_name", "operation_number", "operation_desc", "note"):
+        if k in data:
+            fields[k] = (data.get(k) or "").strip()
+    fields["reset_status"] = bool(data.get("retry"))
+    database.update_photo_fields(photo_id, **fields)
+    log.info(f"Photo #{photo_id} edited: {fields}")
+    return jsonify({"success": True})
+
+
+@app.route("/api/photos/<int:photo_id>/delete", methods=["POST"])
+def delete_photo(photo_id):
+    rel_path = database.delete_photo(photo_id)
+    if rel_path is None:
+        return jsonify({"error": "photo not found"}), 404
+    try:
+        full_path = config.DATA_DIR / rel_path
+        if full_path.exists():
+            full_path.unlink()
+    except Exception as e:
+        log.warning(f"Photo #{photo_id}: row deleted but file unlink failed: {e}")
+    log.info(f"Photo #{photo_id} deleted")
+    return jsonify({"success": True})
+
+
 # ── API: Photo Upload ────────────────────────────────────────────────────
 
 @app.route("/api/photos", methods=["POST"])
@@ -436,6 +475,24 @@ def queue_order():
     brand = (data.get("brand") or None)
     edp = (data.get("edp") or None)
 
+    # All tool requests route through AJ Rodco regardless of what the
+    # tool page lists — older tool records may name another vendor but
+    # we consolidate sourcing through them.
+    if entity_type == "tool" and not vendor:
+        vendor = "AJ Rodco"
+
+    # Enrich with MFG + EDP from ProShop tool library — vendors don't
+    # recognize internal tool numbers (A268, etc.); they need their own
+    # brand + part number to look up the item.
+    description = ""
+    if entity_type == "tool":
+        info = proshop.get_purchasing_info(entity_type, entity_id)
+        description = info.get("description") or ""
+        if not brand:
+            brand = info.get("brand")
+        if not edp:
+            edp = info.get("edp")
+
     auto, reason = purchasing_rules.should_auto_approve(entity_id, qty, unit_cost)
     status = "approved" if auto else "pending"
     approver = "auto" if auto else None
@@ -454,11 +511,21 @@ def queue_order():
             else:
                 first_name = purchasing_vendors.first_name_of(vendor_email)
                 greeting = f"Hi {first_name}," if first_name else "Hello,"
-                ident = entity_id + (f" ({brand})" if brand else "")
+                # Vendor-facing identifier: prefer MFG + EDP, fall back to
+                # description, last resort the internal tool number.
+                if brand and edp:
+                    ident = f"{brand} {edp}"
+                elif description:
+                    ident = description
+                else:
+                    ident = entity_id
+                desc_line = (f"\nDescription: {description}\n"
+                             if description and brand and edp else "")
                 subject = f"Pricing request: {ident} qty {qty:g}"
                 body = (f"{greeting}\n\n"
                         f"Could you send current pricing and lead time for "
-                        f"{ident}, quantity {qty:g}?\n\n"
+                        f"{ident}, quantity {qty:g}?\n"
+                        f"{desc_line}\n"
                         f"Thanks,\nTom\nTraxis Manufacturing")
                 try:
                     draft_id = purchasing_email.create_draft(vendor_email, subject, body)

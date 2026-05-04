@@ -5,6 +5,38 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-04
+
+### P31/P35: tool-page Buy — AJ Rod auto-routing + MFG+EDP email enrichment
+
+**Date:** 2026-05-04
+
+**Task:** Wolfgang clicked the new "Buy" button on tool A268 and saw nothing happen. Connect the existing Phase 1.5 quote-request email path so tool-page clicks actually draft something — and make the email vendor-readable instead of leaking internal tool numbers.
+
+**What was done:**
+
+1. **Diagnosis** — A268 click did reach `/api/queue-order` and queued order #4 as `pending`, but the email-draft branch was skipped because `buy-content.js`'s `scrapeVendor()` returned null on the tool page (the regex looks for an exactly-"Vendor" `<th>`, which COTS Equivalents tables have but tool pages don't). So both `unit_cost` and `vendor` came back null and the order parked silently.
+
+2. **AJ Rod auto-routing** — encoded Wolfgang's domain rule directly in `app.py:442`: any tool-entity request with no vendor scraped now defaults to `"AJ Rodco"`. Older tool records may name a different vendor, but Traxis consolidates all tool sourcing through AJ Rod. Saved as `project_aj_rodco_tool_routing.md` in memory so future sessions don't re-introduce page-scrape heuristics for tool pages.
+
+3. **MFG + EDP email enrichment** — added `proshop_client.get_purchasing_info()` returning the top `approvedBrands` record for a tool (manufacturer name, vendorToolId/EDP, description). `app.py:445` now consults it for tool requests and rebuilds the email subject/body around `{brand} {edp}` instead of the internal toolNumber. Vendors recognize their own catalog numbers; "A268" means nothing to them. Falls back to description if approvedBrands is empty, then to entity_id as last resort. Verified A268 → SGS 34705 with the description below in the body. Synthetic POST drafted email #6 to jaime.gomez@ajrodco.com; Wolfgang sent it.
+
+4. **Cleanup** — orders #5 and #6 (synthetic test drafts) marked `rejected` via direct SQLite UPDATE on .71 (the reject endpoint only accepts `pending`, not `awaiting_quote`); Graph DELETE attempted on the corresponding draft messages but returned 404 (likely because Wolfgang already sent #6 and #5 may have moved). Manual sweep of "Purchasing - To Review" folder may still be needed for #5.
+
+**Operational miscue:** killed the photo-uploader twice mid-session to pick up the AJ Rod edit, leaving a Windows-kernel zombie LISTEN socket on port 5003 each time. First reboot of .71 cleared it; second occurrence cleared on its own as the kernel aged out the half-closed sockets. Wolfgang flagged the recurring reboot pattern as unacceptable. Root cause: Werkzeug dev server `app.run()` can't be shut down cleanly — Overseer's `Popen.terminate()` hard-kills, mid-flight connections enter CLOSE_WAIT, dead PID retains the LISTEN socket. Fix added at top of P31 Next Steps (waitress + `/api/shutdown` endpoint).
+
+**Files modified:**
+
+- `31. Photo Upload Service/photo-uploader/app.py` — AJ Rod default for tool entities; tool quote-request email now uses MFG+EDP+description from ProShop tool library
+- `31. Photo Upload Service/photo-uploader/proshop_client.py` — new `get_purchasing_info()` + `_tool_purchasing_info()` (reads top approvedBrands record per Wolfgang's convention)
+- `31. Photo Upload Service/CLAUDE.md` — Next Steps reordered; waitress migration added at top
+- `35. Purchasing Automation/CLAUDE.md` — Next Steps strikethrough on tool-vendor scraping (now obsolete)
+- `MEMORY.md` + `project_aj_rodco_tool_routing.md` — sole-tool-vendor rule
+
+**Status:** Complete and verified end-to-end. Service wedge fix flagged for next session — until then, avoid restart-driven deploys on this service or accept a wait/reboot.
+
+---
+
 ## 2026-05-03
 
 ### P35: purchasing automation Phase 0/1/1.5 — bootstrap, queue, auto-quote-request
