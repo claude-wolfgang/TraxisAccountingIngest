@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Purchasing Approvals{% endblock %}
+
+{% block content %}
+<h2>Purchasing Approvals</h2>
+
+<div class="stats-bar">
+    <div class="stat"><span class="stat-value">{{ stats.get('pending', 0) }}</span><span class="stat-label">Pending</span></div>
+    <div class="stat"><span class="stat-value">{{ stats.get('awaiting_quote', 0) }}</span><span class="stat-label">Awaiting Quote</span></div>
+    <div class="stat"><span class="stat-value">{{ stats.get('approved', 0) }}</span><span class="stat-label">Approved</span></div>
+    <div class="stat"><span class="stat-value">{{ stats.get('rejected', 0) }}</span><span class="stat-label">Rejected</span></div>
+    <div class="stat"><span class="stat-value">{{ stats.get('vpo_created', 0) }}</span><span class="stat-label">VPO Created</span></div>
+</div>
+
+<h3>Pending</h3>
+<table class="queue-table">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Unit Cost</th>
+            <th>Total</th>
+            <th>Vendor</th>
+            <th>Reason</th>
+            <th>Created</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in pending %}
+        <tr data-order-id="{{ o.id }}" class="approval-row">
+            <td><strong>{{ o.entity_type }}</strong><br>{{ o.entity_id }}</td>
+            <td>{{ o.qty }}</td>
+            <td>{% if o.unit_cost is not none %}${{ '%.2f'|format(o.unit_cost) }}{% else %}<em>?</em>{% endif %}</td>
+            <td>{% if o.unit_cost is not none %}${{ '%.2f'|format(o.qty * o.unit_cost) }}{% else %}<em>?</em>{% endif %}</td>
+            <td><small>{{ o.vendor or '' }}</small></td>
+            <td><small>{{ o.rule_reason or '' }}</small></td>
+            <td><small>{{ o.created_at[:16] }}</small></td>
+            <td>
+                <button class="btn-approve" data-id="{{ o.id }}">Approve</button>
+                <button class="btn-reject" data-id="{{ o.id }}">Reject</button>
+            </td>
+        </tr>
+        {% endfor %}
+        {% if not pending %}
+        <tr><td colspan="8" class="empty-row">Nothing pending.</td></tr>
+        {% endif %}
+    </tbody>
+</table>
+
+{% if pending %}
+<div class="bulk-actions">
+    <button id="btn-approve-all" class="btn-approve">Approve All</button>
+</div>
+{% endif %}
+
+{% set awaiting = recent | selectattr('status', 'equalto', 'awaiting_quote') | list %}
+{% if awaiting %}
+<h3>Awaiting Vendor Quote</h3>
+<table class="queue-table">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Vendor</th>
+            <th>Reason</th>
+            <th>Created</th>
+            <th>Draft</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in awaiting %}
+        <tr>
+            <td><strong>{{ o.entity_type }}</strong><br>{{ o.entity_id }}</td>
+            <td>{{ o.qty }}</td>
+            <td><small>{{ o.vendor or '' }}</small></td>
+            <td><small>{{ o.rule_reason or '' }}</small></td>
+            <td><small>{{ o.created_at[:16] }}</small></td>
+            <td>
+                {% if o.email_draft_id %}
+                <a href="https://outlook.office.com/mail/AAMkADAA/id/{{ o.email_draft_id|urlencode }}"
+                   target="_blank" rel="noopener">Open in Outlook →</a>
+                {% else %}<em>none</em>{% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<h3>Recent</h3>
+<table class="queue-table">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Approver</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in recent %}
+        <tr class="status-{{ o.status }}">
+            <td><strong>{{ o.entity_type }}</strong><br>{{ o.entity_id }}</td>
+            <td>{{ o.qty }}</td>
+            <td>{% if o.unit_cost is not none %}${{ '%.2f'|format(o.qty * o.unit_cost) }}{% else %}<em>?</em>{% endif %}</td>
+            <td><span class="status-badge status-{{ o.status }}">{{ o.status }}</span></td>
+            <td><small>{{ o.approved_by or '' }}</small></td>
+            <td><small>{{ o.created_at[:16] }}</small></td>
+        </tr>
+        {% endfor %}
+        {% if not recent %}
+        <tr><td colspan="6" class="empty-row">No orders yet.</td></tr>
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='approvals.js') }}"></script>
+{% endblock %}

@@ -447,6 +447,32 @@ h2 { margin-bottom: 20px; font-size: 1.3rem; }
 
 .hidden { display: none !important; }
 
+/* ── Approvals Page ────────────────────────────────────── */
+
+.bulk-actions {
+    margin: 12px 0 24px;
+    text-align: right;
+}
+
+.btn-approve, .btn-reject {
+    padding: 8px 14px;
+    margin: 2px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-approve { background: var(--green); }
+.btn-reject  { background: var(--accent); }
+.btn-approve:disabled, .btn-reject:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.status-approved        .status-badge { background: var(--green); color: #082; }
+.status-rejected        .status-badge { background: var(--accent); color: #fff; }
+.status-pending         .status-badge { background: var(--yellow); color: #730; }
+.status-awaiting_quote  .status-badge { background: #6a1b9a; color: #fff; }
+
 /* ── Print Label Bar ───────────────────────────────────── */
 
 .print-label-bar {

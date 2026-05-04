@@ -130,3 +130,20 @@
 .traxis-label-btn--tool.traxis-label-btn--success {
   background: #bf360c;
 }
+
+/* Buy button — purple variant (P35 purchasing) */
+.traxis-label-btn--buy {
+  background: #6a1b9a;
+}
+
+.traxis-label-btn--buy:hover {
+  background: #7b1fa2;
+}
+
+.traxis-label-btn--buy:active {
+  background: #4a148c;
+}
+
+.traxis-label-btn--buy.traxis-label-btn--success {
+  background: #4a148c;
+}

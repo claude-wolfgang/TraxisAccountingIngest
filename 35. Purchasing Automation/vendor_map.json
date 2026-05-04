@@ -1,0 +1,235 @@
+{
+  "_comment": "Bootstrap vendor map for P35 purchasing automation. Generated 2026-05-03 from rene@traxismfg.com Inbox mbox (21,437 messages scanned, 6,223 purchasing-shaped). Each entry: domain key, vendor name, active_reps array (sorted newest first), default email (operator's pick — null means 'use most recent'). Hand-edit freely.",
+  "_review_status": "DRAFT — Wolfgang to review and pick `default` per vendor",
+
+  "ajrodco.com": {
+    "name": "AJ Rodco",
+    "active_reps": [
+      {"email": "cinnamon.clark@ajrodco.com", "last_seen": "2026-04-08", "count": 423, "note": "Wolfgang doesn't recognize — possible cold outreach"},
+      {"email": "jaime.gomez@ajrodco.com",    "last_seen": "active",      "count": 853, "note": "confirmed active rep"}
+    ],
+    "default": "jaime.gomez@ajrodco.com"
+  },
+
+  "hadco-metal.com": {
+    "name": "Hadco Metal",
+    "active_reps": [{"email": "briannab@hadco-metal.com", "last_seen": "2026-04-08", "count": 341}],
+    "default": "briannab@hadco-metal.com"
+  },
+
+  "boedeker.com": {
+    "name": "Boedeker",
+    "active_reps": [{"email": "denises@boedeker.com", "last_seen": "2026-04-06", "count": 321}],
+    "default": "denises@boedeker.com"
+  },
+
+  "mcmaster.com": {
+    "name": "McMaster-Carr",
+    "active_reps": [{"email": "invoice.reply@mcmaster.com", "last_seen": "2026-03-19", "count": 265, "note": "online portal vendor"}],
+    "default": "invoice.reply@mcmaster.com",
+    "online_url": "https://mcmaster.com"
+  },
+
+  "mainlandvalve.com": {
+    "name": "Mainland Valve",
+    "active_reps": [{"email": "randyg@mainlandvalve.com", "last_seen": "2025-12-18", "count": 190}],
+    "default": "randyg@mainlandvalve.com"
+  },
+
+  "awaterjet.com": {
+    "name": "Austin Waterjet",
+    "active_reps": [{"email": "maribeths@awaterjet.com", "last_seen": "2025-11-24", "count": 187}],
+    "default": "maribeths@awaterjet.com"
+  },
+
+  "bralco.com": {
+    "name": "Bralco",
+    "active_reps": [{"email": "cgrubbs@bralco.com", "last_seen": "2026-03-02", "count": 167}],
+    "default": "cgrubbs@bralco.com"
+  },
+
+  "dixie-tool.com": {
+    "name": "Dixie Tool",
+    "active_reps": [{"email": "ccompton@dixie-tool.com", "last_seen": "2026-02-24", "count": 145}],
+    "default": "ccompton@dixie-tool.com"
+  },
+
+  "basstool.com": {
+    "name": "Bass Tool & Supply",
+    "active_reps": [{"email": "tdickey@basstool.com", "last_seen": "2026-02-24", "count": 141}],
+    "default": "tdickey@basstool.com"
+  },
+
+  "dbroberts.com": {
+    "name": "DB Roberts",
+    "active_reps": [{"email": "lrobinson@dbroberts.com", "last_seen": "2026-02-19", "count": 131}],
+    "default": "lrobinson@dbroberts.com"
+  },
+
+  "emjmetals.com": {
+    "name": "EMJ Metals",
+    "active_reps": [{"email": "mbaker@emjmetals.com", "last_seen": "2026-03-02", "count": 112}],
+    "default": "mbaker@emjmetals.com"
+  },
+
+  "bayoumetalsupply.com": {
+    "name": "Bayou Metal Supply",
+    "active_reps": [{"email": "hblack@bayoumetalsupply.com", "last_seen": "2026-04-02", "count": 107}],
+    "default": "hblack@bayoumetalsupply.com"
+  },
+
+  "tricormetals.com": {
+    "name": "Tricor Metals",
+    "active_reps": [{"email": "kstarkey@tricormetals.com", "last_seen": "2026-03-03", "count": 92}],
+    "default": "kstarkey@tricormetals.com"
+  },
+
+  "mscdirect.com": {
+    "name": "MSC Industrial Supply",
+    "active_reps": [{"email": "mscindustrialsupply@mscdirect.com", "last_seen": "2026-01-19", "count": 71, "note": "online portal vendor"}],
+    "default": "mscindustrialsupply@mscdirect.com",
+    "online_url": "https://mscdirect.com"
+  },
+
+  "metals4u.com": {
+    "name": "Metals4U",
+    "active_reps": [{"email": "dominic.ruggiero@metals4u.com", "last_seen": "2026-04-06", "count": 64}],
+    "default": "dominic.ruggiero@metals4u.com"
+  },
+
+  "ableelectropolishing.com": {
+    "name": "Able Electropolishing",
+    "active_reps": [{"email": "angelenau@ableelectropolishing.com", "last_seen": "2026-04-09", "count": 63}],
+    "default": "angelenau@ableelectropolishing.com"
+  },
+
+  "polymershapes.com": {
+    "name": "Polymer Shapes",
+    "active_reps": [{"email": "msandoval@polymershapes.com", "last_seen": "2026-04-01", "count": 47}],
+    "default": "msandoval@polymershapes.com"
+  },
+
+  "ltdmaterial.com": {
+    "name": "LTD Material",
+    "active_reps": [{"email": "apodbevsek@ltdmaterial.com", "last_seen": "2025-10-30", "count": 45}],
+    "default": "apodbevsek@ltdmaterial.com"
+  },
+
+  "performancetitanium.com": {
+    "name": "Performance Titanium Group",
+    "active_reps": [{"email": "spopham@performancetitanium.com", "last_seen": "2025-09-08", "count": 44}],
+    "default": "spopham@performancetitanium.com"
+  },
+
+  "rivercity-industries.com": {
+    "name": "River City Industries",
+    "active_reps": [{"email": "gabe@rivercity-industries.com", "last_seen": "2026-04-02", "count": 44}],
+    "default": "gabe@rivercity-industries.com"
+  },
+
+  "sandmeyersteel.com": {
+    "name": "Sandmeyer Steel",
+    "active_reps": [{"email": "mhoward@sandmeyersteel.com", "last_seen": "2025-09-26", "count": 40}],
+    "default": "mhoward@sandmeyersteel.com"
+  },
+
+  "tciprecision.com": {
+    "name": "TCI Precision",
+    "active_reps": [
+      {"email": "ar@tciprecision.com",      "last_seen": "2026-04-02", "count": 30},
+      {"email": "amunoz@tciprecision.com",  "last_seen": "active (per tom@ data)", "count": 2}
+    ],
+    "default": "amunoz@tciprecision.com"
+  },
+
+  "cmtfinishing.com": {
+    "name": "CMT Finishing",
+    "active_reps": [{"email": "dawn@cmtfinishing.com", "last_seen": "2025-04-22", "count": 26, "note": "OOO bounces seen — verify rep"}],
+    "default": "dawn@cmtfinishing.com"
+  },
+
+  "diligentusa.com": {
+    "name": "Diligent USA",
+    "active_reps": [{"email": "invoice.austin@diligentusa.com", "last_seen": "2026-04-13", "count": 678, "note": "high volume — likely freight/shipping notifications, not orderable parts"}],
+    "default": "invoice.austin@diligentusa.com"
+  },
+
+  "uct.com": {
+    "name": "UCT",
+    "active_reps": [{"email": "p2pbatch@uct.com", "last_seen": "2023-08-25", "count": 61, "note": "stale (>1yr)"}],
+    "default": "p2pbatch@uct.com"
+  },
+
+  "setcomcorp.com": {
+    "name": "Setcom Corp",
+    "active_reps": [{"email": "rjuusola@setcomcorp.com", "last_seen": "2025-12-24", "count": 74}],
+    "default": "rjuusola@setcomcorp.com"
+  },
+
+  "austexmachine.com": {
+    "name": "Austex Machine",
+    "active_reps": [{"email": "aekrut@austexmachine.com", "last_seen": "2024-07-29", "count": 50, "note": "stale (>9mo)"}],
+    "default": "aekrut@austexmachine.com"
+  },
+
+  "interstateam.com": {
+    "name": "Interstate AM",
+    "active_reps": [{"email": "wade.b@interstateam.com", "last_seen": "2025-10-08", "count": 27}],
+    "default": "wade.b@interstateam.com"
+  },
+
+  "heilind.com": {
+    "name": "Heilind",
+    "active_reps": [{"email": "ckarnick@heilind.com", "last_seen": "2024-12-14", "count": 25}],
+    "default": "ckarnick@heilind.com"
+  },
+
+  "spec.com": {
+    "name": "SPEC",
+    "active_reps": [{"email": "lsmith@spec.com", "last_seen": "2025-09-09", "count": 22}],
+    "default": "lsmith@spec.com"
+  },
+
+  "wm.com": {
+    "name": "Waste Management (subscription service)",
+    "active_reps": [{"email": "wmonline@wm.com", "last_seen": "2026-03-26", "count": 20}],
+    "default": "wmonline@wm.com",
+    "category": "subscription"
+  },
+
+  "farmers-copper.com": {
+    "name": "Farmers Copper",
+    "active_reps": [{"email": "adrian@farmers-copper.com", "last_seen": "2024-01-23", "count": 19, "note": "stale (>1yr)"}],
+    "default": "adrian@farmers-copper.com"
+  },
+
+  "dixmetals.com": {
+    "name": "Dix Metals",
+    "active_reps": [{"email": "jbermudez@dixmetals.com", "last_seen": "2025-03-13", "count": 19}],
+    "default": "jbermudez@dixmetals.com"
+  },
+
+  "keymetals.com": {
+    "name": "Key Metals",
+    "active_reps": [{"email": "sales@keymetals.com", "last_seen": "2026-03-02", "count": 17}],
+    "default": "sales@keymetals.com"
+  },
+
+  "tieindustrial.com": {
+    "name": "TIE Industrial",
+    "active_reps": [{"email": "kburnett@tieindustrial.com", "last_seen": "2024-03-06", "count": 16, "note": "stale (>1yr)"}],
+    "default": "kburnett@tieindustrial.com"
+  },
+
+  "wieland.com": {
+    "name": "Wieland",
+    "active_reps": [{"email": "adrian.delarosa@wieland.com", "last_seen": "2026-04-08", "count": 1, "note": "low count in Rene's inbox; appeared in tom@ data"}],
+    "default": "adrian.delarosa@wieland.com"
+  },
+
+  "steelhousemfg.com": {
+    "name": "Steelhouse Mfg",
+    "active_reps": [{"email": "sales@steelhousemfg.com", "last_seen": "2026-04-21", "count": 1, "note": "from tom@ data"}],
+    "default": "sales@steelhousemfg.com"
+  }
+}

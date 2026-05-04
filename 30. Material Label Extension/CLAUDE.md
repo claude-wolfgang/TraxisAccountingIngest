@@ -124,6 +124,11 @@ Bump version in `manifest.json`, rebuild ZIP (`deployment/build.py` or manual zi
 - CWS unlisted + registry policy works on any Windows PC regardless of domain status.
 - Same deployment pattern applies to P14 (Workstation Display) and P18 (Message Notifier) when ready.
 
+## Next Steps
+
+- **CWS resubmit v1.6.0** — added the "Buy" button on COTS / Tools / Parts pages plus `http://10.1.1.71:5003/*` to host_permissions and a `QUEUE_ORDER` handler in service-worker.js. Sideload-tested only. Audit MV3 manifest permissions before submitting (per memory: P30 hit two CWS rejections for vestigial perms — grep all source for every declared permission).
+- **Tighten Cost-column scrape in `buy-content.js`** — heuristic worked for LUB-116 but missed for THI-17. Without unit_cost the order falls through to the auto-quote-request path even when ProShop has a price visible. Inspect the THI-17 DOM to learn what the column actually looks like there.
+
 ## Interfaces
 
 Produces: Material label PNGs, Box label PNGs, COTS label PNGs (450px wide), Equipment label PNGs, User label PNGs, Tool label PNGs — all 128px tall, auto-width (except COTS), as base64 PNG via Canvas API

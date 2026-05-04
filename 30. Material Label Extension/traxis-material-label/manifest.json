@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Traxis Label Printer",
-  "version": "1.5.2",
-  "description": "Print material, COTS, equipment, box, and user labels from ProShop pages via Brother PT-P700",
+  "version": "1.6.0",
+  "description": "Print material, COTS, equipment, box, and user labels from ProShop pages via Brother PT-P700; queue purchase orders from COTS/Tools/Parts pages",
   "icons": {
     "16": "assets/icons/icon16.png",
     "48": "assets/icons/icon48.png",
@@ -10,7 +10,8 @@
   },
   "host_permissions": [
     "https://traxismfg.adionsystems.com/*",
-    "http://10.1.1.242:5002/*"
+    "http://10.1.1.242:5002/*",
+    "http://10.1.1.71:5003/*"
   ],
   "background": {
     "service_worker": "background/service-worker.js"
@@ -49,6 +50,16 @@
     {
       "matches": ["https://traxismfg.adionsystems.com/procnc/tools/*"],
       "js": ["lib/qrcode.min.js", "src/tool-label-generator.js", "src/tool-content.js"],
+      "css": ["src/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://traxismfg.adionsystems.com/procnc/ots/*",
+        "https://traxismfg.adionsystems.com/procnc/tools/*",
+        "https://traxismfg.adionsystems.com/procnc/parts/*"
+      ],
+      "js": ["src/buy-content.js"],
       "css": ["src/content.css"],
       "run_at": "document_idle"
     }

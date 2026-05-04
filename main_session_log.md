@@ -7,6 +7,46 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-03
 
+### P35: purchasing automation Phase 0/1/1.5 — bootstrap, queue, auto-quote-request
+
+**Date:** 2026-05-03 (later, same day)
+
+**Task:** Stand up a one-tap reordering flow. Operator clicks "Buy" on a ProShop COTS/Tool/Part page; backend either auto-approves under-threshold orders or drafts a vendor quote-request email when the page has no price.
+
+**What was done:**
+
+1. **Plan doc** — `35. Purchasing Automation/PLAN.md`. Architecture, file list, 4-phase build order, JSON/SQLite schemas, open risks. Picked Selenium-only (per Wolfgang: API repeatedly fails for VPO creation), folded P35 runtime into P31's Flask, JSON rules home, P27 owns cost-feedback loop downstream. Single Outlook folder ("Purchasing - To Review") for all drafts pending Send. Approval queue accessible from any LAN browser (no separate tablet UI).
+
+2. **Vendor-map bootstrap (Phase 0)** — built `probe_sent_vpos.py` (Graph API on tom@'s Sent Items) and `probe_rene_mbox.py` (Thunderbird mbox parser for rene@'s 7.7GB archived Inbox; rene@'s M365 mailbox was purged). Found tom@ had only 11 VPOs in 3yr; rene@ had 6,223 purchasing-shaped messages from 21,437 total. Identified vendor signal (sender domain, purchasing-keyword subject), confirmed cinnamon.clark@ajrodco.com vs jaime.gomez@ — both active per Wolfgang. Hand-wrote `vendor_map.json` with 37 vendors, marked stale entries, MSC/McMaster as `online_url` portals, AJ Rodco with both reps active.
+
+3. **Phase 1: queue + UI** — new `purchasing/` subpackage in P31 with `queue.py` (SQLite at `data/purchasing.db`), `rules.py` (item→category→default fallback), `rules.json` starter (defaults to manual review). Flask routes: `POST /api/queue-order`, `POST /api/approve/<id>`, `POST /api/reject/<id>`, `GET /approvals` page with Approve/Reject/Approve-All buttons. New P30 content script `buy-content.js` injects purple "Buy" button next to existing label buttons on COTS/Tools/Parts pages; scrapes vendor + brand + best-effort unit_cost; routes through service-worker (mixed-content workaround). Manifest bumped to 1.6.0, host_permissions added for `http://10.1.1.71:5003/*`.
+
+4. **Phase 1.5: auto quote-request email** — new `purchasing/email_draft.py` (Microsoft Graph helper, lazy folder creation in tom@'s "Purchasing - To Review" folder) and `purchasing/vendors.py` (vendor-map lookup + first-name extraction). Wolfgang granted Mail.ReadWrite app permission in Azure for the Graph principal. When `unit_cost` is null on submit AND vendor in map AND today's quote-requests to that vendor < 3, the backend drafts an Outlook message ("Pricing request: {entity_id} qty {qty}") and sets status=`awaiting_quote`. Cap of 3 drafts per vendor per day enforced via `quote_requests_today()` in queue.py. Approvals page shows the awaiting-quote rows in a separate section with a link to the draft.
+
+5. **End-to-end verified** — clicked Buy on a COTS page (THI-17 PEM thread inserts, qty 500, vendor "DB Roberts"), order landed in /approvals as pending with vendor + brand scraped cleanly but unit_cost null (cost-column heuristic missed for that page layout). Curl-tested full path: POST /api/queue-order with vendor=DB Roberts → quote-request drafted to lrobinson@dbroberts.com, order #3 status=awaiting_quote, draft visible in Outlook. Two MainPC reboots required to deploy (ghost-socket pattern still in play).
+
+6. **Folder rescue** — Wolfgang accidentally moved "Purchasing - To Review" into Deleted Items while reorganizing. Walked Graph childFolders to locate it, restored to root via `mailFolders/{id}/move` with `destinationId: msgfolderroot`. Folder must stay at root because `_ensure_folder()` only searches root-level — flagged for fix.
+
+**Files modified/created:**
+- `35. Purchasing Automation/` (new project): PLAN.md, CLAUDE.md, vendor_map.json (37 vendors), probe_sent_vpos.py, probe_rene_mbox.py
+- `31. Photo Upload Service/photo-uploader/purchasing/` (new): __init__.py, queue.py, rules.py, rules.json, vendors.py, email_draft.py
+- `31. Photo Upload Service/photo-uploader/`: app.py (4 new routes + DB init + Graph wiring), templates/approvals.html (new), templates/base.html (Approvals nav), static/approvals.js (new), static/style.css (purple buy variant + status badges)
+- `30. Material Label Extension/traxis-material-label/`: src/buy-content.js (new), background/service-worker.js (QUEUE_ORDER proxy), src/content.css (purple Buy variant), manifest.json (v1.6.0, +5003 host_permission, +Buy content script registration)
+- P31 CLAUDE.md (Key Files, Interfaces, new Next Steps section)
+- P30 CLAUDE.md (new Next Steps section)
+- TRAXIS_ECOSYSTEM.md (P30 + P31 entries updated, new P35 entry, P35 row added to Interface table)
+
+**Key decisions:**
+- Selenium not API for VPO creation (per Wolfgang's history with the gated mutation)
+- Fold runtime into P31 not standalone Flask — saves shared Selenium login + Overseer wiring
+- Quote-request rate limit = 3 drafts/vendor/day, enforced in DB query (no separate counter table)
+- Outlook drafts go to a single dedicated folder so they don't mix with personal drafts
+- "Most recent received from" is the vendor signal (not "most recent sent to") — accepted some noise (cold sales-rep outreach) since email-archeology refinement was deemed not worth the run time
+
+**Status:** Phase 1.5 live in production after second reboot. Buy button works end-to-end — confirmed with one real Buy (THI-17) plus one curl-driven test (deploy validation). Phase 2 (Selenium VPO creation) is the next planned step. P30 v1.6.0 is sideload-tested only; CWS resubmission pending an audit pass.
+
+---
+
 ### P25: Garrett/Thomas onboarding doc + VS Code on .178
 
 **Date:** 2026-05-03 (third close — short)

@@ -1,0 +1,16 @@
+{
+  "_comment": "Per-item / per-category purchasing auto-approve rules. Resolution order: items[id] → categories[cat] → defaults. Each field overrides independently. Phase 1 only honors amount_threshold; min_interval_days is parked for Phase 2 (needs Selenium last-ordered scrape).",
+
+  "defaults": {
+    "amount_threshold": 0,
+    "min_interval_days": 0
+  },
+
+  "categories": {
+    "lubricant":   { "amount_threshold": 250, "min_interval_days": 60 },
+    "consumable":  { "amount_threshold": 150, "min_interval_days": 30 },
+    "tool_insert": { "amount_threshold": 500, "min_interval_days": 14 }
+  },
+
+  "items": {}
+}

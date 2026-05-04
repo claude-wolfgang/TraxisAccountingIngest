@@ -21,6 +21,12 @@ import database
 import label_generator
 from proshop_client import ProShopClient
 from upload_worker import UploadWorker
+from purchasing import queue as purchasing_queue
+from purchasing import rules as purchasing_rules
+from purchasing import vendors as purchasing_vendors
+from purchasing import email_draft as purchasing_email
+
+QUOTE_REQUEST_DAILY_CAP = 3  # max drafts per vendor per day
 
 PRINT_SERVICE_URL = "http://10.1.1.242:5002"
 
@@ -376,6 +382,147 @@ def print_label():
     return jsonify({"success": True, "label_name": label_name, **body})
 
 
+# ── Pages: Approvals ─────────────────────────────────────────────────────
+
+@app.route("/approvals")
+def approvals_page():
+    pending = purchasing_queue.get_pending(limit=100)
+    recent = purchasing_queue.get_recent(limit=30)
+    stats = purchasing_queue.stats()
+    return render_template("approvals.html",
+                           pending=pending, recent=recent, stats=stats)
+
+
+# ── API: Purchasing Queue ────────────────────────────────────────────────
+
+PURCHASING_ENTITY_TYPES = {"cots", "tool", "part"}
+
+
+@app.route("/api/queue-order", methods=["POST"])
+def queue_order():
+    """Receive a Buy-button POST from the P30 extension.
+
+    Body (JSON):
+      entity_type: cots | tool | part
+      entity_id:   e.g. LUB-116
+      qty:         numeric
+      unit_cost:   numeric (best-effort scrape; null if not visible)
+      vendor:      optional pre-selected vendor name
+      brand:       optional brand
+      edp:         optional EDP code
+    """
+    data = request.get_json(silent=True) or {}
+    entity_type = (data.get("entity_type") or "").strip().lower()
+    entity_id = (data.get("entity_id") or "").strip()
+    qty_raw = data.get("qty")
+    unit_cost_raw = data.get("unit_cost")
+
+    if entity_type not in PURCHASING_ENTITY_TYPES:
+        return jsonify({"error": f"entity_type must be one of {sorted(PURCHASING_ENTITY_TYPES)}"}), 400
+    if not entity_id:
+        return jsonify({"error": "entity_id required"}), 400
+    try:
+        qty = float(qty_raw)
+    except (TypeError, ValueError):
+        return jsonify({"error": "qty must be numeric"}), 400
+    unit_cost = None
+    if unit_cost_raw not in (None, ""):
+        try:
+            unit_cost = float(unit_cost_raw)
+        except (TypeError, ValueError):
+            return jsonify({"error": "unit_cost must be numeric or omitted"}), 400
+
+    vendor = (data.get("vendor") or None)
+    brand = (data.get("brand") or None)
+    edp = (data.get("edp") or None)
+
+    auto, reason = purchasing_rules.should_auto_approve(entity_id, qty, unit_cost)
+    status = "approved" if auto else "pending"
+    approver = "auto" if auto else None
+    draft_id = None
+
+    # No unit cost? Try to drop a quote-request draft into Outlook for the
+    # operator to review/Send. Cap to QUOTE_REQUEST_DAILY_CAP per vendor.
+    if not auto and unit_cost is None and vendor:
+        ventry, vdomain = purchasing_vendors.find(vendor)
+        vendor_email = purchasing_vendors.default_email(ventry)
+        if vendor_email:
+            todays = purchasing_queue.quote_requests_today(vendor)
+            if todays >= QUOTE_REQUEST_DAILY_CAP:
+                reason = (f"no unit_cost — daily quote-request cap reached "
+                          f"({todays}/{QUOTE_REQUEST_DAILY_CAP} to {vendor})")
+            else:
+                first_name = purchasing_vendors.first_name_of(vendor_email)
+                greeting = f"Hi {first_name}," if first_name else "Hello,"
+                ident = entity_id + (f" ({brand})" if brand else "")
+                subject = f"Pricing request: {ident} qty {qty:g}"
+                body = (f"{greeting}\n\n"
+                        f"Could you send current pricing and lead time for "
+                        f"{ident}, quantity {qty:g}?\n\n"
+                        f"Thanks,\nTom\nTraxis Manufacturing")
+                try:
+                    draft_id = purchasing_email.create_draft(vendor_email, subject, body)
+                    status = "awaiting_quote"
+                    reason = (f"quote-request drafted to {vendor_email} "
+                              f"(#{todays + 1}/{QUOTE_REQUEST_DAILY_CAP} today to {vendor})")
+                except Exception as e:
+                    log.error(f"Quote-request draft failed for {vendor}: {e}", exc_info=True)
+                    reason = f"no unit_cost; draft attempt failed: {e}"
+
+    order_id = purchasing_queue.insert_order(
+        entity_type=entity_type,
+        entity_id=entity_id,
+        qty=qty,
+        unit_cost=unit_cost,
+        vendor=vendor,
+        brand=brand,
+        edp=edp,
+        status=status,
+        approved_by=approver,
+        rule_reason=reason,
+    )
+    if draft_id:
+        purchasing_queue.attach_draft(order_id, draft_id)
+
+    log.info(f"Queued order #{order_id}: {entity_type} {entity_id} qty={qty} "
+             f"cost={unit_cost} vendor={vendor} status={status} reason={reason}")
+    return jsonify({
+        "success": True,
+        "order_id": order_id,
+        "status": status,
+        "auto_approved": auto,
+        "draft_id": draft_id,
+        "reason": reason,
+    }), 201
+
+
+@app.route("/api/approve/<int:order_id>", methods=["POST"])
+def approve_order(order_id):
+    data = request.get_json(silent=True) or {}
+    approver = (data.get("approver") or "wolfgang").strip()
+    if not purchasing_queue.approve(order_id, approver):
+        order = purchasing_queue.get(order_id)
+        if not order:
+            return jsonify({"error": "order not found"}), 404
+        return jsonify({"error": f"order is {order['status']}, cannot approve"}), 409
+    log.info(f"Order #{order_id} approved by {approver}")
+    return jsonify({"success": True, "order_id": order_id})
+
+
+@app.route("/api/reject/<int:order_id>", methods=["POST"])
+def reject_order(order_id):
+    data = request.get_json(silent=True) or {}
+    approver = (data.get("approver") or "wolfgang").strip()
+    reason = (data.get("reason") or "").strip() or None
+    if not purchasing_queue.reject(order_id, approver, reason):
+        order = purchasing_queue.get(order_id)
+        if not order:
+            return jsonify({"error": "order not found"}), 404
+        return jsonify({"error": f"order is {order['status']}, cannot reject"}), 409
+    log.info(f"Order #{order_id} rejected by {approver} ({reason or 'no reason'})")
+    return jsonify({"success": True, "order_id": order_id})
+
+
 # ── API: Health ──────────────────────────────────────────────────────────
 
 @app.route("/api/health")
@@ -426,6 +573,7 @@ def _sanitize_filename(name):
 
 if __name__ == "__main__":
     database.init_db()
+    purchasing_queue.init_db()
     log.info(f"Photo Upload Service starting on {config.HOST}:{config.PORT}")
     log.info(f"Photos directory: {config.PHOTOS_DIR}")
     log.info(f"Database: {config.DB_PATH}")
