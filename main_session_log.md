@@ -7,6 +7,36 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-04
 
+### P25: lathe_programs.json populated from NC code uploads
+
+**Date:** 2026-05-04 (later, same day)
+
+**Task:** Wolfgang uploaded the NC code of all programs resident on the YCM NTC1600LY (T2/Lathe-2) into `TEMP UPLOADS/`. Goal: read the headers and populate `25. Agent Exploration/lathe_programs.json` with part numbers + operation data so FOCAS `active_programs` can be cross-referenced to ProShop parts.
+
+**What was done:**
+
+1. **First-pass parse — 32 programs from `TEMP UPLOADS/` top level + named subfolders.** Two header styles encountered: the new TraxisPostProcessor format (`O2003(10-2003 SIDE 1)` followed by `(POST PROCESSOR YCM NTC1600LY ...)` and tool-table comments with `MIN Z=` distances) and the legacy Mastercam header (`(PROGRAM NAME - 10739A M8 STANDOFF 91MM LONG 2020V)` with `(MCX FILE - C: USERS COMPUTER DROPBOX PART FILES TRAXIS R2SONIC PARTS LIBRARY ...)`). The MCX-file path is the most reliable part identifier on the legacy ones — the customer-library folder name is right there in the comment. Folder names in `TEMP UPLOADS/` (e.g. `R2-10878/`, `AI-121158-001/`, `MONOGRAM-3000038/`, `R2-AD208-300-007/`) gave authoritative part assignment for sub-programs.
+2. **Wolfgang corrections.** Two FOCAS-bootstrap candidates were verified inline: O4256 = op 56 of part 10042 (not dual-use as the FOCAS-captured header had suggested), and O4280 = op 80 of 10042 AND 10164 (the actual dual-use program). "None of the others is dual purpose" was the load-bearing constraint — used it to mark O4282's `OP 80 MILL-TURN improved threading` as the alt version flagged for clarification rather than assuming dual-use.
+3. **Second-pass parse — discovered nested `TEMP UPLOADS/TEMP UPLOADS/`.** Initial pass missed it; user prompt "look again, I think I got them all" surfaced it. Added `R2-10036-10037/` (O3612, O3712, O3713, O3719, O7001, O7002 → parts 10036/10037), `R2-10042-10164/` (O1647, O4282 + already-known O4256/O4270/O4280), the loose `NC/` folder (O0011 OP50 of 10042, O0012 OP60 of 10042, O4281 10042 SIDE -2 titanium variant, O6881 part NP000688-1, plus generic Impeller subfolder O1000/O1001/O1002).
+4. **Master/subprogram pairs identified.** O7004 calls O2004 ×5 (10-2004 SIDE 1 batch). O7002 calls O3719 ×10 (10037 batch). O7001 calls O3213 with Z offsets. O8772 cross-references both 10877P2 SIDE 2 and 10907P1 SIDE 2 (genuinely shared, not dual-use). 9000.NC in R2-10878 is a master loop calling O0879.
+5. **One unresolved candidate flagged.** O4270's header is just operator notes (`CHANGE PART`, `SWITCH TO HANDLE`, `TO USE TAILSTOCK BUTTONS`) with no machine-readable part/op tag. Folder context (R2-10042-10164) plus elimination logic (10164's OP70 is in O1647; 10042's OP70 unaccounted for) makes 10042 OP70 the most likely fit. Marked as `[CANDIDATE — VERIFY]` with `suggested_op_number: 70` rather than committing.
+6. **14 FOCAS-bootstrap entries still without uploaded NC.** Wolfgang acknowledged: "I will have answers for this tomorrow." Entries flagged with `No NC code uploaded — verify program still on machine` so they're easy to find. List: O2049, O0819, O1481, O0121, O1482, O1492, O2009, O2006, O1491, O0820, O1499, O1489, O2010, O0821 (all low-sample-count clusters from Feb–Mar 2026 — likely test programs or renamed/replaced programs that FOCAS captured before they disappeared).
+
+**Final state of `lathe_programs.json`:** 63 programs total, 37 with part_number filled, 1 candidate (O4270), 14 awaiting Wolfgang's answers. Existing schema (`o_number`, `part_number`, `description`, `op_number`) preserved; `suggested_op_number` field added on the one remaining candidate. The `_instructions` block at the top of the file rewritten to reflect that bootstrap entries have been mostly populated and to explain the "No NC code uploaded" markers.
+
+**Files modified:**
+
+- `25. Agent Exploration/lathe_programs.json` — bulk population (38 entries → 63 entries; 0 part_numbers → 37 part_numbers)
+
+**Status:** Mostly done. Awaiting Wolfgang's answers tomorrow on the 14 unmatched FOCAS-bootstrap programs and on whether O4270 = 10042 OP70 is correct.
+
+**[NEEDS WOLFGANG]:**
+- Tomorrow: identify the 14 programs (O2049, O0819, O1481, O0121, O1482, O1492, O2009, O2006, O1491, O0820, O1499, O1489, O2010, O0821) that have FOCAS history but no NC file in the upload — are they still on the machine, or were they renamed/deleted?
+- Confirm O4270 = 10042 OP70.
+- Confirm O4282 (`OP 80 MILL-TURN improved threading` in R2-10042-10164 folder, T09 instead of T01) — is it part-specific to 10042 or 10164, or a superseded revision of O4280?
+
+---
+
 ### P29 + P31 + P1 (Overseer): FedEx label support, photo-queue fix-page, Overseer zombie-PID adoption fix
 
 **Date:** 2026-05-04 (evening, same day)
