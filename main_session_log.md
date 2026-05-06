@@ -5,6 +5,32 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-05
+
+### P12: M6 Chevalier IP forced static (DHCP drift recovery)
+
+**Date:** 2026-05-05 (evening)
+
+**Task:** Wolfgang asked for a ping on M6 Chevalier. Ping at 10.1.1.106 (the address in `12. FASData Implementation/focasmonitor/machines.json`) returned "Destination host unreachable" four times. Investigation revealed the control's IP had drifted via DHCP and the Fanuc 0i-MF was actually answering at 10.1.1.109. Goal: pin M6 to a stable address so FASData polling and DNC transfers stop breaking.
+
+**What was done:**
+
+1. **Triaged the unreachable ping.** Compared against M3 — Wolfgang booted it and a ping at 10.1.1.118 returned 4/4 in ~5ms, confirming the LAN was healthy and the problem was M6-specific (off, unplugged, or address-drifted).
+2. **Identified the drift.** Photo of the M6 Fanuc 0i-MF Ethernet Setting screen (SYSTEM → EMBED → COMMON) showed `IP ADDRESS = 10.1.1.109`, `DHCP CLIENT = 1`, MAC `00:E0:E4:39:DD:59`. Confirmed by pinging 10.1.1.109 — 4/4 replies. So the control was alive on the wrong address; `machines.json` was stale.
+3. **Discovered Program Transfer Tool was also pointing at .106.** A second screenshot of the Program Transfer Tool / Program Memory tab for Machine 6 showed the DNC client was configured for 10.1.1.106 — meaning DNC transfers had silently been failing for however long DHCP had been handing M6 a different address. The Data Server tab was unrelated (192.168.0.6, FTP-based, checkbox unchecked — dormant).
+4. **Decided to pin M6 static at .106** (not move it to .109) so `machines.json` and the Program Transfer Tool stayed correct without code changes.
+5. **Walked Wolfgang through the static-IP edit.** Order: navigate to DHCP CLIENT field, type `0`, INPUT. *Then* edit IP ADDRESS to 10.1.1.106, INPUT.
+6. **Hit Fanuc DHCP-lock quirk.** Wolfgang reported: "when i type the new ip it says dhcp available" — i.e., the control was rejecting edits to the IP field even after DHCP CLIENT was toggled to 0. **Root cause:** Fanuc 0i-MF embedded Ethernet has split current-vs-next-boot state. Until a power cycle, the control's *active* DHCP state is still `1`, so the IP field stays locked. Solution: power-cycle the control after toggling DHCP off, then return to the screen and edit the IP, then power-cycle again so the new static IP becomes active.
+7. **Verified.** Final ping at 10.1.1.106 returned 4/4 replies (first packet 158ms — ARP cache warming — then settled at 3-6ms). M6 reachable, on the address `machines.json` already expects.
+
+**Files modified:** None to source/code. Documentation update added to `12. FASData Implementation/12. FASData Implementation (1).md` capturing the Fanuc DHCP-lock troubleshooting workflow so the next person hitting this doesn't re-derive it.
+
+**Status:** Done. M6 pinned at 10.1.1.106 statically.
+
+**Followup risk surfaced:** M2/.159, M3/.118, M8/.202, T2/.82 are still on DHCP per `machines.json`. Same drift risk applies to all of them. Worth a sweep before FASData polling is treated as production-reliable — see P12 Next Steps.
+
+---
+
 ## 2026-05-04
 
 ### P25: lathe_programs.json populated from NC code uploads
