@@ -1,0 +1,18 @@
+Hi Joao,
+
+Confirmed your finding — addCustomerPo works under basic auth (/api/beginsession). Test PO 3DS1-BASIC-AUTH-TEST-0C987B01 was created and then deleted. Thanks for the steer.
+
+For posterity on item 1, the OAuth-side context: we previously had a dedicated service user (auth_010, "API Connector AccountingAPI") mapped to our AccountingConnector client. Every addCustomerPo and updateCustomerPo call returned:
+
+  "The user auth_010 attempted to edit record CustomerPo:acceptNewRecord that they don't have write permission for."
+
+We verified all three layers we could see — OAuth scope customerpos:rwdp, moduleAccess read=True/write=True set in admin UI, all 107 UserPermissions flags compared against admin users — and couldn't find what controlled the acceptNewRecord permission. Since that user wasn't producing useful work and we needed the seat, we've deleted it. We'll move forward on basic auth in the meantime; if your developer ticket surfaces what controls acceptNewRecord, that'd help us set up a proper service account next time around.
+
+One related question: are any API operations restricted to OAuth-authenticated callers, or is /api/beginsession a full equivalent for all GraphQL mutations? Asking because if basic auth covers everything we need, we may not bother re-creating a service account.
+
+3 — Yes, please enable Recently Updated Records API for our site. Forward-only is fine.
+
+4 — Looking forward to the scope matrix doc.
+
+Thanks,
+Tom

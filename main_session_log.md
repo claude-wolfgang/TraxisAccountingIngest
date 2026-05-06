@@ -5,6 +5,42 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-06
+
+### P27: Customer PO API unblocked via Basic Auth (`/api/beginsession`)
+
+**Date:** 2026-05-06
+
+**Task:** Reply to Joao @ Adion's outstanding email re: items 1 (OAuth permission bug) and 3 (Recently Updated Records API). The OAuth-side block on `addCustomerPo`/`updateCustomerPo` ("user auth_010 ... CustomerPo:acceptNewRecord") had been stuck since 2026-04-11 with all three known permission layers verified (OAuth scope, moduleAccess, all 107 UserPermissions flags). Joao said basic auth flow appeared unaffected and asked us to verify before he'd file a developer ticket.
+
+**What was done:**
+
+1. **Probed `/api/beginsession` blind first.** Wrote `proshop_basic_auth_test.py` trying four shapes (JSON user/pass, form user/pass, HTTP Basic Auth header, JSON {user,pass}). All four returned `"error":"invalid_client","error_description":"Invalid credentials supplied"`. Tried again with OAuth client_id/secret in seven shapes — same error. Endpoint accepts requests but rejects every credential format we had on hand.
+2. **Wolfgang fetched the Adion docs PDF.** Two key things missing from the blind probe: (a) `username` must be the *full email* (`tbuerkle@traxismfg.com`, not bare `tbuerkle`), (b) JSON wants the `scope` field with **space-delimited** values, not the `+`-separated form the env file uses for OAuth.
+3. **Beginsession succeeded.** Got token, authenticated as user `001` ("Executive", `isSecurityAdmin: true`) — Wolfgang's own account. Session valid 300s.
+4. **Confirmed `addCustomerPo` works under basic auth.** Wrote `proshop_basic_auth_test2.py` — queried existing customer POs to grab a real client name (`3DS1`), then ran `addCustomerPo` with a unique `clientPONumber`. Status 200, `poId: 3DS1-BASIC-AUTH-TEST-0C987B01`, real `proshopUrl` returned. **No `acceptNewRecord` block.** Test PO confirmed via UI and deleted.
+5. **User 010 deleted.** Wolfgang reclaimed the seat for a person — "it seemed that it never accomplished anything." So the OAuth-side comparison can't be re-run cleanly; the AccountingConnector OAuth client is now mapped to nothing/something-undefined.
+6. **Drafted reply email to Joao.** Iterated tone after Wolfgang pushed back ("we ought to take a softer tone on the idea of a wall, don't you?") — final draft frames the OAuth block as our specific configuration, not a universal API-side wall, and adds a question whether any operations are OAuth-only or if `/api/beginsession` is a full equivalent for all GraphQL mutations. Email saved to `27. Accounting Ingest/joao_reply_2026-05-06.txt` and copied to clipboard for Wolfgang to paste into Outlook (per the standing alias setup, From must be picked manually).
+
+**Files modified/created:**
+
+- `27. Accounting Ingest/proshop_basic_auth_test.py` — initial blind probe (kept for reference; the credential-shape table is useful future evidence)
+- `27. Accounting Ingest/proshop_basic_auth_test2.py` — successful end-to-end (beginsession → query → addCustomerPo → endsession)
+- `27. Accounting Ingest/joao_reply_2026-05-06.txt` — final email draft
+
+**Status:** Investigation complete; email draft pending Wolfgang's send via Outlook. Production pipeline (`accounting_ingest.py`) still on OAuth — migration to basic auth is a follow-up.
+
+**Key implications:**
+
+- Customer PO mutations are no longer blocked at the API level — basic auth + Wolfgang's user authenticates and creates POs cleanly.
+- We have **no evidence** any operation is OAuth-only. Worth confirming with Joao before committing to migrate, but if true, the simpler architecture is: drop OAuth from the accounting pipeline entirely, wrap basic auth in a 5-minute-session-aware client, accept that audit logs will show Wolfgang's name on every mutation.
+- The `acceptNewRecord` mystery remains — Joao's developer ticket may surface what controls it, useful for future service-account setup.
+
+**[NEEDS WOLFGANG]:**
+- Send the drafted email (in clipboard / `joao_reply_2026-05-06.txt`) to Joao via Outlook with From = wolfgang@traxismfg.com.
+
+---
+
 ## 2026-05-05
 
 ### P12: M6 Chevalier IP forced static (DHCP drift recovery)
