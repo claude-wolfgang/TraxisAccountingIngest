@@ -1,0 +1,1324 @@
+{
+  "user_id": "026",
+  "ckeditor_forms": [],
+  "file_input_forms": [],
+  "forms": {
+    "(default)": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        },
+        {
+          "form": "personalNumbers",
+          "text": "Personal Numbers"
+        },
+        {
+          "form": "documentqueue",
+          "text": "Document Queue"
+        },
+        {
+          "form": "leftLinks",
+          "text": "Personal Links"
+        },
+        {
+          "form": "userAccessLevels",
+          "text": "Access"
+        },
+        {
+          "form": "signatureHistory",
+          "text": "Signature History"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "6 Months"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "1 Year"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "2 Years"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "Show All"
+        }
+      ],
+      "title": "Josh Farnell: User",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026",
+      "visible_buttons": [
+        "add Add picture",
+        "add Add picture",
+        "Review Performed",
+        "Checkout"
+      ],
+      "screenshot": "inspect_user_026_default_20260506_093437.png"
+    },
+    "writtenDescription": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        },
+        {
+          "form": "personalNumbers",
+          "text": "Personal Numbers"
+        },
+        {
+          "form": "documentqueue",
+          "text": "Document Queue"
+        },
+        {
+          "form": "leftLinks",
+          "text": "Personal Links"
+        },
+        {
+          "form": "userAccessLevels",
+          "text": "Access"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "signatureHistory",
+          "text": "Signature History"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "writtenDescription",
+          "text": "lock_open"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "6 Months"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "1 Year"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "2 Years"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "Show All"
+        }
+      ],
+      "title": "Josh Farnell: User",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=writtenDescription",
+      "visible_buttons": [
+        "add Add picture",
+        "add Add picture",
+        "Review Performed",
+        "Checkout"
+      ],
+      "screenshot": "inspect_user_026_writtenDescription_20260506_093440.png"
+    },
+    "fileStorage": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        },
+        {
+          "form": "personalNumbers",
+          "text": "Personal Numbers"
+        },
+        {
+          "form": "documentqueue",
+          "text": "Document Queue"
+        },
+        {
+          "form": "leftLinks",
+          "text": "Personal Links"
+        },
+        {
+          "form": "userAccessLevels",
+          "text": "Access"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "signatureHistory",
+          "text": "Signature History"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "fileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "6 Months"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "1 Year"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "2 Years"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "Show All"
+        }
+      ],
+      "title": "Josh Farnell: User",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=fileStorage",
+      "visible_buttons": [
+        "add Add picture",
+        "add Add picture",
+        "Review Performed",
+        "Checkout"
+      ],
+      "screenshot": "inspect_user_026_fileStorage_20260506_093443.png"
+    },
+    "userFileStorage": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        },
+        {
+          "form": "personalNumbers",
+          "text": "Personal Numbers"
+        },
+        {
+          "form": "documentqueue",
+          "text": "Document Queue"
+        },
+        {
+          "form": "leftLinks",
+          "text": "Personal Links"
+        },
+        {
+          "form": "userAccessLevels",
+          "text": "Access"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "signatureHistory",
+          "text": "Signature History"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "userFileStorage",
+          "text": "lock_open"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "6 Months"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "1 Year"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "2 Years"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "Show All"
+        }
+      ],
+      "title": "Josh Farnell: User",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=userFileStorage",
+      "visible_buttons": [
+        "add Add picture",
+        "add Add picture",
+        "Review Performed",
+        "Checkout"
+      ],
+      "screenshot": "inspect_user_026_userFileStorage_20260506_093446.png"
+    },
+    "files": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        },
+        {
+          "form": "personalNumbers",
+          "text": "Personal Numbers"
+        },
+        {
+          "form": "documentqueue",
+          "text": "Document Queue"
+        },
+        {
+          "form": "leftLinks",
+          "text": "Personal Links"
+        },
+        {
+          "form": "userAccessLevels",
+          "text": "Access"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "signatureHistory",
+          "text": "Signature History"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "files",
+          "text": "lock_open"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "6 Months"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "1 Year"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "2 Years"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "Show All"
+        }
+      ],
+      "title": "Josh Farnell: User",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=files",
+      "visible_buttons": [
+        "add Add picture",
+        "add Add picture",
+        "Review Performed",
+        "Checkout"
+      ],
+      "screenshot": "inspect_user_026_files_20260506_093449.png"
+    },
+    "messageinbox": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        }
+      ],
+      "title": "403 Forbidden",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=messageinbox",
+      "visible_buttons": [],
+      "screenshot": "inspect_user_026_messageinbox_20260506_093452.png"
+    },
+    "hrnotes": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        },
+        {
+          "form": "personalNumbers",
+          "text": "Personal Numbers"
+        },
+        {
+          "form": "documentqueue",
+          "text": "Document Queue"
+        },
+        {
+          "form": "leftLinks",
+          "text": "Personal Links"
+        },
+        {
+          "form": "userAccessLevels",
+          "text": "Access"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "signatureHistory",
+          "text": "Signature History"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "hrnotes",
+          "text": "lock_open"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "6 Months"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "1 Year"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "2 Years"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "Show All"
+        }
+      ],
+      "title": "Josh Farnell: User",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=hrnotes",
+      "visible_buttons": [
+        "add Add picture",
+        "add Add picture",
+        "Review Performed",
+        "Checkout"
+      ],
+      "screenshot": "inspect_user_026_hrnotes_20260506_093455.png"
+    },
+    "personalInfo": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        },
+        {
+          "form": "personalNumbers",
+          "text": "Personal Numbers"
+        },
+        {
+          "form": "documentqueue",
+          "text": "Document Queue"
+        },
+        {
+          "form": "leftLinks",
+          "text": "Personal Links"
+        },
+        {
+          "form": "userAccessLevels",
+          "text": "Access"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "signatureHistory",
+          "text": "Signature History"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "personalInfo",
+          "text": "lock_open"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "6 Months"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "1 Year"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "2 Years"
+        },
+        {
+          "form": "ajaxEffectivnessNumbers",
+          "text": "Show All"
+        }
+      ],
+      "title": "Josh Farnell: User",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=personalInfo",
+      "visible_buttons": [
+        "add Add picture",
+        "add Add picture",
+        "Review Performed",
+        "Checkout"
+      ],
+      "screenshot": "inspect_user_026_personalInfo_20260506_093458.png"
+    },
+    "ajaxEffectivnessNumbers": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [],
+      "title": "",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=ajaxEffectivnessNumbers",
+      "visible_buttons": [],
+      "screenshot": "inspect_user_026_ajaxEffectivnessNumbers_20260506_093501.png"
+    },
+    "cartAdmin": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        }
+      ],
+      "title": "404 Not Found",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=cartAdmin",
+      "visible_buttons": [],
+      "screenshot": "inspect_user_026_cartAdmin_20260506_093504.png"
+    },
+    "documentqueue": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        }
+      ],
+      "title": "Josh Farnell: User: Personal Document Queue",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=documentqueue",
+      "visible_buttons": [
+        "Print",
+        "Save",
+        "Copy",
+        "Help"
+      ],
+      "screenshot": "inspect_user_026_documentqueue_20260506_093507.png"
+    },
+    "leftLinks": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        },
+        {
+          "form": "personalNumbers",
+          "text": "Personal Numbers"
+        },
+        {
+          "form": "documentqueue",
+          "text": "Document Queue"
+        },
+        {
+          "form": "leftLinks",
+          "text": "Personal Links"
+        },
+        {
+          "form": "userAccessLevels",
+          "text": "Access"
+        }
+      ],
+      "title": "Josh Farnell: User: Personal Links",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=leftLinks",
+      "visible_buttons": [
+        "Checkout"
+      ],
+      "screenshot": "inspect_user_026_leftLinks_20260506_093510.png"
+    },
+    "manageCheckOuts": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        }
+      ],
+      "title": "Josh Farnell: User: Manage Checkouts",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=manageCheckOuts",
+      "visible_buttons": [
+        "Save Changes"
+      ],
+      "screenshot": "inspect_user_026_manageCheckOuts_20260506_093512.png"
+    },
+    "personalNumbers": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        }
+      ],
+      "title": "Josh Farnell: User: Personal Numbers",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=personalNumbers",
+      "visible_buttons": [],
+      "screenshot": "inspect_user_026_personalNumbers_20260506_093515.png"
+    },
+    "signatureHistory": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        }
+      ],
+      "title": "Josh Farnell: User: Signature History",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=signatureHistory",
+      "visible_buttons": [],
+      "screenshot": "inspect_user_026_signatureHistory_20260506_093518.png"
+    },
+    "userAccessLevels": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        }
+      ],
+      "title": "Josh Farnell: User: Access Levels",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=userAccessLevels",
+      "visible_buttons": [
+        "Checkout"
+      ],
+      "screenshot": "inspect_user_026_userAccessLevels_20260506_093521.png"
+    },
+    "userPage": {
+      "ckeditor_count": 0,
+      "ckeditor_names": [],
+      "file_input_count": 0,
+      "file_inputs": [],
+      "sidebar_forms": [
+        {
+          "form": "messageinbox",
+          "text": "Inbox"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "My Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Estimate Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Tool Carts"
+        },
+        {
+          "form": "cartAdmin",
+          "text": "Work Order Carts"
+        },
+        {
+          "form": "userPage",
+          "text": "Preferences"
+        },
+        {
+          "form": "manageCheckOuts",
+          "text": "Manage Checkouts"
+        },
+        {
+          "form": "messageinbox",
+          "text": ""
+        }
+      ],
+      "title": "Josh Farnell: User: Personal Prefs",
+      "url": "https://traxismfg.adionsystems.com/procnc/users/026$formName=userPage",
+      "visible_buttons": [],
+      "screenshot": "inspect_user_026_userPage_20260506_093524.png"
+    }
+  }
+}

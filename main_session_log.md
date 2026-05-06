@@ -41,6 +41,36 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+### HR: Tardy write-up template + Josh Farnell (User #026)
+
+**Task:** Author a standard Traxis unexcused-tardy write-up form to be issued to employees, and explore appending it to the employee's ProShop User profile.
+
+**What was done:**
+
+1. **Template + today's instance.** Wrote a reusable `Tardy Write-Up Template.md` and a pre-filled `2026-05-06 user_026.md` for Josh Farnell. Today's incident: 8:30 actual vs 7:30 scheduled = 60 min late, 45 min past the 15-min grace. Reason and occurrence-count fields left open for hand-off.
+2. **Standardized the policy text.** Defines unexcused tardy as >15 min past scheduled start without prior approval or documented emergency. Tracks on rolling 12 months. Acknowledgment-of-receipt signature, not admission. 5-business-day window for written rebuttal.
+3. **Attempted Selenium attach to ProShop user profile via P31's bridge pattern.** Per memory `feedback_selenium_bridge_fragility.md`, did not build new workarounds — instead wrote `inspect_user_page.py` (mirrors `inspect_upload.py`) to discover the right form on a User page before touching the worker.
+4. **Inspect verdict — dead end.** All 16 sub-forms on Josh's user page report `ckeditor_count: 0` and `file_input_count: 0`. ProShop User pages do not expose CKEditor anywhere; P31's base64-into-CKEditor pattern does not transfer to user profiles. ProShop also silently renders the default user page for any unknown `formName` (so `writtenDescription`, `hrnotes`, `fileStorage`, `userFileStorage`, `files`, `personalInfo` all returned the default page, masking which form names are real). Real user-page sub-forms confirmed via sidebar: `messageinbox`, `cartAdmin`, `userPage` (Preferences), `manageCheckOuts`, `personalNumbers`, `documentqueue`, `leftLinks`, `userAccessLevels`, `signatureHistory`, `ajaxEffectivnessNumbers`. `documentqueue` is the only one with Print/Save/Copy buttons — possibly a real document attach surface, but the inspect didn't click Checkout, so any file inputs that only appear in edit mode would have been missed.
+5. **Decision: drop the digital attach.** Today's write-up will be filed paper-only in Josh's personnel folder. Re-inspection post-Checkout deferred.
+6. **Aborted P31b folder rename.** Wolfgang noticed two `31.` folders (`31. Photo Upload Service` = the de facto P31; `31. BLE Proximity Worker Tracking` = labeled P31b in the ecosystem file). Started renaming BLE to `36.` via `git mv` — blocked by permission denied because `proximity_logger.py` (PID 11364) is actively running and holding files in the directory. Wolfgang reversed the decision rather than stop the production logger; both folders coexist as before.
+
+**Files created:**
+
+- `OPERATIONS Traxis/EMPLOYEES/Tardy Write-Up Template.md`
+- `OPERATIONS Traxis/EMPLOYEES/Tardy Write-Ups/2026-05-06 user_026.md` (Josh Farnell)
+- `31. Photo Upload Service/photo-uploader/inspect_user_page.py` — visible-mode discovery script for User pages
+- `31. Photo Upload Service/photo-uploader/inspect_user_026.bat` — launcher (double-clickable, keeps console open)
+- `31. Photo Upload Service/photo-uploader/data/logs/inspect_user_026_20260506_093524.json` — verdict file
+- 16 per-form screenshots in `data/logs/inspect_user_026_*_20260506_*.png`
+
+**Status:** HR template + today's instance ready to print and hand to Josh. ProShop digital attach dropped for now. Inspect script remains in place as a discovery tool for a future re-investigation if the user-profile attach ever becomes worth automating.
+
+**Key implication for P31:**
+
+User profile pages do not use CKEditor. Future automation against ProShop user records cannot reuse the photo-upload bridge as-is — would need a different upload mechanism (most likely a real file-input post-Checkout, mechanism unknown). Worth documenting so the next attempt doesn't re-walk the same path.
+
+---
+
 ## 2026-05-05
 
 ### P12: M6 Chevalier IP forced static (DHCP drift recovery)
