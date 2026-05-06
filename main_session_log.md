@@ -7,6 +7,31 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-06
 
+### P12: M6 Chevalier FOCAS2 port restored after silent zeroing
+
+**Date:** 2026-05-06
+
+**Task:** Wolfgang reported the Fanuc Program Transfer Tool was failing on M6 Chevalier. Overnight the IP had drifted from 10.1.1.106 → 10.1.1.109 (DHCP). He'd reset it back to .106 and turned off DHCP CLIENT, ping returned, but the transfer tool still failed. He'd then flipped DHCP CLIENT back to 1 to test, no change. Power-cycling the control between tests, not the whole machine.
+
+**What was done:**
+
+1. **Diagnosed the symptom: ping works, FOCAS doesn't.** From .178 and .71 in parallel, `Test-NetConnection 10.1.1.106 -Port 8193` failed on both, ping also failed initially — control was in a re-drifted state. Confirmed by also probing .109; both unreachable. Asked Wolfgang to verify the EMBED screen.
+2. **Confirmed the drift had recurred.** EMBED → COMMON showed IP=10.1.1.109, DHCP CLIENT=1. He reset to 10.1.1.106 with DHCP=0 and power-cycled. Ping now succeeded from both PCs, but FOCAS port 8193 still failed on both — same failure on both PCs ruled out a tool-side or PC-side issue and isolated it to control-side FOCAS config.
+3. **Found the FOCAS2 TCP PORT was 0.** Asked Wolfgang to check the EMBED → FOCAS2 tab. Both TCP and UDP port numbers showed 0, meaning the control was not listening on FOCAS at all. He set TCP PORT NUMBER = 8193, INPUT, and power-cycled.
+4. **Verified end-to-end.** `Test-NetConnection 10.1.1.106 -Port 8193` returned `TcpTestSucceeded : True` from both .178 and .71. Cross-checked the FASData SQLite (`C:\FASData\monitoring.db`) — M6 sample count 60,332 vs M2/M3 60,333 vs M8 60,332, latest M6 sample 2026-05-06 10:16:19. Polling resumed, sample count on par with peers — confirming the FOCAS2 zeroing was a fresh artifact of today's troubleshooting keystrokes rather than a long-standing latent issue.
+5. **Documented the lesson.** Updated `reference_fanuc_dhcp_lock.md` memory entry to cover both gotchas (DHCP IP-field lock + FOCAS2 port silent-zero). Updated P12 doc procedure to require BOTH `ping` and `Test-NetConnection -Port 8193` post-reconfig, and to add a step verifying FOCAS2 TCP PORT before declaring done. Updated P12 Next Steps to extend the M2/M3/M8/T2 audit to include FOCAS2 port verification, not just DHCP/IP.
+
+**Files modified:**
+
+- `12. FASData Implementation/12. FASData Implementation (1).md` — added FOCAS2 verification step + Test-NetConnection requirement to the static-IP procedure; updated Next Steps audit scope
+- Memory: `reference_fanuc_dhcp_lock.md` (renamed to "Fanuc 0i-MF DHCP and FOCAS2 port gotchas") + corresponding `MEMORY.md` index entry
+
+**Status:** Resolved. M6 polling stable, transfer tool functional. **DHCP CLIENT must stay at 0** — Wolfgang flipped it to 1 mid-session as a test; left at 0 at close.
+
+**Followup:** Audit of M2/M3/M8/T2 still pending and now has wider scope — must verify FOCAS2 TCP PORT alongside DHCP/IP. Tracked in P12 Next Steps.
+
+---
+
 ### P27: Customer PO API unblocked via Basic Auth (`/api/beginsession`)
 
 **Date:** 2026-05-06
