@@ -28,8 +28,13 @@ The Flask code, queue DB, rules, vendor lookup, and email-draft helper all live 
 
 ## Next Steps
 
+- **[NEEDS WOLFGANG] Delete test VPO 263106** from ProShop UI — created during 2026-05-06 live mutation probe (`addPurchaseOrder` confirmed working under basic auth). Marker: `remarks = "API-PROBE-2026-05-06 — DELETE ME"`. URL: `https://traxismfg.adionsystems.com/procnc/purchaseorders/2026/263106`.
 - **[NEEDS WOLFGANG] Service-restart fragility** — see P31 Next Steps. Until the dev-server zombie-socket pattern is fixed, deploys that require a Flask restart can wedge port 5003 and force a reboot of .71. Scoped to P31 because all P35 runtime lives there.
-- **Phase 2: Selenium VPO creation** — write `inspect_vpo_form.py` first (visible-mode driver of ProShop's "New VPO" form) to discover selectors before building the VPO worker.
+- **Phase 2 build in progress (API-driven, not Selenium)** — `purchasing/proshop_basic_auth.py` (BasicAuthSession with auto-401 retry) and `purchasing/proshop_vpo.py` (find_last_vpo_line + build_payload + create_vpo with CLI) are committed in P31. Dry-run validated end-to-end against LUB-116 — finds prior VPO 253247, blind-copies supplier `DIX1`, populates `ots`/`orderNumber`/`description`/`costPer` from prior line. Pending:
+  1. **Run `--live` test** for LUB-116 to verify the full repeat-purchase write path (creates one more test VPO requiring manual cleanup).
+  2. **Build `purchasing/worker.py`** — background thread polling `orders.db` for `status='approved'` → call create_vpo → update row to `vpo_created` with `vpo_number`.
+  3. **Wire worker startup into `app.py`** alongside existing `upload_worker`.
+  4. **Add `mark_vpo_created(order_id, vpo_number)` to `purchasing/queue.py`.**
 - **MFG+EDP enrichment for COTS and parts** — tool-page Buy clicks now use approvedBrands data in the quote-request email; mirror the same in COTS and parts paths. (See P31 Next Steps for the implementation pointer.)
 - **Fix folder lookup** — `email_draft._ensure_folder()` only searches root-level mail folders; if the "Purchasing - To Review" folder gets nested under another folder (Wolfgang's organizational impulse), Flask will create a duplicate at root on next restart. Either walk childFolders recursively or persist the folder ID across restarts.
 - **Cost-scrape brittleness** — the COTS-page Cost-column heuristic in P30's `buy-content.js` worked for LUB-116 but missed for THI-17. Inspect the THI-17 page DOM and tighten the column-finder.
@@ -39,7 +44,9 @@ The Flask code, queue DB, rules, vendor lookup, and email-draft helper all live 
 - **McMaster price scraper (v2)** — short-circuit the email-quote loop for the highest-volume catalog vendor.
 - **Add `ocaire.com` to `vendor_map.json`** once OC Pneumatics replies to the SMC AW40-04DG-A quote request (drafted 2026-05-04 from P26, sent by Wolfgang). Reply will confirm preferred contact; this is also the first SMC/pneumatic vendor in the map, so future spare orders for SMC parts (drains, filters, regulators across the floor) auto-route there.
 
-**Done this session (2026-05-04):** AJ Rod auto-routing for tool requests (server-side default); MFG+EDP+description enrichment in tool quote-request emails (replaces internal tool numbers).
+**Done 2026-05-04:** AJ Rod auto-routing for tool requests (server-side default); MFG+EDP+description enrichment in tool quote-request emails (replaces internal tool numbers).
+
+**Done 2026-05-06:** API probe of `addPurchaseOrder` under basic auth (40 input fields, only `poType` required); live mutation confirmed (test VPO 263106); Phase 2 reframed from Selenium → API in PLAN.md; foundation modules `proshop_basic_auth.py` + `proshop_vpo.py` built and dry-run-validated; repeat-purchase shape locked (last 1 VPO, blind-copy supplier `name`/contact code from `supplierPlainText`); customer-PO field-coverage diff produced and bundled into P27 Next Steps for the basic-auth migration pass.
 
 ## Interfaces
 

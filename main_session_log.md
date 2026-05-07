@@ -7,6 +7,56 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-06
 
+### P35 Phase 2 reframed Selenium → API; build started (foundation modules)
+
+**Date:** 2026-05-06 (later, same day as P27 basic-auth breakthrough)
+
+**Task:** Wolfgang asked whether the COTS Buy-button workflow could Selenium-create a VPO with auto-population from a previous purchase, or — if no prior — keep a "purchasing-method history" so we could auto-populate an Amazon cart instead. Wanted to break it into parts: probe first, then plan.
+
+**What was done:**
+
+1. **Probed `addPurchaseOrder` API path under basic auth.** Wrote `35. Purchasing Automation/probe_addpo_api.py` — schema introspection of `AddPurchaseOrderInput` (40 fields, only `poType` required) and the line-item input (`UpdatePurchaseOrderPoItemsDataInput`, 44 fields). Confirmed the API path is fully viable — full ship-to bundle (9 fields), full supplier-address bundle, currency support, multiple identifier keys per line (`toolNumber` + `itemNumber` + `orderNumber`), receiving lifecycle, vendor-rating fields. Live mutation succeeded — test VPO **263106** created (HTTP 200, marker `remarks="API-PROBE-2026-05-06 — DELETE ME"`). Needs manual deletion.
+
+2. **Reframed P35 Phase 2 from Selenium → API in PLAN.md.** The original PLAN was written when API VPO creation was thought blocked by `acceptNewRecord`. Today's basic-auth breakthrough (and confirmation that `addPurchaseOrder` was already working under OAuth even before that — `addCustomerPo` was the only blocked mutation) makes the API path the cleanest. PLAN.md updated: new Phase 2 file shape (`proshop_basic_auth.py`, `proshop_vpo.py`, `worker.py`), open risks updated (session expiry, `acceptNewRecord` regression risk), Part B (purchasing-method history with Amazon/McMaster cart-link deep-links — `amazon.com/gp/aws/cart/add.html?ASIN.1=...&Quantity.1=...`) added as post-Phase-2 follow-on.
+
+3. **Built the foundation modules.**
+   - `31. Photo Upload Service/photo-uploader/purchasing/proshop_basic_auth.py` — `BasicAuthSession` class wrapping `/api/beginsession` → token (query-param auth) → `/api/endsession`, with thread-safe lock + auto-refresh on 401 (handles 300s session expiry mid-mutation). Designed to be shared with P27's basic-auth migration (P27's Next Steps already references this).
+   - `31. Photo Upload Service/photo-uploader/purchasing/proshop_vpo.py` — `find_last_vpo_line(session, entity_id)` (scans 500 most-recent VPOs sorted by date desc, matches against `toolNumberPlainText` OR `otsPlainText`); `build_payload(queue_row, prior_line)` (assembles `AddPurchaseOrderInput` with shipTo defaults, branches `ots` vs `toolNumber` by entity_type); `create_vpo(session, queue_row, prior_line)`. Includes a `python -m purchasing.proshop_vpo --entity X [--type cots] [--live]` CLI for dry-run / live testing.
+
+4. **Validated end-to-end (dry-run).** `python -m purchasing.proshop_vpo --entity LUB-116 --type cots` — found prior VPO **253247** (11/10/2025), blind-copied supplier `DIX1` (contact code, returned by `supplierPlainText`), populated `ots: LUB-116` + `orderNumber: MASCH1-MS585XT-54G` + description + costPer 1718.23 + qty 1 + Traxis MFG ship-to defaults. Repeat-purchase shape locked: last 1 prior VPO, blind-copy supplier (no name→code resolver needed for repeat-buy because `supplierPlainText` already returns the code).
+
+5. **Discovered ProShop GraphQL gotchas during the build.**
+   - `purchaseOrders` default order is **OLDEST first** (PO 213000 from 2021 was page 1). Must use `sortBy: "date", sortOrder: DESC`.
+   - `toolNumber` on a PO line is a `Tool` object (needs sub-selection or `toolNumberPlainText`); `ots` is a `COTS` object (`otsPlainText`). The UI's "COTS / Tool #" column maps to two separate API fields.
+   - `*PlainText` companion fields **still enforce read scope** on the underlying module (got "scope does not grant read access to Tools" with only `purchaseorders:rwdp`). Final scope: `purchaseorders:rwdp+tools:r+ots:r+contacts:r`.
+   - Operators historically don't populate `toolNumber` on PO lines — recent VPOs show `toolNumber: None`, with the actual identifier in `orderNumber`/`itemNumber`/`description` and the `ots`/`toolNumber` link only filled when the line was created via the COTS/Tool-page path. The `ots` field IS populated on real COTS purchases (PO 253247 shows `ots: LUB-116` cleanly).
+   - `supplier` field on the input expects a contact code (`DIX1`, `AJR1`), not a display name.
+
+6. **Independent fix in P31: Brand-vs-Vendor email bug (screenshot-driven).** Wolfgang shared a screenshot of an auto-draft email that read "Pricing request: Aj Rod 314965 qty 1" — the email was sourcing the **vendor** (AJ Rodco) as the brand instead of the actual manufacturer. Root cause: tool's top `approvedBrand` record literally contained "Aj Rod" (data convention where the distributor was entered as the brand). Fix in `proshop_client.py` — added `_pick_brand_record(brands, skip_vendor)` helper that normalizes both names (strip non-alphanumerics, lowercase) and skips `approvedBrands` entries that match the email recipient. Threaded `skip_vendor=vendor` through `get_purchasing_info()` from `app.py:489`. 7-case sanity test passes (only Aj Rod → empty, Aj Rod then Iscar → Iscar, AJ Rodco variants → empty, etc.). For tools where the only entry is "Aj Rod", the email now falls through to description-only — better than mislabeled brand+EDP.
+
+7. **Customer-PO field-coverage diff produced.** Parallel introspection of `AddCustomerPoInput` (25 fields, 3 required: `client`/`clientPONumber`/`dateEntered`) and `UpdateCustomerPoPartOrderedDataInput` (25 line-item fields). Compared against P27's `accounting_ingest._upload_customer_po` (sends 8 header fields, 0 line items). Three concrete findings: `fob` is being misused as ship-to address (line 1502-1503 maps `data["ship_to"]` → `fob` enum); `partsOrdered` is entirely missing (customer POs ingest as bodyless headers); QBO-relevant fields not sent (`taxStatus`, `paymentTermsDiscount*`, `currency`). Bundled all three into a single P27 Next Steps entry to land alongside the basic-auth migration; P35's `BasicAuthSession` is explicitly marked as the shared primitive between P27 and P31.
+
+**Files modified/created:**
+
+- `35. Purchasing Automation/probe_addpo_api.py` (NEW) — schema + live-mutation probe harness, default introspection-only, `--live` flag for one real mutation
+- `35. Purchasing Automation/PLAN.md` — Phase 2 reframed Selenium→API; open risks updated; Part B section added
+- `35. Purchasing Automation/CLAUDE.md` — Next Steps swept; added [NEEDS WOLFGANG] delete VPO 263106; Phase 2 build progress; Done-2026-05-06 line
+- `31. Photo Upload Service/photo-uploader/purchasing/proshop_basic_auth.py` (NEW) — shared BasicAuthSession class
+- `31. Photo Upload Service/photo-uploader/purchasing/proshop_vpo.py` (NEW) — find_last_vpo_line + build_payload + create_vpo + CLI
+- `31. Photo Upload Service/photo-uploader/proshop_client.py` — added `_pick_brand_record()` helper + `skip_vendor` param on `get_purchasing_info()`/`_tool_purchasing_info()`
+- `31. Photo Upload Service/photo-uploader/app.py` — passes `skip_vendor=vendor` to `proshop.get_purchasing_info()` for the quote-request enrichment path
+- `31. Photo Upload Service/CLAUDE.md` — Next Steps entry "P35 Phase 2 — Selenium VPO creation" replaced with the API-driven progress pointer
+- `27. Accounting Ingest/CLAUDE.md` — Next Steps entry "Migrate accounting_ingest.py to basic auth" expanded with shared-class pointer; new bundled entry "Bundle all addCustomerPo field-shape fixes with the basic-auth migration" covering the three findings
+- `TRAXIS_ECOSYSTEM.md` — P35 status line updated (Phase 2 now API not Selenium)
+
+**Status:** P35 Phase 2 foundation in place; dry-run end-to-end validated; awaiting decision on `--live` test for LUB-116 before building `worker.py` and wiring into `app.py`. Brand-vs-Vendor email fix shipped to code (next P31 restart picks it up).
+
+**[NEEDS WOLFGANG]:**
+- Delete test VPO **263106** from ProShop UI (created during today's live mutation probe).
+- Decide whether to authorize a second `--live` test that exercises the full repeat-purchase write path (LUB-116 with prior-VPO context) — would create one more test VPO requiring manual cleanup but would prove out the whole pipeline before the worker is wired in.
+
+---
+
 ### P12: M6 Chevalier FOCAS2 port restored after silent zeroing
 
 **Date:** 2026-05-06

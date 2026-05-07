@@ -486,7 +486,11 @@ def queue_order():
     # brand + part number to look up the item.
     description = ""
     if entity_type == "tool":
-        info = proshop.get_purchasing_info(entity_type, entity_id)
+        # Skip approvedBrands entries that are actually the recipient vendor —
+        # tool records sometimes have AJ Rodco stored as approvedBrand which
+        # produces "Aj Rod 314965" emails to AJ Rodco; we want the actual
+        # manufacturer (e.g. "Iscar 314965") or fall through to description.
+        info = proshop.get_purchasing_info(entity_type, entity_id, skip_vendor=vendor)
         description = info.get("description") or ""
         if not brand:
             brand = info.get("brand")

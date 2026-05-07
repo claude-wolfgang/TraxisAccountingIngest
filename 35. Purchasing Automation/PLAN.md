@@ -7,7 +7,7 @@ One-tap reordering of COTS / Tools / Parts items from any browser on the LAN. Op
 - Browser-button purchase trigger on ProShop COTS, Tools, and Parts pages (P30 extension territory)
 - Two-condition auto-approve gate: `qty × unit_cost ≤ amount_threshold` **AND** `last_ordered > min_interval`
 - Single-screen approval queue at `http://10.1.1.71:5003/approvals` (or a new P35 service — see "Hosting decision")
-- Selenium-driven VPO creation (no API; acceptNewRecord gate is unsolved)
+- **API-driven** VPO creation via `addPurchaseOrder` mutation under basic auth (proven 2026-05-06; replaces the original Selenium plan — see Phase 2 below)
 - Draft (not auto-send) vendor email via Microsoft Graph with VPO PDF attached
 - Bootstrap a vendor → email map by scraping Sent Items in M365
 - Hand off the cost-drift feedback loop to P27 — P35 publishes `vpo_number → entity_id` in `orders.db` so P27's parser can update ProShop unit_cost when vendor replies arrive
@@ -146,11 +146,43 @@ CREATE TABLE orders (
 - Stops short of actually creating VPOs — approval just marks the row `approved` and that's it
 - **Milestone:** you can click "Buy" on a COTS page and see it land in the approval inbox
 
-### Phase 2 — Selenium VPO creation
-- `proshop_scrape.py`: log into ProShop (reuse P31's `upload_worker.py` login), navigate to "New VPO", fill line items, save, capture VPO number
-- `worker.py` background thread: pops `approved` orders, runs the create-VPO routine, updates row to `vpo_created`
-- Download the VPO PDF (Selenium "Print" → save dialog → known download path)
-- **Milestone:** approval triggers a real VPO in ProShop with PDF on disk
+### Phase 2 — API VPO creation (was Selenium; reframed 2026-05-06)
+
+**Why API:** Probing on 2026-05-06 (`probe_addpo_api.py`) confirmed
+`addPurchaseOrder` works end-to-end under basic auth — test VPO 263106 was
+created with HTTP 200. `AddPurchaseOrderInput` exposes 40 fields (only
+`poType` required); `UpdatePurchaseOrderPoItemsDataInput` exposes 44 line-item
+fields. No Selenium needed for the create path.
+
+**Repeat-purchase shape (locked 2026-05-06):**
+- Lookup: most recent VPO touching the entity (last 1, not averaged)
+- Vendor selection: blind-copy from that prior VPO (no surface in approval UI)
+- Defaults pulled from prior VPO line: `costPer`, `quantity`, `orderNumber` (brand+EDP)
+
+**Files:**
+- `purchasing/proshop_basic_auth.py` — `BasicAuthSession` class wrapping
+  beginsession/endsession + 401-on-expiry retry. Shared between P31 and P27
+  (P27 needs the same primitive after auth_010 deletion).
+- `purchasing/proshop_vpo.py`:
+  - `find_last_vpo_line(entity_id) -> {vendor, qty, costPer, orderNumber, ...}` —
+    queries `purchaseOrders` filtered by line-item identifier, returns most
+    recent line for that item.
+  - `create_vpo(queue_row, prior_line) -> vpo_id` — assembles
+    `AddPurchaseOrderInput` payload (poType=Standard, year, supplier,
+    shipTo defaults per memory `project_vpo_defaults.md`, poItems with both
+    `toolNumber` for internal matching and `orderNumber=brand+EDP` for the
+    vendor's view), calls mutation, returns id.
+- `purchasing/worker.py` — background thread polling `orders.db` for
+  `status='approved'`. For each: call `find_last_vpo_line`, then `create_vpo`,
+  then update row to `vpo_created` with `vpo_number` populated (P27 will read
+  this for cost-feedback).
+
+**Open question deferred to Phase 3:** PDF download. The web UI's "Print VPO"
+action may or may not have an API-callable equivalent — fall back to Selenium
+for the PDF step only if the API doesn't expose it.
+
+**Milestone:** approval → real VPO in ProShop, `orders.db` row reflects
+`vpo_number`, no Selenium in the path.
 
 ### Phase 3 — email draft
 - `email_draft.py`: Graph `me/messages` create-draft with PDF attachment, To from vendor_map
@@ -175,6 +207,35 @@ When a vendor reply lands, P27 already parses the doc for line items and totals.
 
 P35's only obligation here is keeping `orders.db` populated with VPO ↔ entity_id. Everything downstream is P27's domain.
 
+## Part B — Purchasing-method history (post-Phase-2)
+
+For items that aren't bought via VPO (Amazon, McMaster, etc.), keep a
+`purchasing.method_history` table keyed by entity_id:
+
+```sql
+CREATE TABLE method_history (
+  entity_id TEXT PRIMARY KEY,
+  method TEXT,            -- vpo / amazon / mcmaster / web_other
+  vendor TEXT,
+  asin_or_url TEXT,       -- ASIN for amazon, full URL otherwise
+  last_price REAL,
+  last_qty REAL,
+  last_used TIMESTAMP
+);
+```
+
+On Buy click, branch on `method`:
+- `vpo` → Phase 2 API pipeline
+- `amazon` → return `{action: "open_cart_url", url: amazon-cart-add-URL}` to
+  the extension (uses `amazon.com/gp/aws/cart/add.html?ASIN.1=...&Quantity.1=...`
+  scheme — no Selenium); queue row marked `pending_web_order`
+- `mcmaster` → similar deep-link
+- `null` → fall through to the existing quote-request email path
+
+Populated lazily: first time an item is purchased via a non-VPO method, the
+operator sets the method (UI affordance TBD). Subsequent Buy clicks
+auto-route.
+
 ## v2 / future
 
 - Equipment → COTS consumables link (so equipment page shows "Reorder coolant" instead of just docs)
@@ -186,8 +247,10 @@ P35's only obligation here is keeping `orders.db` populated with VPO ↔ entity_
 
 ## Open risks
 
-- **Selenium "New VPO" form discovery** — same hidden-CKEditor surprise we hit on P31's photo upload. May need a `inspect_vpo_form.py` discovery script first (the way P31 has `inspect_upload.py`)
-- **VPO PDF download path** — ProShop may stream the PDF inline rather than offering a download. Fallback: print-to-PDF via Chrome devtools protocol
+- **Basic-auth session expiry mid-flight** — sessions expire ~300s. `BasicAuthSession` must catch 401 mid-mutation, re-`beginsession`, and retry once. Failure to do so will silently drop write attempts during slow approval cycles.
+- **`acceptNewRecord` resurfacing for VPOs?** — `addCustomerPo` was historically blocked at this gate while `addPurchaseOrder` was not (per Joao inquiry). Today's probe confirmed it still works for VPOs, but if Adion changes permission model we'd lose the API path with no warning. Keep `BasicAuthSession` flexible enough to swap in OAuth or fall back to Selenium.
+- **VPO PDF download path** — ProShop may not expose the rendered PDF via API. Fallback: Selenium "Print VPO" action (Phase 3 only — does not block Phase 2 milestone).
+- **`orderNumber` collision** — memory says `orderNumber = brand + EDP`. If a single PO has multiple lines for items sharing a brand+EDP, ProShop may reject. Need to confirm with the live mutation when we wire up multi-line POs.
 - **Vendor email parse** — sales-rep addresses cycle out, generic `orders@` isn't always present. Manual prune required after bootstrap; script flags low-confidence matches
 - **Browser button on Tools page must work in iframe** — P30's tool-content.js already handles this (three-layer cascade); buy-content.js can copy that pattern
 

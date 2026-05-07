@@ -22,6 +22,34 @@ class GraphQLError(Exception):
         super().__init__("; ".join(messages))
 
 
+def _norm_org_name(name):
+    """Lowercase, strip non-alphanumerics — for fuzzy vendor/brand matching.
+
+    "AJ Rodco", "Aj Rod", "ajrodco", "A.J. Rodco" all collapse to "ajrodco"
+    (or close enough for substring match).
+    """
+    return "".join(c.lower() for c in (name or "") if c.isalnum())
+
+
+def _pick_brand_record(brands, skip_vendor=None):
+    """Return the first approvedBrands record whose brand isn't the email
+    recipient (skip_vendor). Falls through to the original top record if
+    every entry matches the recipient. Empty dict if list is empty."""
+    if not brands:
+        return {}
+    if not skip_vendor:
+        return brands[0]
+    skip_n = _norm_org_name(skip_vendor)
+    for b in brands:
+        bn = _norm_org_name(b.get("approvedBrand"))
+        if not bn:
+            continue
+        if bn == skip_n or bn.startswith(skip_n) or skip_n.startswith(bn):
+            continue
+        return b
+    return {}
+
+
 class ProShopClient:
     """ProShop ERP GraphQL client with OAuth token management."""
 
@@ -704,19 +732,25 @@ class ProShopClient:
 
     # ── Purchasing Info ───────────────────────────────────────────────────
 
-    def get_purchasing_info(self, entity_type, entity_id):
+    def get_purchasing_info(self, entity_type, entity_id, skip_vendor=None):
         """Fetch the fields needed to compose a vendor-facing quote-request email.
 
         Returns {description, brand, edp, cost} — top approvedBrand record per
         Wolfgang's convention. brand/edp/cost may be None if the tool has no
         approvedBrands records on file. Caller should fall back to description
         + entity_id when brand/edp are missing.
+
+        skip_vendor: name of the email-recipient vendor (e.g. "AJ Rodco"). When
+        the tool record has the recipient's own name stored in approvedBrand
+        (a long-standing data convention where the distributor was entered as
+        the brand), skip those records and use the next manufacturer-brand
+        entry. Prevents drafting "Aj Rod 314965" emails to AJ Rodco.
         """
         if entity_type == "tool":
-            return self._tool_purchasing_info(entity_id)
+            return self._tool_purchasing_info(entity_id, skip_vendor=skip_vendor)
         return {"description": "", "brand": None, "edp": None, "cost": None}
 
-    def _tool_purchasing_info(self, tool_number):
+    def _tool_purchasing_info(self, tool_number, skip_vendor=None):
         try:
             result = self._execute("""
                 query ($num: String!) {
@@ -735,7 +769,7 @@ class ProShopClient:
                 return {"description": "", "brand": None, "edp": None, "cost": None}
             t = records[0]
             brands = ((t.get("approvedBrands") or {}).get("records") or [])
-            top = brands[0] if brands else {}
+            top = _pick_brand_record(brands, skip_vendor)
             return {
                 "description": t.get("description") or "",
                 "brand": top.get("approvedBrand") or None,
