@@ -1042,9 +1042,15 @@ Example for 7 pages: packing slip (p1-2) + mill cert (p3) = one package, shippin
         raw = re.sub(r"^```[a-z]*\n?", "", raw)
         raw = re.sub(r"\n?```$", "", raw)
         try:
-            return json.loads(raw)
+            parsed = json.loads(raw)
         except json.JSONDecodeError:
             return {"raw": raw, "error": "JSON parse failed", "confidence": 0}
+        if isinstance(parsed, list):
+            # Claude occasionally returns a top-level JSON array; coerce to dict
+            return parsed[0] if (parsed and isinstance(parsed[0], dict)) else {"items": parsed, "confidence": 0}
+        if not isinstance(parsed, dict):
+            return {"raw": raw, "error": f"unexpected JSON type {type(parsed).__name__}", "confidence": 0}
+        return parsed
 
     def extract_html(self, html_body, doc_type, subject="", sender=""):
         """Extract structured data from an email body (HTML or plain text)."""
@@ -1065,9 +1071,15 @@ Example for 7 pages: packing slip (p1-2) + mill cert (p3) = one package, shippin
         raw = re.sub(r"^```[a-z]*\n?", "", raw)
         raw = re.sub(r"\n?```$", "", raw)
         try:
-            return json.loads(raw)
+            parsed = json.loads(raw)
         except json.JSONDecodeError:
             return {"raw": raw, "error": "JSON parse failed", "confidence": 0}
+        if isinstance(parsed, list):
+            # Claude occasionally returns a top-level JSON array; coerce to dict
+            return parsed[0] if (parsed and isinstance(parsed[0], dict)) else {"items": parsed, "confidence": 0}
+        if not isinstance(parsed, dict):
+            return {"raw": raw, "error": f"unexpected JSON type {type(parsed).__name__}", "confidence": 0}
+        return parsed
 
 
 # ─── Email Poller ─────────────────────────────────────────────────────────────
@@ -1106,6 +1118,7 @@ class EmailPoller:
         if not msgs:
             return
         new_count = 0
+        fail_count = 0
         con = db()
         for msg in msgs:
             gid = msg["id"]
@@ -1121,12 +1134,20 @@ class EmailPoller:
                     (gid, sender, subject, received)
                 )
                 con.commit()
-            queued = self._process_message(msg, subject, sender, con)
+            try:
+                queued = self._process_message(msg, subject, sender, con)
+            except Exception as e:
+                # Don't let one bad email kill the whole batch
+                fail_count += 1
+                self.log(f"Skipped (error): {sender} | {subject[:60]} — {type(e).__name__}: {str(e)[:120]}")
+                continue
             if queued:
                 con.execute("UPDATE email_log SET processed=1 WHERE graph_id=?", (gid,))
                 con.commit()
                 new_count += 1
         con.close()
+        if fail_count:
+            self.log(f"Poll completed with {fail_count} per-message error(s); see log lines above")
         if new_count:
             self.log(f"Processed {new_count} new email(s)")
 
