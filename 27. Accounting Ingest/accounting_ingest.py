@@ -13,7 +13,7 @@ and route documents:
 """
 
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog, simpledialog
 import threading
 import time
 import os
@@ -43,6 +43,7 @@ SCAN_FOLDER  = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting 
 BURST_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\Scanned\burst")
 EMAIL_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\From Email")
 DB_PATH      = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\ingest_queue.db")
+QBO_AUDIT_LOG = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\qbo_audit.log")
 
 GRAPH_TOKEN_URL = "https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
 GRAPH_MESSAGES_URL = "https://graph.microsoft.com/v1.0/users/{mailbox}/mailFolders/inbox/messages"
@@ -105,6 +106,24 @@ QBO_APP_URLS = {
     "sandbox":    "https://app.sandbox.qbo.intuit.com/app/bill?txnId={bill_id}",
     "production": "https://app.qbo.intuit.com/app/bill?txnId={bill_id}",
 }
+
+def _qbo_audit(event, **fields):
+    """Append a tab-delimited record to qbo_audit.log. Never raises.
+
+    Captures every QBO write attempt — success or failure — so we have an
+    independent local trail beyond Intuit's own audit log.
+    """
+    try:
+        QBO_AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        parts = [ts, event, f"env={QBO_ENVIRONMENT}"]
+        for k, v in fields.items():
+            sval = str(v).replace("\t", " ").replace("\n", " ")
+            parts.append(f"{k}={sval}")
+        with QBO_AUDIT_LOG.open("a", encoding="utf-8") as f:
+            f.write("\t".join(parts) + "\n")
+    except Exception:
+        pass
 
 def _update_env_value(key, value):
     """Overwrite a single KEY=value line in .traxis.env (used to persist refreshed QBO tokens)."""
@@ -414,6 +433,7 @@ class QBOClient:
         self._vendors_cache = None
         self._vendors_cache_time = 0
         self._default_account_ref = None
+        self._vendor_account_cache = {}  # vendor_id -> AccountRef from last Bill
         self._token_url = QBO_TOKEN_URL
         self._revoke_url = QBO_REVOKE_URL
         self._load_discovery()
@@ -541,9 +561,40 @@ class QBOClient:
                 return self._default_account_ref
         return {"value": "1"}  # last-resort fallback
 
+    def get_vendor_default_account(self, vendor_id):
+        """Return the AccountRef from this vendor's most recent Bill, or None.
+
+        QBO's UI defaults the account on a new Bill to whatever was used on the
+        previous Bill for that vendor. There's no Vendor.DefaultAccount field
+        exposed via the API, so we mimic the UI by querying the last Bill.
+        """
+        if vendor_id in self._vendor_account_cache:
+            return self._vendor_account_cache[vendor_id]
+        ref = None
+        try:
+            data = self.qbo_query(
+                f"SELECT * FROM Bill WHERE VendorRef = '{vendor_id}' "
+                f"ORDERBY TxnDate DESC MAXRESULTS 1"
+            )
+            bills = data.get("QueryResponse", {}).get("Bill", [])
+            if bills:
+                for line in bills[0].get("Line", []):
+                    detail = line.get("AccountBasedExpenseLineDetail")
+                    if detail and detail.get("AccountRef"):
+                        ref = detail["AccountRef"]
+                        break
+        except Exception:
+            ref = None
+        self._vendor_account_cache[vendor_id] = ref
+        return ref
+
     def create_bill(self, extracted, vendor_id, vendor_display=""):
         """Create a Bill in QBO.  Returns (bill_id, qbo_url)."""
-        account_ref = self.get_default_expense_account()
+        account_ref = self.get_vendor_default_account(vendor_id)
+        account_source = "vendor_last_bill"
+        if not account_ref:
+            account_ref = self.get_default_expense_account()
+            account_source = "global_fallback"
 
         # Build line items from extracted data, or single total line
         lines = []
@@ -597,18 +648,41 @@ class QBOClient:
         if extracted.get("notes"):
             bill["PrivateNote"] = extracted["notes"]
 
-        r = requests.post(
-            self._url("bill"),
-            headers=self._headers(),
-            params={"minorversion": "65"},
-            json=bill,
-        )
-        if not r.ok:
-            self._raise_qbo_error(r)
-        result = r.json()
-        bill_id = result.get("Bill", {}).get("Id", "")
-        qbo_url = QBO_APP_URLS[QBO_ENVIRONMENT].format(bill_id=bill_id)
-        return bill_id, qbo_url
+        total_amount = round(sum(ln.get("Amount", 0) for ln in lines), 2)
+        try:
+            r = requests.post(
+                self._url("bill"),
+                headers=self._headers(),
+                params={"minorversion": "65"},
+                json=bill,
+            )
+            if not r.ok:
+                self._raise_qbo_error(r)
+            result = r.json()
+            bill_id = result.get("Bill", {}).get("Id", "")
+            qbo_url = QBO_APP_URLS[QBO_ENVIRONMENT].format(bill_id=bill_id)
+            _qbo_audit(
+                "BILL_CREATED",
+                bill_id=bill_id,
+                vendor=f"{vendor_display} (id={vendor_id})",
+                doc_number=extracted.get("invoice_number", ""),
+                txn_date=bill.get("TxnDate", ""),
+                amount=f"${total_amount:.2f}",
+                account=f"{account_ref.get('name', '')} (id={account_ref.get('value', '')})",
+                account_source=account_source,
+                lines=len(lines),
+                qbo_url=qbo_url,
+            )
+            return bill_id, qbo_url
+        except Exception as e:
+            _qbo_audit(
+                "BILL_FAILED",
+                vendor=f"{vendor_display} (id={vendor_id})",
+                doc_number=extracted.get("invoice_number", ""),
+                amount=f"${total_amount:.2f}",
+                error=str(e)[:300],
+            )
+            raise
 
     def attach_pdf(self, entity_type, entity_id, pdf_path):
         """Upload a PDF and attach it to a QBO entity (e.g. Bill).
@@ -621,18 +695,35 @@ class QBOClient:
             "FileName": p.name,
             "ContentType": "application/pdf",
         })
-        r = requests.post(
-            self._url("upload"),
-            headers={"Authorization": f"Bearer {self._refresh()}", "Accept": "application/json"},
-            params={"minorversion": "65"},
-            files={
-                "file_metadata_0": ("metadata.json", metadata, "application/json"),
-                "file_content_0": (p.name, p.read_bytes(), "application/pdf"),
-            },
-        )
-        if not r.ok:
-            self._raise_qbo_error(r)
-        return r.json()
+        try:
+            r = requests.post(
+                self._url("upload"),
+                headers={"Authorization": f"Bearer {self._refresh()}", "Accept": "application/json"},
+                params={"minorversion": "65"},
+                files={
+                    "file_metadata_0": ("metadata.json", metadata, "application/json"),
+                    "file_content_0": (p.name, p.read_bytes(), "application/pdf"),
+                },
+            )
+            if not r.ok:
+                self._raise_qbo_error(r)
+            _qbo_audit(
+                "PDF_ATTACHED",
+                entity_type=entity_type,
+                entity_id=entity_id,
+                file=p.name,
+                size_bytes=p.stat().st_size,
+            )
+            return r.json()
+        except Exception as e:
+            _qbo_audit(
+                "PDF_ATTACH_FAILED",
+                entity_type=entity_type,
+                entity_id=entity_id,
+                file=p.name,
+                error=str(e)[:300],
+            )
+            raise
 
     def check_duplicate_bill(self, doc_number):
         """Return QBO URL if a Bill with this DocNumber already exists, else None."""
@@ -1003,8 +1094,15 @@ class EmailPoller:
                     return
                 time.sleep(1)
 
-    def _poll(self):
-        msgs = self.graph.get_recent_emails()
+    def poll_once(self, lookback_days=10):
+        """Run a single poll with a custom lookback. Doesn't start the loop."""
+        try:
+            self._poll(lookback_days=lookback_days)
+        except Exception as e:
+            self.log(f"Email poll error: {e}")
+
+    def _poll(self, lookback_days=10):
+        msgs = self.graph.get_recent_emails(lookback_days=lookback_days)
         if not msgs:
             return
         new_count = 0
@@ -1592,6 +1690,7 @@ class AccountingIngestApp(tk.Tk):
         tb.pack(fill="x", padx=8, pady=2)
         ttk.Button(tb, text="Open File", command=self._open_file).pack(side="left", padx=2)
         ttk.Button(tb, text="Poll Now", command=self._poll_now).pack(side="left", padx=2)
+        ttk.Button(tb, text="Backfill...", command=self._backfill).pack(side="left", padx=2)
         ttk.Button(tb, text="Refresh", command=self._refresh_queue).pack(side="left", padx=2)
         ttk.Button(tb, text="Open QBO", command=self._open_qbo_folder).pack(side="left", padx=2)
         ttk.Button(tb, text="Reject Selected", command=self._batch_reject).pack(side="left", padx=2)
@@ -2507,6 +2606,22 @@ class AccountingIngestApp(tk.Tk):
     def _poll_now(self):
         self._log("Manual email poll triggered...")
         threading.Thread(target=self._email_poller.run, daemon=True).start()
+
+    def _backfill(self):
+        days = simpledialog.askinteger(
+            "Backfill",
+            "Look back how many days?\n(Already-seen emails are skipped automatically.)",
+            parent=self, minvalue=1, maxvalue=365, initialvalue=20,
+        )
+        if not days:
+            return
+        self._log(f"Backfill poll triggered (lookback {days} days)...")
+        threading.Thread(
+            target=self._email_poller.poll_once,
+            args=(days,),
+            daemon=True,
+            name=f"backfill_{days}d",
+        ).start()
 
     # ── Background Workers ─────────────────────────────────────────────────
 

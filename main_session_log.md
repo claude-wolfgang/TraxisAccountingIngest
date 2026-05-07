@@ -5,6 +5,40 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-07
+
+### P27: pre-flight audit log + vendor-aware categorization + email backfill button
+
+**Date:** 2026-05-07
+
+**Task:** Wolfgang preparing to operate P27 for the first time. Wanted (a) a tour of the QBO-side state — code locations, write surface, safety — before touching anything; (b) an append-only log of every QBO change made by the tool; (c) help with categorization since QBO defaults categories per-vendor and Wolfgang doesn't know which is right. Mid-session he noticed nothing in the queue from May 1-7 — diagnosed as the GUI not having been launched since 2026-04-30, not a bug.
+
+**What was done:**
+
+1. **Reviewed P27 QBO surface.** Explained the actual write footprint: only `QBOClient.create_bill` and `QBOClient.attach_pdf` modify QuickBooks; everything else (vendor lookup, account lookup, duplicate check) is read-only. No update, no delete, no payment, no vendor-auto-create. Production realm `123146014753554` confirmed in `.traxis.env`. Manual approval per Bill — click required for every push. No "dry run" toggle. Pre-change behavior used a global COGS/Expense account fallback for *every* line item, overriding QBO's own categorization.
+
+2. **Added `qbo_audit.log` — append-only file audit trail.** New file `Accounting Inbox/qbo_audit.log` (Dropbox-synced). Module-level `_qbo_audit(event, **fields)` helper, swallows all exceptions. Tab-delimited UTC ISO timestamp + event + env + named fields. Events logged: `BILL_CREATED` (bill_id, vendor+id, doc_number, txn_date, amount, account+id, account_source, lines, qbo_url), `BILL_FAILED` (vendor, doc_number, amount, error), `PDF_ATTACHED` (entity_type, entity_id, file, size_bytes), `PDF_ATTACH_FAILED` (entity_type, entity_id, file, error). Failure paths wrap inside QBOClient methods with try/except/raise so the GUI's existing error UI still fires.
+
+3. **Vendor-aware categorization (QBO UI mimicry).** Added `QBOClient.get_vendor_default_account(vendor_id)` — queries `SELECT * FROM Bill WHERE VendorRef = ? ORDERBY TxnDate DESC MAXRESULTS 1`, pulls `AccountRef` from `line[0].AccountBasedExpenseLineDetail`, caches per vendor for the session. `create_bill` resolution order: vendor's last-Bill account first (`account_source=vendor_last_bill`), global COGS/Expense fallback second (`account_source=global_fallback`). The source label lands in `qbo_audit.log` on every push, so global_fallback rows are easy to grep — those are the ones to spot-check inside QBO. New vendors hit the global fallback once; user fixes the category in QBO post-push; subsequent Bills follow the fix automatically.
+
+4. **Email backfill button.** New `EmailPoller.poll_once(lookback_days)` method — single poll, no background loop. New "Backfill..." button in the queue toolbar; `simpledialog.askinteger` prompts for days (default 20, range 1-365), threaded `poll_once` call. Dedup is automatic via `email_log.graph_id UNIQUE`. Distinct from the buggy "Poll Now" button which spawns the background loop on each click.
+
+5. **Diagnosed "nothing from May".** Inspected `ingest_queue.db` directly: `email_log` had zero rows since `2026-04-30T01:02:29Z` despite the date being 2026-05-07. The 10 May rows in `queue` all came from today's manual scans (`source='scan'`), not email. Conclusion: the GUI hadn't been launched since 2026-04-30, and `EmailPoller` only runs while the app is open. No code bug. Plan: launch GUI → default 10-day poll fires → already-seen emails dedupe → May 1-7 ingest fresh. Then Backfill 14-20 days to pad.
+
+6. **Noted (did not fix) `_poll_now` bug.** App.`_poll_now` calls `self._email_poller.run()` (the background loop), not a one-shot. Each click adds another loop running in parallel. Backfill button uses the new `poll_once` correctly. Logged as Next Steps.
+
+**Files modified:**
+
+- `27. Accounting Ingest/accounting_ingest.py` — `_qbo_audit()` helper + `QBO_AUDIT_LOG` path; `QBOClient._vendor_account_cache` + `get_vendor_default_account()`; `create_bill` rewired with vendor-default-first resolution + audit on success/failure; `attach_pdf` audit on success/failure; `EmailPoller._poll(lookback_days=)` parameterized + `poll_once(lookback_days)`; `simpledialog` imported; `_backfill()` handler + "Backfill..." toolbar button.
+
+**Status:** Tool safer to start. GUI not launched in-session — first push to the live realm is Wolfgang's next action. `qbo_audit.log` will populate on the first Bill; the `account_source` field will reveal whether vendor-default lookup is hitting (expected) or global_fallback is winning (means vendor has no prior Bill in the realm).
+
+**[NEEDS WOLFGANG]:**
+- Launch GUI to ingest May 1-7 email backlog. Default 10-day poll covers it; Backfill 14-20 to pad.
+- After first Bill push, sanity-check `Accounting Inbox/qbo_audit.log` populated and `account_source=vendor_last_bill` for established vendors.
+
+---
+
 ## 2026-05-06
 
 ### P35 Phase 2 reframed Selenium → API; build started (foundation modules)
