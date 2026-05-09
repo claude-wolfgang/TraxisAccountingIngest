@@ -1893,6 +1893,13 @@ class AccountingIngestApp(tk.Tk):
     # ── Queue Management ───────────────────────────────────────────────────
 
     def _refresh_queue(self):
+        # Preserve current selection and scroll position so a background ingest
+        # doesn't yank the user out of whatever row they're reviewing.
+        prior_selection = self._tree.selection()
+        prior_selected_iid = prior_selection[0] if prior_selection else None
+        anchor_iid = self._tree.identify_row(1) or None  # iid at top of viewport
+        prior_yview = self._tree.yview()
+
         for row in self._tree.get_children():
             self._tree.delete(row)
 
@@ -1938,6 +1945,20 @@ class AccountingIngestApp(tk.Tk):
                 pending += 1
 
         self._status_label.config(text=f"{pending} pending")
+
+        # Restore scroll/selection so new rows arriving at the top don't
+        # disrupt the row the user was reviewing.
+        if prior_selected_iid and self._tree.exists(prior_selected_iid):
+            self._tree.selection_set(prior_selected_iid)
+            self._tree.focus(prior_selected_iid)
+        if anchor_iid and self._tree.exists(anchor_iid):
+            self._tree.see(anchor_iid)
+        else:
+            try:
+                self._tree.yview_moveto(prior_yview[0])
+            except Exception:
+                pass
+
         self._refresh_activity()
 
     def _refresh_activity(self):

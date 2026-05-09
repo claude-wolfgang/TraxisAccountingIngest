@@ -7,6 +7,43 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-07
 
+### P27 (continued): bug-fix during first backfill + GUI usability + PO attach-surface discovery
+
+**Date:** 2026-05-07 (later, same day as the audit-log/categorization session)
+
+**Task:** Wolfgang launched the GUI for the first time and asked to run the 14-day Backfill button. First run crashed mid-batch on a list-shaped Claude response. Diagnosed and patched the bug, re-ran cleanly. Then surfaced two GUI annoyances (refresh yanking the user out of the current row; overall Tkinter look feels dated next to the ProShop bridge palette). Fixed the first; deferred the second. Closed by digging into whether the existing P31 selenium uploader could be repurposed to attach the source PDFs of customer/vendor POs to their ProShop pages — that turned into a discovery sub-task with a clear verdict.
+
+**What was done:**
+
+1. **Diagnosed and patched email-poll crash (committed `620aeaf`).** First 14-day backfill against the previous session's code crashed with `'list' object has no attribute 'get'` after saving exactly one attachment, because Claude's `extract()` occasionally returns a top-level JSON array instead of an object — the next `extracted.get("confidence", 0)` call in `_enqueue` blew up, the outer try/except in `poll_once` swallowed it, and the whole batch stopped. Two-part fix in `accounting_ingest.py`: `AIExtractor.extract()` and `extract_html()` now coerce list-typed `json.loads()` results to a dict (take `parsed[0]` if it's dict-shaped, else wrap as `{"items": [...], "confidence": 0}`); `EmailPoller._poll()` got a per-message try/except so one bad email logs `Skipped (error): ...` and the loop continues. Re-ran 14-day backfill: **34 emails queued, 0 errors, 317s** — full inbox catch-up from 2026-04-30 through 2026-05-07.
+
+2. **Scroll/selection preservation in `_refresh_queue` (uncommitted before this entry).** Background ingest was rebuilding the Treeview from scratch on every new doc, jumping the user out of whatever row they were reviewing. `_refresh_queue` now snapshots `tree.selection()`, the iid at `tree.identify_row(1)` (top of viewport), and `tree.yview()` before clearing; restores selection + focus + scroll anchor after rebuild. Newest still at top (`ORDER BY id DESC` unchanged); new rows arrive "out of view" relative to whatever the user was looking at.
+
+3. **Deferred Tkinter→Flask GUI rewrite to post-server-install (logged in P27 Next Steps).** Honest assessment: Tkinter ceiling is real — `ttk.Style` polish gets ~60% of the way to "bridge feel" but square buttons, native scrollbars, and absent transitions cap it. Real fix is a Flask localhost UI reusing `palette.html`'s CSS tokens (same model P31 already uses). Held until the OptiPlex Micro dedicated-server install consolidates Flask deployment patterns; cheaper to do once on the server than on `.71` first then re-port. Logged with rationale.
+
+4. **Confirmed PDF→ProShop attach gap for POs.** Walked the code: vendor invoices get the source PDF auto-attached to their QBO Bill via `QBOClient.attach_pdf()` (works). Customer POs (`addCustomerPo`) and vendor POs (`addPurchaseOrder`) only push the JSON header — the source PDF stays in `Accounting Inbox/From Email/` and is never linked on the ProShop page. Packing slips have a half-solution (cert PDFs copied to `Certs/VPO-XXXXXX/` for manual upload).
+
+5. **Built `inspect_po_page.py` (NEW)** — generic ProShop PO-page DOM inspector modeled on P31's `inspect_user_page.py`. Visible-mode Chrome, accepts `--url`, walks default + 8 candidate sub-forms + any sidebar-discovered `$formName=` links, dumps per-form `ckeditor_count`, `ckeditor_names`, `file_inputs[]`, `visible_buttons[]`. Outputs PNG screenshots and JSON report under `27. Accounting Ingest/logs/inspect_po_<id>_<ts>.{png,json}`. Uses P27's existing env loader (no P31 dependency).
+
+6. **Inspected real VPO 263104 — verdict: no attach surface in read mode.** Across 12 form names probed (default + candidates + nothing from sidebar — `$formName=` is ignored for purchase orders): zero CKEditor instances, zero file inputs, identical 4 visible buttons everywhere (`Create Return PS`, `+`, `Checkout`, `Email`). Same dead-end pattern as user pages on 2026-05-06: attachment surface (if any exists) is gated behind a **Checkout** action that puts the page into edit mode. **P31's base64-image-into-CKEditor path is not reusable as-is on VPO pages.** Phase-2 inspector (click Checkout first, then re-probe) is the documented next step before committing to a worker.
+
+7. **Customer PO equivalent inspect not yet run.** Different URL pattern (`/procnc/customerpos/...`), different page chrome — verdict for VPOs doesn't necessarily transfer. Pending a real customer PO URL from Wolfgang.
+
+**Files modified/created:**
+
+- `27. Accounting Ingest/accounting_ingest.py` — list-coercion in `extract()`/`extract_html()`; per-message try/except in `_poll`; scroll/selection preservation in `_refresh_queue`
+- `27. Accounting Ingest/inspect_po_page.py` (NEW) — generic PO-page DOM inspector
+- `27. Accounting Ingest/logs/inspect_po_263104_20260507_170640.json` + 12 PNG screenshots — discovery artifacts (verdict: no attach surface)
+- `27. Accounting Ingest/CLAUDE.md` — added inspect_po_page.py to Key Files; new Next Steps entries (Phase-2 inspect; deferred GUI rewrite); updated launch-GUI item to reflect actual state (34 emails ingested)
+
+**Status:** P27 ingest pipeline now runs cleanly through a multi-day batch. GUI usable enough to operate. Real-PDF-to-ProShop-page attachment for POs is unresolved — needs a Phase-2 inspect (Checkout + re-probe) before any worker work; both VPO and customer PO surfaces need that pass independently.
+
+**[NEEDS WOLFGANG]:**
+- Provide a real customer PO URL when convenient (any existing `/procnc/customerpos/...` page) so the inspector can be run against it. The VPO verdict doesn't necessarily transfer to customer POs.
+- First push to QBO from the now-clean queue still pending. Audit log will populate on the first BILL_CREATED.
+
+---
+
 ### P27: pre-flight audit log + vendor-aware categorization + email backfill button
 
 **Date:** 2026-05-07
