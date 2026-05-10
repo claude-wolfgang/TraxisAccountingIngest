@@ -1,0 +1,71 @@
+Tool Assembly Kiosk — Instructions
+===================================
+
+STARTING & STOPPING (on Kiosk PC - 10.1.1.142)
+-----------------------------------------------
+  START:    Double-click "START KIOSK.bat"
+            - Starts Flask server on port 5001
+            - Opens Chrome in fullscreen kiosk mode
+            - Watchdog auto-restarts both if they crash
+            - Leave the console window open while running
+
+  STOP:     Double-click "STOP KIOSK.bat"
+            - Kills Flask, kiosk Chrome, and the launcher window
+
+  RESTART:  Run STOP then START, or just close the START window
+            and re-open it (it cleans up leftover processes).
+
+
+PRINT SERVICE (on MainPC - 10.1.1.71)
+--------------------------------------
+  The label printer runs separately on MainPC.
+
+  START:    Double-click "start_print_service.bat"
+            (or use the shortcut on the desktop)
+            - Runs print_service.py on port 5002
+            - Brother PT-D610BT must be connected via USB
+
+  This only needs restarting if print_service.py is changed
+  or the printer is reconnected.
+
+
+FILES
+-----
+  Core app:
+    app.py                  Flask web server (routes, ProShop integration)
+    config.py               Configuration (machines, URLs, timeouts)
+    database.py             SQLite data layer
+    proshop_client.py       ProShop ERP GraphQL client
+    requirements.txt        Python dependencies
+
+  Launchers:
+    kiosk_launcher.py       Launcher + watchdog (Flask + Chrome)
+    START KIOSK.bat          Start everything
+    STOP KIOSK.bat           Stop everything
+
+  Print service:
+    print_service.py                Label printing server (b-PAC SDK)
+    start_print_service.bat         Start print service
+    open_print_service_firewall.bat Open firewall port 5002 (one-time)
+    restart_print.ps1               PowerShell restart helper
+
+  Scheduled:
+    tool_usage_rollup.py    Aggregates tool usage data (runs on schedule)
+
+  Other:
+    Remote Display.bat      Opens Chrome to kiosk URL for remote viewing
+    kiosk_launcher.log      Launcher/watchdog log output
+
+  Directories:
+    data/                   SQLite database + logs
+    static/                 CSS + JavaScript (kiosk.js, style.css)
+    templates/              HTML templates (kiosk.html, base.html)
+    labels/                 Brother label layout (.lbx) + CSV data
+    old/                    Archived scripts and shortcuts
+
+
+NETWORK
+-------
+  Kiosk PC (10.1.1.142)  — runs Flask + Chrome kiosk
+  MainPC   (10.1.1.71)   — runs print service + label printer
+  Both PCs share code via Dropbox sync.

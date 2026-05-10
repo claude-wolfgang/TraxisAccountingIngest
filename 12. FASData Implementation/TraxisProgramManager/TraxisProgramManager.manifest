@@ -1,0 +1,13 @@
+{
+	"autodeskProduct":	"Fusion",
+	"type":	"addin",
+	"id":	"traxis-program-manager-v1",
+	"author":	"Traxis Manufacturing",
+	"description":	{
+		"":	"v1.4.0 — Traxis Program Manager: Setup naming, NC program versioning, header injection, WCS origin, tool IDs, and file management"
+	},
+	"version":	"1.4.0",
+	"runOnStartup":	true,
+	"supportedOS":	"windows",
+	"editEnabled":	true
+}

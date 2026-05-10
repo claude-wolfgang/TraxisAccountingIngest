@@ -1,0 +1,13 @@
+{
+	"autodeskProduct":	"Fusion",
+	"type":	"addin",
+	"id":	"traxis-post-processor-v1",
+	"author":	"Traxis Manufacturing",
+	"description":	{
+		"":	"v1.0.0 — Traxis Post Processor: Automatic NC program naming with versioning and header injection"
+	},
+	"version":	"1.0.0",
+	"runOnStartup":	true,
+	"supportedOS":	"windows",
+	"editEnabled":	true
+}

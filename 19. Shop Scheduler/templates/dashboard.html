@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Shop Scheduler</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>Shop Dashboard</h1>
+        <nav class="header-nav">
+            <a href="/">Board</a>
+            <a href="/operator">Operator</a>
+            <a href="/dashboard" class="active">Dashboard</a>
+            <a href="/tools">Tools</a>
+        </nav>
+        <div class="readiness-key">
+            <span class="key-label">Dots:</span>
+            <span class="key-item"><span class="light green"></span>Prog</span>
+            <span class="key-item"><span class="light green"></span>Mat</span>
+            <span class="key-item"><span class="light green"></span>Tools</span>
+            <span class="key-item"><span class="light green"></span>Machine</span>
+        </div>
+        <div class="header-actions">
+            <div class="sync-status">
+                <span class="sync-dot" id="sync-dot"></span>
+                <span id="sync-text">Loading...</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Stats Row -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="card">
+                <div class="card-header">Active WOs</div>
+                <div class="stat-value" id="stat-active-wos">—</div>
+            </div>
+            <div class="card">
+                <div class="card-header">Past Due</div>
+                <div class="stat-value" id="stat-past-due" style="color:var(--accent-red)">—</div>
+            </div>
+            <div class="card">
+                <div class="card-header">Backlog Hours</div>
+                <div class="stat-value" id="stat-backlog-hours">—</div>
+            </div>
+            <div class="card">
+                <div class="card-header">Unscheduled Ops</div>
+                <div class="stat-value" id="stat-unscheduled">—</div>
+            </div>
+            <div class="card">
+                <div class="card-header">Machines Running</div>
+                <div class="stat-value" id="stat-machines-running" style="color:var(--accent-green)">—</div>
+            </div>
+            <div class="card">
+                <div class="card-header">Open Flags</div>
+                <div class="stat-value" id="stat-open-flags" style="color:var(--accent-orange)">—</div>
+            </div>
+            <div class="card">
+                <div class="card-header">Completed Today</div>
+                <div class="stat-value" id="stat-completed-today" style="color:var(--accent-green)">—</div>
+            </div>
+        </div>
+
+        <!-- Machine Status Cards -->
+        <h2 style="font-size:16px; margin-bottom:12px">Machine Status</h2>
+        <div class="machine-cards" id="machine-cards"></div>
+
+        <!-- Needs Lists -->
+        <h2 style="font-size:16px; margin:24px 0 12px">Needs Lists</h2>
+        <div class="needs-tabs" id="needs-tabs">
+            <button class="needs-tab active" data-tab="program">Needs Program <span class="needs-count" id="needs-program-count">0</span></button>
+            <button class="needs-tab" data-tab="material">Needs Material <span class="needs-count" id="needs-material-count">0</span></button>
+            <button class="needs-tab" data-tab="tools">Needs Tools <span class="needs-count" id="needs-tools-count">0</span></button>
+            <button class="needs-tab" data-tab="runtimes">Check Runtimes <span class="needs-count" id="needs-runtimes-count">0</span></button>
+            <button class="btn" id="btn-print-needs" style="margin-left:auto;font-size:12px;padding:4px 10px">Print List</button>
+        </div>
+        <div class="needs-list" id="needs-list"></div>
+
+        <!-- Two-column: Past Due + Flags -->
+        <div class="dashboard-row" style="margin-top:24px">
+            <div>
+                <h2 style="font-size:16px; margin-bottom:12px">Past Due Work Orders</h2>
+                <div id="past-due-list"></div>
+            </div>
+            <div>
+                <h2 style="font-size:16px; margin-bottom:12px">Active Flags</h2>
+                <div id="flags-list"></div>
+            </div>
+        </div>
+
+        <!-- Sync Log -->
+        <h2 style="font-size:16px; margin:24px 0 12px">Recent Syncs</h2>
+        <div id="sync-log"></div>
+    </div>
+
+    <script>window.PROSHOP_BASE = "{{ proshop_base }}";</script>
+    <script src="/static/dashboard.js"></script>
+</body>
+</html>

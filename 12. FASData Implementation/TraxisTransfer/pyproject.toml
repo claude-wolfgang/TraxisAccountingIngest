@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "traxistransfer"
+version = "0.1.0"
+description = "CNC program transfer tool for Traxis Manufacturing"
+requires-python = ">=3.11"
+license = {text = "Proprietary"}
+
+dependencies = [
+    "customtkinter>=5.2",
+    "paramiko>=3.0",
+    "scp>=0.14",
+    "requests>=2.28",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-mock",
+    "pyinstaller>=6.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

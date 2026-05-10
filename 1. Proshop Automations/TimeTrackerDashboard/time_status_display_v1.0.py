@@ -550,7 +550,30 @@ def main():
 
     # Start web server
     log.info("Starting dashboard at http://localhost:%d", PORT)
-    app.run(host=HOST, port=PORT, debug=False, use_reloader=False)
+    _serve_with_shutdown(app, HOST, PORT)
+
+
+def _serve_with_shutdown(app, host, port, channel_timeout=30):
+    """Run app under waitress with a /api/shutdown route for graceful stop."""
+    import threading
+    from waitress import create_server
+
+    shutdown_event = threading.Event()
+
+    @app.route("/api/shutdown", methods=["POST"])
+    def _api_shutdown():
+        shutdown_event.set()
+        return ("shutting down", 200)
+
+    server = create_server(app, host=host, port=port, channel_timeout=channel_timeout)
+
+    def _waiter():
+        shutdown_event.wait()
+        server.close()
+
+    threading.Thread(target=_waiter, daemon=True).start()
+    print(f"Serving on http://{host}:{port} (waitress)", flush=True)
+    server.run()
 
 
 if __name__ == "__main__":

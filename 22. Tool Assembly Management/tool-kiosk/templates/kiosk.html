@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+{% block title %}Kiosk - Tool Assembly{% endblock %}
+{% block nav_kiosk %}nav-active{% endblock %}
+
+{% block content %}
+<!-- Screen 0: Sleep / landing -->
+<section id="screen-sleep" class="kiosk-screen active" onclick="wakeKiosk()" ontouchend="wakeKiosk()">
+    <div class="sleep-container">
+        <h1 class="sleep-title">Tool Kiosk</h1>
+        <p class="sleep-hint">Tap anywhere to start</p>
+    </div>
+</section>
+
+<!-- Screen 1: Who are you? -->
+<section id="screen-employee" class="kiosk-screen">
+    <h2 class="kiosk-heading">Who are you?</h2>
+    <div id="employee-grid" class="employee-grid">
+        <div class="loading">Loading employees...</div>
+    </div>
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="kioskGoHome()">Back</button>
+    </div>
+</section>
+
+<!-- Screen 2: Scan holder QR -->
+<section id="screen-scan" class="kiosk-screen">
+    <h2 class="kiosk-heading">Scan Holder QR Code</h2>
+    <p class="kiosk-subtitle">Employee: <strong id="selected-employee"></strong></p>
+
+    <div class="scan-area">
+        <input type="text" id="scan-input" class="scan-input"
+               placeholder="Scan H-XXXX or type ID..."
+               autocomplete="off" autocorrect="off" autocapitalize="off"
+               spellcheck="false">
+        <p class="scan-hint">Scanner will auto-submit, or type holder ID and press Enter.</p>
+    </div>
+
+    <div class="scan-actions">
+        <button class="btn btn-secondary btn-large" onclick="showScreen('register')">
+            Register New RTA
+        </button>
+        <button class="btn btn-primary btn-large" onclick="showScreen('inventory-menu')"
+                style="margin-left:12px">
+            Cabinet Inventory
+        </button>
+    </div>
+
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="kioskGoHome()">Back</button>
+    </div>
+</section>
+
+<!-- Screen 3: Holder detail -->
+<section id="screen-detail" class="kiosk-screen">
+    <h2 class="kiosk-heading">
+        <span id="detail-holder-id"></span>
+        <span id="detail-holder-type" class="badge badge-type"></span>
+        <span id="detail-rta-number" class="badge badge-rta" style="display:none"></span>
+    </h2>
+
+    <div class="detail-cards">
+        <!-- Current Cutter -->
+        <div class="detail-card">
+            <h3>Current Cutter</h3>
+            <div id="detail-assembly">
+                <p class="no-data">No cutter installed</p>
+            </div>
+        </div>
+
+        <!-- Current Assignment -->
+        <div class="detail-card">
+            <h3>Current Location</h3>
+            <div id="detail-assignment">
+                <p class="no-data">Not assigned to any machine</p>
+            </div>
+        </div>
+
+        <!-- Usage Stats -->
+        <div class="detail-card">
+            <h3>Usage (Current Cutter)</h3>
+            <div id="detail-usage">
+                <p class="no-data">No usage data</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <button class="btn btn-primary" id="btn-install-cutter"
+                onclick="showInstallScreen()">Install Cutter</button>
+        <button class="btn btn-warning" id="btn-replace-cutter"
+                onclick="showReplaceScreen()" style="display:none">Replace Cutter</button>
+        <button class="btn btn-primary" id="btn-assign"
+                onclick="showAssignScreen()">Assign to Machine</button>
+        <button class="btn btn-secondary" id="btn-move"
+                onclick="showMoveScreen()" style="display:none">Move to Machine</button>
+        <button class="btn btn-danger-outline" id="btn-remove"
+                onclick="confirmRemove()" style="display:none">Remove from Machine</button>
+        <button class="btn btn-secondary" id="btn-print-label"
+                onclick="printLabel()">Print Label</button>
+    </div>
+
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="showScreen('scan')">Back</button>
+    </div>
+</section>
+
+<!-- Screen 4: Register New RTA (combined holder + cutter) -->
+<section id="screen-register" class="kiosk-screen">
+    <h2 class="kiosk-heading">Register New RTA</h2>
+
+    <div class="form-panel">
+        <p class="form-keyboard-hint">Use keyboard to type in fields below</p>
+        <h3 class="form-section-heading">Holder</h3>
+        <div class="form-group">
+            <label>Holder Type</label>
+            <select id="reg-holder-type">
+                <option value="">-- Select --</option>
+                <option value="CAT40 ER32">CAT40 ER32</option>
+                <option value="CAT40 ER25">CAT40 ER25</option>
+                <option value="CAT40 ER16">CAT40 ER16</option>
+                <option value="CAT40 Shrink Fit">CAT40 Shrink Fit</option>
+                <option value="CAT40 End Mill">CAT40 End Mill</option>
+                <option value="CAT40 Shell Mill">CAT40 Shell Mill</option>
+                <option value="CAT40 Drill Chuck">CAT40 Drill Chuck</option>
+                <option value="CAT40 Hydraulic">CAT40 Hydraulic</option>
+                <option value="CAT40 Boring Bar">CAT40 Boring Bar</option>
+                <option value="CAT40 Tap">CAT40 Tap</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Collet / Bore Size</label>
+            <select id="reg-collet-size">
+                <option value="">-- Select --</option>
+                <optgroup label="Inch (Fractional)">
+                    <option value="1/8">1/8"</option>
+                    <option value="3/16">3/16"</option>
+                    <option value="1/4">1/4"</option>
+                    <option value="5/16">5/16"</option>
+                    <option value="3/8">3/8"</option>
+                    <option value="7/16">7/16"</option>
+                    <option value="1/2">1/2"</option>
+                    <option value="5/8">5/8"</option>
+                    <option value="3/4">3/4"</option>
+                    <option value="1">1"</option>
+                </optgroup>
+                <optgroup label="Metric">
+                    <option value="3mm">3mm</option>
+                    <option value="4mm">4mm</option>
+                    <option value="6mm">6mm</option>
+                    <option value="8mm">8mm</option>
+                    <option value="10mm">10mm</option>
+                    <option value="12mm">12mm</option>
+                    <option value="16mm">16mm</option>
+                    <option value="20mm">20mm</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Holder Length — collet types only (flange to nut face)</label>
+            <select id="reg-holder-length">
+                <option value="">N/A</option>
+                <option value="2">2"</option>
+                <option value="3">3"</option>
+                <option value="4">4"</option>
+                <option value="5">5"</option>
+                <option value="6">6"</option>
+                <option value="7">7"</option>
+                <option value="8">8"</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Mfg Serial Number</label>
+            <input type="text" id="reg-serial-number" placeholder="Lasered SN from holder"
+                   autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>Notes</label>
+            <input type="text" id="reg-notes" placeholder="Optional notes...">
+        </div>
+
+        <h3 class="form-section-heading">Cutter</h3>
+        <div class="form-group required">
+            <label>ProShop Tool # (e.g., A16, B9)</label>
+            <input type="text" id="reg-tool-number" placeholder="A16"
+                   autocomplete="off" autocapitalize="characters">
+        </div>
+        <div class="form-group">
+            <label>Tool Description</label>
+            <input type="text" id="reg-tool-desc" placeholder="1/2 4-Flute End Mill">
+        </div>
+        <div class="form-group">
+            <label>Stick-Out (OOH) inches</label>
+            <input type="number" id="reg-ooh" placeholder="2.500" step="0.001">
+        </div>
+    </div>
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="showScreen('scan')">Cancel</button>
+        <button class="btn btn-confirm btn-large" onclick="registerRTA()">Register</button>
+    </div>
+</section>
+
+<!-- Screen 5: Install/Replace cutter -->
+<section id="screen-install" class="kiosk-screen">
+    <h2 class="kiosk-heading" id="install-heading">Install Cutter</h2>
+    <p class="kiosk-subtitle">Holder: <strong id="install-holder-id"></strong></p>
+
+    <!-- Retire reason (only shown for replace) -->
+    <div id="retire-reason-area" class="form-panel" style="display:none">
+        <div class="form-group">
+            <label>Reason for Removing Old Cutter</label>
+            <div class="action-toggle">
+                <button class="toggle-btn active" data-reason="worn"
+                        onclick="setRetireReason('worn')">Worn</button>
+                <button class="toggle-btn" data-reason="broken"
+                        onclick="setRetireReason('broken')">Broken</button>
+                <button class="toggle-btn" data-reason="reground"
+                        onclick="setRetireReason('reground')">Reground</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-panel">
+        <p class="form-keyboard-hint">Use keyboard to type in fields below</p>
+        <div class="form-group">
+            <label>ProShop Tool # (e.g., A16, B9)</label>
+            <input type="text" id="install-tool-number" placeholder="A16"
+                   autocomplete="off" autocapitalize="characters">
+        </div>
+        <div class="form-group">
+            <label>Tool Description</label>
+            <input type="text" id="install-tool-desc" placeholder="1/2 4-Flute End Mill">
+        </div>
+        <div class="form-group">
+            <label>Stick-Out (OOH) inches</label>
+            <input type="number" id="install-ooh" placeholder="2.500" step="0.001">
+        </div>
+    </div>
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="showScreen('detail')">Cancel</button>
+        <button class="btn btn-secondary" id="install-skip-btn"
+                onclick="skipToAssign()" style="display:none">Skip — Assign to Machine</button>
+        <button class="btn btn-confirm btn-large" onclick="submitInstall()">
+            <span id="install-btn-text">Install Cutter</span>
+        </button>
+    </div>
+</section>
+
+<!-- Screen 6: Assign to machine -->
+<section id="screen-assign" class="kiosk-screen">
+    <h2 class="kiosk-heading" id="assign-heading">Assign to Machine</h2>
+    <p class="kiosk-subtitle">Holder: <strong id="assign-holder-id"></strong></p>
+
+    <div class="form-panel">
+        <p class="form-keyboard-hint">Use keyboard to type in fields below</p>
+        <div class="form-group required">
+            <label>Machine</label>
+            <div id="machine-grid" class="machine-grid"></div>
+        </div>
+        <div class="form-group required">
+            <label>Pocket # (T-slot)</label>
+            <input type="number" id="assign-pocket" placeholder="e.g., 6" min="1" max="99">
+        </div>
+        <div class="form-group">
+            <label>Work Order (optional)</label>
+            <input type="text" id="assign-wo" placeholder="WO #..."
+                   autocomplete="off">
+        </div>
+    </div>
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="showScreen('detail')">Cancel</button>
+        <button class="btn btn-confirm btn-large" onclick="submitAssign()">Assign</button>
+    </div>
+</section>
+
+<!-- Screen 7: Done -->
+<section id="screen-done" class="kiosk-screen">
+    <div class="done-message">
+        <div class="done-icon">&#10003;</div>
+        <h2 id="done-headline"></h2>
+        <p id="done-details"></p>
+    </div>
+    <div id="done-next-actions" class="action-bar" style="display:none"></div>
+    <div class="done-countdown">
+        Returning home in <span id="countdown">{{ auto_return }}</span>s...
+    </div>
+    <div class="kiosk-actions">
+        <button class="btn btn-secondary" onclick="showScreen('scan')">Scan Another</button>
+        <button class="btn btn-primary btn-large" onclick="kioskGoHome()">Done</button>
+    </div>
+</section>
+<!-- Screen: Inventory Menu -->
+<section id="screen-inventory-menu" class="kiosk-screen">
+    <h2 class="kiosk-heading">Cabinet Inventory</h2>
+    <p class="kiosk-subtitle">Employee: <strong id="inv-employee"></strong></p>
+
+    <!-- Resume bar (hidden unless open session exists) -->
+    <div id="inv-resume-bar" class="inv-resume-bar" style="display:none">
+        <div class="inv-resume-info">
+            <strong>Inventory in progress</strong>
+            <span id="inv-resume-progress"></span>
+        </div>
+        <button class="btn btn-primary btn-large" onclick="resumeInventory()">Resume</button>
+        <button class="btn btn-danger-outline" onclick="abandonInventorySession()">Abandon</button>
+    </div>
+
+    <div class="inv-menu-grid">
+        <button class="inv-menu-btn" onclick="startQuickCount()">
+            <span class="inv-menu-icon">&#128269;</span>
+            <span class="inv-menu-label">Quick Count</span>
+            <span class="inv-menu-desc">Scan a bin QR and enter counts</span>
+        </button>
+        <button class="inv-menu-btn" onclick="startFullInventory()">
+            <span class="inv-menu-icon">&#128203;</span>
+            <span class="inv-menu-label">Full Inventory</span>
+            <span class="inv-menu-desc">Count every tool in sequence</span>
+        </button>
+        <button class="inv-menu-btn" onclick="showAddInventoryItem()">
+            <span class="inv-menu-icon">&#10010;</span>
+            <span class="inv-menu-label">Add New Tool</span>
+            <span class="inv-menu-desc">Register a tool bin in the cabinet</span>
+        </button>
+        <button class="inv-menu-btn" onclick="pushInventoryToProShop()">
+            <span class="inv-menu-icon">&#8593;</span>
+            <span class="inv-menu-label">Push to ProShop</span>
+            <span class="inv-menu-desc">Send cabinet counts to ProShop</span>
+        </button>
+        <button class="inv-menu-btn inv-menu-btn-video" onclick="showInventoryVideo()">
+            <span class="inv-menu-icon">&#9654;</span>
+            <span class="inv-menu-label">How To</span>
+            <span class="inv-menu-desc">Watch a video tutorial</span>
+        </button>
+    </div>
+
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="showScreen('scan')">Back</button>
+    </div>
+</section>
+
+<!-- Screen: Inventory Quick Count Scan -->
+<section id="screen-inventory-scan" class="kiosk-screen">
+    <h2 class="kiosk-heading">Scan Bin QR Code</h2>
+    <p class="kiosk-subtitle">Employee: <strong id="inv-scan-employee"></strong></p>
+
+    <div class="scan-area">
+        <input type="text" id="inv-scan-input" class="scan-input"
+               placeholder="Scan tool # or type it..."
+               autocomplete="off" autocorrect="off" autocapitalize="characters"
+               spellcheck="false">
+        <p class="scan-hint">Scanner will auto-submit, or type tool # and press Enter.</p>
+    </div>
+
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="showScreen('inventory-menu')">Back</button>
+    </div>
+</section>
+
+<!-- Screen: Inventory Count Form -->
+<section id="screen-inventory-count" class="kiosk-screen">
+    <h2 class="kiosk-heading">
+        <span id="inv-count-tool-number"></span>
+    </h2>
+    <p class="kiosk-subtitle" id="inv-count-description"></p>
+    <p class="kiosk-subtitle inv-location" id="inv-count-location"></p>
+
+    <div id="inv-prev-counts" class="inv-prev-counts" style="display:none">
+        <span class="inv-prev-label">Previous:</span>
+        <span id="inv-prev-values"></span>
+    </div>
+
+    <div class="inv-session-bar" id="inv-session-bar" style="display:none">
+        <div class="inv-progress-track">
+            <div class="inv-progress-fill" id="inv-progress-fill"></div>
+        </div>
+        <span id="inv-progress-text"></span>
+    </div>
+
+    <div class="inv-jump-bar">
+        <input type="text" id="inv-jump-input" placeholder="Jump to tool # (e.g. A61)"
+               autocomplete="off" autocapitalize="characters">
+        <button class="btn btn-secondary btn-sm" onclick="invJumpToTool()">Go</button>
+    </div>
+
+    <div class="inv-count-grid">
+        <div class="inv-count-item inv-color-blue">
+            <label>Blue <span class="inv-color-tag">New</span></label>
+            <div class="inv-stepper">
+                <button class="inv-step-btn" onclick="invStep('blue',-1)">-</button>
+                <input type="number" id="inv-qty-blue" value="0" min="0"
+                       class="inv-qty-input" inputmode="numeric">
+                <button class="inv-step-btn" onclick="invStep('blue',1)">+</button>
+            </div>
+        </div>
+        <div class="inv-count-item inv-color-green">
+            <label>Green <span class="inv-color-tag">Barely used</span></label>
+            <div class="inv-stepper">
+                <button class="inv-step-btn" onclick="invStep('green',-1)">-</button>
+                <input type="number" id="inv-qty-green" value="0" min="0"
+                       class="inv-qty-input" inputmode="numeric">
+                <button class="inv-step-btn" onclick="invStep('green',1)">+</button>
+            </div>
+        </div>
+        <div class="inv-count-item inv-color-yellow">
+            <label>Yellow <span class="inv-color-tag">Moderate</span></label>
+            <div class="inv-stepper">
+                <button class="inv-step-btn" onclick="invStep('yellow',-1)">-</button>
+                <input type="number" id="inv-qty-yellow" value="0" min="0"
+                       class="inv-qty-input" inputmode="numeric">
+                <button class="inv-step-btn" onclick="invStep('yellow',1)">+</button>
+            </div>
+        </div>
+        <div class="inv-count-item inv-color-red">
+            <label>Red <span class="inv-color-tag">Heavy use</span></label>
+            <div class="inv-stepper">
+                <button class="inv-step-btn" onclick="invStep('red',-1)">-</button>
+                <input type="number" id="inv-qty-red" value="0" min="0"
+                       class="inv-qty-input" inputmode="numeric">
+                <button class="inv-step-btn" onclick="invStep('red',1)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="inv-available-badge">
+        Available: <strong id="inv-available-total">0</strong>
+    </div>
+
+    <div class="kiosk-actions">
+        <button class="btn btn-back" id="inv-count-back-btn"
+                onclick="invCountBack()">Back</button>
+        <button class="btn btn-danger-outline" id="inv-stop-btn"
+                onclick="invStopSession()" style="display:none">Stop</button>
+        <button class="btn btn-secondary" id="inv-skip-btn"
+                onclick="invSkip()" style="display:none">Skip</button>
+        <button class="btn btn-confirm btn-large" id="inv-save-btn"
+                onclick="invSaveCount()">Save Count</button>
+    </div>
+</section>
+
+<!-- Screen: Inventory Add New Tool -->
+<section id="screen-inventory-add" class="kiosk-screen">
+    <h2 class="kiosk-heading">Add Tool to Inventory</h2>
+
+    <div class="form-panel">
+        <p class="form-keyboard-hint">Use keyboard to type in fields below</p>
+        <div class="form-group required">
+            <label>ProShop Tool # (e.g., A61, B12)</label>
+            <input type="text" id="inv-add-tool-number" placeholder="A61"
+                   autocomplete="off" autocapitalize="characters">
+        </div>
+        <div class="form-group">
+            <label>Tool Description</label>
+            <input type="text" id="inv-add-description" placeholder="1/2 4-Flute End Mill">
+        </div>
+        <div class="form-group">
+            <label>Cabinet Location</label>
+            <input type="text" id="inv-add-location" placeholder="Drawer 3, Shelf B">
+        </div>
+        <div class="form-group">
+            <label>Minimum Quantity (reorder point)</label>
+            <input type="number" id="inv-add-min-qty" placeholder="2" min="0">
+        </div>
+        <div class="form-group">
+            <label>Notes</label>
+            <input type="text" id="inv-add-notes" placeholder="Optional notes...">
+        </div>
+    </div>
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="showScreen('inventory-menu')">Cancel</button>
+        <button class="btn btn-confirm btn-large" onclick="invAddItem()">Add Tool</button>
+    </div>
+</section>
+
+<!-- Screen: Inventory Session Summary -->
+<section id="screen-inventory-summary" class="kiosk-screen">
+    <h2 class="kiosk-heading">Inventory Complete</h2>
+
+    <div class="inv-summary-stats">
+        <div class="inv-summary-stat">
+            <span class="inv-summary-number" id="inv-summary-counted">0</span>
+            <span class="inv-summary-label">Tools Counted</span>
+        </div>
+        <div class="inv-summary-stat">
+            <span class="inv-summary-number" id="inv-summary-total-items">0</span>
+            <span class="inv-summary-label">Total Available</span>
+        </div>
+    </div>
+
+    <div id="inv-summary-low-stock" style="display:none">
+        <h3 class="inv-summary-warning-heading">Low Stock Items</h3>
+        <div id="inv-summary-low-list"></div>
+    </div>
+
+    <div class="kiosk-actions">
+        <button class="btn btn-secondary btn-large" onclick="pushInventoryToProShop()" id="btn-push-proshop">Push to ProShop</button>
+        <button class="btn btn-primary btn-large" onclick="kioskGoHome()">Done</button>
+    </div>
+</section>
+
+<!-- Video Modal -->
+<div id="inv-video-modal" class="inv-video-modal" style="display:none">
+    <div class="inv-video-backdrop" onclick="closeInventoryVideo()"></div>
+    <div class="inv-video-container">
+        <button class="inv-video-close" onclick="closeInventoryVideo()">&times;</button>
+        <h3>How to do Inventory</h3>
+        <video id="inv-video-player" controls playsinline>
+            <source src="/static/inventory-howto.mp4" type="video/mp4">
+            Your browser does not support video playback.
+        </video>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var AUTO_RETURN = {{ auto_return }};
+var INACTIVITY_TIMEOUT = {{ inactivity_timeout }};
+var MACHINES = {{ machines | tojson }};
+var PRINT_SERVICE_URL = "{{ print_service_url }}";
+</script>
+<script src="/static/kiosk.js"></script>
+{% endblock %}

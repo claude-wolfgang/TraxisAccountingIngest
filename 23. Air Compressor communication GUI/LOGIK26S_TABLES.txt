@@ -1,0 +1,174 @@
+
+===== PAGE 1 =====
+Page dimensions: 612 x 792
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+CONTENTS
+SERIAL CONNECTIONS .......................................................................................................... 2
+MODBUS COMMUNICATION ................................................................................................ 3
+MODBUS ADDRESS LIST ........................................................................................................ 4
+1
+
+===== PAGE 2 =====
+Page dimensions: 612 x 792
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+SERIAL CONNECTIONS
+The serial communication type is RS485 and uses modbus RTU protocol.
+Each logik26S has 2 serial communcation ports on the termials
+M2(Master/slave - Multinuit) and M8(Inverter or stand alone
+comm. only)
+Master / Slave operation only two compressor must be connected
+via serial communication.In case of communication between two
+units, no need to use 120 Ω resistor for each end.
+Serial Connection Notes
+1. Use shielded flexible twisted cable
+2. Connect D+ and D- terminals through each compressor controller and connect shield part to terminal “M2-
+1 : GND” digital ground for each side as well.
+3. Do not connect the cables shield to the ground
+4. The cable lenght must not be longer than 400 meters
+5. The units on the serial net must be connected without any reversal connection and connections must be
+like :
+D+ -> D+ / D- -> D- / 0 -> 0
+Note :
+The serial port on the terminal M2 can be used for ;
+- Master / Slave Operation usage
+- Stand alone modbus communications (Scada Systems, modbus softwares on pc etc.)
+- Multi unit Operation
+The serial port on the terminal M8 can be used for inverter communications or for stand alone communication.
+2
+Found 1 image(s)
+  Image: x0=71, y0=146, w=132, h=245
+
+===== PAGE 3 =====
+Page dimensions: 612 x 792
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+MODBUS COMMUNICATION
+The serial connection has described in Serial Connection Section.
+Logik26S has 1 RS485 Serial interface for modbus communication with external systems. This
+serial interface supports modbus RTU protocol and allow to read compressor data’s under the
+conditions :
+- Compressors must be working stand alone. If two compressors are working under
+master / slave mode, its not possible to use same serial line for external communication.
+- If compressors are working under the multiunit operation, then Logika ethernet serial
+converter interface is needed to make possible to read data from the compressors
+externally via modbus tcp protocol. (Serial ethernet interface also have capability to
+convert modbus rtu into the modbus tcp.)
+Note: Its not possible to use standard serial ethernet converter to convert the modbus
+rtu protocol into the modbus tcp, since the logik ethernet serial interface has special
+function to prevent master message interruption. Standard converters do not have
+such capability.
+Modbus communication parameters :
+Baud Rate : 9600
+Data Bits : 8
+Stop Bits : 1
+Parity : None
+These modbus connection parameters are constant and they are not able to change.
+Each compressor number is also modbus address of the relevant compressor. All the
+compressors must have different compressor number under the compressor number parameter
+setting C08.
+3
+
+===== PAGE 4 =====
+Page dimensions: 792 x 612
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+MODBUS ADDRESS LIST FOR THE LOGIK 26S
+4
+Found 4 image(s)
+  Image: x0=71, y0=88, w=706, h=83
+  Image: x0=71, y0=171, w=706, h=61
+  Image: x0=71, y0=233, w=705, h=112
+  Image: x0=71, y0=345, w=706, h=153
+
+===== PAGE 5 =====
+Page dimensions: 792 x 612
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+5
+Found 2 image(s)
+  Image: x0=71, y0=71, w=702, h=345
+  Image: x0=71, y0=416, w=702, h=88
+
+===== PAGE 6 =====
+Page dimensions: 792 x 612
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+6
+Found 1 image(s)
+  Image: x0=71, y0=71, w=697, h=386
+
+===== PAGE 7 =====
+Page dimensions: 792 x 612
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+7
+Found 2 image(s)
+  Image: x0=71, y0=71, w=697, h=255
+  Image: x0=71, y0=326, w=697, h=171
+
+===== PAGE 8 =====
+Page dimensions: 792 x 612
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+8
+Found 2 image(s)
+  Image: x0=71, y0=71, w=690, h=75
+  Image: x0=71, y0=146, w=691, h=341
+
+===== PAGE 9 =====
+Page dimensions: 792 x 612
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+9
+Found 1 image(s)
+  Image: x0=71, y0=71, w=691, h=394
+
+===== PAGE 10 =====
+Page dimensions: 792 x 612
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+10
+Found 2 image(s)
+  Image: x0=71, y0=71, w=689, h=299
+  Image: x0=71, y0=370, w=689, h=128
+
+===== PAGE 11 =====
+Page dimensions: 792 x 612
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+11
+Found 2 image(s)
+  Image: x0=71, y0=71, w=685, h=153
+  Image: x0=71, y0=224, w=685, h=97
+
+===== PAGE 12 =====
+Page dimensions: 792 x 612
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+12
+Found 2 image(s)
+  Image: x0=71, y0=71, w=685, h=222
+  Image: x0=71, y0=293, w=685, h=171
+
+===== PAGE 13 =====
+Page dimensions: 792 x 612
+No tables found
+--- Text ---
+LOGIK 26S MODBUS COMMUNICATION
+13
+Found 1 image(s)
+  Image: x0=71, y0=71, w=650, h=424

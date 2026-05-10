@@ -1,0 +1,12 @@
+{
+  "active_sessions": {
+    "2168840-98-A": {
+      "part_identifier": "2168840-98-A",
+      "document_path": "Traxis Main/2168840-98-A",
+      "session_start": "2026-05-09T17:49:14",
+      "last_activity": "2026-05-10T13:46:47",
+      "accumulated_seconds": 2790,
+      "idle_timeout_count": 11
+    }
+  }
+}

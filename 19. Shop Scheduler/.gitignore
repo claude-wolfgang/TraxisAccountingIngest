@@ -1,0 +1,37 @@
+# Database
+scheduler.db
+scheduler.db-wal
+scheduler.db-shm
+scheduler*.db
+
+# Dropbox conflicted copies
+*conflicted copy*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Heartbeat
+heartbeat.json
+
+# Environment
+.env
+.traxis.env
+
+# Claude Code
+.claude/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+nul
+
+# Misc
+echo *.bat

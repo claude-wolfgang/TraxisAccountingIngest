@@ -107,6 +107,42 @@ QBO_APP_URLS = {
     "production": "https://app.qbo.intuit.com/app/bill?txnId={bill_id}",
 }
 
+def _name_match_score(needle, hay):
+    """Better company-name matching than raw SequenceMatcher.
+
+    Prioritizes substring containment, then token overlap, then falls back
+    to sequence ratio. Length-disparate names (a short search vs a long
+    company name) used to lose to similar-length-but-wrong names; substring
+    boost fixes that. Returns a 0..1 score.
+    """
+    import difflib
+    n = (needle or "").lower().strip()
+    h = (hay or "").lower().strip()
+    if not n or not h:
+        return 0.0
+    if n in h:
+        # Full substring match — strongest signal. Modulate slightly by how
+        # much of the company name the search consumed (so a 5-char search
+        # in a 30-char name stays high but doesn't beat an exact-equality).
+        coverage = len(n) / len(h)
+        return 0.92 + 0.08 * coverage
+    if h in n:
+        # User typed more than the stored name (e.g., included a suffix)
+        return 0.85
+    n_tokens = {t for t in re.findall(r"\w+", n) if len(t) >= 2}
+    h_tokens = {t for t in re.findall(r"\w+", h) if len(t) >= 2}
+    token_score = 0.0
+    if n_tokens and h_tokens:
+        if n_tokens.issubset(h_tokens):
+            coverage = len(n_tokens) / len(h_tokens)
+            token_score = 0.78 + 0.10 * coverage
+        else:
+            jaccard = len(n_tokens & h_tokens) / len(n_tokens | h_tokens)
+            token_score = jaccard * 0.75
+    seq_score = difflib.SequenceMatcher(None, n, h).ratio()
+    return max(token_score, seq_score)
+
+
 def _qbo_audit(event, **fields):
     """Append a tab-delimited record to qbo_audit.log. Never raises.
 
@@ -375,14 +411,9 @@ class ProShopClient:
 
     def fuzzy_match_contact(self, company_name):
         """Returns list of (score, contact) sorted best first."""
-        import difflib
         contacts = self.get_contacts()
-        results = []
-        name_lower = company_name.lower()
-        for c in contacts:
-            cn = (c.get("companyName") or "").lower()
-            score = difflib.SequenceMatcher(None, name_lower, cn).ratio()
-            results.append((score, c))
+        results = [(_name_match_score(company_name, c.get("companyName") or ""), c)
+                   for c in contacts]
         results.sort(key=lambda x: x[0], reverse=True)
         return results[:5]
 
@@ -533,14 +564,9 @@ class QBOClient:
         return self._vendors_cache
 
     def fuzzy_match_vendor(self, name):
-        import difflib
         vendors = self.get_vendors()
-        results = []
-        name_lower = name.lower()
-        for v in vendors:
-            vn = v.get("DisplayName", "").lower()
-            score = difflib.SequenceMatcher(None, name_lower, vn).ratio()
-            results.append((score, v))
+        results = [(_name_match_score(name, v.get("DisplayName") or ""), v)
+                   for v in vendors]
         results.sort(key=lambda x: x[0], reverse=True)
         return results[:5]
 
@@ -1475,6 +1501,22 @@ class ProShopUploader:
 
     def _build_ps_items(self, line_items):
         """Convert extracted line items to packing slip itemsShipped format."""
+        def _num(value):
+            """Parse a numeric value that may carry a unit suffix or currency.
+            "13.000 PC" -> 13.0,  "$25.00" -> 25.0,  "20,000.5 EA" -> 20000.5
+            Returns None if no leading number found.
+            """
+            if value is None:
+                return None
+            s = str(value).strip().replace(",", "").replace("$", "").replace("€", "").replace("£", "")
+            m = re.match(r"^-?\d+(?:\.\d+)?", s)
+            if not m:
+                return None
+            try:
+                return float(m.group(0))
+            except ValueError:
+                return None
+
         items = []
         for li in line_items:
             item = {}
@@ -1482,47 +1524,42 @@ class ProShopUploader:
                 item["itemNumber"] = li["part_number"]
             if li.get("description"):
                 item["partDescription"] = li["description"]
-            if li.get("quantity_shipped"):
-                try:
-                    item["quantity"] = float(str(li["quantity_shipped"]).replace(",", ""))
-                except (ValueError, TypeError):
-                    pass
-            elif li.get("quantity"):
-                try:
-                    item["quantity"] = float(str(li["quantity"]).replace(",", ""))
-                except (ValueError, TypeError):
-                    pass
-            if li.get("quantity_ordered"):
-                try:
-                    item["qtyOrdered"] = int(float(str(li["quantity_ordered"]).replace(",", "")))
-                except (ValueError, TypeError):
-                    pass
-            if li.get("unit_price"):
-                try:
-                    item["pricePer"] = float(str(li["unit_price"]).replace(",", "").replace("$", ""))
-                except (ValueError, TypeError):
-                    pass
+            qty = _num(li.get("quantity_shipped")) or _num(li.get("quantity"))
+            if qty is not None:
+                item["quantity"] = qty
+            qty_ord = _num(li.get("quantity_ordered"))
+            if qty_ord is not None:
+                item["qtyOrdered"] = int(qty_ord)
+            unit_price = _num(li.get("unit_price"))
+            if unit_price is not None:
+                item["pricePer"] = unit_price
             if item:
                 items.append(item)
         return items
 
     def _upload_customer_po(self, data, contact_name):
+        # When a doc was first classified as VENDOR_PO and the user manually
+        # reclassifies to CUSTOMER_PO, the extraction left quote_* fields
+        # rather than po_*. Fall back to keep clientPONumber non-null.
+        po_number = data.get("po_number") or data.get("quote_number") or ""
+        po_date   = data.get("po_date")   or data.get("quote_date")   or ""
         payload = {}
         if contact_name:
             payload["client"] = contact_name
-        if data.get("po_number"):
-            payload["clientPONumber"] = data["po_number"]
-        if data.get("po_date"):
-            payload["dateEntered"] = data["po_date"]
+        if po_number:
+            payload["clientPONumber"] = po_number
+        if po_date:
+            payload["dateEntered"] = po_date
         if data.get("buyer_name"):
             payload["buyer"] = data["buyer_name"]
         if data.get("payment_terms"):
             payload["paymentTerms"] = data["payment_terms"]
         if data.get("notes"):
             payload["notes"] = data["notes"]
-        if data.get("ship_to"):
-            payload["fob"] = data["ship_to"]
-        payload["year"] = (data.get("po_date") or "")[:4] or str(datetime.now().year)
+        # NOTE: ship_to was previously written to `fob`, but `fob` is an enum
+        # (DESTINATION/ORIGIN), not a free-text address. Disabled until the
+        # planned addCustomerPo field-shape bundle wires shiptoAddress correctly.
+        payload["year"] = po_date[:4] or str(datetime.now().year)
         return self.proshop.add_customer_po(payload)
 
     def _upload_purchase_order(self, data, contact_name):
@@ -2407,13 +2444,32 @@ class AccountingIngestApp(tk.Tk):
                     if ref_number:
                         existing_url = self._check_proshop_duplicate(doc_type, ref_number)
                         if existing_url:
-                            proceed = messagebox.askyesno(
-                                "Possible Duplicate in ProShop",
-                                f"A record with reference '{ref_number}' may already exist in ProShop.\n\n"
-                                f"{existing_url}\n\nPush anyway?"
+                            # Hard refuse — do not create a duplicate ProShop record.
+                            # Mark the queue row POSSIBLE_DUPLICATE and link the
+                            # existing ProShop record so the user can verify it.
+                            con = db()
+                            con.execute(
+                                "UPDATE queue SET status='POSSIBLE_DUPLICATE', "
+                                "proshop_url=?, upload_error=? WHERE id=?",
+                                (existing_url,
+                                 f"Refused to duplicate: ProShop already has '{ref_number}' at {existing_url}",
+                                 cur_id)
                             )
-                            if not proceed:
-                                return
+                            con.commit()
+                            con.close()
+                            self._log(f"Refused to duplicate: '{ref_number}' already in ProShop")
+                            self.after(0, lambda: messagebox.showwarning(
+                                "Duplicate detected — push refused",
+                                f"ProShop already has a record for '{ref_number}'.\n\n"
+                                f"{existing_url}\n\n"
+                                "This row was NOT pushed. It is marked POSSIBLE_DUPLICATE.\n"
+                                "If you've handled the existing record outside this tool, "
+                                "click Reject to file it as done."
+                            ))
+                            self.after(0, self._refresh_queue)
+                            self.after(0, lambda: self._load_record(cur_id))
+                            self.after(0, self._advance_queue)
+                            return
 
                     proshop_id, proshop_url = self.uploader.upload(
                         cur_id, doc_type, edited_raw, contact_code
@@ -2580,29 +2636,74 @@ class AccountingIngestApp(tk.Tk):
         threading.Thread(target=do_extract, daemon=True).start()
 
     def _check_proshop_duplicate(self, doc_type, ref_number):
-        """Query ProShop for an existing record with the same referenceNumber. Returns URL or None."""
+        """Query ProShop for an existing record matching ref_number within the last 6 months.
+
+        Returns a URL string (with optional date suffix) on match, or None on no match.
+        Each doc type uses its correct filter field — `referenceNumber` only fits Bills.
+        Fetches up to 10 matches and filters client-side to the last 6 months by date,
+        because the GraphQL date-range filter syntax isn't documented for these queries.
+
+        Normalizes common reference-number prefixes ("PO", "P.O.", "PO#") so a doc
+        printed as "PO115126" matches a record stored as "115126". Tries both
+        normalized and raw forms.
+        """
+        # (query_field, filter_field, date_field_in_records)
         query_map = {
-            "VENDOR_INVOICE": ("bills",       "bills",       "billId"),
-            "PACKING_SLIP":   ("packingSlips","packingSlips","packingSlipId"),
-            "CUSTOMER_PO":    ("customerPOs", "customerPOs", "poId"),
-            "VENDOR_PO":      ("purchaseOrders","purchaseOrders","purchaseOrderId"),
-            "CUSTOMER_QUOTE": ("quotes",      "quotes",      "quoteId"),
+            "VENDOR_INVOICE": ("bills",          "referenceNumber",   "dateIssued"),
+            "PACKING_SLIP":   ("packingSlips",   "referenceNumber",   "date"),
+            "CUSTOMER_PO":    ("customerPOs",    "clientPONumber",    "dateEntered"),
+            "VENDOR_PO":      ("purchaseOrders", "confirmationNumber","date"),
+            "CUSTOMER_QUOTE": ("quotes",         "referenceNumber",   "date"),
         }
         if doc_type not in query_map:
             return None
-        field, _, _ = query_map[doc_type]
-        try:
-            gql = f"""{{
-              {field}(filter: {{referenceNumber: ["{ref_number}"]}}, pageSize: 1) {{
-                records {{ proshopUrl }}
-              }}
-            }}"""
-            data = self.proshop.query(gql)
-            records = data.get(field, {}).get("records", [])
-            if records:
-                return records[0].get("proshopUrl", "existing record found")
-        except Exception:
-            pass
+        field, filter_field, date_field = query_map[doc_type]
+        from datetime import timedelta
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=183)).date()
+
+        # Normalize: strip leading PO/P.O./PO#/INV/INVOICE prefixes
+        raw = str(ref_number or "").strip()
+        norm = re.sub(r'^(p\s*[/\.]?\s*o\s*[#:\-]?\s*|inv(?:oice)?\s*[#:\-]?\s*)',
+                      '', raw, flags=re.I).strip()
+        candidates = []
+        for v in (norm, raw):
+            if v and v not in candidates:
+                candidates.append(v)
+
+        def _parse_loose(s):
+            s = str(s or "").strip()
+            if not s:
+                return None
+            for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%Y/%m/%d"):
+                try:
+                    return datetime.strptime(s[:10] if fmt == "%Y-%m-%d" else s, fmt).date()
+                except ValueError:
+                    continue
+            return None
+
+        for cand in candidates:
+            safe = cand.replace('"', '\\"')
+            gql = (
+                "{ " + field
+                + "(filter: {" + filter_field + ': ["' + safe + '"]}, pageSize: 10) '
+                + "{ records { proshopUrl " + date_field + " } } }"
+            )
+            try:
+                data = self.proshop.query(gql)
+            except Exception as e:
+                self._log(f"Dup-check query failed ({field}.{filter_field}={cand!r}): {e}")
+                continue
+            records = data.get(field, {}).get("records", []) or []
+            for rec in records:
+                rec_date_str = rec.get(date_field) or ""
+                rec_date = _parse_loose(rec_date_str)
+                if rec_date and rec_date < cutoff:
+                    continue  # outside 6-month window
+                url = rec.get("proshopUrl") or "(existing record found)"
+                suffix = f"  (dated {rec_date_str})" if rec_date_str else ""
+                if cand != raw:
+                    suffix += f"  [matched normalized '{cand}']"
+                return url + suffix
         return None
 
     def _open_proshop_link(self, _event=None):

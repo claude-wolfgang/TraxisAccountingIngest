@@ -1,0 +1,334 @@
+Total pages: 13
+
+===== PAGE 1 =====
+LOGIK 26S MODBUS COMMUNICATION 
+1 
+ 
+CONTENTS 
+SERIAL CONNECTIONS .......................................................................................................... 2 
+MODBUS COMMUNICATION ................................................................................................ 3 
+MODBUS ADDRESS LIST ........................................................................................................ 4 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- Blocks: 26 ---
+  TEXT [329,44,544,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,732,311,757]: 1
+  TEXT [71,97,128,109]: CONTENTS
+  TEXT [106,120,544,132]: SERIAL CONNECTIONS .......................................................................................................... 2
+  TEXT [106,143,544,155]: MODBUS COMMUNICATION ................................................................................................ 3
+  TEXT [106,166,544,178]: MODBUS ADDRESS LIST ........................................................................................................ 4
+  TEXT [71,187,73,199]: 
+  TEXT [71,214,144,242]: 
+  TEXT [71,256,425,267]: 
+  TEXT [71,281,73,293]: 
+  TEXT [71,306,73,317]: 
+  TEXT [71,332,73,343]: 
+  TEXT [71,357,73,368]: 
+  TEXT [71,383,73,394]: 
+  TEXT [71,408,73,419]: 
+  TEXT [71,434,73,445]: 
+  TEXT [71,459,73,471]: 
+  TEXT [71,485,73,496]: 
+  TEXT [71,510,73,522]: 
+  TEXT [71,536,73,547]: 
+  TEXT [71,561,73,573]: 
+  TEXT [71,587,73,598]: 
+  TEXT [71,612,73,624]: 
+  TEXT [71,637,73,648]: 
+  TEXT [71,663,73,674]: 
+  TEXT [71,688,73,699]: 
+
+===== PAGE 2 =====
+LOGIK 26S MODBUS COMMUNICATION 
+2 
+ 
+SERIAL CONNECTIONS 
+The serial communication type is RS485 and uses modbus RTU protocol. 
+ 
+ 
+Serial Connection Notes 
+1. Use shielded flexible twisted cable 
+2. Connect D+ and D- terminals through each compressor controller and connect shield part to terminal “M2-
+1 : GND” digital ground for each side as well. 
+3. Do not connect the cables shield to the ground 
+4. The cable lenght must not be longer than 400 meters 
+5. The units on the serial net must be connected without any reversal connection and connections must be 
+like : 
+ 
+D+ -> D+  /   D- -> D-   /   0 -> 0  
+Note : 
+ The serial port on the terminal M2 can be used for ; 
+- 
+Master / Slave Operation usage 
+- 
+Stand alone modbus communications (Scada Systems, modbus softwares on pc etc.) 
+- 
+Multi unit Operation 
+The serial port on the terminal M8 can be used for inverter communications or for stand alone communication. 
+ 
+Each logik26S has 2 serial communcation ports on the termials 
+M2(Master/slave - Multinuit) and M8(Inverter or stand alone 
+comm. only) 
+Master / Slave operation only two compressor must be connected 
+via serial communication.In case of communication between two 
+units,no needto use 120 Ω resistorfor each end.
+
+--- Blocks: 19 ---
+  TEXT [329,44,544,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,732,311,757]: 2
+  TEXT [71,72,175,83]: SERIAL CONNECTIONS
+  TEXT [71,96,367,109]: The serial communication type is RS485 and uses modbus RTU protocol.
+  TEXT [71,121,73,133]: 
+  TEXT [203,384,205,394]: 
+  TEXT [71,406,173,416]: Serial Connection Notes
+  TEXT [89,428,541,454]: 1. Use shielded flexible twisted cable 
+2. Connect D+ and D- terminals through each compressor controller and connect shield part to terminal “M2-
+  TEXT [89,458,532,510]: 1 : GND” digital ground for each side as well. 
+3. Do not connect the cables shield to the ground 
+4. The cable lenght must not be longer than 400 meters 
+5. The units on the serial net must be connected without any reversal connection and connections must be
+  TEXT [107,514,128,538]: like :
+  TEXT [107,543,233,553]: D+ -> D+  /   D- -> D-   /   0 -> 0
+  TEXT [71,567,98,577]: Note :
+  TEXT [71,591,289,601]: The serial port on the terminal M2 can be used for ;
+  TEXT [89,613,458,638]: - 
+Master / Slave Operation usage 
+- 
+Stand alone modbus communications (Scada Systems, modbus softwares on pc etc.)
+  TEXT [89,642,194,653]: - 
+Multi unit Operation
+  TEXT [71,668,532,677]: The serial port on the terminal M8 can be used for inverter communications or for stand alone communication.
+  TEXT [71,692,73,701]: 
+  TEXT [210,161,493,203]: Each logik26S has 2 serial communcation ports on the termials 
+M2(Master/slave - Multinuit) and M8(Inverter or stand alone 
+comm. only)
+  TEXT [210,218,515,260]: Master / Slave operation only two compressor must be connected 
+via serial communication.In case of communication between two 
+units,no needto use 120 Ω resistorfor each end.
+
+===== PAGE 3 =====
+LOGIK 26S MODBUS COMMUNICATION 
+3 
+ 
+MODBUS COMMUNICATION 
+The serial connection has described in Serial Connection Section. 
+Logik26S has 1 RS485 Serial interface for modbus communication with external systems. This 
+serial interface supports modbus RTU protocol and allow to read compressor data’s under the 
+conditions : 
+- 
+Compressors must be working stand alone. If two compressors are working under 
+master / slave mode, its not possible to use same serial line for external communication. 
+- 
+If compressors are working under the multiunit operation, then Logika ethernet serial 
+converter interface is needed to make possible to read data from the compressors 
+externally via modbus tcp protocol. (Serial ethernet interface also have capability to 
+convert modbus rtu into the modbus tcp.) 
+Note: Its not possible to use standard serial ethernet converter to convert the modbus 
+rtu protocol into the modbus tcp, since the logik ethernet serial interface has special 
+function to prevent master message interruption. Standard converters do not have 
+such capability. 
+Modbus communication parameters : 
+Baud Rate : 9600 
+Data Bits   : 8 
+Stop Bits   : 1 
+Parity        : None 
+These modbus connection parameters are constant and they are not able to change. 
+Each compressor number is also modbus address of the relevant compressor. All the 
+compressors must have different compressor number under the compressor number parameter 
+setting C08. 
+
+--- Blocks: 13 ---
+  TEXT [329,44,544,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,732,311,757]: 3
+  TEXT [71,71,254,87]: MODBUS COMMUNICATION
+  TEXT [71,103,389,115]: The serial connection has described in Serial Connection Section.
+  TEXT [71,130,544,175]: Logik26S has 1 RS485 Serial interface for modbus communication with external systems. This 
+serial interface supports modbus RTU protocol and allow to read compressor data’s under the 
+conditions :
+  TEXT [89,188,544,354]: - 
+Compressors must be working stand alone. If two compressors are working under 
+master / slave mode, its not possible to use same serial line for external communication. 
+- 
+If compressors are working under the multiunit operation, then Logika ethernet serial 
+converter interface is needed to make possible to read data from the compressors 
+externally via modbus tcp protocol. (Serial ethernet interface also have capability to 
+convert modbus rtu into the modbus tcp.) 
+Note: Its not possible to use standard serial ethernet converter to convert the modbus 
+rtu protocol into the modbus tcp, since the logik ethernet serial interface has special 
+function to prevent master message interruption. Standard converters do not have 
+such capability.
+  TEXT [71,369,266,381]: Modbus communication parameters :
+  TEXT [71,396,159,408]: Baud Rate : 9600
+  TEXT [71,423,140,435]: Data Bits   : 8
+  TEXT [71,450,140,462]: Stop Bits   : 1
+  TEXT [71,476,161,488]: Parity        : None
+  TEXT [71,503,486,515]: These modbus connection parameters are constant and they are not able to change.
+  TEXT [71,530,543,576]: Each compressor number is also modbus address of the relevant compressor. All the 
+compressors must have different compressor number under the compressor number parameter 
+setting C08.
+
+===== PAGE 4 =====
+LOGIK 26S MODBUS COMMUNICATION 
+4 
+ 
+MODBUS ADDRESS LIST FOR THE LOGIK 26S 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- Blocks: 7 ---
+  TEXT [509,44,724,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,552,401,577]: 4
+  TEXT [71,70,374,86]: MODBUS ADDRESS LIST FOR THE LOGIK 26S
+  TEXT [778,158,782,174]: 
+  TEXT [777,220,781,235]: 
+  TEXT [777,332,781,348]: 
+  TEXT [71,485,781,515]: 
+
+===== PAGE 5 =====
+LOGIK 26S MODBUS COMMUNICATION 
+5 
+ 
+ 
+ 
+
+--- Blocks: 4 ---
+  TEXT [509,44,724,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,552,401,577]: 5
+  TEXT [773,403,777,419]: 
+  TEXT [773,491,777,506]: 
+
+===== PAGE 6 =====
+LOGIK 26S MODBUS COMMUNICATION 
+6 
+ 
+ 
+ 
+ 
+ 
+
+--- Blocks: 3 ---
+  TEXT [509,44,724,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,552,401,577]: 6
+  TEXT [71,445,773,508]: 
+
+===== PAGE 7 =====
+LOGIK 26S MODBUS COMMUNICATION 
+7 
+ 
+ 
+ 
+ 
+
+--- Blocks: 4 ---
+  TEXT [509,44,724,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,552,401,577]: 7
+  TEXT [768,313,772,328]: 
+  TEXT [71,485,772,514]: 
+
+===== PAGE 8 =====
+LOGIK 26S MODBUS COMMUNICATION 
+8 
+ 
+ 
+ 
+ 
+
+--- Blocks: 4 ---
+  TEXT [509,44,724,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,552,401,577]: 8
+  TEXT [762,132,766,148]: 
+  TEXT [71,473,766,503]: 
+
+===== PAGE 9 =====
+LOGIK 26S MODBUS COMMUNICATION 
+9 
+ 
+ 
+ 
+ 
+ 
+
+--- Blocks: 3 ---
+  TEXT [509,44,724,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,552,401,577]: 9
+  TEXT [71,452,767,515]: 
+
+===== PAGE 10 =====
+LOGIK 26S MODBUS COMMUNICATION 
+10 
+ 
+ 
+ 
+ 
+
+--- Blocks: 4 ---
+  TEXT [509,44,724,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,552,403,577]: 10
+  TEXT [760,356,764,372]: 
+  TEXT [71,486,765,515]: 
+
+===== PAGE 11 =====
+LOGIK 26S MODBUS COMMUNICATION 
+11 
+ 
+ 
+ 
+
+--- Blocks: 4 ---
+  TEXT [509,44,724,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,552,403,577]: 11
+  TEXT [756,211,760,226]: 
+  TEXT [756,309,760,325]: 
+
+===== PAGE 12 =====
+LOGIK 26S MODBUS COMMUNICATION 
+12 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- Blocks: 4 ---
+  TEXT [509,44,724,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,552,403,577]: 12
+  TEXT [756,280,760,295]: 
+  TEXT [71,452,760,529]: 
+
+===== PAGE 13 =====
+LOGIK 26S MODBUS COMMUNICATION 
+13 
+ 
+ 
+
+--- Blocks: 3 ---
+  TEXT [509,44,724,58]: LOGIK 26S MODBUS COMMUNICATION
+  TEXT [71,552,403,577]: 13
+  TEXT [722,487,725,499]: 

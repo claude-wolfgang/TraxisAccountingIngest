@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if item else 'Add' }} Item - COTS Crib{% endblock %}
+{% block nav_add %}nav-active{% endblock %}
+
+{% block content %}
+<h2 style="margin-bottom:16px">{{ 'Edit: ' + item.aka if item else 'Add New COTS Item' }}</h2>
+
+<form id="cots-form" class="edit-form" onsubmit="return submitForm(event)">
+    <input type="hidden" id="form-ots-id" value="{{ item.otsId if item else '' }}">
+
+    <div class="form-group required">
+        <label for="aka">Item Name (AKA)</label>
+        <input type="text" id="aka" name="aka" required value="{{ item.aka if item else '' }}">
+    </div>
+
+    <div class="form-row">
+        <div class="form-group required">
+            <label for="type">Type</label>
+            <input type="text" id="type" name="type" required value="{{ item.type if item else '' }}"
+                   placeholder="e.g. Fastener, ABS, Raw Material">
+        </div>
+        <div class="form-group">
+            <label for="subclass">Subclass</label>
+            <input type="text" id="subclass" name="subclass" value="{{ item.subclass if item else '' }}">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description">{{ item.description if item else '' }}</textarea>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location" value="{{ item.location if item else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="units">Units</label>
+            <input type="text" id="units" name="units" value="{{ item.units if item else '' }}"
+                   placeholder="e.g. each, box, ft">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="quantity">Quantity on Hand</label>
+            <input type="number" id="quantity" name="quantity" min="0"
+                   value="{{ item.quantity if item and item.quantity else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="minimumQuantityOnHand">Minimum Qty (Reorder Point)</label>
+            <input type="text" id="minimumQuantityOnHand" name="minimumQuantityOnHand"
+                   value="{{ item.minimumQuantityOnHand if item else '' }}">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="material">Material</label>
+            <input type="text" id="material" name="material" value="{{ item.material if item else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="thread">Thread</label>
+            <input type="text" id="thread" name="thread" value="{{ item.thread if item else '' }}">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="od">OD</label>
+            <input type="text" id="od" name="od" value="{{ item.od if item else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="length">Length</label>
+            <input type="text" id="length" name="length" value="{{ item.length if item else '' }}">
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="/browse" class="btn btn-back">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-large" id="submit-btn">
+            {{ 'Update' if item else 'Create' }} Item
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/edit.js"></script>
+{% endblock %}

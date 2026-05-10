@@ -67,19 +67,64 @@ CHECK_INTERVAL = 60
 STARTUP_GRACE = 30
 MAX_EVENTS = 200
 
-PYTHON_EXE = r"C:\Users\TRAXIS\AppData\Local\Programs\Python\Python314\python.exe"
-PYTHONW_EXE = r"C:\Users\TRAXIS\AppData\Local\Programs\Python\Python314\pythonw.exe"
-BASE_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\1. Proshop Automations")
+
+def _env(name, default):
+    """Return env var if set and non-empty, else default."""
+    val = os.environ.get(name, "").strip()
+    return val if val else default
+
+
+# Python interpreters. Defaults match the .71 (TRAXIS user) install.
+# On srv-01, set TRAXIS_PYTHON / TRAXIS_PYTHONW to the new install paths.
+PYTHON_EXE = _env(
+    "TRAXIS_PYTHON",
+    r"C:\Users\TRAXIS\AppData\Local\Programs\Python\Python314\python.exe",
+)
+PYTHONW_EXE = _env(
+    "TRAXIS_PYTHONW",
+    r"C:\Users\TRAXIS\AppData\Local\Programs\Python\Python314\pythonw.exe",
+)
+# AirCompressor uses a separate interpreter on .71 (different deps installed).
+# On srv-01 this can collapse back to TRAXIS_PYTHONW.
+AIR_COMPRESSOR_PYTHONW = _env(
+    "TRAXIS_AIRCOMPRESSOR_PYTHONW",
+    r"C:\Users\TRAXIS\AppData\Local\Python\bin\pythonw.exe",
+)
+
+# Project tree root. Default = .71 Dropbox path.
+# On srv-01, set TRAXIS_BASE_DIR=C:\traxis\services\1. Proshop Automations
+BASE_DIR = Path(_env(
+    "TRAXIS_BASE_DIR",
+    r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\1. Proshop Automations",
+))
+PROJECTS_ROOT = BASE_DIR.parent
 
 PROGRAMMING_LOG = BASE_DIR / "ProgrammingTimer" / "programming_time_log.jsonl"
 
-COTS_KIOSK_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\17. COTS - Tools Crib Kiosk\cots-kiosk")
-TOOL_KIOSK_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\22. Tool Assembly Management\tool-kiosk")
-MSG_NOTIFIER_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\18. ProShop Message Notifier")
-AIR_COMPRESSOR_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\23. Air Compressor communication GUI")
-SHOP_SCHEDULER_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\19. Shop Scheduler")
-AGENT_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\25. Agent Exploration")
-PHOTO_UPLOADER_DIR = Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\31. Photo Upload Service\photo-uploader")
+COTS_KIOSK_DIR     = PROJECTS_ROOT / "17. COTS - Tools Crib Kiosk" / "cots-kiosk"
+TOOL_KIOSK_DIR     = PROJECTS_ROOT / "22. Tool Assembly Management" / "tool-kiosk"
+MSG_NOTIFIER_DIR   = PROJECTS_ROOT / "18. ProShop Message Notifier"
+AIR_COMPRESSOR_DIR = PROJECTS_ROOT / "23. Air Compressor communication GUI"
+SHOP_SCHEDULER_DIR = PROJECTS_ROOT / "19. Shop Scheduler"
+AGENT_DIR          = PROJECTS_ROOT / "25. Agent Exploration"
+PHOTO_UPLOADER_DIR = PROJECTS_ROOT / "31. Photo Upload Service" / "photo-uploader"
+
+# FOCAS DB. Local on .71 (`C:\FASData\monitoring.db`).
+# On srv-01, set TRAXIS_FOCAS_DB to the new location after the DB copy.
+FOCAS_DB = _env("TRAXIS_FOCAS_DB", r"C:\FASData\monitoring.db")
+
+# ProShop OAuth client secrets. Per-client because services use different
+# OAuth clients in ProShop (different scope sets). Defaults are the current
+# literals so .71 keeps working until env vars are set; remove the literal
+# fallbacks once both .71 and srv-01 read from env.
+_PROSHOP_SECRET_BRIDGE = _env(
+    "PROSHOP_CLIENT_SECRET_BRIDGE",
+    "E190F2AD406FA4DCBEC5F867CC055142A46E75E6D4728328A7A64E4EA897C110",
+)  # MessageNotifier + COTSCribKiosk
+_PROSHOP_SECRET_TOOLKIOSK = _env(
+    "PROSHOP_CLIENT_SECRET_TOOLKIOSK",
+    "8A32CD4983CA93F9BE1FF0E651B9CDE9A28F55C66B74E1CDF5D6887EFE85D5B6",
+)  # ToolAssemblyKiosk
 
 BUSINESS_HOURS_START = (5, 15)   # (hour, minute) — 5:15 AM
 BUSINESS_HOURS_END = (18, 0)     # (hour, minute) — 6:00 PM
@@ -120,7 +165,7 @@ SERVICES_CONFIG = {
         "restart_cooldown": 300,
         "max_failures": 3,
         "max_degraded": 10,
-        "db_path": r"C:\FASData\monitoring.db",
+        "db_path": FOCAS_DB,
         "max_sample_age": 180,     # seconds — samples older = stale
     },
     "FASDataDashboard": {
@@ -144,7 +189,7 @@ SERVICES_CONFIG = {
         "port": 5050,
         "start_cmd": [PYTHONW_EXE, "app.py"],
         "working_dir": str(MSG_NOTIFIER_DIR),
-        "env": {"PROSHOP_CLIENT_SECRET": "E190F2AD406FA4DCBEC5F867CC055142A46E75E6D4728328A7A64E4EA897C110"},
+        "env": {"PROSHOP_CLIENT_SECRET": _PROSHOP_SECRET_BRIDGE},
         "auto_start": True,
         "restart_cooldown": 300,
         "max_failures": 3,
@@ -158,7 +203,7 @@ SERVICES_CONFIG = {
         "port": 5000,
         "start_cmd": [PYTHONW_EXE, "app.py"],
         "working_dir": str(COTS_KIOSK_DIR),
-        "env": {"PROSHOP_CLIENT_SECRET": "E190F2AD406FA4DCBEC5F867CC055142A46E75E6D4728328A7A64E4EA897C110"},
+        "env": {"PROSHOP_CLIENT_SECRET": _PROSHOP_SECRET_BRIDGE},
         "auto_start": True,
         "restart_cooldown": 300,
         "max_failures": 3,
@@ -172,7 +217,7 @@ SERVICES_CONFIG = {
         "port": 5001,
         "start_cmd": [PYTHONW_EXE, "app.py"],
         "working_dir": str(TOOL_KIOSK_DIR),
-        "env": {"PROSHOP_CLIENT_SECRET": "8A32CD4983CA93F9BE1FF0E651B9CDE9A28F55C66B74E1CDF5D6887EFE85D5B6"},
+        "env": {"PROSHOP_CLIENT_SECRET": _PROSHOP_SECRET_TOOLKIOSK},
         "auto_start": True,
         "restart_cooldown": 300,
         "max_failures": 3,
@@ -210,7 +255,7 @@ SERVICES_CONFIG = {
         "check_type": "http",
         "health_url": "http://localhost:8085/api/status",
         "port": 8085,
-        "start_cmd": [r"C:\Users\TRAXIS\AppData\Local\Python\bin\pythonw.exe", "compressor_web.py"],
+        "start_cmd": [AIR_COMPRESSOR_PYTHONW, "compressor_web.py"],
         "working_dir": str(AIR_COMPRESSOR_DIR),
         "auto_start": True,
         "restart_cooldown": 300,
@@ -312,7 +357,7 @@ def validate_time_tracker(data):
 def validate_focas_monitor(config):
     """Check FocasMonitor Windows service status + SQLite DB freshness."""
     svc_name = config.get("windows_service_name", "FocasMonitor")
-    db_path = config.get("db_path", r"C:\FASData\monitoring.db")
+    db_path = config.get("db_path", FOCAS_DB)
     max_age = config.get("max_sample_age", 180)
 
     # 1. Check Windows service status
@@ -770,15 +815,30 @@ class ServiceManager:
 
     def _stop_process(self, name):
         state = self.services[name]
+        port = state.config.get("port")
+
+        # Try graceful HTTP shutdown first (waitress with /api/shutdown).
+        # 5s budget; falls through to terminate() if endpoint missing or hung.
+        if port:
+            try:
+                http_requests.post(
+                    f"http://localhost:{port}/api/shutdown", timeout=2,
+                )
+            except Exception:
+                pass
 
         if state.process and state.process.poll() is None:
-            state.process.terminate()
             try:
+                # Give the process up to 5s to exit on its own (post-shutdown).
                 state.process.wait(timeout=5)
-            except Exception:
-                state.process.kill()
+            except subprocess.TimeoutExpired:
+                state.process.terminate()
+                try:
+                    state.process.wait(timeout=5)
+                except Exception:
+                    state.process.kill()
 
-        pid = self._find_pid_by_port(state.config.get("port"))
+        pid = self._find_pid_by_port(port)
         if pid:
             self._kill_pid(pid)
 
@@ -1156,6 +1216,34 @@ def api_programming_sessions():
 # MAIN
 # ============================================================================
 
+def _serve_with_shutdown(app, host, port, channel_timeout=30):
+    """Run app under waitress with a /api/shutdown route for graceful stop.
+
+    Werkzeug's dev server has no graceful shutdown — terminate() leaves zombie
+    LISTEN sockets when there are pending CLOSE_WAITs from hung clients.
+    Waitress + a shutdown route fixes that: POST /api/shutdown closes the
+    server cleanly, releasing the port immediately.
+    """
+    from waitress import create_server
+
+    shutdown_event = threading.Event()
+
+    @app.route("/api/shutdown", methods=["POST"])
+    def _api_shutdown():
+        shutdown_event.set()
+        return ("shutting down", 200)
+
+    server = create_server(app, host=host, port=port, channel_timeout=channel_timeout)
+
+    def _waiter():
+        shutdown_event.wait()
+        server.close()
+
+    threading.Thread(target=_waiter, daemon=True).start()
+    log.info("Serving on http://%s:%d (waitress)", host, port)
+    server.run()
+
+
 def _kill_stale_overseer():
     """If another Overseer is already bound to our port, kill it before starting."""
     try:
@@ -1193,7 +1281,7 @@ def main():
     check_thread.start()
 
     log.info("Overseer dashboard at http://localhost:%d", PORT)
-    app.run(host=HOST, port=PORT, debug=False, use_reloader=False)
+    _serve_with_shutdown(app, HOST, PORT)
 
 
 if __name__ == "__main__":

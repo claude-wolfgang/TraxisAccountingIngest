@@ -1,0 +1,1522 @@
+Instructions and Advices to use the electronic controller
+Logik 26-S
+ORIGINAL INSTRUCTIONS
+
+Revision 1 ­ 04.12.2015
+
+1/28
+
+(INDUSTRIAL CONTROL EQUIPMENT)
+39UG FILE: E316817
+
+INDEX
+CAUTION ..........................................................................................................................................3 TECHNICAL FEATURES......................................................................................................................4 MOUNTING .......................................................................................................................................5 WARNING TO THE WIRING OF THE CONTROLLER.............................................................................5
+LEGEND ..............................................................................................................................................................7 CONNECTION SERIAL NET RS485 .....................................................................................................9 MAIN VISUALIZATION ...................................................................................................................10 QUICK SETTING START/STOP PRESSURES (ENABLED WITH PASSWORD LEVEL3) .........................12 GENERAL NOTES TO THE PROGRAMMING .......................................................................................12 M1 MAIN MENU..........................................................................................................................12 M2 ENTER PASSWORD ...............................................................................................................13 M1-1 INFO .................................................................................................................................13 M1-2 PASSWORD .......................................................................................................................13 M1-3 VISUALIZATIONS SETUP...................................................................................................13 M1-4 COMPRESSOR SETUP ........................................................................................................14 M1-5 PRESSURES.......................................................................................................................16 M1-6 TEMPERATURES ................................................................................................................16 M1-7 TIMER ...............................................................................................................................16 M1-8 INVERTER RS485 (DANFOSS) ...........................................................................................17 M1-9 ANALOG OUTPUT ..............................................................................................................18 M1-10 HOURS FILTERS/OIL ........................................................................................................19 M1-11 MAINTENANCE LIST..........................................................................................................19 M1-12 ALARMS LIST ....................................................................................................................19 M1-13 TIMER START/STOP..........................................................................................................20 M1-14 RESET ...............................................................................................................................20 ALARMS ..........................................................................................................................................21
+ALARMS WITH IMMEDIATE COMPRESSOR SHUT-OFF ..............................................................................................21 ALARMS WITH COMPRESSOR SHUT-OFF AFTER 30 SECONDS UNLOAD RUNNING.......................................................21 WARNINGS (VISUAL ALARMS) .............................................................................................................................22 MESSAGES VISUALIZED INTO ALARM LIST ONLY ...................................................................................................22 MAINTENANCE MESSAGES ..................................................................................................................................22 HOW LOGIK 26-S CONTROLS THE COMPRESSOR ............................................................................23 INVERTER OPERATION ...................................................................................................................25 INVERTER CONTROLLED VIA ANALOG OUTPUT 4/20mA ..........................................................................................25 INVERTER CONTROLLED VIA RS485 .....................................................................................................................25 MASTER/SLAVE OPERATION ..........................................................................................................26 MASTER/SLAVE INVERTER (ONLY FOR LOGIK26S, LOGIK33S) .................................................................................26 MULTIUNIT OPERATION .................................................................................................................26 WARRANTY TERMS .........................................................................................................................27
+
+Revision 1 ­ 04.12.2015
+
+2/28
+
+CAUTION
+THE LOGIK 26-S IS AN INDUSTRIAL CONTROL EQUIPMENT (NOT A SAFETY ISTRUMENT) FOR THE OPERATION OF A SCREW COMPRESSOR WITH SOFTWARE CLASS A (see EN 60730-1 and EN 60335-1). THE INSTALLATION MUST BE MADE IN ACCORDANCE TO THE LOCAL AND INTERNATIONAL STANDARDS AND REGULATIONS WHERE THE COMPRESSOR IS MANUFACTURED. THE INSTALLATION AND START UP OF THE CONTROLLER MUST BE CARRIED OUT BY TRAINED PERSONNEL WELL KNOW IN THIS MANUAL. THE CONTROLLER HAS TO BE USED IN STANDARD INDUSTRIAL ENVIRONMENT AND IT CAN NOT BE USED IN EXPLOSION RISK ENVIRONMENT, MARITIME AND MILITARY PURPOSE. THIS MANUAL COULD BE SUBJET TO CHANGES; PLEASE CONTACT LOGIKA CONTROL TECHNICAL OFFICE IN CASE OF DOUBT ON THE LAST VERSION.
+ATTENTION
+LA LOGIK 26-S EST UN CONTROLE EQUIPMENT INDUSTRIEL (PAS UN INSTRUMENT DE SECURITE) POUR LE FONCTIONNEMENT D'UN COMPRESSEUR A VIS AVEC SOFTWARE DE CLASS A (voir EN 60730-1 et EN 60335-1). L'INSTALLATION DOIT ETRE EFFECTUEE CONFORMEMENT AUX NORMES ET AUX REGLEMENTATIONS LOCALES ET INTERNATIONALES OU LE COMPRESSEUR EST FABRIQUE. L'INSTALLATION ET MISE EN MARCHE DE LA COMMANDE DOIVENT ETRE EFFECTUEES PAR DU PERSONNEL QUALIFIÉ BIEN SAVOIR DANS CE MANUEL. LE CONTROLEUR DOIT ETRE UTILISE DANS LA NORME ENVIRONNEMENT INDUSTRIEL ET IL NE PEUT PAS ETRE UTILISE DANS UN ENVIRONNEMENT DE RISQUE D'EXPLOSION ET MARITIME FINS MILITAIRES. CE MANUEL POURRAIT ETRE SOUS RESERVE DE MODIFICATION; S'IL VOUS PLAIT CONTACTER LOGIKA CONTROL TECHNIQUE BUREAU EN CAS DE DOUTE SUR LA DERNIERE VERSION.
+
+Revision 1 ­ 04.12.2015
+
+3/28
+
+TECHNICAL FEATURES
+- Industrial control equipment for the operation and management of screw compressors only, pollution degree 2. - In accordance to EC Directives: - Directive: - LVD : 2014/35/UE
+- EMC: 2014/30/UE
+- RHOS: 2011/65/EU
+- based on the following harmonized standards applied: - SAF-EMC: EN 60730-1 - RHOS: EN 50581 - In accordance to UL 508 (FILE #: E316817). - Black auto-extinguishing box in ABS: - a) according EC: IP64 for the front panel and IP20 for the other parts; - b) according UL: type 1 and Type 12 for front panel mounting , installation in pollution degree 2 for the other parts - Inputs and outputs via terminal-block board to wires (250V, 10A, 12-24AWG) tightening torque 8 Nm. - Working temperature: 0°C (32°F) ÷ 50°C (122°F) 90% RH (non condensing) - Storage temperature: -20 (-4°F) ÷ +70 °C (158°F) - Power supply: 12Vac ± 10% 50 ÷ 60 Hz. (power of the transformer's secondary: ~ 9 VA) from safety transformer - Max. current absorbed = ~ 350 mA - Visualization through back light alphanumerical LCD 20 digits x 2 rows and nr. 1 led for alarm status - Messages selectable in 8 languages: Italian ­ English ­ French ­ German ­ Spanish ­ Portuguese ­
+Turkish ­ Russian - nr. 6 key buttons: increase, decrease, enter, reset, start, stop - nr. 1 input for temperature probe KTY13.5/NTC 10KOhm@25°C, ß(25/85)= 3977 - nr. 1 input for pressure transducer (working pressure P1) - nr. 1 input for auxiliary pressure transducer (internal pressure P2) or analog information from inverter - nr. 1 input for PTC or Klicson for motor protection (IN8). - nr. 7 opto isolated digital inputs from 12/24Vac to detect:
+ IN 1 = emergency stop button  IN 2 = thermal motor  IN 3 = thermal fan  IN 4 = remote start/stop  IN 5 = air filter pressure switch  IN 6 = separator filter differential pressure switch  IN 7 = settable as: door of the electrical cabinet open ­ control phase relay ­ generic alarm - nr. 3 digital inputs for connection to Logika Control phases unit. - nr. 7 outputs via relay with contact 1.5A AC1 250Vac ­ 6 A AC1 250Vac total  RL1 = line contactor  RL2 = delta contactor  RL3 = star contactor  RL4 = load solenoid valve  RL5 = fan contactor  RL6 = settable as fan contactor, condensate drain, compressor status  RL7 = settable as: alarm, fan contactor, condensate drain, compressor status - nr. 1 real time clock with buffer battery, around 10 years electrical life - nr. 1 24Vdc power supply input for PNP outputs - nr. 1 24Vdc input from inverter to detect inverter fault - nr. 2 PNP digital output to control the inverter (run and jog command) - nr. 1 analog output 4÷20 mA for inverter operation - nr. 2 serial output RS485 for:  connection to other compressor for Master/Slave and/or Multiunit operation  inverter communication - Check min. and max. power supply to the controller - Non volatile memory to store setting data, working hours, compressor status, alarm list - The controller switches OFF due to micro interruption longer than ~ 300 m.s. Weight: 470 g
+Accessories: - nr. 1 temperature probe KTY 13.5 for detection of the air end temperature: cable in silicone rubber, length 2.5 m,
+working range ­10 ÷ 130°C, resolution 1°C. - nr. 1 pressure transducer 4-20 mA for working pressure control: 2 wires, AISI 316L stainless steel membrane,
+working range 0 ÷ 15 bar, resolution 0,1bar, precision ± 0,1bar. - nr. 1 Logika Control phases unit for power supply 230 ÷ 460V three phase
+
+Revision 1 ­ 04.12.2015
+
+4/28
+
+MOUNTING
+Use the drawing below as overall dimensions to mount the controller.
+
+106 mm
+
+DRILLING TEMPLATE
+
+161 mm
+WARNING TO THE WIRING OF THE CONTROLLER
+1) Respect the working technical features and instructions on the electrical wiring; in special way both the cables of the temperatures probes and pressure transducers must be isolated from the power cables and proper RC filters must be placed on the contactors' coils
+2) On the back side of the controller there must be enough space for wiring and connectors. 3) The rear side of the controller must be protected against condensation, oil and dust. 4) Don't wash the front panel by water injection; clean the front mylar with a soft cloth using soap water. 5) Low voltage and high voltage cables run on separate trunks. 6) The connection cables of temperature probe and pressure transducer must be placed in a trunk separate from the power
+cables. 7) The connections cables of digital inputs must be placed in a trunk separate from the power cables. 8) The power cable of controller must NOT be placed in the same trunk of the power cables
+
+Revision 1 ­ 04.12.2015
+
+5/28
+
+ELECTRICAL DRAWING AND LEGEND OF THE CONNECTIONS
+
+Revision 1 ­ 04.12.2015
+
+6/28
+
+LEGEND
+Terminal M1 Pole 1-2 = power supply 12Vac
+Terminal M2 ­ RS485 FOR CONNECTION MASTER/SLAVE ­ MULTIUNIT Pole 1 = 0 Pole 2 = DPole 3 = D+ Pole 4 = +15Vdc (As power supply for a Logik option)
+Terminal M3 Pole 1-2 = air end temperature probe Pole 3-4 = pressure transducer (pole 3 = negative ­ pole 4 = positive)
+Terminal M4 Pole 1 = pole 5 of the control phases (GND) Pole 2 = pole 1 of the control phases (T) Pole 3 = pole 2 of the control phases (S) Pole 4 = pole 3 of the control phases (R) NOTE: THE GND FROM THE CONTROL PHASES UNIT MUST NOT BE CONNECTED TO EARTH. IT'S THE GROUND OF THE CONTROLLER AND MUST BE CONNECTED TO GROUND OF THE CONTROL PHASES UNIT
+Terminal M5 Pole 1 = IN 1 = emergency stop button (L) Pole 2 = IN 2 = thermal motor (L) Pole 3 = IN 3 = thermal fan (L) Pole 4 = IN 4 = remote start/stop (L) Pole 5 = IN 5 = air filter pressure switch (L) Pole 6 = IN 6 = separator filter differential pressure switch (L) Pole 7 = neutral = N NOTE: the digital inputs you do not use have to be connected directly to 12-24V otherwise they generate the related alarm, except IN5 that must not be connected in case you do not use it.
+Terminal M6 Pole 1 = RL7 = alarm (configurable) Pole 2 = RL6 = condensate drain solenoid valve (configurable) Pole 3 = RL5 = fan contactor (configurable) Pole 4 = RL4 = solenoid valve Pole 5 = RL3 = star contactor Pole 6 = RL2 = delta contactor (configurable) Pole 7 = RL1 = line contactor Pole 8 = common = 24 ÷ 230Vac
+Terminal M7 Pole 1 = IN 7 = settable as door of electrical cabinet open ­ control phase relay ­ generic alarm (L) Pole 2-3 = IN 8 = PTC or Klicson for motor protection
+Terminal M8 ­ RS485 FOR DRIVE CONNECTION Pole 1 = 0 Pole 2 = DPole 3 = D+ Polo 4 = 2nd 4/20mA analog input configurable as internal pressure transducer or as analog data coming from the drive:
+1. internal pressure transducer: connect to the negative pole of the transducer 2. analog data from drive: connect to a 4/20mA analog output on the drive control board (drive must be set correctly
+to give the right information on this output) Pole 5 = +15V power supply for the internal pressure transducer (first of the above cases): connect to positive pole of the transducer; not to be connected in case of analog data coming from drive
+Terminal M9 These terminals to be connected only to the drive controlled by 4/20mA analog output Pole 1 = Analog and/or digital GND and DGND from drive Pole 2 = Inverter fault input, 24Vdc signal coming from drive (normally connected to drive alarm relay) Pole 3 = 4/20mA analog output computed by Logik26S PID (when activated) Pole 4 = PNP1 digital output from 24Vdc from drive (when analog output is active this is the run command for the drive) Pole 5 = PNP2 digital output from 24Vdc from drive (when analog output is active this is the jog command for the drive) Pole 5 = 24Vdc from drive
+
+Revision 1 ­ 04.12.2015
+
+7/28
+
+EXAMPLE OF CONNECTION TO SECURITY PRESSURE SWITCH Alarm related to security pressure switch A21 is joined to the lacking phase to all the digital inputs. This is a shut off alarm: below you can find the connection drawing both to contactors 24Vac and/or 230Vac.
+
+Contactors 24Vac If the operation of the contactors and soenoid valves come through 24 Vac, the digital inputs have to be connected to 24 Vac (see drawing on the right); on this way when the pressure switch opens due to high pressure, 24 Vac lacks and deenergize all the contactors, solenoid valve and digital: the controller detects all the digital inputs opened and signal the alarm "SEC. PRESSURE SWITCH".
+
+Security pressure switch for high pressure detection
+
+I° II°
+12 ­ 0
+Power supply to the controller
+
+Contactors 230Vac If the operation of the contactors and solenoid valves comes through 230 Vac, the digital inputs have to be connected to 12 Vac; next to the contact of the pressure switch, place and energize an auxiliary relay and put the contact in serie to 12 Vac (L) (see drawing on the right). When the pressure switch is closed, the auxiliary relay with contact closed supply power to the digital inputs; the power supply of the controller is connected before the contact of the relay. When the pressure switch opens, the auxiliary relay opens power to the digital inputs; the controller detects all the digital inputs open and signal the alarm "SEC. PRESSURE SWITCH".
+
+Power supply to digital inputs and uses
+
+24 ­ 0
+
+Security pressure switch for high pressure detection
+Auxiliary relay
+Power supply to the uses
+
+I° II°
+12 ­ 0
+Power supply to the controller
+
+230 ­ 0
+
+Power supply to digital inputs
+
+Revision 1 ­ 04.12.2015
+
+8/28
+
+CONNECTION SERIAL NET RS485
+To connect a serial net you have to pay carefully attention to some executive aspects: 1) Use flexible cable, shielded, twisted 22 AWG type. 2) Connect D- and D+ to two conductors of same couple and 0 to a third one (if available) or both conductors of a second couple. 3) Connect the cable's shield to only one end of 0. 4) DO NOT CONNECT the cable's shield to the electrical ground of the plant. 5) The net MUST NOT BE LONGER than 400 meters. 6) Max connectable units through serial net RS 485 is 32. 7) In case of connection via serial line RS485 you have to set the parameter C08 into menu 04 Compressor setup: this is the number you need to combine to the recognition of the controller. 8) The units on serial net RS485 must be connected without any reversal: pole D+ to D+, pole D- to D-, pole 0 to 0. 9) In case of connection with more than 2 units it is necessary to provide only one line without any deriving. At the terminal both starting and ending the net it is possible to place (in parallel to D- and D+) a termination resistance 120 Ohm. In the picture below you can see the connection of 4 units on serial net RS485 by using a shielded cable with two twisted couples.
+NOTES ON THE WIRING: wrong wiring can damage both the controller and other devices connected to the serial port.
+WARNINGS TO THE WIRING RS485 1) The cable must be placed into a TRUNK SEPARATED by power cables and any potentially dangerous cables as lighting plant and so on. 2) DO NOT PLACE signal cables next to power bar, lighting lamps, antennas, transformers; 3) Keep signal cables FAR 2 METERS MINIMUM from units with heavy inductive (distribution cabinet, motors, inverter). 4) Don't pull the cables with a strength over 12 Kg; stronger strength can damage the wires and reduce the signal transmission on the line. 5) DO NOT: twist, knot, crush or fray the conductors. 6) Do not make any joints between lengths of cable: always use only one cable to connect any single unit to each others. Strip the end part carefully, do not crush the cable next to core-hitches or safety supports. 7) Always respect the position of the colors at the both sides of the connection. Once the wiring is complete, visually and physically check the cables are undamaged and properly placed
+
+Revision 1 ­ 04.12.2015
+
+9/28
+
+MAIN VISUALIZATION
+
+Power on and display visualizes the message "Logika Control" "Logik 26-S" for about 3 seconds, then it shift to the main
+visualization and the compressor is in OFF status. The pic. below shows the main visualization1.
+
+1
+
+2
+
+34
+
+56
+
+T6 9
+T5
+
+T2
+
+T1
+
+T3
+
+T4
+
+7a
+
+8
+
+7b
+
+According the pic. above and related icons, the main visualization can be described as below: 1. General icons, where be present the following:  I01, Condensate drain in operation  I02, Multiunit operation  I03, Master/slave operation  I04, Maintenance messages 2. Alarm or maintenance messages: if an alarm is detected the display visualizes the icon I05, if maintenance timer is over visualizes icon I04. 3. Start/stop by timer activated. 4. Time (hours and minutes). 5. Icons I12 when fan ON 6. Air end temperature 7. Inverter area: data visualized when output 4/20mA or RS485 inverter are enabled. In case output 4/20mA is activated the display shows the PID frequency set (F) and eventual data set on the input 4/20mA (parameter C19). In case of inverter via RS485 all the data from the inverter are visualized: frequency (F), current (I), power (P) and temperature (T). Data are visualized on the right side (7b) or left side (7a) according the inverter configuration is on the air end temperature or working pressure. 8. Compressor status: icons from I07 to I13 as below:  Compressor OFF  Witing for safety timer  Pressure set  Remote start/stop open  Compressor ON  Waiting for start/stop by timer (in this case the display visualizes the day of the week and time of the next ON by timer).  Waiting for internal pressure P2 lower than parameter AP4 9. Pressure area:  Working pressure (BIG) and stop/start pressures.  Aux pressure transducer (if enabled).  Icon I17, motor run  Icon I18, load solenoid valve open
+In case of alarm, the below side of the display (7a, 7b and 8) visualizes the alarm message
+
+The controller is provided with 6 key-buttons with following functions: (with reference to the above pic.): - T1, decrease, select down - T2, increase, select up - T3, change or confirm - T4, reset or back - T5, stop compressor - T6, start compressor
+
+1 In a normal operation status, the icons will not be visualized all together: here they are just to show their own position in the display.
+
+Revision 1 ­ 04.12.2015
+
+10/28
+
+Meaning of icons
+
+Main visualization: icons located on the upper row
+
+I01
+
+Condensate drain activated
+
+I02
+
+Multiunit operation activated
+
+I03
+
+Master/slave operation activated
+
+I04
+
+Maintenance timer over
+
+I05
+
+Alarm
+
+I06
+
+Weekly start/stop timer activated
+
+Main visualization: icons related to compressor status located lower row (centre)
+
+I07
+
+Compressor OFF
+
+I08
+
+Waiting for safety timer
+
+I09
+
+Pressure set, compressor running unload or stand-by
+
+I10
+
+Remote start/stop input open
+
+I11
+
+Compressor running
+
+I12
+
+Stop by timer: the display visualizes day and time of the next start
+
+I13
+
+Internal pressure P2 too high
+
+Main visualization: left square = pressure ­ right square: temperature
+
+I14
+
+Fan ON
+
+I15
+
+PID and output 4/20mA enabled
+
+I16
+
+Stop pressure
+
+I17
+
+Start pressure
+
+I18
+
+Motor running
+
+I19
+
+Compressor running load (load solenoid valve activated)
+
+Menu setting: date, time, contrast, units of measurement
+
+I20
+
+Unit of measurement activated
+
+I21
+
+Contrast
+
+I22
+
+Language
+
+I23
+
+Date and time
+
+Revision 1 ­ 04.12.2015
+
+11/28
+
+QUICK SETTING START/STOP PRESSURES (ENABLED WITH PASSWORD LEVEL3)
+
+To change the Start pressure push and the data starts blinking; change the value by using
+
+the new one by
+
+: the data stops blinking. By the button R you can abort the modification.
+
+To change the Stop pressure, push and the data starts blinking; change the value by using
+
+the new one by
+
+: the data stops blinking. By the button R you can abort the modification.
+
+and/or and confirm and/or and confirm
+
+GENERAL NOTES TO THE PROGRAMMING
+
+FLOW AND MODIFICATION OF THE PARAMETERS
+
+To select every single label, use the arrow keys and confirm by
+
+to enter into related parameters and/or data.
+
+After you select the data and/or parameter to change by the arrow buttons, push to edit, set the new value till by arrow
+
+buttons and confirm it
+
+.
+
+After the last label or by pushing the button R, you can shift back to the main visualization.
+
+ESC FUNCTION In any part of the menu you can shift back to the main visualization by pushing
+
+for about 5 seconds.
+
+ANTIPANIC FUNCTION In any label or sub-menu related to the setting and/or visualizations, after 180 seconds from the last pushing of a button, the controller shift back to the main visualization without saving any change you have not confirmed.
+
+LCD ENERGY SAVING After 1 minute from the last pushing of any button, the back-light of the display switches off; it will be on again by pushing any button on the controller.
+
+M1 MAIN MENU
+
+To enter the setting, push
+
+and the display visualizes the flow menu including the following labels related to other sub-
+
+menu reported in the table below.
+
+In case you push for 3 seconds the display visualize the label related to the password allowing to select the levels to access the different parameters (1-service 1, 2-service 2, 3-factory).
+
+Id
+
+Submenu
+
+01
+
+Info
+
+02
+
+Password
+
+03
+
+Visualizations
+
+04
+
+Compressor setup
+
+05
+
+Pressures
+
+06
+
+Temperatures
+
+07
+
+Timer
+
+08
+
+Inverter RS485
+
+09
+
+Analog output
+
+10
+
+Hours filters/oil
+
+11
+
+Maintenance list
+
+12
+
+Alarms list
+
+13
+
+Timer start/stop
+
+14
+
+Reset
+
+Password level
+0 1 0 1 2 2 1 3 3 0 0 0 1 1
+
+Revision 1 ­ 04.12.2015
+
+12/28
+
+M2 ENTER PASSWORD
+
+Enter to password levels by pushing on the main visualization.
+
+To select the password level, use the arrow buttons and confirm
+
+.
+
+Now, enter the code (2,4 or 6 digits according the level).
+
+Password
+
+1-2
+
+Use the arrow buttons to change any digit of the code, the button
+
+to shift to the digit on
+
+Service 1
+
+the right and the button R to shift back to the previous one. The digit to enter are indicated
+
+by "-" while the digit already entered by the symbol "*". Once the password is OK you enter into the main menu according the level selected. In case you enter a wrong password code,
+
+0-
+
+the display visualizes the message "ERROR".
+
+PASSWORD FORGOTTEN In case of password forgotten or missed you have to switch power off to the controller; restore power and keep on pushing
+
+the
+
+for more than 5 seconds. During this time the display visualizes the blinking message "Reset Password";
+
+release the arrows button when the message changes into "Password reset".
+
+M1-1 INFO
+This sub-menu visualizes the following info: 1. Working hours 2. Load hours 3. Load % during last 100 working hours (updated every 5 hours) 4. Frequeny set on output 4/20mA (if enabled) 5. Starts/hour 6. Flow Air Delivered 7. Serial number 8. Software release
+
+M1-2 PASSWORD
+In this sub-menu you can change the password codes saved. Parameters, setting range, default and levels are reported in the table below:
+
+Fuction
+PW1 PW2 PW3
+
+Description
+Password service 1 Password service 2
+Password factory
+
+Setting range
+00 ÷ 99 0000 ÷ 9999 000000 ÷ 999999
+
+Default
+22 4444 666666
+
+Password level
+1 2 3
+
+M1-3 VISUALIZATIONS SETUP
+In this sub-menu you can set the parameters related to the visualization of the controller. By the arrow buttons select the parameter you need and confirm by Enter to enable the change: till by the arrow buttons
+change the value and confirm the new one by .
+
+
+
+language set to read the message on the display (default TURKISH)
+
+
+
+Units of measurement of temperature and pressure
+
+(°C-bar, °C-psi, °F-bar, °F-psi) ­ (default °C/bar)
+
+
+
+LCD contrast
+
+
+
+date/time and possible automatic shift between DLS and
+
+Summer time
+
+Revision 1 ­ 04.12.2015
+
+13/28
+
+M1-4 COMPRESSOR SETUP
+In this menu you can change the general setting of the compressor. Parameters, setting range, default and password level are reported in the table below:
+
+Code C01 C02 C03 C04 C05 C06 C07
+C07.1
+C07.2
+C07.3
+C07.4 C08 C09 C10 C11 C12
+C13
+C14 C15 C16 C17
+C18
+C19 C19.1
+
+Description Restart
+Starts/hour Timer Wt4 Control phases
+Safety Low voltage
+Multiunit operation Timer Master/Slave
+Timer slave
+Maintenance mode
+Inverter twin Compressor Nr Serial number Flow Air Delivered
+Input PTC Input IN 7
+Output RL2
+Output RL5 Output RL6 Output RL7 Shut-off C--h
+Output 4/20mA
+Aux input 4/20mA Timer separator filter
+
+Value
+
+Meaning
+
+Default Level
+
+MAN-AUT Restart after power off: MAN (manual) ­ AUT (automatic)
+
+MAN
+
+2
+
+0 ÷ 60 Starts/hour of the motor allowed
+
+6
+
+2
+
+SI-NO
+
+Wt4 operation: YES = fixed ­ NO = variable
+
+YES
+
+2
+
+YES-NO
+
+Logika control phases uni: YES = enabled - NO = disabled
+
+YES
+
+2
+
+YES-NO
+
+Safety operation: YES = enabled - NO = disabled
+
+NO
+
+3
+
+YES-NO
+
+Alarm low voltage : SI = enabled - NO = disabled
+
+YES
+
+3
+
+0/1/2/3
+
+Multiunit options: 0 = stand alone ­ 1 = Master/Slave 2 = Master/Slave new ­ 3= Multiunit Slave
+
+0
+
+2
+
+Balancing working hours:
+
+00÷200 h in case of setting "00" the balancing is not allowed; Master 100 h.
+
+2
+
+is the compressor with address 1
+
+Slave support:
+
+1 ÷ 99 min. After power on if Master unit has not reached stop set until 5 min.
+
+2
+
+the time set in this parameter, the slave starts to support
+
+YES/NO
+
+In case of Multiunit Slave, the compressor works on standing alone and Multiunit Master is informed this compressori s out of order
+
+NO
+
+2
+
+YES/NO
+
+Both inverter modulating in Master/slave operation new SI = noth inverter modulating NO = master max speed if both units are running
+
+0
+
+2
+
+1 ÷ 32 Enter MODBUS address of the compressor
+
+1
+
+1
+
+15
+
+alphanumerical Serial number of the compressor
+
+3
+
+characters
+
+100 / 99990 Capacity: nominal air flow of the compressor (liters/min.) 1000L/min 3
+
+YES/NO
+
+Input PTC configuration: NO = disabled ­ SI = enabled
+
+0
+
+2
+
+Input IN7 configuration:
+
+0/1/2/3 0 = disabled ­ 1 = door open
+
+0
+
+3
+
+2 = control phases relay ­ 4= high temperature bearings
+
+Relay RL2 setting:
+
+0=default (star contactor)
+
+1=fan - 2 = condensate drain - 3=compressor status
+
+0÷6
+
+4=alarm - 5 = motor activated - 6 = load valve on ­ 7 = lubricating - 8 = off - 9 = activation on power on for
+
+0
+
+3
+
+the time Wt5
+
+10 = activation on power on for the time Wt5 and
+
+activation in case of alarm
+
+0/6
+
+See C13
+
+0
+
+3
+
+0/6
+
+See C13
+
+0
+
+3
+
+0/6
+
+See C13
+
+0
+
+3
+
+NO/YES
+
+Compressor stop once the timer "Check compressor" is over: NO = disabled ­ SI = shut-off alarm
+
+NO
+
+3
+
+0/1/2
+
+Operation output 4/20mA and PID: 0= disabled 1 = enabled on working pressure control 2 = enabled on air end temperature control
+
+0
+
+3
+
+Configuration auxiliary input 4/20mA:
+
+0÷4
+
+0=disabled ­ 1= relative pressure (delta in relation to the working pressure) ­ 2=power inverter ­ 3=current inverter
+
+0
+
+3
+
+4=inverter temperature
+
+1 ÷ 600 sec. Delay timer separator filter alarm
+
+30s
+
+3
+
+Revision 1 ­ 04.12.2015
+
+14/28
+
+C19.2
+
+Top range AI
+
+10 ÷ 999
+
+Enabled if C19 is set from 2 to 4. This is the top range related to the current 20mA used to read on the main visualization the data from the inverter
+
+100
+
+3
+
+0=All the alarms related to the temperature are disabled.
+
+Ventilation is operated by ON/OFF fixed cycles managed by
+
+C20 Temperature probe
+
+0/1
+
+the next parameters C20.1 and C20.2
+
+1
+
+3
+
+1=KTY
+
+2=NTC
+
+C20.1
+
+Time Fan ON
+
+10÷9999s Time ON fan in case of temperature probe disabled
+
+500
+
+3
+
+C20.2
+
+Time fan OFF
+
+C21 Input Fault Inverter
+
+C22
+
+Lubricating time
+
+C23
+
+Interval lubricating
+
+10÷9999s Time OFF fan in case of temperature probe disabled
+
+0/1/2
+1 ÷ 999s 0 ÷99990m
+
+0=Disabled 1=Input enabled, managed normally open 2=Input enabled, managed normally closed
+Activation time of lubricating relay
+Time to lubricate
+
+500
+
+3
+
+0
+
+3
+
+2
+
+3
+
+11000
+
+3
+
+NOTES: C01­RESTART: in case of power off, by selecting "Man", the compressor doesn't start automatically and the display visualizes "POWER OFF"; by selecting "Aut.", the compressor restart automatically according a delay time set Wt5: during this time the display visualizes the "WAIT". If you change the default setting, it is recorder into the alarm buffer and you can cancel it by general reset only. C05­SAFETY: if you set "YES", once the timer "CAF" will be over, the display visualizes the message "Shut-off for safety"; you can erase it into this parameter only and set it as "Safety = NO"; in this case the alarm code change into "Change air filter". C07­MULTIUNIT OPERATION: set "0", the compressor works by standing alone. Set "1", the compressor communicates with a second unit via serial RS232 as Master/Slave (see related working program) and the controller visualizes the parameters 07.1 e 07.2. C07.1­TIMER MASTER / SLAVE: time to switch Master into Slave; if the difference of working hours between the two compressors is bigger than the setting of this parameter, the unit with more hours will not be Master as long as the other will reach the same. C07.2­TIMER SLAVE: after power ON, if the Master unit has not reached the stop pressure until the time setting in this parameter, the Slave will start to support. C08­COMPRESSOR Nr.: in case of Master/Slave enabled, the compressor set as 1 will be the Master unit. C09­SERIAL NUMBER: LCD visualizes the serial number on the third lower right side row from the bottom.
+Push to edit.
+You can select the characters by the arrows buttons; by shift forward to the next character or enter a new one, by ESC shift back to the previous one; you can delete the editing by pushing ESC when the cursor in on the first character. You can save the data by enter two SPACE in a row or by reaching the max. number of characters (15). C17­Shut-off for C--h: alarm related to the maintenance timer C--h (check compressor); if you set "YES", 100 hours before the timer is over, the compressor stops showing alarm STOP FOR AL32 ­ CHECK COMPRESSOR. You can reset the alarm and restart the compressor for the next 100 hours and every 50 working minutes the display remind to maintenance C--h. Once the residual 100 working hours are over, the compressor will stop again; you can reset such alarm by resetting the maintenance timer only. C18­Output 4/20mA: allow to upload factory default parameters in menu M1-9. Two different default set are provided according regulation is related to the working pressure or air end temperature. C22-C23: These parameters are enabled if one of the relay is configured as per setting value 7 (lubricating). In this case the relay allows automatic lubricating according the setting on C22 and C23. The time to lubricate is calculated on BL timer that is not visible for the reason used on this function.
+
+Revision 1 ­ 04.12.2015
+
+15/28
+
+M1-5 PRESSURES
+In this menu you can change the setting related to the working pressure. Parameters, setting range, default and password level are reported in the table below:
+
+Function
+WP1
+WP2
+WP3 WP4 WP5 WP6 AP1 AP2 AP3 AP4
+
+Description
+Top range transducer
+High pressure alarm
+Stop pressure Start pressure Slave start pressure
+Offset Separator filter alarm Separator filter warning
+Offset Max. aux. pressure on start
+
+Setting range
+15 ÷60
+(WP3+0,2) ÷ (WP1-0,5 )
+(WP4+0,2) ÷ (WP2-0,2) 3 ÷ (WP3-0,2)
+2,0 ÷ (WP4-0.2) -2,0 ÷ +2,0
+(AP2+0,2) ÷ (WP1-0,5) 0,1 ÷ (AP1-0,2) -2,0 ÷ +2,0 (WP1-0,5) ÷ 1,0
+
+Default
+15
+11,0 bar
+8,8 bar 7,3 bar 6,5 bar 0 bar 1,7 bar 1,2 bar 0 bar 2,0 bar
+
+Password level
+3
+3
+1 1 1 2 3 3 3 3
+
+NOTE: WP5 is visualized just in case the compressor has been set to Master/Slave operation (see menu 4 Compressor SETUP). Parameters AP1..AP4 are visualized if the security transducer has been configured in COMPRESSOR SETUP and if the parameter C19 set 1 or 2, only. AP4 is the max. internal pressure allowing to run the motor (see icon I13, page 11).
+
+M1-6 TEMPERATURES
+In this menu you can change the setting related to the temperature. Parameters, setting range, default and password level are reported in the table below:
+
+Function
+WT1 WT2 WT3 WT4 WT5 WT6 WT7
+
+Description
+High T. alarm High T. warning
+Start fan T fan stop Low T. alarm
+Offset PID Enable temp.
+
+Setting range
+(WT2+2°C) ÷ 125°C (WT3+2°C) ÷ (WT1-2°C)
+30°C ÷ (WT2-2°C) 5°C ÷ 15°C
+-10°C ÷ +15°C -10°C ÷ +10°C -10°C ÷ 100°C
+
+Default
+105 °C 100 °C 85 °C 10 °C
+0 °C 0 °C 0 °C
+
+Password level
+3 2 2 2 2 3 3
+
+M1-7 TIMER
+In this menu you can change the setting related to the temperature. Parameters, setting range, default and password level are reported in the table below:
+
+Function
+Wt1 Wt2 Wt3 Wt4 Wt5 Wt6 Wt7
+
+Description
+Star Star/Delta
+Delta Unload Safety RL6 On RL6 Off
+
+Setting range
+2 ÷ 20 sec 10 ÷ 50 m.s. 1 ÷ 900 sec. 0 ÷ 30 min 0 ÷ 240 sec.
+1 ÷ 10 sec 1 ÷ 10 min
+
+Default
+5 sec. 35 m.s. 2 sec. 3 min. 30 sec.
+2 sec 3 min.
+
+Password level
+3 3 3 2 2 1 1
+
+NOTE: changing the set value, the new one is loaded once the counting in progress is over. NOTE Wt4: non stop motor mode when Wt4 set to max.
+
+Revision 1 ­ 04.12.2015
+
+16/28
+
+M1-8 INVERTER RS485 (DANFOSS)
+This menu allows to visualize/set the parameters related to the inverter in case of connection via RS485 (Danfoss available only). The parameters you can set, related setting range, default and password level necessary to the visualization and modification are described in the table below:
+
+Function DR0 DR1 DR2 DR3 DR4 DR5 DR6 DA0 DA1 DA2 DA3 DA4 DA5 DA6 DA7 DA8 DA9
+Setup Drive
+
+Description Drive Model Min frequency Max frequency Accel. time Decel. time PID prop. gain PID int. time Motor Power Motor Voltage Motor Frequency Motor Current Motor Speed Current Limit PID Diff.Time Reset Energy Meter Jog Ramp Time PID int. mult.
+
+Setting 0/1
+0Hz÷(DR2-5Hz) (DR1+5Hz)÷300Hz
+0.0s÷300.0s 0.0s÷300.0s 0.00÷99.99 0.00s÷99.99s 0.00KW÷400.'KW
+0V÷2000V 8Hz÷200Hz 0.1A÷999.9A 0RPM÷9999RPM 0.0%÷200.0% 0.00s÷99.99s
+0÷1 0.0s÷300.0s
+0.10÷4.00
+
+Default 0
+30Hz 85Hz 40.0s 4.0s 4.40 2.00s 57.6KW 415V 87Hz 106.0A 2575RPM 100.0% 0.00s
+0 20.0s 1.00
+
+Password level 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+
+NOTE: If you set the parameter a value different from 0 on the parameter DR0, you enable the inverter operation via RS485 and related alarms 60, 61,62.
+
+After the last parameter DA9 comes "Setup Drive" that allows to start the setting of the inverter; it means to send the parameters from DR1 to DA9 to the inverter. Moreover all the required settings to make the system Logik26S+Drive working, such as drive PID enable, drive PID setpoint and feedback source and so on, are programmed to the drive also. Confirming "Setup Drive" the LCD visualizes the following screen:
+
+Setup Drive
+
+Drive ready
+
+In the middle of the LCD is visualized the drive status. When the download is in progress, above the drive status comes the progress status (in percentage) of the setup. Pressing the setup start. Setup required approximately 5minutes. Pressing R the setup abort and it is possible to go back to menu M1-8.
+While setting up the inverter, the main contactor is activated.
+
+Revision 1 ­ 04.12.2015
+
+17/28
+
+M1-9 ANALOG OUTPUT
+This menu is visualized only if the safety pressure transducer has been configured in the menu Compressor setup (parameter C18 different from 0). The analog output is determined by a PID calculation. The analog output can be eventually connected to the electrical motor inverter or fan motor inverter. Parameter C18 must be set 1 for electric motor or 2 for fan motor. In case of electric motor the regulation is made by the pressure. The setpoint of the PID calculation is placed in the middle of the interval between start pressure WP3 stop pressure WP4. Example: WP3=7bar and WP4=8bar, setpoint will be 7.5bar and PID will try to keep the working pressure around such reference value by increasing the inverter output (frequency as well) in case the pressure is lower than the set and decreasing in case the pressure is higher. In case of the fan motor the regulation is made by the temperature. The sepoint of the PID calculation is the value set on WT3 (fan start). PID will try to keep the air end temperature around such reference value by increasing the inverter output (frequency as well) in case the temperature is higher than the set value and decreasing in case the temperature is lower. Menu M1-9 allows to visualize/set the parameters related to the PID regulator. The pic. below shows the PID calculation.
+
+ScrewTemp 100°C
+FEEDBACK WorkPress WP1
+
+WT3
+
+100°C SETPOINT
+
++
+
+-
+
+SUM
+
+MUL
+
+WP3+WP4
+
+2 x WP1
+
+1 -1
+C18
+
+MUL
+
+PI1
+
+MUL
+
+
+
+1 PI2(xPM1)
+
+MUL
+
+
+
+PI3
+
+1,0
+SUM
+-0,1
+PID
+
+MUL
+
+PI5
+
+1,0
+
++ +
+
+1,0=20mA
+
+MUL
+
+SUM
+
+OUT
+
+PI7
+
+-
+
+0,0=4mA
+
+PI4
+
+PI6
+
+Parameters, setting range, default and password level are reported in the table below:
+
+Function
+PI1 PI2 PI3 PI4 PI5 PI6 PI7 FR1 FR2 PT1 PT2 PT3 PM1
+
+Description
+
+Setting range
+
+PID prop. gain PID int. time PID der. time PID out scaling Adder multipl. Adder offset PID low limit
+Min. Freq. Max. Freq. Ramp up time Ramp down time Jog Ramp time PID I gain multiplier
+
+-99.99s÷ 99.99s -99.99s÷ 99.99s -99.99s÷ 99.99s -99.99s÷ 99.99s -99.99s÷ 99.99s
+-2.00÷2.00 -2.00÷1.00 0Hz÷(FR2 ­ 5Hz) (FR1 + 5Hz) ÷ 500Hz 0,1s ÷99,9s 0,1s ÷99,9s 0,1s ÷99,9s 0,01 ÷9,99
+
+Default Press/Temp
+2.50/5.00 10.00s/15.00s
+0.00s/0.01s 1.00/4.00 0.00/1.60 0.00/0.76 0.00/-100 25Hz/25Hz 50Hz/50Hz 5,0s 5,0s 5,0s 1,00
+
+Password level
+3 3 3 3 3 3 3 3 3 3 3 3 3
+
+NOTE: For all the above parameters two default set are provided according the way of control (set on parameter C18). PID output (limited to the interval 0..1) is transposed to output current: frequency FR1 (PID output=0) correspond 4mA, frequency FR2 (PID output=1) correspond 20mA. You have to set the frequency reference on the inverter so that 4mA/20mA input correspond the frequency ranged you need. You have to set such range both on parameters FR1 and FR2. PT3 is the duration of the acceleration/deceleration time in case the compressor has to reach the download status; in this case inverter reaches the minimum frequency FR1 according ramp PT3. In case of compressor loading the ramps are PT1, while the speed goes up and PT2 while speed goes down. In case of pressure regulation, PM1 alters the integrating effect of the error on the setpoint; specially integral time PI2 is multiplied for PM1 when the pressure is over setopint. Set PI2 or PI3 zero, the related integration or derivative action is disabled.
+
+Revision 1 ­ 04.12.2015
+
+18/28
+
+M1-10HOURS FILTERS/OIL
+In this menu you can visualize the maintenance timer; if you enter by a password level over 1, you can enter into the submenu to change and/or reset.
+
+Function
+
+Description
+
+CAF COF CSF C-C--h C-BL
+
+Change air filter Change oil filter Change separator filter
+Change oil Check compressor Bearings lubrication
+
+Setting range
+100 ÷ 3.000 h. 100 ÷ 10.000 h 100 ÷ 10.000 h 100 ÷ 10.000 h 100 ÷ 10.000 h 100 ÷ 29.999 h
+
+Counter
+xxxxxx h. xxxxxx h. xxxxxx h. xxxxxx h. xxxxxx h. xxxxxx h.
+
+Reset Default
+
+NO
+
+2.000
+
+NO
+
+2.000
+
+NO
+
+4.000
+
+NO
+
+8.000
+
+NO
+
+500
+
+NO
+
+29.999
+
+Password level
+2 2 2 2 2 2
+
+The counting is related to the ON time of the line contactor (RL1) and goes on backward: when the counting reaches 0, the display shows the related message and goes on as negative counting. The storage of the hours comes every 15 minutes; if the power goes off during the counting such 15 minutes are missed. If parameter C--h is set 10.000, the alarm "CHECK COMP." is not enabled. If parameter C-BL is set 29.999, the alarm "BEARING. LUB." is not enabled (bearing lubricating). By changing the set value than the count in progress is re-calculated. Example: CAF, set 2000h, the counter is 1600, it means 400h has passed from reset. If yu change the set, for example 3000, the counter will change into 2600.
+
+M1-11MAINTENANCE LIST
+Memory related to reset of the maintenance timer with related date. In case of empty memory the display visualizes the message "Memory empty". The memory keeps till 20 data, the twenty-first erases the first one and so on. Once the maintenance requested has been carried out, you have to reset the related counter; if you don't reset the timer every 50 working minutes or every power on of the compressor the display visualized the related maintenance message.
+
+M1-12ALARMS LIST
+List of the alarm detected with related progressive number, date, time and cause.
+For maintenance alarm the display shows the icon I04 , while the icon I05 for shut-off alarm. Memory capacity of 20 alarms: the twenty-first erases the first one and so on; if the memory is empty the display visualizes the message "Memory empty".
+
+Revision 1 ­ 04.12.2015
+
+19/28
+
+M1-13TIMER START/STOP
+This menu allows to manage start and stop of the compressor by weekly timer. Editing the timer, the display visualizes the parameters T01 "Enable timer". If you set YES, the display shows the link to sub-menu to enter start/stop program and T02 "Weekly timer". Enter into this sub-menu to set/change three working bands for every day of the week. Initially the day of the week is selected. By the arrow buttons you can select a different day. By selecting a day next to the last one (Sunday) the display shift back to the previous menu. By pushing Enter you shift to the start time of the first interval T1. By the arrow buttons you can change the time and confirm it by Enter or shift back to select the previous data. Next pushing of the Enter button allows to select hours and minutes of all start/stop event visualized. When the stop minutes of the last interval of the day are selected, by pushing Enter you enter into the setting of the next day. In any time by pushing R button for longer time you can shift back to the previous menu ending the visualization/setting of the weekly timer.
+
+Timer start/stop
+
+1-13
+
+T01 Enable timer
+
+SI
+
+T02 Weekly program
+
+Weekly timer
+
+Mon T1 T2 T3
+
+Start 00:00 00:00 00:00
+
+1-13-1
+Stop 00:00 00:00 00:00
+
+M1-14 RESET
+
+Description
+Working hours Alarmsi Maintenance Weekly timer General
+
+Password level
+3 3 3 2 3
+
+Select the message you need and push Enter button: the display visualizes a confirmation message To start reset select YES. Now the display visualizes the blinking message "RESETTING" for about few seconds
+NOTE: GENERAL reset is allowed when the compressor is "OFF" only; the controller will load all factory default values.
+
+Revision 1 ­ 04.12.2015
+
+20/28
+
+ALARMS
+
+ALARMS WITH IMMEDIATE COMPRESSOR SHUT-OFF
+
+Code
+
+Description
+
+Cause
+
+01
+
+EMERGENCY STOP
+
+Emergency stop button open (IN1)
+
+02
+
+MOTOR OVERLOAD
+
+Thermal motor open (IN2)
+
+03
+
+THERMAL FAN
+
+Thermal fan open (IN3)
+
+04
+
+NO PHASE
+
+One or more phase missed for over 300 m.s.
+
+05
+
+WRONG PHASE
+
+Phase inverted
+
+07
+
+DOOR OPEN
+
+IN7 open (set as come door micro-switch)
+
+09
+
+DRIVE FAULT
+
+Input relay fault drive open/closed (alarm managed with input enabled only (C21=1/2))
+
+11
+
+HIGH PRESSURE
+
+Working pressure over set WP2
+
+12
+
+T. PROBE FAILURE
+
+Air end temperature probe failure
+
+13
+
+HIGH TEMP.
+
+Air end temperature over set WT1
+
+14
+
+LOW TEMP.
+
+Air end temperature lower than set WT5
+
+15
+
+SEPARATOR FILTER
+
+Delta P (internal pressure ­ working pressure) over shut off set AP1 once the timer C19.1 is over and air end temperature is over 45°C (alarm managed when the aux pressure transducer is enabled into differential operation
+
+(C19=2))
+
+18
+
+POWER OFF
+
+In case of power off and compressor set as manual restart
+
+20
+
+TEMP. MOTORE
+
+PTC input open
+
+21
+
+INPUT POWER FAULT
+
+Safety pressure switch open (missing power to all digital inputs)
+
+22
+
+INPUT IN7
+
+Parameter C12 = 3 (generic alarm)
+
+25
+
+SEPARATOR FILTER
+
+Separator filter differential pressure switch open (IN6)
+
+ALARMS WITH COMPRESSOR SHUT-OFF AFTER 30 SECONDS UNLOAD RUNNING
+
+Code
+
+Description
+
+Cause
+
+26
+
+PRESS. TRANSD. FAILURE
+
+Working pressure transducer failure
+
+27
+
+AUX. TRANSD. FAILURE
+
+Aux. Pressure transducer failure
+
+Power supply to the controller lower than 9,5Vac and reset accepted when the
+
+28
+
+LOW VOLTAGE
+
+power goes over 10,6Vac.
+
+It is not visualized in case it has been disabled in menu 4 Compressor SETUP
+
+29
+
+SAFETY
+
+Timer CAF elapsed: this alarm is detected if the parameter Safety is set YES
+
+30
+
+HIGH TEMP. WARNING
+
+Air end temperature over set WT2. Reset once temperature is lower than WT2-5°C
+
+32
+
+CHECK COMPRESS.
+
+Timer C--h elapsed: reset the related maintenance timer
+
+33
+
+RS 485 FAILURE
+
+In case compressor start/stop is operated via RS232 and the watchdog function is enabled (see MODBUS protocol communication)
+
+60
+
+INVERTER FAILURE
+
+In case of inverter via RS485, shut off alarm detected (managed by inverter
+
+connected via RS485 only (DR0>0))
+
+62
+
+COMMUNICATION INVERTER No communication to inverter in case of connection via RS485 (managed by
+
+inverter vua RS485 only (DR0>0))
+
+NOTE: Every time a shut-off alarm is detected, both relay set as alarm led DL1 are activated; the alarm message is stored into the alarm list; once the cause of the alarm has been erased, push the button R to reset the message and start the compressor.
+
+Revision 1 ­ 04.12.2015
+
+21/28
+
+WARNINGS (VISUAL ALARMS)
+
+Code
+
+Description
+
+30 HIGH TEMPERATURE WARNING
+
+35 DATA LOST 36 AIR FILTER 37 MULTIUNIT FAILURE
+
+38 SEPARATOR FILTER
+
+39 LOW VOLTAGE 40 HIGH VOLTAGE 41 CLOCK FAILURE
+42 RS485 FAILURE 43 ORA LEGALE/SOLARE
+
+47* STARTS/HOUR
+
+61 ALLARME INVERTER
+
+Cause
+Air end temperature over set WT2. Reset while temperature below WT2-5°C Loading default data Air filter pressure switch closed (IN5) No communication or Master failure: each Slave works stand alone Delta P (internal pressure ­ working pressure) over warning set AP2 when the timer C19.1 is over and the air end temperature is over 45°C (alarm managed by aux pressure transducer set into differential operation (C19=1) Power supply to the controller lower than 11.6Vac and automatic reset when the voltage rise over 12Vac Power supply to the controller over 14.5Vac Try to switch off and switch on the controller: if the problem goes on contact the compressor manufacturer Master/slave communication is gone: auto reset while communication restart properly Automatic change DLS/Summer time Starts/hour over set on parameter "Starts/hour" (menu 4). The compressor will not stop and keep on running loading/unloading according the pressure till the end of one hour time from the first starting in the same hour Inverter failure detected in case of inverter connected vua RS485 (managed in case of inverter communication via RS485 enabled (DR0>0))
+
+NOTE: 
+
+
+In case of warning the relay set as alarm output is activated with intermittency further to led DL1; the alarm message is stored into the alarms list. When the message is visualized (in case it has not automatic reset), by pushing the button R you can reset the message.
+
+MESSAGES VISUALIZED INTO ALARM LIST ONLY
+
+Code
+
+Description
+
+Cause
+
+48 MAN RESTART
+
+Restart changed from automatic into manual
+
+49 AUTO RESTART
+
+Restart changed from manual into automatic
+
+MAINTENANCE MESSAGES
+
+Code
+
+Description
+
+50
+
+CHANGE AIR FILTER
+
+51
+
+CACHANGE OIL FILTER
+
+52
+
+CHANGE SEP. FILTER
+
+53
+
+CHANGE OIL
+
+54
+
+CHECK COMPRESS.
+
+55
+
+CONCHECK BEARINGS
+
+Timer CAF in menu 10 elapsed Timer COF in menu 10 elapsed Timer in menu 10 elapsed Timer C-- in menu 10 elapsed Timer C-h in menu 10 elapsed Timer C-BL in menu 10 elapsed
+
+Cause
+
+The message is shown with the symbol and related code. If you reset the alarm only, the icon remain in the left upper corner of the display until you reset the counter too.
+
+Revision 1 ­ 04.12.2015
+
+22/28
+
+HOW LOGIK 26-S CONTROLS THE COMPRESSOR Management of the compressor
+
+OFF
+
+Timer Wt5>0 I
+
+I
+
+0
+
+WAITING Wt5
+
+Timer Wt5=0
+
+MOTOR STARTS
+
+Press< P.Start
+
+IN SET
+
+Press<P.Start
+
+LOADING
+
+R
+
+Timer Wt5=0
+
+Timer UNLOAD FOR Wt4=0 SET REACHED
+
+0
+
+UNLOADING
+
+Press>P.Stop
+
+0 I
+
+SHUT OFF
+SHUT OFF ALARM
+
+The symbols into the above squares indicate the compressor status showed on the main visualization of the LCD. The back is grey while the symbol is blinking.
+Motor start When the motor is activated the icon is visualized on the part related to the pressures. Motor starts according the following procedure: 1. Line contactor and star contactor are activated for the time set on Wt1. 2. Star contactor deactivates and pause for the time set on Wt2. 3. Delta contactor activation. 4. Wait for time on Wt3, activation of load solenoid valve by exciting RL4.
+
+Safety time Wt5
+
+Pushing 0 the compressor stops according the following procedure: 1. If the compressor is loading it switches to unloading for the time set on Wt5; during timer in progress restart is
+accepted by the start button. 2. If the compressor is running unload and the value of Wt4 in progress is higher than Wt5 setting, the compressor stops
+while Wt4 will be over. 3. If the value of Wt4 in progress is lower than Wt5 setting, Wt5 goes counting and the compressor will stop once Wt5 is
+over. Once the compressor stops for reaching pressure set, the timer Wt5 starts: during that time if you push the start
+
+button, the display visualizes
+
+and the compressor will not start till the Wt5 counting is over.
+
+In case the compressor stops due to alarm detection, till timer Wt5 starts: during that time, if you rest the alarm and push
+
+the start button, the symbol
+
+start blinking and the compressor will not start till Wt5 counting is over.
+
+Stop the compressor through remote start/stop input - IN4 (status symbol ) When the input IN4 opens, the compressor stops according the following procedure: 1. If the compressor is loading, switch to unload running for the time set on Wt5 and the display visualizes the blinking
+
+symbol (instead of ); once the timer is over, if IN4 is still open the compressor stops and the symbol blinking. During Wt5 counting, if IN4 closes the compressor turns back under pressure transducer control. 2. Once Wt5 is over, if the compressor is running unload, it stops and the display visualizes . 3. If the compressor is in stand-by status due to pressure set reached, the display visualizes the symbol .
+
+stops
+
+Revision 1 ­ 04.12.2015
+
+23/28
+
+Solenoid valve operation (RL4)
+The symbol indicates the load solenoid valve is ON. The unload timer Wt4 can be managed according two different ways settable on C03. 1. Wt4 set as fixed timer: when the pressure reaches stop set, the load solenoid valve (RL4) switches OFF and the timer
+Wt4 starts; once the timer is over, if the pressure is not yet under the start pressure, the compressor stops. During that timer, if the pressure goes down the start set, the load solenoid valve (RL4) switches in ON and Wt4 erases. 2. Wt4 set as variable timer: at the first start the compressor follow the same cycle repoterd on point 1 above; during the next cycle the controller counts time the pressure spent to go from stop set to start set; if this time (tx), is bigger the Wt4 set, the next Wt4 timer will be shorter (1 minute less) and so on till a minimum time of 2 minutes. While tx will be lower than Wt4 changed, the unload time uploaded will be Wt4 set again. ATTENTION: on the contact of the solenoid valve relay is mounted an RC filter (22 F + 100 ) sized for a power of 4,7W; in case you use a solenoid valve with less power, if the solenoid valve keeps on exciting while the contact is open, you have to delete this filer by cutting the terminal of the resistor R11.
+Thermoregulation of the fan (default RL5) The symbol indicates the fan is on. While delta contactor is on:  air end temperature equal or higher than WT3 = fan ON  air end temperature lower than (WT3 - WT4) = fan OFF
+Operation of the condensate drain solenoid valve (default RL6) The symbol indicates the condensate drain is activated. During the operation of the load solenoid valve (RL4), the condensate drain solenoid valve (RL6) operates according the parameters Wt6 and Wt7; besides it is OFF while load solenoid valve is off too.
+Compressor status (settable on RL5, RL6 or RL7) When the compressor is ON the relay is activated, when the compressor is OFF because the pressure set is reached, the relay is OFF.
+Compressor start/stop under weekly timer control When the compressor is operated by weekly timer, during OFF time the display visualizes the symbol with day and time of the next ON; during the operation the same symbol is visualized on the top right corner of the display. When the compressor is in operation under timer control you can stop it by simply pushing the Stop button and you can restore it under timer control by pushing Start only. When the compressor is stopped by timer you can start it by keeping on pusher the Start button for 5 seconds and you can restore it under timer control by pushing the Stop button only.
+
+Revision 1 ­ 04.12.2015
+
+24/28
+
+INVERTER OPERATION
+INVERTER CONTROLLED VIA ANALOG OUTPUT 4/20mA
+In case output 4/20mA is activated, parameter C18, the display visualizes the symbol . It is visualized below pressure or temperature area according parameter C18 is set 1 (regulation on working pressure) or 2 (regulation air end temperature).
+Output 4/20mA ha sto be connected to the speed analog reference on the inverter.
+In case of inverter air end motor, C18=1, the starting procedure change for the reason the sequence start/delta is not in: relay RL2 is activated directl (and function air end motor activated), wait for time Wt3 (load time) and then RL4 is activated (load solenoid valve). Activation steps for star and star/delta are by passed. In this configuration RL3 is always de-energized.
+Inverter run command can be got from the output PNP1. In case you need to give to the inverter a digital input to force a pre-fixed frequency while the compressori s running unload, you can use the output PNP2.
+For run command you can use also relay outputs RL2,RL5, RL6 or RL7, eventually through external relays. These outputs have to be set through the parameters C13, C14, C15 and C16 (value 5 in case of C18=1 and value 1 in case of C18=2).
+Make reference to the PID operating drawing reported in the menu of the programming (see ANALOG OUTPUT) for the calculation made by the controller.
+INVERTER CONTROLLED VIA RS485
+Through RS485 MODBUS interface the controller starts and stops the inverter.
+When the compressor is loading the inverter PID is enabled: pressure setpoint and feedback come through MODBUS. When the compressor is running unload the controller forces a constant frequency equal to the minimum frequency of the range provided for the motor.
+The controller can reset possible failures or alarms from the inverter through MODBUS interface.
+The controller provides the user with some working data from inverter as frequency, power, current, voltage and IGBT temperature and in case of failure or warnings the alarm/fault message and code.
+For the operation functions the controller read also the working frequency range from the inverter.
+Even in this case the start motor cycle bypass start and star/delta steps.
+
+Revision 1 ­ 04.12.2015
+
+25/28
+
+MASTER/SLAVE OPERATION
+The two compressors must be connected through serial connection RS232 BASE (crossing RX and TX) with length cable no longer than 10 m (for longer distance use interface RS 232/485).
+Set C07 as 1 (2 in case of protocol Master/Slave new allowing to connect two inverter machines). In the same menu set the time to switch Master into Slave (parameter C07.1) and the timer Slave comes into force in case Master is not enough at the first staring (parameter C07.2).
+Pushing I on one of the 2 compressors to put into operation both units. During power up you have to wait for 5 seconds before the connection between the two compressors start. Pushing 0 on one of the 2 compressors to switch OFF both units. In case IN4 opens on one of the two compressors, it stops both machines.
+In case one of the parameters WP2÷WP5 is changed on one of the two compressors, all these parameters are copied on the other compressor. Parameters are: date and time, Restart (automatic or manual), weekly timer and DLS/Summer time.
+The Slave compressor starts only if: 1. during the first starting by button or timer, Master has not reached the stop pressure until the setting time; 2. the pressure decrease below set on WP5.
+The change Master into Slave comes: 1. when the Timer Master/Slave is over (working hours); 2. in case of Master shut-off; 3. in case one of the 2 compressors has more working hours than the time set on le the parameter Timer Master/Slave (working hours), the second compressor keep on working till to reach the same working hours of the other + the hours set on Timer Master/Slave. Only after this time the Master will change into Slave and the Slave into Master.
+NOTE: in case of maintenance on one of the two compressors, before to stop it you have to set both units as stand alone working; after maintenance only you can restore the Master/Slave operation. In case of serial connection failure, both compressors will be Master.
+MASTER/SLAVE INVERTER (ONLY FOR LOGIK26S, LOGIK33S)
+In case the controller connected to Master/Slave are Logik26S or Logik26S + Logik33S it is possible to set the parameter master/slave (C07 on Logik26S) as 2 on both unit. In this case the system take into consideration that both machines have a variable air flow. In case of different nominal air flows one compressor becomes master if: a) both units are loading and the total air flow is higher than the flow of the actual master machine but lower than the slave flow (condition valid for 60 seconds), after next 60 seconds the compressor become slave switch to unload running if this conditions keeps on going; b) the average flow in the last 10 minutes is lower than half of the flow of the actual master but lower than the flow slave and higher than half of the slave (it means the new master has a better flow while an oversize compressor is running in relation to the air demand). Besides it is possible to set the parameter C07.4, Inverter Twin, so that both compressors modulate the speed according the pressure. On different case the master unit works 100% and slave modulate.
+MULTIUNIT OPERATION
+Connect the compressor to the net RS485 with other machines and master unit (one controller for compressor Logik3xS oor one controller for compressors room management Logik200) .
+You have to set: 1. The parameter C07=3 2. Compressor MODBUS addrress C08: value different from 1 reserved to the Master Multiunit 3. Compressor air flow
+Pushing I on one of the Multiunit compressors, all the units are ON. Pushing 0 on one of the Multiunit compressors, all the compressors are OFF. For the Multiunit operation, see related document.
+In case of maintenance on the compressor, you can set parameter C07.3=YES to shift to manual operation (start/stop). Master is automatically informed and consider this compressor out of order.
+
+Revision 1 ­ 04.12.2015
+
+26/28
+
+WARRANTY TERMS
+24 (twenty-four) months from the production date printed on the label of the serial number.
+Temperature probe is not included in the warranty terms.
+Both working and technical features of the controller must be fully respected: the warranty declines if the controller has been opened or repaired by unauthorized personnel. Operation or modification different from the original, wrong electrical wiring or bad assembling can be cause of failures or malfunctioning of the controller; in these cases both warranty and own technical features of the controller declines.
+Technical features, drawings and any other document in this manual are property of Logika Control that forbid any reproduction, even partial, of text and illustrations.
+On its unquestionable judgement, Logika Control reserves the authority to modify the product to improve operation and performance, besides to the right to withdraw the product from the production, in any time and without notice.
+REVISION INDEX Revision 0 = Issue
+
+Revision 1 ­ 04.12.2015
+
+27/28
+
+Revision 1 ­ 04.12.2015
+
+28/28
+
+

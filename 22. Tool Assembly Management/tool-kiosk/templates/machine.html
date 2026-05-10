@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ machine_id }} Pockets{% endblock %}
+
+{% block content %}
+<h2 class="page-heading">{{ machines[machine_id].name if machine_id in machines else machine_id }} — Pocket Map</h2>
+
+<div id="pocket-table-area">
+    <table class="items-table" id="pocket-table">
+        <thead>
+            <tr>
+                <th>Pocket</th>
+                <th>Holder</th>
+                <th>Tool #</th>
+                <th>Description</th>
+                <th>OOH</th>
+                <th>RTA</th>
+            </tr>
+        </thead>
+        <tbody id="pocket-tbody">
+            <tr><td colspan="6" class="loading">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="page-actions">
+    <button class="btn btn-primary" onclick="syncPockets()">Sync All to ProShop</button>
+    <a href="/" class="btn btn-back">Back to Kiosk</a>
+</div>
+
+<script>
+var MACHINE_ID = {{ machine_id | tojson }};
+
+function loadPockets() {
+    apiFetch('/api/machines/' + MACHINE_ID + '/pockets').then(function(pockets) {
+        var tbody = document.getElementById('pocket-tbody');
+        if (!pockets.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">No tools loaded</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        pockets.forEach(function(p) {
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td><strong>T' + p.pocket_number + '</strong></td>' +
+                '<td>' + (p.holder_id || '-') + '</td>' +
+                '<td>' + (p.proshop_tool_number || '-') + '</td>' +
+                '<td>' + (p.tool_description || '-') + '</td>' +
+                '<td>' + (p.ooh_inches ? p.ooh_inches.toFixed(3) + '"' : '-') + '</td>' +
+                '<td>' + (p.rta_number || '-') + '</td>';
+            tbody.appendChild(tr);
+        });
+    });
+}
+
+function syncPockets() {
+    apiFetch('/api/machines/' + MACHINE_ID + '/sync-pockets', { method: 'POST' })
+        .then(function(result) {
+            var ok = result.results.filter(function(r) { return r.synced; }).length;
+            var fail = result.results.length - ok;
+            showToast(ok + ' pockets synced' + (fail ? ', ' + fail + ' failed' : ''), fail ? 'warning' : 'success');
+        });
+}
+
+loadPockets();
+</script>
+{% endblock %}

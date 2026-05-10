@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Browse - COTS Crib{% endblock %}
+{% block nav_browse %}nav-active{% endblock %}
+
+{% block content %}
+<div class="browse-container">
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search by name, type, location..."
+               class="search-input" autocomplete="off">
+        <button class="btn btn-primary" onclick="doSearch()">Search</button>
+    </div>
+
+    <div id="results-count" class="results-count"></div>
+
+    <div style="overflow-x:auto">
+        <table class="items-table" id="items-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Qty</th>
+                    <th>Min</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody id="items-tbody">
+                <tr><td colspan="7" class="loading">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+</div>
+
+<!-- Detail Modal -->
+<div id="detail-modal" class="modal hidden" onclick="if(event.target===this)closeModal()">
+    <div class="modal-content">
+        <h2 id="modal-title"></h2>
+        <div id="modal-body"></div>
+        <div class="modal-actions">
+            <a id="modal-edit-link" class="btn btn-secondary" href="#">Edit</a>
+            <button class="btn btn-back" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/browse.js?v=20260501-livesearch"></script>
+{% endblock %}

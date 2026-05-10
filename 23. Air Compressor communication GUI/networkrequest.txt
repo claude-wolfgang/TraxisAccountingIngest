@@ -1,0 +1,44 @@
+C:\Users\Superuser>arp -a
+
+Interface: 10.1.1.35 --- 0x6
+  Internet Address      Physical Address      Type
+  10.1.1.1              f4-f5-e8-91-45-74     dynamic
+  10.1.1.13             00-22-4d-d6-45-df     dynamic
+  10.1.1.70             00-23-24-c3-07-e5     dynamic
+  10.1.1.76             ec-71-db-df-e1-33     dynamic
+  10.1.1.100            30-c9-ab-a9-fc-a9     dynamic
+  10.1.1.139            e4-54-e8-51-42-04     dynamic
+  10.1.1.156            b0-c0-90-c8-36-ce     dynamic
+  10.1.1.159            00-e0-e4-3b-f8-6d     dynamic
+  10.1.1.176            e4-54-e8-67-5a-b1     dynamic
+  10.1.1.178            64-00-6a-4e-f8-e4     dynamic
+  10.1.1.190            e4-54-e8-67-be-a1     dynamic
+  10.1.1.197            48-a2-e6-88-72-57     dynamic
+  10.1.1.200            d8-61-62-50-82-7c     dynamic
+  10.1.1.202            00-e0-e4-5c-d8-3e     dynamic
+  10.1.1.214            e4-54-e8-67-c6-bd     dynamic
+  10.1.1.220            e4-54-e8-68-12-86     dynamic
+  10.1.1.228            e4-54-e8-67-57-2f     dynamic
+  10.1.1.242            18-66-da-16-2b-b3     dynamic
+  10.1.1.253            6c-2b-59-d7-89-4b     dynamic
+  10.1.1.255            ff-ff-ff-ff-ff-ff     static
+  192.168.1.1           10-da-43-b5-0b-bc     dynamic
+  224.0.0.2             01-00-5e-00-00-02     static
+  224.0.0.22            01-00-5e-00-00-16     static
+  224.0.0.251           01-00-5e-00-00-fb     static
+  224.0.0.252           01-00-5e-00-00-fc     static
+  239.255.255.250       01-00-5e-7f-ff-fa     static
+  255.255.255.255       ff-ff-ff-ff-ff-ff     static
+
+Interface: 169.254.175.199 --- 0x7
+  Internet Address      Physical Address      Type
+  169.254.255.255       ff-ff-ff-ff-ff-ff     static
+  224.0.0.2             01-00-5e-00-00-02     static
+  224.0.0.22            01-00-5e-00-00-16     static
+  224.0.0.251           01-00-5e-00-00-fb     static
+  224.0.0.252           01-00-5e-00-00-fc     static
+  239.255.255.250       01-00-5e-7f-ff-fa     static
+  255.255.255.255       ff-ff-ff-ff-ff-ff     static
+
+C:\Users\Superuser>
+

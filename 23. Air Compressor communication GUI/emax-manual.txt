@@ -1,0 +1,1343 @@
+
+===== PAGE 1 =====
+EMAX Rotary Screw Compressors
+1
+
+===== PAGE 2 =====
+Operating Instructions
+Contents
+Variable Speed Drive Information ...................2 Clock T imer Settings .............................. 14
+Model Specification Charts ..........................3-4 Working Timer – Unloading Delay .........15
+Safety Information ........................................ ....4 Maintenance Notifications .....................16
+Tag Definitions .........................................4 Resetting Maintenance Alarms ......... 16-19
+Basic Guidelines ..................................... 5 Mechanical Components.................20-25
+Breathable Air .........................................5 Resetting Overload Protection ............... 21
+Pressurized Components ........................ 5 Operation .......................................................25
+Personal Protective Equipment ................ 5 Safety Rules.....................................25-26
+Inspection ........................................................6 Initial Checks ........................................ 26
+Forklift Safety..........................................6 Start-Up ...............................................27
+Lifting Safety ........................................... 6 Power Outages ...................................... 27
+Installation .......................................................7 Storage ................................................28
+Area......................................................7 Restarting Procedure ............................28
+Piping ..................................................... 7 Maintenance ..................................................28
+Safety Steps............................................ 7 Safety Steps ..................................28-29
+Installing................................................. 8 Lubricating Oil .......................................29
+Oil Check ................................................9 Changing Oil .........................................29
+Electrical Installation ..............................9 Oil Capacities ........................................30
+Motor Rotation......................................10 Belts .....................................................30
+System Description ........................................11 System Pressure ...................................31
+Air Process ............................................ 11 Safety V alve ........................................... 31
+Lubrication Process ..............................11 Air/Oil Separator Filter ........................... 31
+System Components ..................................... 11 OPTIONAL: Cabinet Intake Filter(s) ...... 31
+PLC (Programmable Logistical Control) 11 Maintenance Schedule ................................. 32
+Maintenance Notifications....................11 Troubleshooting .......................................33-37
+Setting:oC/oF;BAR/PSI;Lang;Time/Date12 Wiring Diagrams ............................................38
+Working Pressures .................................13 Warranty ......................................................... 42
+Variable Speed Drive
+The variable speed drive is an auxiliary feature available on all EMAX compressors. A variable speed drive or VSD
+regulates amp draw during start-up and motor speed during operation according to air demand.
+All EMAX compressors are equipped with a VSD compliant motor ventilated electrical box & adequate space in
+compressor cabinet for easy installation. The electronic controller (PLC) for the compressor unit provides start/stop
+command and display fault status for the VSD device.
+NOTICE
+• Be sure to install VSD in a clean, dustfree
+e nvironment.
+• To convert to variable speed drive, contact EMAX
+customer service for more information,
+1 -877-283-7614
+2
+
+===== PAGE 3 =====
+EMAX Rotary Screw Compressors
+EMAX Electric Operated, Two-Stage, 5-10 Hp Piston Air Compressors
+Model No. ERS0070001 ERS0100001 ERS0070003 ERS0100003 ERS0150003 ERS0200003
+Single Phase Single Phase Three Phase Three Phase Three Phase Three Phase
+Description
+Dual Voltage Dual Voltage Dual Voltage Dual Voltage Dual Voltage
+Motor 7.5HP 10HP 7.5HP 10HP 15HP 20HP
+32 40 230V: 18 230V: 24 230V: 36 230V: 24
+Amp Draw
+460V: 9 460V: 12 460V: 18 460V: 18
+RPM 1750 1750 1750 1750 1750 1750
+Voltage 208/230 208/230 208/230/460/575 208/230/460/575 208/230/460/575 208/230/460/575
+SCFM @ 100 PSI 29 45 29 45 62 85
+Start Type Magnetic Starter Magnetic Starter Y-Delta & VSD Y-Delta & VSD Y-Delta & VSD Y-Delta & VSD
+Drive Type Belt Belt Belt Belt Belt Belt
+Air End Model B40 B40 B40 B40 B60 B60
+Noise DB(a) 62 64 62 64 67 85
+Outlet Size NPT 3/4” NPT 3/4” NPT 3/4” NPT 3/4” NPT 1” NPT 1”
+Oil Capacity 1-1/3gal. (3.8 L) 1-1/3 gal. (3.8 L) 1-1/3gal. (3.8 L) 1-1/3 gal. (3.8 L) 1-1/2 gal (6 L) 1-1/2 gal (6 L)
+L•W•H
+Dimensions 26”x34”x43” 26”x34”x43” 26”x34”x43” 34”x24”x43” 32”x37”x50” 32”x37”x50”
+(inches)
+Weight (lbs.) 562 562 562 562 788 804
+EMAX Rotary Screw Systems: 25 Hp - 60 Hp (VSD Compliant)
+Model No. ERS0250003 ERS0300003 ERS0400003 ERS0500003 ERS0600003
+Three Phase Three Phase Three Phase Three Phase Three Phase
+Description
+Dual Voltage Dual Voltage Dual Voltage Dual Voltage Dual Voltage
+Motor 25HP 30HP 40HP 50HP 60HP
+230V: 60 230V: 72 230V: 96 230V: 120 230V: 144
+Amp Draw
+460V: 30 460V: 36 460V: 48 460V: 60 460V: 72
+RPM 1750 1750 1750 1750 1750
+Voltage 208/230/460/575 208/230/460/575 208/230/460/575 208/230/460/575 208/230/460/575
+SCFM @ 100 PSI 108 129 188 235 261
+Start Type Y-Delta & VSD Y-Delta & VSD Y-Delta & VSD Y-Delta & VSD Y-Delta & VSD
+Drive Type Belt Belt Belt Belt Belt
+Air End Model B101 B101 CA116D B170 B170
+Noise DB(a) 73 75 79 79 81
+Outlet Size NPT 1” NPT 1” NPT 1-1/4” NPT 1-1/4” NPT 1-1/4”
+Oil Capacity 3 gal. (9.5 L) 3 gal. (9.5 L) 5-1/2 gal. (11.4 L) 5-1/2 gal. (15.1 L) 5-1/2 gal. (15.1 L)
+L•W•H
+Dimensions 40”x38”x57” 40”x38”x57” 53”x55”x66” 53”x55”x66” 53”x55”x66”
+(inches)
+Weight (lbs.) 1205 1205 2120 2120 2120
+3
+
+===== PAGE 4 =====
+Operating Instructions
+EMAX Rotary Screw Systems: 75 Hp - 200 Hp (VSD Compliant)
+Model No. ERS0750003 ERS1000003 ERS1250003 ERS1500003 ERS1750003 ERS2000003
+Three Phase Three Phase Three Phase Three Phase Three Phase Three Phase
+Description
+Dual Voltage Dual Voltage Dual Voltage Dual Voltage Dual Voltage Dual Voltage
+Motor 75HP 100HP 125HP 150HP 175HP 200HP
+230V:180 230V:240 230V: 300 230V: 360 230V: 420 230V: 480
+Amp Draw
+460V: 90 460V: 120 460V: 150 460V: 180 460V: 210 460V: 240
+RPM 1750 1750 1750 1750 1750 1750
+Voltage 208/230/460 208/230/460 208/230/460 208/230/460 208/230/460 208/230/460
+SCFM @ 100 PSI 353 424 570 706 812 883
+Start Type Y-Delta & VSD Y-Delta & VSD Y-Delta & VSD Y-Delta & VSD Y-Delta & VSD Y-Delta & VSD
+Drive Type Direct Drive Direct Drive Direct Drive Direct Drive Direct Drive Direct Drive
+Air End Model E25G E25G AA-1030R E75G E75G E75G
+Noise DB(a) 78 80 83 83 87 87
+Outlet Size NPT 2” NPT 2” NPT 3” NPT 3” NPT 3-1/2” NPT 3-1/2”
+Oil Capacity 8 gal. (30 L) 8 gal. (30 L) 18 gal. (70 L) 18 gal. (70 L) 21 gal. (80 L) 21 gal. (80 L)
+L•W•H
+Dimensions (inches) 56”x85”x72” 56”x85”x72” 63”x104”x75” 63”x104”x75” 68”x105”x78” 68”x105”x78”
+Weight (lbs.) 3496 3496 5806 5806 6538 6538
+Safety
+This manual contains very important information on SAFETY and how to PREVENT EQUIPMENT PROBLEMS. The
+following will help in understanding this information:
+DANGER indicates an imminently hazardous situation which, if not avoided, will result
+DANGER
+in death or serious injury.
+WARNING indicates a potentially hazardous situation which, if not avoided, could
+WARNING
+result in death or serious injury.
+CAUTION indicates a potentially hazardous situation, which if not avoided, may
+CAUTION
+result in minor or moderate injury.
+NOTICE indicates important information that if not followed, may cause damage to
+NOTICE
+equipment.
+Read all manuals included with this product carefully. Be thoroughly
+familiar with the controls and the proper use of the equipment.
+4
+
+===== PAGE 5 =====
+EMAX Rotary Screw Compressors
+Basic Guidelines
+CALIFORNIA PROPOSITION 65
+This product or its power cord may contain chemicals known to the State
+WARNING of California to cause cancer and birth defects or other reproductive harm.
+Wash hands after handling.
+1. Allow only trained, authorized persons who have read and understood these operating instructions to use
+this compressor. Failure to follow the instructions, procedures and safety precautions in this manual can
+result in accidents and injuries.
+2. NEVER start or operate the compressor under unsafe conditions. Tag the compressor, disconnect and
+lock-out all power to it to prevent accidental start-up until the condition is corrected.
+3. Install, use and operate the compressor only in full compliance with all pertinent OSHA regulations and all
+applicable Federal, State & Local Codes, standards and regulations.
+4. NEVER modify the compressor and/or controls in any way.
+5. Keep a first aid kit in a convenient place. Seek medical assistance promptly in case of injury. Avoid infection
+by caring for any small cuts and burns promptly.
+Breathable Air
+1. NEVER use air from this compressor for breathable air except in full compliance with OSHA
+Standards 29 CFR 1910 and any other Federal, State or Local codes or regulations.
+Death or serious injury can result from inhaling compressed air
+without using proper safety equipment. See OSHA standards on safety
+equipment.
+DANGER
+2. DO NOT use air line anti-icer systems in air lines supplying respirators or other equipment used to
+produce breathable air. DO NOT discharge air from these systems in unventilated or other confined
+areas.
+Pressurized Components
+This equipment is supplied with a pressure vessel protected by a relief valve. DO NOT attempt to open valve while
+the machine is under pressure.
+Personal Protective Equipment
+Be sure all operators and others around the compressor and its controls comply with all applicable OSHA, Federal,
+State and Local regulations, codes and standards relating to personal protective equipment. This includes respiratory
+protective equipment, protection for the extremities, protective clothing, protective shields and barriers, electrical
+protective equipment, and personal hearing equipment.
+5
+
+===== PAGE 6 =====
+Operating Instructions
+Inspection
+Prior to using the compressor, check for external damage that might have occurred during transit.
+Make sure pallet-mounted compressors are firmly secured to the
+WARNING pallet before moving. NEVER attempt to move a compressor that is
+not secure as serious injury or property damage could occur.
+A forklift may be necessary for unloading the EMAX compressor. and requires a certified forklift operator, using all
+forklift safety measures. Refer to figure 1 for safe unloading procedures.
+Forklift Safety
+1. Be sure load is secure and well balanced before moving
+compressor.
+2. Make sure forks are fully engaged and tipped back before
+lifting or moving compressor.
+3. Keep load as low as possible and observe safe operating
+practices.
+Lifting Safety
+1. Carefully inspect all lifting equipment and make sure it is in good
+condition. Rated capacity should exceed compressor weight. the
+lifting hook has a functional safety latch or equivalent and is
+properly attached to lifting feature.
+2. Make sure lifting points are in good condition and tighten any loose
+nuts or bolts before lifting.
+3. Use provided lifting feature or appropriate sling. A sling must be
+used when moving compressor with a helicopter or other air borne
+equipment. Be sure to follow OSHA standards 29 CFR 1910
+Subpart N.
+4. Use guide ropes or equivalent to prevent twisting or swinging of the compressor while it is in the air and
+NEVER attempt to lift in high winds. Keep compressor as low to the ground as possible.
+5. Keep persons away and make sure no one is under the compressor while it is lifted.
+6. Only use lifting features provided for entire compressor package. NEVER use bolts or other hooks on
+invididual components to move the compressor.
+7. Put compressor on level surface that can support the weight of the compressor and loading equipment.
+Do not operate unit if damaged during shipping, handling or use.
+WARNING
+Bursting may result, causing injury or property damage.
+Remove shipping brackets from each corner of mounting base before
+NOTICE
+operating compressor. Refer to Figure 2.
+6
+
+===== PAGE 7 =====
+EMAX Rotary Screw Compressors
+Installation
+Area
+Exhaust air from this unit can be used to supplement environment heat. Install unit in separate room then create duct
+system as shown in figure 3.
+1. Install compressor in a clean, well ventilated and well lit area. Make sure air inlet is away from exhaust fumes
+or other toxic, noxious or corrosive fumes or substances. Installation area must maintain low relative
+humidity and a temperature range between 35o – 110 o F (2o – 43 o C). This unit must be kept under roof
+and away from rain, snow, etc.
+In environments where fine dust is common, such as granite or concrete
+NOTICE plants, the compressor MUST be installed in a separate area
+with dedicated ventilation. Failure to provide dust free operating area
+voids the warranty.
+2. Clearances around compressor. At least:
+• 24 inches sides and back
+• 3 feet in front of compressor.
+NOTICE
+This compressor unit is equipped with internal
+rubber vibration isolators. To avoid internal pump
+damage, DO NOT use an additional rubber
+mounting surface when installing compressor.
+3. Make sure compressor base is on a hard, flat surface
+and anchored securely.
+4. If installation is above the first story of a building, use
+appropriate vibration insulation.
+NOTICE
+Tank Sizing Guideline: Tank capacity must be
+at least 1.2 gallons (5.3 L.) for every CFM of air
+produced by compressor. This eliminates wear on
+internal pump parts.
+Piping
+Safety Steps
+1. Install appropriate flow-limiting valves as necessary, according to pipe size(s) and run lengths. This reduces
+pressure in case of hose failure, per OSHA Standard 29 CFR 1926.302(b)(7).
+2. Flow-limiting valves are listed by pipe size and rated CFM. Select appropriate valves accordingly, in accordance
+with the manufacturer’s recommendations.
+3. Do not install check valve as compressor has internal check valve.
+7
+
+===== PAGE 8 =====
+Operating Instructions
+Installing
+1. Install piping as shown in Figure 4. Refer to Figure 5 for recommended, closed loop installation.
+2. Make sure any tube, pipe or hose connected to the unit can withstand operating temperatures and retain
+pressure.
+Never use plastic (PVC) pipe for compressed air. Serious injury or
+WARNING
+death could result.
+Minimum Pipe Size For Compressed Air Lines
+(Pipe size shown in inches)
+SCFM 25 ft. 50 ft. 100 ft. 250 ft.
+20 3/4 3/4 3/4 1
+40 3/4 1 1 1
+60 3/4 1 1 1
+100 1 1 1 1-1/4
+125 1-1/4 1-1/4 1-1/2 1-1/2
+150 1-1/2 2 2 2
+200 2 2 2 2
+3. Install appropriate ASME code safety valves and adequate condensate drains on piping system.
+4. Never use reducers in discharge piping. Keep all piping and fittings the same size in the piping system to
+help prevent pressure drops
+8
+
+===== PAGE 9 =====
+EMAX Rotary Screw Compressors
+5. For permanent installations of compressed air systems, determine total length of system and select correct
+pipe size. Bury underground lines below frost line and avoid areas where condensation could build-up and
+freeze.
+6. Test entire piping system before underground lines are buried, and find and repair all leaks before using
+compressor.
+Oil Check
+This unit is shipped with oil in it and ready to operate. Check for proper oil level before operating the compressor.
+Compressor must be off at least 45 min. - 1 hr. before checking to ensure accurate reading. Refer to figure 6.
+Oil Capacities:
+7.5 – 10 HP – 5 liters (1-1/3 gal)
+CNAOUTITCIOEN
+15 – 20 HP – 6 liters (1-1/2 gal)
+DO NOT OVERFILL. Residual oil may still be in the
+25 – 30 HP – 11 liters (3 gal)
+compressor. The above capacities can be used for
+40 – 60 HP – 20 liters (5-1/2 gal) guidelines, but use the upper arrow fill line on the
+sight glass (See page 7). Over filling causes oil to
+75 – 100 HP – 30 liters (8 gal)
+blowout the inlet valve and through the air filter, also
+125 – 150 HP – 70 liters (18 gal) oil could push past the separation system resulting
+175 – 200 HP – 80 liters (21 gal) in oil in the air lines.
+NOTICE
+Use only genuine Airbase Industries Rotary
+Screw Oil, SKU OIL003. For food manufacturing
+applications, use Airbase Industries Rotary Screw
+Oil SKU OIL001. Use of any other product may
+cause product damage and void the warranty. Refer
+to warranty statement for oil requirements.
+Electrical Installation
+TO PREVENT DEATH OR SERIOUS INJURY, ONLY TRAINED AND
+AUTHORIZED PERSONNEL SHOULD INSTALL AND MAINTAIN THIS
+COMPRESSOR IN ACCORDANCE WITH ALL APPLICABLE FEDERAL,
+STATE AND LOCAL CODES, STANDARDS AND REGULATIONS.
+FOLLOW ALL NEC (National Electric Code) STANDARDS ESPECIALLY
+THOSE CONCERNING EQUIPMENT GROUNDING CONDUCTORS.
+DANGER
+9
+
+===== PAGE 10 =====
+Operating Instructions
+1. Follow all NEC and local codes for electrical wiring.
+Allow only authorized EMAX service person or Wiring for Variable Speed Drive or typical Wye-
+certified electrician to install electrical components. Delta Start. See page 1 for advantages of VSD.
+2. Put unit on dedicated circuit and make sure no
+other electrical equipment is wired into it.
+Failure to wire unit on independent circuit
+can cause circuit overload and/or imbalance in motor
+phasing. Install proper No Fuse Breaker (NFB)
+according to kW output of compressor.
+3. Ensure incoming service has adequate ampere
+rating.
+4. Ensure supply line has the same electrical
+characteristics (voltage, cycles and phase) as the
+machine.
+5. Refer to amp load information on motor tag and
+use correctly sized wiring. Be sure to consider
+distance between power supply and machine.
+6. Install surge protection device between power supply
+and compressor electrical cabinet.
+7. Make sure to install properly sized breakers and
+fuses.
+8. The unit must be properly grounded. DO NOT
+connect ground wire to air or cooling lines. Connect
+ground wire to grounding lug in the compressor
+electrical cabinet.
+IMPROPERLY GROUNDED ELECTRICAL COMPONENTS ARE SHOCK
+HAZARDS. MAKE SURE ALL THE COMPONENTS ARE PROPERLY
+GROUNDED TO PREVENT DEATH OR SERIOUS INJURY.
+DANGER
+Motor Rotation
+After electrical installation is complete, check the direction of the motor rotation.
+1. Lightly push START and STOP buttons on the instrument panel. View unit while facing the drive pulleys
+(from the back). Check directional arrows on air end of pump
+2. If motor shaft is not turning counterclockwise, disconnect power to terminal block then exchange any two
+of the three power leads. Re-check rotation.
+10
+
+===== PAGE 11 =====
+EMAX Rotary Screw Compressors
+System Description
+The EMAX compressor is highly efficient and provides reliable performance with low wear parts, low vibration and
+quiet operation. An electric motor, which is controlled by a Programmable Logistical Controller (PLC), runs the
+compressor and is actuated with a belt drive system. The belt drive system utilizes pulleys to connect the motor to the
+main rotor shaft, or a direct-drive coupling system.
+Air Process
+Air enters the system through the suction valve which has an air/suction filter to remove dust. The air is mixed with
+the lubricating oil and flows into the air/oil separator tank. It passes through an air/oil separator filter then through a
+minimum pressure check valve. Air then passes through an air cooled after cooler then into storage tank.
+Lubrication Process
+Pressure in the oil/air separator presses lubricating oil into the oil cooler. The oil is cooled and filtered then divided
+into two parts. One part is injected into the compression chamber from the lower end of the rotary compressor body
+to cool the compressed air. The other part passes through the two ends of the compressor body and is used to
+lubricate internal roller bearings of rotary compressor pump and gear drive. The two parts meet at the bottom of the
+compression chamber and are drained out with the compressed air.
+System Components
+PLC (Programmable Logistical Controller)
+The PLC is the compressor controller and has a display screen for system information. The electric circuitry of the
+PLC can be divided into two systems. One is for the starting panel to configure Y Delta starting. The other is for
+internal computer controls and is explained in more detail in the PLC manual. If there is any failure, contact EMAX
+service department. Refer to figure 8 for explanation of buttons.
+Maintenance Notifications
+Six automatic maintenance notifications are built into the EMAX compressor system designed to signify when
+maintenance is due for certain components. The user is notified by a message displayed on the control panel. Refer
+to the following chart for the components that have automatic maintenance notifications and their factory set lifetimes.
+1. ON Button: Press to start compressor
+2. OFF Button: Press to stop compressor
+3. Emergency Stop: Use only for emergency to stop
+compressor immediately! Use normal stop at all other
+times.
+4. Enter/Confirm Button: Press to enter a changed
+setting or to confirm a menu selection.
+5. Down Button: Press to scroll down through menus
+while changing settings or menu selections.
+6. Up Button: Press up to scroll through menus while
+changing settings or menu selections.
+Factory Set Passwords: Level 1 = 22
+Level 2 = 4444
+Level 3 = 666666
+11
+
+===== PAGE 12 =====
+Operating Instructions
+Setting:oC/ oF; BAR/PSI; Language; Time/Date
+2 Press the Up arrow for setting temperature
+1 scale, gauge pressure, language, time &
+Main screen starting point.
+date.
+3 Press the Enter button to see the current 4 Now the current flashing gauge pressure
+setting, BAR (metric) or PSI (Am. Std)
+flashing temperatures scale, oC (Celcius) or
+shows in display. Use the Up & Down
+oF (Fahrenheit). Use the Up & Down arrows
+arrows to change, if desired, and then press
+to change, if desired, and then press Enter
+Enter to set the value.
+to set the value.
+12
+
+===== PAGE 13 =====
+EMAX Rotary Screw Compressors
+5 The current language setting now shows in 6 The current date, day of week and time
+the display. Use the Up & Down arrows to now shows in the display. Starting with the
+change to the desired language and then flashing date, use the Up & Down Arrows
+press Enter. to change the setting and then press
+Enter. Now the next parameter flashes
+and it can be changed. The day of the
+week is shown by Day 1=Monday, Day
+2=Tuesday, etc. The current time can be
+set; hours:minutes, 24 hour time. Once set,
+press the Enter button to return to the main
+screen.
+Working Pressures
+These pressures settings are the compressor’s operating pressure settings, Top Range Transducer, High Pressure
+Alarm, Stop Pressure, etc. (See chart on page 17 of PLC manual.)
+2 Press the two arrow keys at the same time to
+1 To access these settings, start with the bring up the Password Level Selection- Press
+main screen shown below. down arrow 2 times to select Level 3 then
+press enter.
+13
+
+===== PAGE 14 =====
+Operating Instructions
+Enter in the 6 Digit Password 6 6 6 6 6 6, by
+3
+using the Up Arrow to set the digit to 6 then
+press Enter to move to the next digit, and press
+the Up Arrow to set to 6, repeat until last digit is
+set to 6, then press Enter.
+Arrow down to 0)WORKING PRESSURES
+4
+Press both Up & Down Arrows
+and press Enter.
+NOTICE again if the wrong password is
+entered.
+WP1 (Top Range Transducer pressure) shows
+5 Press Down Arrow to see and/or change
+in the display. Press Enter and the pressure 6
+the other pressure settings. Once satisfied
+setting flashes and can be changed by using
+with all settings, press Down Arrow until
+the Up & Down Arrows. Press Enter again to
+you are back to the Main Screen.
+confirm the setting.
+Clock Timer Settings
+This feature allows the operator to set the start and stop times (in 24 hour time) of the compressor, every day of the
+week.
+Up to 3 time slots can be programmed per day.
+Example:
+Day 1 (Monday)
+1 – ON 07:30 – OFF 12:30
+2 – ON 13:30 – OFF 17:30
+3 – ON 18:30 – OFF 23:30
+Once Day 1 is set, Day 2 through Day 7 can be programmed. (See page 17 of the PLC manual for more details.)
+14
+
+===== PAGE 15 =====
+EMAX Rotary Screw Compressors
+Working Timer - Unloading Delay
+To reduce wear & tear of the compressor components, an unloading delay time is set in the controls that shuts-down
+the compressor after the unloading delay time has counted down.
+If the compressor is running in slow periods of the day, the compressor could run for long periods in the unloading
+stage, causing unnecessary component wear and elevated energy costs.
+With an unload delay time of 10 minutes, for example, the compressor would run for 10 minutes in the unloading
+stage and then it would shut down and enter a stand-by mode. Then when the low pressure setting is reached, the
+compressor automatically starts again.
+To view or set the unload delay time, start Press the two arrow keys at the same time to
+1 2
+with the main screen shown below. bring up the Password Level Selection- Press
+down arrow 2 times to select Level 3 then press
+enter.
+It’s recommended not set the
+NOTICE unload delay too low. If the
+compressor starts more than
+5 times per hour, it could cause unnecessary wear to 3 Arrow down to 5)WORKING TIMER and press
+components. Enter.
+Enter in the 6 Digit Password 6 6 6 6 6 6, by using the Up
+Arrow to set the digit to 6 then press Enter to move to the
+next digit, and press the Up Arrow to set to 6, repeat until
+last digit is set to 6, then press Enter.
+Press both Up & Down Arrows
+NOTICE again if the wrong password is
+entered.
+15
+
+===== PAGE 16 =====
+Operating Instructions
+Arrow down to Wt4 (Unload delay time). Press
+4
+Enter and the time flashes and can be changed
+by using the Up & Down Arrows. Press Enter Once satisfied with all settings, press Down
+5
+again to confirm the setting. (See chart on page Arrow until you are back to the Main Screen.
+17 of PLC manual.)
+Maintenance Notifications
+Component (PLC) Lifetime (hrs)
+Following replacement times are important for safe
+operation. Remember to clear lifetime and reset Air Filter CAF 4000
+maintenance timer after replacements are made. Oil Filter COF 4000
+Refer to PLC manual for more details.
+Air/Oil Separator Filter CSF 4000
+Lubricating Oil C--= 4000
+Check Compressor C--h 4000
+Motor Bearing Grease BL 10,000
+Resetting Maintenance Alarms
+Press the two arrow keys at the same time to
+6 7
+First screen for resetting alarms.
+bring up the Password Level Selection- Press
+down arrow 2 times to select Level 3 then press
+enter.
+16
+
+===== PAGE 17 =====
+EMAX Rotary Screw Compressors
+Resetting Maintenance Alarms (Continued)
+Arrow down to 6)OIL/FILTER-HOURS and
+9
+Enter in the 6 Digit Password 6 6 6 6 6 6, by
+8 press Enter
+using the Up Arrow to set the digit to 6 then
+press Enter to move to the next digit, and press
+the Up Arrow to set to 6, repeat until last digit is
+set to 6, then press Enter.
+Press both Up & Down Arrows
+NOTICE again if the wrong password is
+entered.
+Using Enter move over to the SET: number and
+11
+change to 4000, using the Up & Down Arrows.
+Then using the Enter button, change NO to
+CHANGE AIR FILTER shows in the
+10 YES then press Enter and hours are reset.
+display and press Enter.
+Using Enter move over to NO and use the Up
+Press Down Arrow and CHANGE OIL FILTER 13
+12
+Arrow to change it to YES then press Enter and
+shows in the display. Press Enter.
+hours are reset.
+17
+
+===== PAGE 18 =====
+Operating Instructions
+Resetting Maintenance Alarms (Continued)
+Using Enter move over to NO and use the Up
+15
+Press Down Arrow and CHANGE SEP. Arrow to change it to YES then hit Enter and it
+14
+(Separator) FILTER shows in the display. resets the hours. Separator filter should be set
+Press Enter. at 4000 hours.
+16 Press Down Arrow and CHANGE OIL FILTER 17 Using Enter move over to NO and use the Up
+shows in the display, but the first Line is C--=. Arrow to change it to YES then hit Enter and it
+This is the screen for the oil life. Press Enter. resets the hours
+Press Down Arrow and CHECK
+18
+COMPRESSOR shows in the display. Check
+belt condition and belt tension. Give your
+compressor a good overlook noting any
+changes since last machine maintenance.
+Press Enter.
+18
+
+===== PAGE 19 =====
+EMAX Rotary Screw Compressors
+Resetting Maintenance Alarms (Continued) Resetting Maintenance Alarms (Continued)
+Press Down Arrow and BEARING LUBRICATE
+20
+Using Enter move over to NO and use the Up
+19 shows in the display. Press Enter.
+Arrow to change it to YES then hit Enter and it
+resets the hours.
+After resetting the Bearing Lubricant timer,
+22
+Using Enter move over to NO and use the Up you can return to the Main Screen by Pressing
+21
+Arrow to change it to YES then hit Enter and it the Down Arrow until you are back to the Main
+resets the hours. Screen.
+19
+
+===== PAGE 20 =====
+Operating Instructions
+Mechanical Components
+1 Drive Motor
+Drive motor is 4 pole with low RPM (1750). This motor is also capable of variable speed drive as a standard feature. The
+motor is 12 lead, Y delta soft starting for low amp draw. Overload protection is installed for safety. Normal electric current
+can fluctuate slightly for various reasons but if the current spikes, the overload protection causes the motor(s) to stop. If
+this happens, the motors must be reset manually.
+Reasons for tripped overload protection:
+a) Operator error: Improper regulation of air
+exhaust pressure or other parts of the system.
+b) Branch circuit not sized correctly
+c) Mechanical failures:
+• Internal motor failure
+• Improper motor phasing
+• System setting error
+• Blocked air/oil separator filter
+If motor overload protection is caused by any other reason, contact EMAX immediately.
+20
+
+===== PAGE 21 =====
+EMAX Rotary Screw Compressors
+Resetting Overload Protection
+Disconnect, tag & lock out electrical power to unit, or electrical shock
+WARNING
+could result.
+A. Using lock key, remove electrical panel B. Locate BLUE reset button on relay
+from unit attached to K1 contactor.
+C. Once motor has cooled, press-in on BLUE
+Example of relay on larger units.
+button
+21
+
+===== PAGE 22 =====
+Operating Instructions
+2 variable speed drive (Energy saving device) Ready Cabinet
+This cabinet has allocated space and cooling fan to house variable speed drive components. To convert to variable
+speed drive, contact EMAX customer service for more information, 1-877-283-7614.
+3 Air Suction Filter (Air Intake)
+A dry type paper filter with filtration of 5 ppm, replace after first 600 hours of operation;
+then every 4000 hours, depending on environment. Refer to the computer controls of
+the compressor to monitor operating time and reset maintenance timer when filter is
+replaced. There is an automatic alarm that can be set to remind operator of service
+times.
+4 Suction Valve
+A butterfly valve that opens and closes during operation. When PLC calls for air, the suction valve opens through a
+solenoid valve to allow compressor to load. When air pressure reaches preset max level, the PLC closes the suction
+valve allowing compressor to pull vacuum and not compress air, or unload.
+5 Regulation Modulation Control
+This device is included on all 100-200 hp models as an energy saving feature for applications with duty cycles of 50%
+or more. The device keeps amp load lower by maintaining motor operation so consistent air pressure is delivered
+under heavy workloads. Units with lower duty cycles should use online/offline (min./max. pressure) control. Both
+control methods are available so appropriate features can be selected for different air demands. It is important
+to monitor air demand since it takes 15% more power to operate compressor for every 10 PSI of pressure
+increase.
+6 Air End
+Two rotor shafts are mounted on bearings parallel to each other in the machine casing. The casing has an air inlet at
+the top and an air outlet at the bottom. The shafts have precisely machined, helical shaped screw threads which work
+together to compress air. Air compression occurs through a four course process:
+A. Absorption
+The position and shape of the rotor shafts allow maximum air intake from the inlet port. As the shafts turn, the air
+is forced to move between the grooves of the screw threads.
+B. Sealing and Conveyance
+The air is sealed within the grooves of the screw threads and conveyed, or moved, through the machine casing
+toward the air outlet.
+C. Compression and Lubrication
+The rotor shaft screw threads are designed with decreasing space between the grooves. As air is moves through
+them, it becomes pressurized and actuates the lubrication process. Lubricating oil is pressurized and injected
+into the compression chamber during operation for the following reasons:
+a. To form protective film on rotors to avoid contact and reduce friction.
+b. To seal in the compressed air to improve compressor efficiency.
+c. To absorb heat to maintain optimal power.
+d. To reduce operating noise.
+D. Exhaust
+When the air has reached the end of the rotor shafts, it is fully pressurized and exhausted into the air tank. As the
+rotors turn, the compression process continues.
+22
+
+===== PAGE 23 =====
+EMAX Rotary Screw Compressors
+7 Exhaust Probe
+The probe is temperature sensitive and located at the air outlet of the rotary screw casing. When exhaust temperature
+exceeds 210°F (98.8°C), the system automatically powers OFF. The temperature of the air exhaust can be read on a
+display panel located on the PLC. Common reasons for excessive exhaust
+temperatures:
+• low oil level
+• inoperable exhaust fan
+• improper ventilation causing ambient air temperature to be too hot
+• clogged oil filter
+• clogged radiator not allowing air-flow to cool oil
+It is important to keep the circulating fan and cooler fins clean to prevent the compressor from shutting down. Low air
+pressure can be used to blow them off or if needed, use waterbased solvent to clean.
+8 Oil Cooler
+The oil cooler function is to cool the hot oil from compressor pump and return oil to the air oil separator tank. It is
+important to keep the cooler fins clean to prevent the compressor from high temperature shut down. Low air pressure
+can be used to blow them off or if needed, use water-based solvent to clean.
+9 Oil Filter
+The oil filter is a paper filter with a filtration of 10 PPM. It removes impurities
+and protects the bearings and rotors. Replace the filter core every 4000 hours
+or annually, whichever comes first. Replace oil and filter after first 600 hours of
+operation. Refer to the computer controls of the compressor to monitor operating
+time and remember to reset maintenance timer when filter is replaced. An
+automatic alarm can be set to remind operator of service times.
+10 Air/Oil Separator Tank
+This is a steel pressure vessel used to store lubricating oil and to separate the compressed air and the lubricating oil.
+An oil sight gauge is installed on one end of the air/oil separator tank. Make sure oil level is at high oil level indicator
+when unit is shut down. During operation, the oil level should stay between the high oil level line and the lowest oil
+level line. After the machine has been shut down for an hour, open the drain valve slightly, that’s under the air/oil
+separator tank, to drain condensed water in the tank. This drain valve can also be used to gather oil for oil analysis.
+Refer to warranty statement for analysis requirements. Replace lubricating oil after first 600 hours of operation, then
+every 4000 hours or more often if needed. Refer to the computer controls of the compressor to monitor operating time
+and to reset maintenance timer when filter is replaced. An automatic alarm can be set to remind operator of service
+times.
+Use only Airbase Industries, SKU OIL003. For food manufacturing
+applications, Use SKU OIL001. Use of any other product causes
+NOTICE
+product damage and voids the warranty. Refer to warranty statement
+for oil requirements.
+23
+
+===== PAGE 24 =====
+Operating Instructions
+11 Air/Oil Separator Filter
+During the process of air compression from pump, air and oil are mixed together
+to lubricate, seal and cool compressor rotors. This air and oil is transferred to air/
+oil separator tank and then the air/oil separator filter removes oil mist from the
+compressed air. The filter core is made of multiple-layer fine glass fibers. The filter
+reduces the oil particle size and can lower content to less than 3 PPM. During
+normal operation, the air/oil separator filter can be used for about 4000 hours or
+annually, whichever comes first. Refer to the computer controls of the compressor
+to monitor operating time and remember to reset maintenance timer when filter is
+replaced. There is an automatic alarm that can be set to remind operator of service
+times
+12 Safety Valve
+The ASME certified safety valve on the air/oil separator tank is set to open when
+the pressure exceeds 175 PSI (12.1 bar). NEVER attempt to operate machine
+without ASME safety valve.
+13 Blow Down Valve
+The blow down valve is a two-way valve normally open. When the machine is shut down or the compressor is
+unloaded, the vent valve opens and relieves pressure in the air/oil separator tank to ensure the compressor will not be
+started under load.
+14 Check Valve
+A minimum pressure check valve is installed after the air oil separator filter. The starting pressure is set at over 43.5
+PSI (3 bar). The functions of the minimum pressure valve are as follows:
+a. Actuates oil lubrication of the air end.
+b. Regulates air flow through the air separator filter to prevent damage to the separator filter element. Air flow
+begins when pressure in the air / oil separator tank reaches 43.5 PSI (3 bar).
+c. Prevents back flow from the air receiver tank into the air / oil separator tank. This component serves as a
+built-in check valve. No additional check valve is needed for installation.
+15 After Cooler
+The air flows through the check valve then enters the after cooler. The fan on the air cooled after cooler radiator
+draws in ambient air and blows it through the radiator cores to reduce heat in the compressed air and lubricating oil
+exhausted from the rotary screw pump. The heat absorbed in the radiator cores is discharged from the screw cabinet
+because of the cooling fan and generally reduces air temperature by 60°F (15°C). If ambient air temperature exceeds
+112°F (45°C), the system may overheat. It is important to operate the compressor in a well ventilated area for the
+cooling process to be effective.
+16 Air Storage Tank
+(optional, not shown) The air storage tank can serve as cushion to keep output pressure relatively stable. It can
+also reduce operating temperature, remove moisture content, provide cleaner air and reduce the load of the dryer. A
+larger tank also reduces the cycling of the suction valve. As a guideline, for every CFM the compressor produces, a
+minimum of 1.2 gal. of air storage is needed.
+24
+
+===== PAGE 25 =====
+EMAX Rotary Screw Compressors
+17 Refrigerated Dryer/Coalescing Filter
+(optional, not shown) The refrigerated dryer removes moisture content. The coalescing filter removes oil droplets and
+impurities in the compressed air. The refrigerated dyer/coalescing filter operates best with an automatic drain that
+removes water condensation collected during the air drying process.
+Operation
+Safety Rules
+1. Make sure all operators receive product training, read and understand all instructions.
+To avoid fires, keep all flammable, combustible, poisonous and
+noxious materials away from operating area. Make sure there are
+no oily rags, trash, leaves, litter or other combustible materials in
+operating area. Keep suitable, fully charged fire extinguishers nearby
+when servicing and operating the compressor.
+WARNING
+2. NEVER allow modifications to compressor structure or controls.
+3. Keep all ignition sources away from exposed live electrical parts.
+4. Keep all persons clear of compressor during start-up and operation.
+This unit can automatically start! Before attempting any repairs or
+adjustments, disconnect, lock out and verify all power is off to all
+circuits to minimize the possibility of accidental startup or operation.
+This is especially important for remotely controlled compressors.
+Serious injury could result.
+WARNING
+5. NEVER operate the compressor with the fan, coupling or other guards removed or with access doors open.
+6. DO NOT engage in horseplay with air hoses as death or serious injury may result.
+7. Provide adequate ventilation and use proper lubricant while operating the compressor. Clean-up immediately
+any spilled lubricant or other combustible substances.
+8. Shut off compressor and allow it to cool before checking or adding lubricant, or when refilling air line anti-
+icer systems with antifreeze compound. Keep sparks, flames and other ignition sources away and DO NOT
+permit smoking in the area.
+9. Stop compressor and disconnect power if a hazardous condition arises.
+10. Wear snug fitting clothing and confine long hair when around compressor. Keep all body parts and
+clothing away from couplings, fans and other moving parts of the equipment.
+11. Keep hands, feet, floor controls and walking surfaces clean and dry.
+25
+
+===== PAGE 26 =====
+Operating Instructions
+To avoid serious injury, keep all persons away from the discharge
+opening of hoses or tools or other points of compressed air discharge.
+If the machine is installed in an enclosed area, be sure to vent the relief
+valve outside of the structure or to an unoccupied area.
+WARNING
+12. DO NOT use air tools that are rated below the maximum rating of the compressor. Select air tools, air hoses,
+pipes, valves, filters and other fittings accordingly. DO NOT exceed manufacturer’s rated safe operating
+pressures for these items.
+13. Make sure all hose connections are adequately secured to prevent tools or hose ends from being accidentally
+disconnected.
+14. Coolants and lubricants used in this compressor contain chemicals that can harmful or fatal. Take care to avoid
+accidental ingestion and/or skin contact. In case of ingestion, seek medical treatment promptly. Wash with soap
+and water after skin contact.
+15. Antifreeze compound used in air line anti-icer systems contains methanol which is harmful or fatal if swallowed.
+Avoid contact with the skin or eyes and avoid breathing the fumes. Wear goggles or a full face shield when
+adding antifreeze compound to air line anti-icer systems.
+• If swallowed, induce vomiting and call a physician immediately.
+• In case of eye contact, wash eyes with plenty of clean water for 15 minutes then contact eye
+doctor immediately.
+• Never store antifreeze compound in confined areas.
+Initial Checks
+Be sure to make physical checks of the compressor to avoid serious failure before start-up.
+1. Make sure compressor is properly grounded and verify voltage is correct, especially when using a three phase
+power.
+2. Double check internal control transformer before applying power to unit. Make sure wiring is correct to avoid
+damage to circuitry and PLC. Refer to wiring diagram, figure 7.
+3. Check for correct oil level. To avoid overfilling, check for correct oil level after machine has been stopped for at
+least 10 minutes. If oil needs to be added, make sure all pressure is relieved before opening fill port. Use only
+Airbase Industries lubricating oil. Also make sure oil level does not drop below low level line on site glass during
+operation. If it does, stop compressor immediately, let rest for 10 minutes, then add oil.
+Air/Oil Separator tank is a pressurized component. To avoid serious
+injury, be sure system pressure is relieved before removing fill plug.
+Be aware oil temperature may be very hot. Use caution when opening
+fill plug.
+WARNING
+26
+
+===== PAGE 27 =====
+EMAX Rotary Screw Compressors
+Use only genuine Airbase Industries Rotary Screw Oil, SKU OIL003. For
+NOTICE food manufacturing applications, use Airbase Industries Rotary Screw Oil
+SKU OIL001. Use of any other product may cause product damage and
+void the warranty. Refer to warranty statement for oil requirements.
+4. If compressor has sat idle for some time, add approximately 0.5 L Airbase Industries Rotary Screw lubricating
+oil to suction valve. Then hand rotate compressor several times to prevent equipment damage. Check to ensure
+no foreign matter has entered the system.
+5. Make sure shipping brackets have been removed. Refer to figure 2 in inspection section.
+6. Ensure all pipes and plugs are tight before starting compressor.
+Start-Up
+1. Slightly open drain valve on air/oil separator tank to drain any condensed water. Failure to do this shortens
+service life of lubricating oil and destroy the bearings. Be sure to close valve after draining water.
+2. Check “Emergency Stop” function by pressing the button shortly after pressing ON button.
+3. Do not operate the machine if there is any abnormal noise or vibration during operation. Call EMAX service for
+assistance.
+4. Press ON button to begin operation. After unit starts, a time delay of approximately 5 seconds occurs and a
+“LOADING” message displays on PLC screen. This means the pump is operating and the compressor is building
+pressure.
+5. Monitor display panel for normal readings such as amp draw and voltage. Push OFF button if there are any
+abnormal sounds, vibration or oil leakage.
+6. Check that oil exhaust temperature is maintained between 160° - 190° F (70° - 88° C). Cooling fan cycles as
+needed to cool oil temperature.
+7. After OFF button is pressed, the motor continues to run for approx. 10-15 seconds and blow-down valve
+automatically discharges pressure from air/oil separator tank. This is to prevent the air compressor from stopping
+under heavy-load.
+8. Record these instrument readings on a regular basis and retain for future reference:
+• Voltage
+• Current
+• Air pressure
+• Air exhaust temperature
+• Oil level
+• Maintenance parameter
+Power Outages
+Once power is restored after a power outage the controls will show
+a “Power Fault” error. Press the Enter button to reset and restart the
+NOTICE
+compressor.
+27
+
+===== PAGE 28 =====
+Operating Instructions
+Storage
+1. If the machine is stopped for over three weeks:
+a) Wrap electrical equipment such as the control panel with plastic or oil paper to avoid condensation.
+b) Completely drain water in the oil cooler, the back cooler and the oil/air separator tank.
+c) Make sure any unsafe conditions are clearly stated or repaired.
+2. If the machine is not run for more than two months:
+a) Seal all ports to prevent moisture or dust accumulation.
+b) Wrap safety valve & control panel with oil paper or an equivalent to avoid rust.
+c) Replace lubricating oil then run machine for 30 minutes. Drain condensed water in the oil/air
+separator tank and the oil cooler 2-3 days later.
+d) Move machine to a clean, dry place.
+Restarting Procedure
+1. Remove any wrappings from system components.
+2. Ensure electric motor is properly insulated.
+3. Perform initial checks then follow procedures for start up.
+Maintenance
+Safety Steps
+To avoid shock and serious personal injury, disconnect, tag and lock
+out power source then release all pressure from the system before
+attempting to install, service, relocate or perform ANY maintenance.
+WARNING
+To avoid serious personal injury, when performing service in any
+enclosure large enough to hold a man, inform others then be sure
+to tag and keep open any access doors. Before closing and latching
+access doors, make sure all persons are clear from enclosure.
+WARNING
+28
+
+===== PAGE 29 =====
+EMAX Rotary Screw Compressors
+1. Make sure repairs are done in a clean, dry, well lighted and ventilated area.
+2. When cleaning, use air pressure less than 30 psig (2.1bar). Also use effective chip guarding and personal
+protective equipment per OSHA standard 29 CFR 1910.242 (b).
+3. Relieve all internal pressure prior to opening any line, fitting, hose, valve, drain plug, connection or other
+component, such as filters and line oilers, and before refilling optional air line anti-icer systems with antifreeze
+compound.
+4. Keep sound reducing material, any external surfaces of the air compressor or internal surfaces of the enclosure
+free from fluids and build-up. Clean with water based industrial cleaner or steam clean as necessary. Remove
+then replace sound reducing materials as needed to clean all surfaces. Immediately replace any sound reducing
+material with torn or punctured protective covering to prevent accumulation of liquids or build-up inside the
+material. NEVER use flammable solvents for cleaning purposes.
+5. Keep electrical wiring, including all terminals and pressure connectors in good condition. Replace any wiring that
+has cracked, cut, or otherwise damaged insulation. Replace terminals that are worn, discolored or corroded.
+Keep all terminals and pressure connectors clean and tight.
+6. Keep all body parts and any hand-held tools or other conductive objects away from exposed live parts of the
+electrical system. When making repairs or adjustments, stand on a dry, insulated surface and DO NOT contact
+any other portion of the compressor.
+7. DO NOT leave compressor unattended with exposed electrical components. Be sure to tag and disconnect all
+power if temporary absence is necessary.
+Compressor components can become hot during operation. Avoid
+bodily contact with hot liquids, hot surfaces and sharp edges and
+corners, or burns or personal injury could result.
+CAUTION
+Lubricating Oil
+To avoid water condensation during operation, keep oil temperature between 160° - 190° F (70° - 88° C). Failure to do so
+causes pump damage. Contact EMAX service if temperature drops below 160° F (70° C).
+Changing Oil
+1. Shut down compressor and allow machine to set for 5-10 minutes.
+Air/Oil Separator tank is a pressurized component. To avoid serious
+injury, be sure system pressure is relieved before removing fill plug.
+Be aware oil temperature may be very hot. Use caution when opening
+fill plug.
+WARNING
+29
+
+===== PAGE 30 =====
+Operating Instructions
+2. Drain oil completely. Be sure to include oil in system piping, cooler and air/oil separator tank. Close drain valve.
+3. Remember to remove and change oil filter, taking care to avoid hot oil during replacement.
+4. Open oil fill port and add new oil.
+Oil Capacities:
+CAUTION
+7.5– 10 HP – 5 liters (1 gal/2.5 pints)
+15 – 20 HP – 6 liters (1 gal/4.6 pints)
+DO NOT OVERFILL. Residual oil may still be in the
+25 – 30 HP – 11 liters (2 gal/7.25 pints)
+compressor. The above capacities can be used for
+40 – 60 HP – 20 liters (5 gal/2.25 pints) guidelines, but use the upper arrow fill line on the
+sight glass (See page 7). Over filling causes oil to
+75 – 100 HP – 30 liters (7 gal/7.4 pints)
+blowout the inlet valve and through the air filter, also
+125 – 150 HP – 70 liters (18 gal/4 pints) oil could push past the separation system resulting
+175 – 200 HP – 80 liters (21 gal/1 pint) in oil in the air lines.
+Use only genuine Airbase Industries Rotary Screw Oil, SKU OIL003. For
+NOTICE food manufacturing applications, use Airbase Industries Rotary Screw Oil
+SKU OIL001. Use of any other product may cause product damage and
+void the warranty. Refer to warranty statement for oil requirements.
+Failure to perform regular oil changes may cause equipment damage and
+NOTICE
+will void warranty. Oil must be changed annually regardless of hours used.
+Belts
+To avoid serious personal injury, be sure to relieve all system pressure
+then lock out power and tag compressor to prevent unexpected
+movement of the unit.
+WARNING
+Inspect belt tension after first 30 hours of operation then at every 1,000 hours.
+1. Check belt tension on each individual belt in the center of each pulley, and should have ¼”deflection up and ¼”
+deflection down, for ½” total.
+2. Always replace all belts with the same brand, at the same time. Make sure belts are unimatched. Do not
+replace belts independently.
+3. Do not splash lubricating oil on belts or pulleys when adjusting or replacing belts.
+30
+
+===== PAGE 31 =====
+EMAX Rotary Screw Compressors
+System Pressure
+System pressure is factory set but can be regulated depending on operating conditions. Refer to computer control
+specifications for setting adjustments or PLC operating manual.
+Safety Valve
+TO AVOID SERIOUS INJURY OR DEATH, NEVER ATTEMPT TO
+REGULATE OR TAMPER WITH SAFETY VALVE. VALVE IS SEALED AND
+CERTIFIED BY ASME CODE AND IS DESIGNED TO RELIEVE SYSTEM
+PRESSURE WHEN NECESSARY.
+DANGER
+Air/Oil Separator Filter
+Air/Oil Separator tank is a pressurized component. To avoid serious
+injury, be sure system pressure is relieved before removing filter. Be
+aware oil temperature may be very hot. Use caution when changing
+filter.
+WARNING
+1. Relieve all air pressure from air/oil separator tank, then wait approximately 5-10 minutes before replacing filter.
+2. Replace air/oil separator filter. Do not attempt to clean.
+OPTIONAL: Cabinet Intake Filter(s)
+Remove 2
+Current rotary screw compressors can now be ordered with air-
+Phillips-
+intake filters which reduce the amount of airborne debris being head
+pulled into the unit, thus reducing the frequency of maintenance screws on
+and cleaning of the interior of the cabinet. large panel
+to access
+or install
+These filters are easily changed or installed on current models;
+filter.
+Number of filters (1 to 3) varies with model. Typical filter installation
+is shown below.
+NOTICE
+Remove 4 Phillips-head
+Use only OEM filters. Other filters may create air screws on small panel
+restrictions, causing overheating issues.
+to access or install
+31
+
+===== PAGE 32 =====
+Operating Instructions
+Maintenance Schedule
+ 
+Daily Check oil level Check safety valve
+ 
+Check coolant level Drain condensed water
+ 
+Weekly Clean air filter General unit cleaning
+
+Check belt tension
+ 
+500 hrs. Change lubricating oil (after first 500 hrs.) Grease electric motor bearings
+ 
+Replace oil filter Blow-out radiator
+ 
+1000 hrs. Inspect & lubricate suction valve Clean/replace air filter
+ 
+Check belt tension Replace oil filter
+ 
+2000 hrs./ 6 months Change oil & replace oil filter Check belt tension
+ 
+Blow-out radiator Inspect all piping
+ 
+Grease electric motor bearings Thoroughly clean sight glass
+
+Check & tighten all electrical
+connections/terminals
+ 
+4000 hrs./1 year Change oil & replace filter Clean suction valve
+ 
+Replace air filter Inspect 3 direction magnetic
+ valve
+Replace air/oil separator filter
+
+ Inspect minimum pressure
+Grease electric motor bearings
+valve
+
+Blow-out radiator 
+Inspect motion of magnetic
+
+Check belt tension contactor
+
+Check & tighten all electrical
+connections/terminals
+NOTES:
+32
+
+===== PAGE 33 =====
+EMAX Rotary Screw Compressors
+Troubleshooting Chart
+Problem Possible Causes Resolutions
+Compressor will not start 1. Power supply problem 1. Check complete circuit for proper
+(Electric failure light is on) voltage, ensure all electrical connections
+are secure; once power is restored,
+press Enter button on controls.
+2. Blown circuit fuse and/or internal 2. Replace fuse(s) as needed
+fuse
+3. Insufficient power to PLC 3. Check for correct voltage and make sure
+all fuses are functioning
+4. Fault is present 4. Check fault history on PLC: Arrow down
+to 9)ALARMS, then press Enter button.
+Arrow down to see all faults, up to 20.
+Refer to page 18 of PLC manual for
+fault listing and causes
+Enter button
+5. Poor contact on START 5. Have electrician or EMAX dealer
+pushbutton inspectand replace pushbutton
+6. Failed electric motor 6. Have electrician or EMAX dealer inspect
+and replace motor
+7. Failed compressor pump 7. Attempt to move by hand to check for
+free movement of pump. If not possible,
+contact EMAX service
+TURN OFF POWER before
+attempting to move pump.
+Watch for moving parts. Do
+not pinch fingers in pulley.
+WARNING
+Compressor shuts down under 1. Fault is present 1. Check fault history on PLC:
+compression mode/while Arrow down to 9)ALARMS, then
+loading
+press Enter button. Arrow down to
+see all faults, up to 20. Refer to
+page 18 of PLC manual for fault
+listing and causes
+Enter button
+33
+
+===== PAGE 34 =====
+Operating Instructions
+Problem Possible Causes Resolutions
+Compressor shuts down under 2. Loss of Control Voltage 2. Reset-Press Enter button on controls. If
+compression mode/while load- trouble persists, check line pressure
+ing (Continued) does not exceed maximum operating
+pressure of the compressor (specified on
+nameplate)
+3. Low incoming Voltage 3. Wire size for power supply too small.
+Contact local power company.
+Air pressure is too low 1. Air demand too high 1. Decrease air consumption or increase
+number of compressors in system
+2. Blocked air filter 2. Clean or replace air filter
+3. Suction valve not opening properly 3. Disassemble and clean suction valve.
+which reduces incoming air flow Apply lubricating oil to valve
+4. Improperly adjusted pressure 4. Adjust pressure regulator to proper
+regulator settings. Refer to PLC manual
+5. Load solenoid not operating 5. Disassemble and clean solenoid valve.
+properly Replace if needed. Check for proper
+voltage – 220V required
+6. Improper maintenance/Failed to 6. Check maintenance parameter. Make
+reset hours sure operating time does not exceed
+preset limit. Reset Maintenance Timer –
+see page 16
+7. Low oil level 7. Add oil
+8. V-belts slipping 8. Adjust belt tension
+9. Air leak 9. Check compressor & complete air
+system for air leaks
+10. Compressor running in unload 10. Check pressure settings in PLC; make
+mode sure unload pressure is set properly
+Line pressure exceeds upper 1. Control system leak causing 1. Check pressure sensor for leaks and/or
+preset safety limit pressure signals to be lost. air restriction. Repair as needed.
+2. Defective pressure sensor 2. Check for damage to diaphragm and
+contacts. Replace if necessary.
+3. Defective solenoid valve 3. Replace valve
+4. Defective blow-down valve 4. Check that sump pressure is exhausted
+to the atmosphere when machine is
+unloaded. Repair or replace if necessary
+34
+
+===== PAGE 35 =====
+EMAX Rotary Screw Compressors
+Problem Possible Causes Resolutions
+Line pressure exceeds upper 2. High pressure shut-down preset 5. Reset to proper setting. Refer to PLC
+preset safety limit (Continued) is incorrectly programmed manual.
+2. Additional compressor piped into 6. Reset additional compressor pressure
+system causing preset to be settings to 145 psi or lower
+exceeded
+Air exhaust temperature lower 1. Compressor running under noload 1. Reset Motor shut-down time in PLC
+than normal excessively
+2. Incorrect fan temperature parameter 2 . Reset to proper setting. Refer to PLC
+setting in PLC manual
+3. Temperature sensor malfunction 3. Replace temperature sensor
+Excessive air exhaust 1. Low oil level 1. Add oil
+temperature causing
+compressor to shutdown 2. Incorrect oil used 2. Drain all oil & replace with Airbase
+Industries compressor oil only
+3. Blocked oil filter 3. Replace oil filter
+4. Surrounding temperature too high 4. Check for air exhaust blockage. Increase
+area ventilation
+5. Blocked cooler 5. Clean cooler
+6. Temperature sensor malfunction 6. Replace temperature sensor
+7. 75HP & above-Bad Thermo valve 7. Replace Thermo valve
+8. Cooling fan failure 8. Replace cooling fan
+Excessive oil consumption 1. Clogged return/scavage line or 1. Clear blockage; clean orifice
+orifice
+2. Damaged or improperly functioning 2. Change air/oil filter
+air/oil separator filter
+3. Excessive foaming 3. Drain and change oil. Use only Airbase
+Industries oil, model no. Oil003. For
+food manufacturing applications, use
+model no. Oil001. Use of any other
+product causes product damage
+and voids the warranty. Refer to
+warranty statement for oil
+requirements.
+35
+
+===== PAGE 36 =====
+Operating Instructions
+Problem Possible Causes Resolutions
+Excessive oil consumption 4. Oil level too high 4. Drain oil then check at sight glass for
+(Continued) proper level
+5. Lubrication system leak 6. Check all pipes, connections and
+components. Repair as needed
+6. Low minimum pressure in 6. Minimum pressure should be 65 psi
+separator tank
+Pressure relief valve opens 1. High pressure shut-down preset 1. Reprogram high pressure safety setting
+repeatedly is improperly programmed to 155 psi (10.7bar)
+2. Defective pressure relief 2. Replace valve
+3. Clogged air/oil separator filter 3. Replace filter
+AL02-Motor Overload Fault 1. Motor overload protection tripped 1. Allow unit to cool; reset overload
+protection
+2. Bad wire connections causing 2. Turn unit off and check unit for loose or
+over amperage of motor bad connections
+3. Overload relay set too low 3. Check the overload setting on relay
+Water in air system 1. Defective moisture 1. Inspect & clean if required; Replace
+separator/Drain trap separator if necessary
+2. Trap drain or drain piping blocked 2. Inspect & clean
+3. After cooler core dirty 3. Inspect & clean
+4. No after cooler on unit 4. Install after cooler
+5. Drain line/drip leg incorrectly 5. Slope drain line away from trap; Install
+installed drip leg
+6. No refrigerated or desiccant 6. Contact EMAX Compressor
+dryer in air system
+Excessive noise level 1. V-belts slipping 1. Adjust belt tension or replace belts
+2. Compressor defective (Bearing 2. Replace bearing; Contact EMAX
+failure or rotor contact) Compressor
+3. Enclosure panels not in place 3. Install enclosure panels
+4. Loose component mounting 4. Inspect & tighten
+5. Shipping brackets in place 5. Remove shipping brackets
+36
+
+===== PAGE 37 =====
+EMAX Rotary Screw Compressors
+Problem Possible Causes Resolutions
+Excessive vibration 1. Loose component mounting 1. Inspect & tighten
+2. Motor or compressor bearing 2. Replace bearing; Contact EMAX
+failure Compressor
+3. External sources 3. Check for other sources of vibration,
+other than the compressor
+4. V-belts slipping 4. Adjust belt tension or replace belts
+5. Shipping brackets in place 5. Remove shipping brackets
+Black residue on belt guards 1. V-belts loose 1. Adjusted belt tension
+2. Sheave misaligned 2. Align sheaves
+3. Excessive belt wear 3. Replace belts
+4. Using non-OEM belt 4. Use ONLY OEM parts
+Shaft seal leak 1. Defective shaft seal 1. Replace or contact EMAX Compressor
+During start-up, PLC shows 1. Blown fuse/breaker for control 1. Replace fuse or reset breaker
+normal running functions, but voltage
+compressor not running
+2. Faulty E-Stop button – causing 2. Replace E-Stop button
+break in control voltage circuit
+Low air pressure in storage 1. Check valve installed between 1. Remove check valve
+tank while compressor compressor & storage tank
+maintains programmed air
+pressure 2. Dryer frozen-up restricting air flow 2. Bypass dryer, if available; allow dryer to
+thaw; if symptom persist, make
+adjustments to dryer
+3. Inline filter between compressor 3. Replace filter
+& storage tank is clogged
+37
+
+===== PAGE 38 =====
+Operating Instructions
+38
+
+===== PAGE 39 =====
+EMAX Rotary Screw Compressors
+39
+
+===== PAGE 40 =====
+Operating Instructions
+40
+
+===== PAGE 41 =====
+EMAX Rotary Screw Compressors
+41
+
+===== PAGE 42 =====
+Operating Instructions
+Warranty Statement
+EMAX COMPRESSOR makes the following warranties:
+1. THAT EACH ROTARY SCREW AIR COMPRESSOR PUMP TO BE FREE FROM DEFECTS IN MATERIAL, WORKMANSHIP, AND PARTS FOR 10 YEARS ON THE ROTARY SCREW AIR
+COMPRESSOR PUMP FROM THE DATE OF PURCHASE. EMAX COMPRESSOR. (and each of its subsidiaries) is not responsible for downtime during warranty
+service. If downtime is necessary, it is the Purchaser’s discretion and obligation (at Purchaser’s expense) to have a redundant UNIT. This warranty applies to rotary screw rotors and
+bearings. The electric motor carries a five year warranty and a 2 year warranty on the rest of the compressor unit. The screw compressor MUST have EMAX COMPRESSOR. Lubricant
+Synthetic exclusively, the same which must be purchased from EMAX COMPRESSOR. (Mixing different brands of oil will void this warranty and cause the rotors to varnish). All air filters,
+oil filters, and oil separator filters must be purchased from EMAX COMPRESSOR. and the screw compressor must have EMAX COMPRESSOR. Synthetic Rotary Screw oil, purchased
+exclusively from EMAX COMPRESSOR for this warranty to apply.
+Annual participation in all oil programs are required by original purchaser of the unit outlined by the following:
+a) Purchase an oil sample kit for oil analysis by EMAX COMPRESSOR. d) The laboratory will perform an oil analysis then email a report
+b) Oil sample kit contains 20 oil sample containers. One (1) oil sample e) Provide annual proof of purchase for oil/filter service kit.
+is to be sent for analysis by an EMAX COMPRESSOR oil analysis labora
+tory every six (6) months so oil can be tested twice yearly.
+c) Oil samples are obtained by draining 4 ozs. of oil into container then f) Maintain proper oil level in unit at all times. If the unit runs out of oil,
+mailing sample container to laboratory address provided in this warranty is void.
+oil sample kit.
+Failure of original purchaser to comply with any of the above conditions pertaining to oil analysis with void the complete unit warranty.
+A full detailed maintenance schedule must be sent to EMAX COMPRESSOR. once a year with the total service completed quarterly, outlining each air filter, oil filter and oil change with the
+total hours on the unit after each maintenance was performed.
+Failure to fully comply with this warranty and fully comply with the manual herein will void this warranty.
+Exclusions to this warranty also include all normal wear and tear items, including, but not limited to the bearings, rotors, valves, belts, shaft seal and load/unload solenoids.
+2. THAT EACH BARE COMPRESSOR PUMP UNIT TO BE FREE FROM DEFECTS IN MATERIAL, WORKMANSHIP, AND PARTS FOR 5 YEARS FOR THE UNIT FROM THE DATE OF
+PURCHASE. EMAX COMPRESSOR. (and each of its subsidiaries) is not responsible for downtime during warranty service. If downtime is necessary, it is the
+Purchaser’s discretion and obligation (at Purchaser’s expense) to have a redundant UNIT. Warranty repairs shall not include freight costs. Purchaser is responsible for returning
+unit to EMAX COMPRESSOR. This pump must have EMAX COMPRESSOR. lubricant Synthetic exclusively, the same which must be purchased from EMAX COMPRESSOR. (Mixing different
+brands of oils will void the pump warranty). A service kit must be purchased from EMAX COMPRESSOR. for this warranty to apply. Service kits contain an air filter and synthetic oil that
+must be changed annually. Annual proof of purchase of all oil programs must be maintained by the original purchaser of the compressor pump. If the unit runs out of oil, this warranty is
+void. Failure to fully comply with this warranty and fully comply with the manual herein will void this warranty.
+Exclusions include: service such as OIL CHANGES, FILTER REPLACEMENTS, GASKET TIGHTENING TO CORRECT OIL SEEPAGE or DRIVE BELT TIGHTENING and VALVE CLEANING and
+are not covered under warranty.
+Warranty shall be void under the following conditions: Failure to routinely change oil and to maintain a clean filter, or exceeding 70% duty cycle resulting in overheating and
+excessive wear and tear, or exposing electrical components to rain or water, or installing the unit in a hostile environment such as acid vapors or any caustic or abrasive matter that
+may be ingested into the pump, or installing the unit in an enclosed area where lack of cooling ventilation is present, such as in boiler or equipment rooms where the ambient air
+exceeds 100°F.
+3. THAT EACH COMPRESSOR UNIT TO BE FREE FROM DEFECTS IN MATERIAL, WORKMANSHIP, AND PARTS FOR 5 YEARS FOR THE COMPRESSOR PUMP AND 2 YEARS ON THE
+REMAINDER OF THE UNIT FROM THE DATE OF PURCHASE. The UNIT also carries a 1-year labor warranty. EMAX COMPRESSOR. (and each of its subsidiaries) is not responsible for
+downtime during warranty service. If downtime is necessary, it is the Purchaser’s discretion and obligation (at Purchaser’s expense) to have a redundant compressor. Warranty repairs
+shall not include freight costs. Purchaser is responsible for returning unit to EMAX COMPRESSOR. This pump MUST have EMAX COMPRESSOR. Lubricant Synthetic exclusively, the same
+which must be purchased from EMAX COMPRESSOR. (Mixing different brands of oil will void this warranty). A service kit must be purchased from EMAX COMPRESSOR. for this warranty
+to apply. Service kits contain an air filter and synthetic oil that must be changed annually. Annual proof of purchase of all oil programs must be maintained by the original purchaser of the
+compressor unit. If the unit runs out of oil, this warranty is void. Failure to fully comply with this warranty and fully comply with the manual herein will void this warranty.
+Exclusions include: service such as OIL CHANGES, FILTER REPLACEMENTS, GASKET TIGHTENING TO CORRECT OIL SEEPAGE or DRIVE BELT TIGHTENING and VALVE CLEANING and
+are not covered under warranty.
+Warranty shall be void under the following conditions: Failure to routinely change oil and to maintain a clean filter, or exceeding 70% duty cycle resulting in overheating and
+excessive wear and tear, or exposing electrical components to rain or water, or installing the unit in a hostile environment such as acid vapors or any caustic or abrasive matter that
+may be ingested into the pump, or installing the unit in an enclosed area where lack of cooling ventilation is present, such as in boiler or equipment rooms where the ambient air
+exceeds 100°F.
+4. THAT EACH DRYER UNIT TO BE FREE FROM DEFECTS IN MATERIAL, WORKMANSHIP, AND PARTS FOR 5 YEARS on the HEAT EXCHANGER AND 2 YEARS ON THE DRYER UNIT
+FROM THE DATE OF PURCHASE. EMAX COMPRESSOR. (and each of its subsidiaries) is not responsible for downtime during warranty service. If downtime is necessary, it is the
+Purchaser’s discretion and obligation (at Purchaser’s expense) to have a redundant DRYER UNIT. Warranty repairs shall not include freight costs. Purchaser is responsible for returning unit
+to EMAX COMPRESSOR. Each DRYER UNIT must have a coalescing filter attached to the intake of the dryer to remove any oil or dirt before air enters the dryer. Failure to install coalescing
+filter will void the warranty.
+5. GENERAL PROVISIONS: EMAX COMPRESSOR. (and each of its subsidiaries) is not responsible for downtime during warranty service. If downtime is necessary, it is the Purchaser’s
+discretion and obligation (at Purchaser’s expense) to have a redundant compressor. Warranty repairs shall not include freight costs. If necessary, the Purchaser is responsible for returning
+unit and/or applicable part(s) to EMAX COMPRESSOR.
+Exclusions include: service such as OIL CHANGES, FILTER REPLACEMENTS, GASKET TIGHTENING TO CORRECT OIL SEEPAGE or DRIVE BELT TIGHTENING and VALVE CLEANING and
+are not covered under warranty.
+Further Exclusions include failure to fully and completely follow the guidelines set forth in the manual. Of specific note is where a product is used where granite and/or concrete
+work is performed or conditions are dusty and the product is required to be housed in a separate room from the adverse conditions where the product has access to fresh air intake.
+Parts used for warranty purposes must be supplied by EMAX COMPRESSOR. Warranty work will be performed by an approved EMAX COMPRESSOR. Technician. If any maintenance (other
+than routine maintenance) is performed by a non-approved EMAX COMPRESSOR. Technician,
+written pre-approval must be obtained from EMAX COMPRESSOR. to prevent voiding this Warranty. Failure to fully comply with this warranty and fully
+comply with the manual herein will void this warranty.
+All warranties are nontransferable.
+The Oil Purchase Program is effective as of January 1, 2011.
+42

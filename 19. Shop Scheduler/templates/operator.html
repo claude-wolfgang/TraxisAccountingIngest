@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operator View — Shop Scheduler</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>Operator View</h1>
+        <nav class="header-nav">
+            <a href="/">Board</a>
+            <a href="/operator" class="active">Operator</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/tools">Tools</a>
+        </nav>
+        <div class="readiness-key">
+            <span class="key-label">Dots:</span>
+            <span class="key-item"><span class="light green"></span>Prog</span>
+            <span class="key-item"><span class="light green"></span>Mat</span>
+            <span class="key-item"><span class="light green"></span>Tools</span>
+            <span class="key-item"><span class="light green"></span>Machine</span>
+        </div>
+        <div class="header-actions">
+            <span id="machine-label" style="font-weight:600"></span>
+        </div>
+    </header>
+
+    <div class="operator-container">
+        <!-- Machine Selector -->
+        <div id="machine-selector" class="machine-selector"></div>
+
+        <!-- Daily Completions Banner -->
+        <div class="completions-banner" id="completions-banner" style="display:none">
+            You completed <strong id="completions-count">0</strong> ops today!
+        </div>
+
+        <!-- Now Running -->
+        <div id="now-running" style="display:none">
+            <div class="now-running">
+                <div class="section-title">Now Running</div>
+                <div class="job-title" id="job-title"></div>
+                <div class="job-detail" id="job-detail"></div>
+                <div class="due-countdown" id="job-due"></div>
+
+                <div class="qty-display">
+                    <span id="qty-done">0</span>
+                    <span class="qty-sep">/</span>
+                    <span class="qty-total" id="qty-total">0</span>
+                </div>
+
+                <div class="progress-bar" style="height:10px; border-radius:5px; margin:8px 0 16px">
+                    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+                </div>
+
+                <div class="part-buttons">
+                    <button class="part-btn" onclick="addParts(1)">+1</button>
+                    <button class="part-btn" onclick="addParts(5)">+5</button>
+                    <button class="part-btn" onclick="addParts(10)">+10</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success btn-xl" style="flex:1" onclick="markComplete()">
+                        Mark Complete
+                    </button>
+                    <button class="btn btn-danger btn-lg" onclick="openFlagModal()">
+                        Flag Issue
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- No job running -->
+        <div id="no-job" style="display:none">
+            <div class="empty-state">
+                <div class="empty-icon">&#9881;</div>
+                <p>No job currently running on this machine.</p>
+                <p style="margin-top:8px; color:var(--text-subtle)">Drag a job onto this machine from the Board view.</p>
+            </div>
+        </div>
+
+        <!-- Up Next -->
+        <div class="up-next" id="up-next" style="display:none">
+            <div class="section-title">Up Next</div>
+            <div id="queue-items"></div>
+        </div>
+
+        <!-- Completed Today -->
+        <div class="up-next" id="completed-today" style="display:none">
+            <div class="section-title">Completed Today</div>
+            <div id="completed-items"></div>
+        </div>
+    </div>
+
+    <!-- Flag Modal -->
+    <div class="modal-overlay" id="flag-modal">
+        <div class="modal">
+            <h2>Flag an Issue</h2>
+            <label>Category</label>
+            <select id="flag-category">
+                <option value="tooling">Tooling</option>
+                <option value="material">Material</option>
+                <option value="quality">Quality</option>
+                <option value="question">Question</option>
+            </select>
+            <label>Description</label>
+            <textarea id="flag-description" placeholder="Describe the issue..."></textarea>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeFlagModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="submitFlag()">Submit Flag</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <script src="/static/operator.js"></script>
+</body>
+</html>

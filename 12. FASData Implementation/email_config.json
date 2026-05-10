@@ -1,0 +1,9 @@
+{
+  "smtp_server": "",
+  "smtp_port": 587,
+  "username": "",
+  "password": "",
+  "from_address": "",
+  "to_addresses": [],
+  "subject_prefix": "FASData Daily Report"
+}

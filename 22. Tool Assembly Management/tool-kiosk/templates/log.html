@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Activity Log{% endblock %}
+{% block nav_log %}nav-active{% endblock %}
+
+{% block content %}
+<h2 class="page-heading">Activity Log</h2>
+
+<table class="items-table" id="log-table">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Action</th>
+            <th>Holder</th>
+            <th>Machine</th>
+            <th>Pocket</th>
+            <th>Employee</th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody id="log-tbody">
+        <tr><td colspan="7" class="loading">Loading...</td></tr>
+    </tbody>
+</table>
+
+<script>
+function loadLog() {
+    apiFetch('/api/activity?n=100').then(function(entries) {
+        var tbody = document.getElementById('log-tbody');
+        if (!entries.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">No activity yet</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        entries.forEach(function(e) {
+            var ts = e.timestamp ? new Date(e.timestamp).toLocaleString() : '-';
+            var details = '';
+            if (e.details) {
+                try {
+                    var d = typeof e.details === 'string' ? JSON.parse(e.details) : e.details;
+                    details = Object.keys(d).map(function(k) {
+                        return k + ': ' + d[k];
+                    }).join(', ');
+                } catch(x) { details = e.details; }
+            }
+            var actionClass = '';
+            if (e.action === 'install_cutter' || e.action === 'assign_to_machine') actionClass = 'log-checkin';
+            if (e.action === 'retire_cutter' || e.action === 'remove_from_machine') actionClass = 'log-checkout';
+
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + ts + '</td>' +
+                '<td class="' + actionClass + '">' + (e.action || '-') + '</td>' +
+                '<td>' + (e.holder_id || '-') + '</td>' +
+                '<td>' + (e.machine_id || '-') + '</td>' +
+                '<td>' + (e.pocket_number != null ? 'T' + e.pocket_number : '-') + '</td>' +
+                '<td>' + (e.employee || '-') + '</td>' +
+                '<td class="details-cell">' + details + '</td>';
+            tbody.appendChild(tr);
+        });
+    });
+}
+loadLog();
+</script>
+{% endblock %}

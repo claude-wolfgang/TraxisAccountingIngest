@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tools Queue — Shop Scheduler</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .tools-container { max-width: 900px; margin: 0 auto; padding: 16px; }
+        .tools-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .tools-header h2 { margin: 0; font-size: 18px; }
+        .tools-count { font-size: 14px; color: var(--text-muted); }
+        .wo-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+        }
+        .wo-card.past-due { border-left: 4px solid var(--accent-red); }
+        .wo-card.urgent { border-left: 4px solid var(--accent-orange); }
+        .wo-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .wo-card-info { flex: 1; min-width: 0; }
+        .wo-card-wo {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+        .wo-card-wo:hover { text-decoration: underline; }
+        .wo-card-part { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .wo-card-due { font-size: 13px; white-space: nowrap; }
+        .wo-card-due.past-due { color: var(--accent-red); font-weight: 600; }
+        .wo-card-due.urgent { color: var(--accent-orange); font-weight: 600; }
+        .wo-card-tools {
+            font-size: 12px;
+            color: var(--text-subtle);
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        .wo-card-actions { display: flex; gap: 8px; align-items: center; }
+        .wo-card-ops { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+        .wo-card-ops-label { font-size: 12px; color: var(--text-subtle); margin-right: 4px; }
+        .btn-op {
+            padding: 6px 12px;
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text);
+            transition: all 0.15s;
+        }
+        .btn-op:hover { background: var(--accent-green); color: #fff; border-color: var(--accent-green); }
+        .btn-op.done {
+            background: var(--accent-green);
+            color: #fff;
+            border-color: var(--accent-green);
+            opacity: 0.6;
+            cursor: default;
+        }
+        .btn-done {
+            padding: 8px 20px;
+            background: var(--accent-green);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-done:hover { opacity: 0.9; }
+        .btn-done:disabled { opacity: 0.4; cursor: default; }
+        .btn-ps {
+            padding: 8px 14px;
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .btn-ps:hover { background: var(--border); }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-subtle);
+            font-size: 16px;
+        }
+        /* Tool Shortages */
+        .shortages-section { margin-bottom: 24px; }
+        .shortages-header {
+            display: flex; align-items: center; gap: 12px;
+            cursor: pointer; user-select: none; margin-bottom: 8px;
+        }
+        .shortages-header h2 { margin: 0; font-size: 18px; }
+        .shortages-toggle { font-size: 14px; color: var(--text-muted); }
+        .shortages-count {
+            font-size: 12px; font-weight: 600; padding: 2px 8px;
+            border-radius: 10px; color: #fff;
+        }
+        .shortages-count.red { background: var(--accent-red); }
+        .shortages-count.green { background: var(--accent-green); }
+        .shortage-warning {
+            background: #7c2d12; color: #fed7aa; padding: 10px 14px;
+            border-radius: 6px; font-size: 13px; margin-bottom: 8px;
+        }
+        .shortage-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 14px; border-radius: 6px; margin-bottom: 4px;
+            font-size: 13px; border-left: 4px solid transparent;
+        }
+        .shortage-row.out_of_stock {
+            background: rgba(239,68,68,0.10); border-left-color: var(--accent-red);
+        }
+        .shortage-row.low_stock {
+            background: rgba(249,115,22,0.10); border-left-color: var(--accent-orange);
+        }
+        .shortage-row.not_in_inventory {
+            background: rgba(148,163,184,0.10); border-left-color: #94a3b8;
+        }
+        .shortage-tool { font-weight: 700; min-width: 60px; }
+        .shortage-desc { flex: 1; min-width: 0; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .shortage-qty { min-width: 50px; text-align: center; font-weight: 600; }
+        .shortage-qty.zero { color: var(--accent-red); }
+        .shortage-qty.low { color: var(--accent-orange); }
+        .shortage-qty.na { color: #94a3b8; }
+        .shortage-ops { min-width: 50px; text-align: center; color: var(--text-muted); }
+        .shortage-wos { font-size: 12px; color: var(--text-subtle); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .shortage-badge {
+            font-size: 11px; font-weight: 600; padding: 1px 6px;
+            border-radius: 4px; white-space: nowrap;
+        }
+        .shortage-badge.out_of_stock { background: var(--accent-red); color: #fff; }
+        .shortage-badge.low_stock { background: var(--accent-orange); color: #fff; }
+        .shortage-badge.not_in_inventory { background: #64748b; color: #fff; }
+        .shortages-all-clear {
+            text-align: center; padding: 20px;
+            color: var(--text-subtle); font-size: 14px;
+        }
+        @media print {
+            .app-header, .wo-card-actions { display: none; }
+            .wo-card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>Tools Queue</h1>
+        <nav class="header-nav">
+            <a href="/">Board</a>
+            <a href="/operator">Operator</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/tools" class="active">Tools</a>
+        </nav>
+        <div class="readiness-key">
+            <span class="key-label">Dots:</span>
+            <span class="key-item"><span class="light green"></span>Prog</span>
+            <span class="key-item"><span class="light green"></span>Mat</span>
+            <span class="key-item"><span class="light green"></span>Tools</span>
+            <span class="key-item"><span class="light green"></span>Machine</span>
+        </div>
+        <div class="header-actions">
+            <button class="btn" id="btn-print" style="font-size:12px;padding:4px 10px">Print</button>
+            <div class="sync-status">
+                <span class="sync-dot" id="sync-dot"></span>
+                <span id="sync-text">Loading...</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="tools-container">
+        <!-- Tool Shortages (inventory vs demand) -->
+        <div class="shortages-section" id="shortages-section">
+            <div class="shortages-header" onclick="toggleShortages()">
+                <h2>Tool Shortages</h2>
+                <span class="shortages-count" id="shortages-badge"></span>
+                <span class="shortages-toggle" id="shortages-toggle">&#9660;</span>
+            </div>
+            <div id="shortages-body"></div>
+        </div>
+
+        <div class="tools-header">
+            <h2>Work Orders Needing Tools</h2>
+            <span class="tools-count" id="tools-count"></span>
+        </div>
+        <div id="tools-list"></div>
+    </div>
+
+    <script>
+    const PROSHOP_BASE = "{{ proshop_base }}";
+
+    function psWoUrl(woNumber) {
+        const yy = woNumber.split('-')[0];
+        return `${PROSHOP_BASE}/procnc/workorders/20${yy}/${woNumber}$`;
+    }
+
+    async function loadTools() {
+        try {
+            const resp = await fetch('/api/needs');
+            if (!resp.ok) throw new Error('Failed to load');
+            const data = await resp.json();
+            renderTools(data.needs_tools || []);
+            document.getElementById('sync-text').textContent = 'Live';
+            document.getElementById('sync-dot').classList.remove('syncing');
+        } catch (e) {
+            document.getElementById('sync-text').textContent = 'Error';
+            console.error(e);
+        }
+    }
+
+    function renderTools(ops) {
+        // Group by WO
+        const woMap = {};
+        for (const op of ops) {
+            const key = op.wo_number;
+            if (!woMap[key]) {
+                woMap[key] = {
+                    wo_number: op.wo_number,
+                    part_name: op.part_name || op.part_number || '',
+                    customer: op.customer || '',
+                    due_date: op.due_date || '',
+                    material_type: op.material_type || '',
+                    ops: [],
+                    tools: new Set(),
+                    total_hours: 0,
+                };
+            }
+            woMap[key].ops.push(op);
+            woMap[key].total_hours += op.est_hours || 0;
+            if (op.tools) {
+                for (const t of op.tools) {
+                    woMap[key].tools.add(`T${t.tool_number} ${t.tool_description || ''}`.trim());
+                }
+            }
+        }
+
+        // Sort by due date (soonest first, no-date last)
+        const wos = Object.values(woMap).sort((a, b) => {
+            if (!a.due_date && !b.due_date) return 0;
+            if (!a.due_date) return 1;
+            if (!b.due_date) return -1;
+            return new Date(a.due_date) - new Date(b.due_date);
+        });
+
+        document.getElementById('tools-count').textContent = `${wos.length} work orders · ${ops.length} ops`;
+
+        const container = document.getElementById('tools-list');
+        if (wos.length === 0) {
+            container.innerHTML = '<div class="empty-state">All tools are ready!</div>';
+            return;
+        }
+
+        const now = new Date();
+        container.innerHTML = wos.map(wo => {
+            const dueDate = wo.due_date ? new Date(wo.due_date) : null;
+            const isPastDue = dueDate && dueDate < now;
+            const isUrgent = dueDate && !isPastDue && (dueDate - now) < 7 * 86400000;
+            const dueStr = dueDate ? dueDate.toLocaleDateString() : 'No date';
+            const urgencyClass = isPastDue ? 'past-due' : isUrgent ? 'urgent' : '';
+
+            const toolList = [...wo.tools].join(', ') || 'No tool details';
+
+            const opButtons = wo.ops.map(o =>
+                `<button class="btn-op" data-opid="${o.op_id}" onclick="markOpDone('${o.op_id}', this)" title="${o.op_name || ''}">Op${o.op_number}</button>`
+            ).join('');
+
+            return `
+                <div class="wo-card ${urgencyClass}" id="wo-card-${wo.wo_number}">
+                    <div class="wo-card-top">
+                        <div class="wo-card-info">
+                            <a href="${psWoUrl(wo.wo_number)}" target="_blank" class="wo-card-wo">WO ${wo.wo_number}</a>
+                            <span style="color:var(--text-muted); margin-left:8px; font-size:13px">${wo.part_name}</span>
+                            <div class="wo-card-part">${wo.customer}${wo.customer && wo.material_type ? ' · ' : ''}${wo.material_type} · ${wo.total_hours.toFixed(1)}h</div>
+                        </div>
+                        <div class="wo-card-due ${urgencyClass}">Due ${dueStr}</div>
+                        <div class="wo-card-actions">
+                            <a href="${psWoUrl(wo.wo_number)}" target="_blank" class="btn-ps">ProShop</a>
+                        </div>
+                    </div>
+                    <div class="wo-card-ops">
+                        <span class="wo-card-ops-label">Mark done:</span>
+                        ${opButtons}
+                    </div>
+                    <div class="wo-card-tools">Tools: ${toolList}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function markOpDone(opId, btn) {
+        if (btn.classList.contains('done')) return;
+        const origText = btn.textContent;
+        btn.textContent = '...';
+        try {
+            const resp = await fetch(`/api/operations/${opId}/tools-ready`, { method: 'POST' });
+            if (!resp.ok) throw new Error('Failed');
+            btn.classList.add('done');
+            btn.textContent = origText + ' \u2713';
+            // If all ops in this card are done, fade and reload
+            const card = btn.closest('.wo-card');
+            const allBtns = card.querySelectorAll('.btn-op');
+            if ([...allBtns].every(b => b.classList.contains('done'))) {
+                card.style.opacity = '0.4';
+                setTimeout(loadTools, 1000);
+            }
+        } catch (e) {
+            btn.textContent = origText;
+        }
+    }
+
+    document.getElementById('btn-print').addEventListener('click', () => window.print());
+
+    // ── Tool Shortages ──────────────────────────────────────────────────────
+    let shortagesCollapsed = false;
+
+    function toggleShortages() {
+        shortagesCollapsed = !shortagesCollapsed;
+        document.getElementById('shortages-body').style.display = shortagesCollapsed ? 'none' : '';
+        document.getElementById('shortages-toggle').innerHTML = shortagesCollapsed ? '&#9654;' : '&#9660;';
+    }
+
+    async function loadShortages() {
+        try {
+            const resp = await fetch('/api/tool-demand');
+            if (!resp.ok) throw new Error('Failed');
+            const data = await resp.json();
+            renderShortages(data);
+        } catch (e) {
+            console.error('Shortages load error:', e);
+        }
+    }
+
+    function renderShortages(data) {
+        const badge = document.getElementById('shortages-badge');
+        const body = document.getElementById('shortages-body');
+
+        if (!data.kiosk_available) {
+            badge.textContent = '?';
+            badge.className = 'shortages-count';
+            badge.style.background = '#64748b';
+            body.innerHTML = '<div class="shortage-warning">Inventory data unavailable — kiosk DB not reachable</div>';
+            return;
+        }
+
+        const flagged = data.tools.filter(t => t.status !== 'ok');
+
+        if (flagged.length === 0) {
+            badge.textContent = '0';
+            badge.className = 'shortages-count green';
+            body.innerHTML = '<div class="shortages-all-clear">All demanded tools are in stock</div>';
+            return;
+        }
+
+        badge.textContent = flagged.length;
+        badge.className = 'shortages-count red';
+
+        const statusLabel = {
+            out_of_stock: 'Out of stock',
+            low_stock: 'Low stock',
+            not_in_inventory: 'Not tracked',
+        };
+
+        body.innerHTML = flagged.map(t => {
+            const qtyText = t.qty_available !== null ? t.qty_available : '—';
+            const qtyClass = t.status === 'out_of_stock' ? 'zero' : t.status === 'low_stock' ? 'low' : 'na';
+            const wos = t.wo_numbers.length <= 3
+                ? t.wo_numbers.join(', ')
+                : t.wo_numbers.slice(0, 3).join(', ') + ` +${t.wo_numbers.length - 3}`;
+            return `
+                <div class="shortage-row ${t.status}">
+                    <span class="shortage-tool">${t.tool_number}</span>
+                    <span class="shortage-desc" title="${t.description}">${t.description}</span>
+                    <span class="shortage-badge ${t.status}">${statusLabel[t.status]}</span>
+                    <span class="shortage-qty ${qtyClass}">${qtyText}</span>
+                    <span class="shortage-ops" title="${t.op_count} operations">${t.op_count} ops</span>
+                    <span class="shortage-wos" title="${t.wo_numbers.join(', ')}">${wos}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    loadTools();
+    loadShortages();
+    setInterval(loadTools, 30000);
+    setInterval(loadShortages, 30000);
+    </script>
+</body>
+</html>

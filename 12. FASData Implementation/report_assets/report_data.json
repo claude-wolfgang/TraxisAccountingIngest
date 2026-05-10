@@ -1,0 +1,726 @@
+{
+  "date_start": "2026-02-02",
+  "date_end": "2026-03-11",
+  "num_days": 28,
+  "report_generated": "2026-05-10T13:48:36.845838",
+  "shift_hours": "6:00 - 19:00",
+  "green_threshold": 30,
+  "yellow_threshold": 10,
+  "shop_avg_utilization": 15.6,
+  "shop_avg_cutting": 15.6,
+  "total_hours_available": 1714.3,
+  "total_hours_running": 1222.2,
+  "total_hours_cutting": 267.4,
+  "active_machine_count": 5,
+  "total_machine_count": 5,
+  "machines": {
+    "T2": {
+      "name": "YCM NTC1600LY",
+      "total_samples": 20572,
+      "running_samples": 15875,
+      "cutting_samples": 2164,
+      "spindle_only_samples": 13711,
+      "connected_samples": 15875,
+      "utilization_pct": 77.2,
+      "cutting_pct": 10.5,
+      "spindle_only_pct": 66.6,
+      "connected_pct": 77.2,
+      "hours_available": 342.9,
+      "hours_running": 264.6,
+      "hours_cutting": 36.1,
+      "hours_spindle_only": 228.5,
+      "alarm_samples": 543,
+      "status": "YELLOW"
+    },
+    "M2": {
+      "name": "FANUC Mill 2",
+      "total_samples": 20572,
+      "running_samples": 12205,
+      "cutting_samples": 1726,
+      "spindle_only_samples": 10479,
+      "connected_samples": 12205,
+      "utilization_pct": 59.3,
+      "cutting_pct": 8.4,
+      "spindle_only_pct": 50.9,
+      "connected_pct": 59.3,
+      "hours_available": 342.9,
+      "hours_running": 203.4,
+      "hours_cutting": 28.8,
+      "hours_spindle_only": 174.7,
+      "alarm_samples": 4,
+      "status": "RED"
+    },
+    "M3": {
+      "name": "FANUC Mill 3",
+      "total_samples": 20571,
+      "running_samples": 13225,
+      "cutting_samples": 3604,
+      "spindle_only_samples": 9621,
+      "connected_samples": 13225,
+      "utilization_pct": 64.3,
+      "cutting_pct": 17.5,
+      "spindle_only_pct": 46.8,
+      "connected_pct": 64.3,
+      "hours_available": 342.9,
+      "hours_running": 220.4,
+      "hours_cutting": 60.1,
+      "hours_spindle_only": 160.3,
+      "alarm_samples": 4,
+      "status": "YELLOW"
+    },
+    "M6": {
+      "name": "FANUC Mill 6",
+      "total_samples": 20569,
+      "running_samples": 15203,
+      "cutting_samples": 3147,
+      "spindle_only_samples": 12056,
+      "connected_samples": 15203,
+      "utilization_pct": 73.9,
+      "cutting_pct": 15.3,
+      "spindle_only_pct": 58.6,
+      "connected_pct": 73.9,
+      "hours_available": 342.8,
+      "hours_running": 253.4,
+      "hours_cutting": 52.5,
+      "hours_spindle_only": 200.9,
+      "alarm_samples": 248,
+      "status": "YELLOW"
+    },
+    "M8": {
+      "name": "FANUC Mill 8",
+      "total_samples": 20568,
+      "running_samples": 16822,
+      "cutting_samples": 5394,
+      "spindle_only_samples": 11428,
+      "connected_samples": 16822,
+      "utilization_pct": 81.8,
+      "cutting_pct": 26.2,
+      "spindle_only_pct": 55.6,
+      "connected_pct": 81.8,
+      "hours_available": 342.8,
+      "hours_running": 280.4,
+      "hours_cutting": 89.9,
+      "hours_spindle_only": 190.5,
+      "alarm_samples": 89,
+      "status": "YELLOW"
+    }
+  },
+  "daily": {
+    "2026-02-02": {
+      "T2": {
+        "running": 64.2,
+        "cutting": 2.2
+      },
+      "M2": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M3": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M6": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M8": {
+        "running": 86.0,
+        "cutting": 39.2
+      }
+    },
+    "2026-02-03": {
+      "T2": {
+        "running": 99.4,
+        "cutting": 3.5
+      },
+      "M2": {
+        "running": 75.1,
+        "cutting": 1.8
+      },
+      "M3": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M6": {
+        "running": 99.5,
+        "cutting": 46.5
+      },
+      "M8": {
+        "running": 100.0,
+        "cutting": 33.2
+      }
+    },
+    "2026-02-04": {
+      "T2": {
+        "running": 81.3,
+        "cutting": 0.0
+      },
+      "M2": {
+        "running": 100.0,
+        "cutting": 23.3
+      },
+      "M3": {
+        "running": 37.2,
+        "cutting": 0.0
+      },
+      "M6": {
+        "running": 80.5,
+        "cutting": 11.4
+      },
+      "M8": {
+        "running": 97.1,
+        "cutting": 34.0
+      }
+    },
+    "2026-02-05": {
+      "T2": {
+        "running": 99.5,
+        "cutting": 0.0
+      },
+      "M2": {
+        "running": 87.2,
+        "cutting": 11.4
+      },
+      "M3": {
+        "running": 64.2,
+        "cutting": 4.4
+      },
+      "M6": {
+        "running": 2.4,
+        "cutting": 0.3
+      },
+      "M8": {
+        "running": 94.9,
+        "cutting": 61.0
+      }
+    },
+    "2026-02-06": {
+      "T2": {
+        "running": 71.4,
+        "cutting": 1.7
+      },
+      "M2": {
+        "running": 75.4,
+        "cutting": 6.9
+      },
+      "M3": {
+        "running": 55.5,
+        "cutting": 0.1
+      },
+      "M6": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M8": {
+        "running": 89.1,
+        "cutting": 39.0
+      }
+    },
+    "2026-02-09": {
+      "T2": {
+        "running": 100.0,
+        "cutting": 6.0
+      },
+      "M2": {
+        "running": 48.8,
+        "cutting": 11.2
+      },
+      "M3": {
+        "running": 100.0,
+        "cutting": 0.6
+      },
+      "M6": {
+        "running": 85.0,
+        "cutting": 5.5
+      },
+      "M8": {
+        "running": 100.0,
+        "cutting": 15.4
+      }
+    },
+    "2026-02-10": {
+      "T2": {
+        "running": 85.6,
+        "cutting": 5.3
+      },
+      "M2": {
+        "running": 86.0,
+        "cutting": 16.8
+      },
+      "M3": {
+        "running": 86.2,
+        "cutting": 0.0
+      },
+      "M6": {
+        "running": 85.9,
+        "cutting": 0.0
+      },
+      "M8": {
+        "running": 86.2,
+        "cutting": 5.9
+      }
+    },
+    "2026-02-11": {
+      "T2": {
+        "running": 94.7,
+        "cutting": 12.7
+      },
+      "M2": {
+        "running": 65.9,
+        "cutting": 2.1
+      },
+      "M3": {
+        "running": 75.9,
+        "cutting": 9.6
+      },
+      "M6": {
+        "running": 95.1,
+        "cutting": 0.0
+      },
+      "M8": {
+        "running": 69.1,
+        "cutting": 32.1
+      }
+    },
+    "2026-02-12": {
+      "T2": {
+        "running": 95.6,
+        "cutting": 0.4
+      },
+      "M2": {
+        "running": 19.6,
+        "cutting": 1.2
+      },
+      "M3": {
+        "running": 79.6,
+        "cutting": 6.3
+      },
+      "M6": {
+        "running": 95.4,
+        "cutting": 0.3
+      },
+      "M8": {
+        "running": 100.0,
+        "cutting": 37.3
+      }
+    },
+    "2026-02-13": {
+      "T2": {
+        "running": 39.7,
+        "cutting": 0.0
+      },
+      "M2": {
+        "running": 75.0,
+        "cutting": 0.0
+      },
+      "M3": {
+        "running": 45.1,
+        "cutting": 0.6
+      },
+      "M6": {
+        "running": 87.1,
+        "cutting": 6.4
+      },
+      "M8": {
+        "running": 74.9,
+        "cutting": 0.0
+      }
+    },
+    "2026-02-16": {
+      "T2": {
+        "running": 71.5,
+        "cutting": 0.8
+      },
+      "M2": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M3": {
+        "running": 64.9,
+        "cutting": 28.3
+      },
+      "M6": {
+        "running": 56.0,
+        "cutting": 1.8
+      },
+      "M8": {
+        "running": 0.0,
+        "cutting": 0.0
+      }
+    },
+    "2026-02-17": {
+      "T2": {
+        "running": 47.8,
+        "cutting": 13.1
+      },
+      "M2": {
+        "running": 83.7,
+        "cutting": 0.1
+      },
+      "M3": {
+        "running": 87.4,
+        "cutting": 38.3
+      },
+      "M6": {
+        "running": 99.9,
+        "cutting": 1.4
+      },
+      "M8": {
+        "running": 83.4,
+        "cutting": 44.2
+      }
+    },
+    "2026-02-18": {
+      "T2": {
+        "running": 85.4,
+        "cutting": 1.5
+      },
+      "M2": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M3": {
+        "running": 90.6,
+        "cutting": 14.9
+      },
+      "M6": {
+        "running": 99.7,
+        "cutting": 10.0
+      },
+      "M8": {
+        "running": 95.0,
+        "cutting": 10.3
+      }
+    },
+    "2026-02-19": {
+      "T2": {
+        "running": 87.1,
+        "cutting": 18.2
+      },
+      "M2": {
+        "running": 41.5,
+        "cutting": 2.1
+      },
+      "M3": {
+        "running": 87.4,
+        "cutting": 19.9
+      },
+      "M6": {
+        "running": 95.6,
+        "cutting": 33.2
+      },
+      "M8": {
+        "running": 27.4,
+        "cutting": 0.0
+      }
+    },
+    "2026-02-20": {
+      "T2": {
+        "running": 86.0,
+        "cutting": 56.4
+      },
+      "M2": {
+        "running": 89.7,
+        "cutting": 19.1
+      },
+      "M3": {
+        "running": 73.3,
+        "cutting": 30.6
+      },
+      "M6": {
+        "running": 89.6,
+        "cutting": 4.7
+      },
+      "M8": {
+        "running": 71.3,
+        "cutting": 11.2
+      }
+    },
+    "2026-02-23": {
+      "T2": {
+        "running": 78.7,
+        "cutting": 36.8
+      },
+      "M2": {
+        "running": 99.9,
+        "cutting": 15.0
+      },
+      "M3": {
+        "running": 100.0,
+        "cutting": 67.7
+      },
+      "M6": {
+        "running": 96.8,
+        "cutting": 69.2
+      },
+      "M8": {
+        "running": 99.1,
+        "cutting": 73.1
+      }
+    },
+    "2026-02-24": {
+      "T2": {
+        "running": 99.2,
+        "cutting": 26.9
+      },
+      "M2": {
+        "running": 99.9,
+        "cutting": 20.5
+      },
+      "M3": {
+        "running": 100.0,
+        "cutting": 48.2
+      },
+      "M6": {
+        "running": 99.2,
+        "cutting": 68.7
+      },
+      "M8": {
+        "running": 100.0,
+        "cutting": 55.6
+      }
+    },
+    "2026-02-25": {
+      "T2": {
+        "running": 100.0,
+        "cutting": 6.1
+      },
+      "M2": {
+        "running": 98.7,
+        "cutting": 2.2
+      },
+      "M3": {
+        "running": 100.0,
+        "cutting": 46.3
+      },
+      "M6": {
+        "running": 100.0,
+        "cutting": 33.5
+      },
+      "M8": {
+        "running": 98.8,
+        "cutting": 5.6
+      }
+    },
+    "2026-02-26": {
+      "T2": {
+        "running": 82.1,
+        "cutting": 21.9
+      },
+      "M2": {
+        "running": 80.8,
+        "cutting": 19.6
+      },
+      "M3": {
+        "running": 100.0,
+        "cutting": 52.1
+      },
+      "M6": {
+        "running": 100.0,
+        "cutting": 51.6
+      },
+      "M8": {
+        "running": 100.0,
+        "cutting": 16.9
+      }
+    },
+    "2026-02-27": {
+      "T2": {
+        "running": 77.3,
+        "cutting": 2.4
+      },
+      "M2": {
+        "running": 75.6,
+        "cutting": 43.7
+      },
+      "M3": {
+        "running": 70.3,
+        "cutting": 35.0
+      },
+      "M6": {
+        "running": 75.6,
+        "cutting": 53.8
+      },
+      "M8": {
+        "running": 75.7,
+        "cutting": 50.1
+      }
+    },
+    "2026-03-02": {
+      "T2": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M2": {
+        "running": 76.0,
+        "cutting": 0.0
+      },
+      "M3": {
+        "running": 76.2,
+        "cutting": 0.1
+      },
+      "M6": {
+        "running": 54.7,
+        "cutting": 0.3
+      },
+      "M8": {
+        "running": 75.9,
+        "cutting": 0.3
+      }
+    },
+    "2026-03-03": {
+      "T2": {
+        "running": 80.1,
+        "cutting": 24.0
+      },
+      "M2": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M3": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M6": {
+        "running": 85.9,
+        "cutting": 0.6
+      },
+      "M8": {
+        "running": 57.3,
+        "cutting": 2.7
+      }
+    },
+    "2026-03-04": {
+      "T2": {
+        "running": 92.3,
+        "cutting": 16.0
+      },
+      "M2": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M3": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M6": {
+        "running": 100.0,
+        "cutting": 3.7
+      },
+      "M8": {
+        "running": 99.5,
+        "cutting": 21.0
+      }
+    },
+    "2026-03-05": {
+      "T2": {
+        "running": 81.7,
+        "cutting": 1.4
+      },
+      "M2": {
+        "running": 64.1,
+        "cutting": 2.1
+      },
+      "M3": {
+        "running": 59.6,
+        "cutting": 10.6
+      },
+      "M6": {
+        "running": 84.7,
+        "cutting": 0.0
+      },
+      "M8": {
+        "running": 88.8,
+        "cutting": 46.0
+      }
+    },
+    "2026-03-06": {
+      "T2": {
+        "running": 64.9,
+        "cutting": 14.0
+      },
+      "M2": {
+        "running": 30.5,
+        "cutting": 5.1
+      },
+      "M3": {
+        "running": 57.2,
+        "cutting": 5.6
+      },
+      "M6": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M8": {
+        "running": 87.4,
+        "cutting": 1.0
+      }
+    },
+    "2026-03-09": {
+      "T2": {
+        "running": 69.5,
+        "cutting": 6.0
+      },
+      "M2": {
+        "running": 90.9,
+        "cutting": 17.2
+      },
+      "M3": {
+        "running": 84.7,
+        "cutting": 42.6
+      },
+      "M6": {
+        "running": 80.5,
+        "cutting": 0.5
+      },
+      "M8": {
+        "running": 100.0,
+        "cutting": 56.8
+      }
+    },
+    "2026-03-10": {
+      "T2": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M2": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M3": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M6": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M8": {
+        "running": 0.0,
+        "cutting": 0.0
+      }
+    },
+    "2026-03-11": {
+      "T2": {
+        "running": 1.2,
+        "cutting": 0.6
+      },
+      "M2": {
+        "running": 0.6,
+        "cutting": 0.0
+      },
+      "M3": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M6": {
+        "running": 0.0,
+        "cutting": 0.0
+      },
+      "M8": {
+        "running": 0.0,
+        "cutting": 0.0
+      }
+    }
+  }
+}

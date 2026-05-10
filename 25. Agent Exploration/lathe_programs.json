@@ -1,0 +1,408 @@
+{
+  "_instructions": [
+    "Map CNC program O-numbers to ProShop part numbers for legacy lathe programs.",
+    "These are programs that live on the machine (T2 - YCM NTC1600LY) and predate",
+    "the TraxisPostProcessor header system. Fill in one entry per program.",
+    "",
+    "BOOTSTRAPPED 2026-05-03 from FOCAS history (Feb 2 - May 1, 2026).",
+    "POPULATED 2026-05-04 from NC code uploads (TEMP UPLOADS/) — part_number and",
+    "description filled in from program headers. Folder context (R2-*, AI-*, AP-*,",
+    "MONOGRAM-*) names the customer/part for sub-programs.",
+    "",
+    "Entries still showing 'FOCAS bootstrap:' had no NC code uploaded — these may",
+    "be programs that were renamed/removed since the FOCAS history captured them.",
+    "",
+    "To find O-numbers: MDI > PROG > DIR on the YCM, or check FOCAS program_directory.",
+    "To find part numbers: match the program to the part it cuts in ProShop.",
+    "",
+    "Fields:",
+    "  o_number    - Program number on the CNC (e.g. 'O0001'). Include leading zeros.",
+    "  part_number - ProShop part number (e.g. 'TRA1-0042'). Case-sensitive.",
+    "  description - Short note so anyone can identify this (e.g. 'Housing 1st op').",
+    "  op_number   - ProShop operation number if known (e.g. 60). Optional.",
+    "",
+    "Programs with empty part_number are still tracked but won't auto-cross-reference."
+  ],
+  "machine_id": "T2",
+  "machine_name": "YCM NTC1600LY (Lathe-2)",
+  "programs": [
+    {
+      "o_number": "O0680",
+      "part_number": "ICO1-10-01680",
+      "description": "10-01680 SIDE 1. TPM-posted 2026-02-17. Tools: T03 general turning, T05 groove, T07 general turning, T08 drill, T11 spot drill.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O2004",
+      "part_number": "ICO1-10-02004",
+      "description": "10-2004 SIDE 1. TPM-posted 2026-02-26. Note in header: 'TO RUN 5 PARTS USE PROGRAM O7004' (master loop). Tools: T01/T07 general turning, T03 groove, T06 flat end mill, T10 boring, T11 spot drill.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O2005",
+      "part_number": "ICO1-10-02004",
+      "description": "10-2004 SIDE 2. TPM-posted 2026-02-26. Tools: T03/T07 general turning, T06 right hand tap, T08 drill, T11 spot drill.",
+      "op_number": 70
+    },
+    {
+      "o_number": "O0879",
+      "part_number": "R2S1-10878",
+      "description": "10878P2 SIDE 1 V2. Posted 2025-06-27 (legacy Mastercam header, not TPM). Tools: T01 OD rough, T07 OD finish, T03 OD groove, T08 drill .532, T06 3/8 SQ EM, T10 ID groove, T11 ID thread, T05 bar puller. Notes: added bar puller op, more chamfer at mouth, revised T6 entry, revised bore finishing T10.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O3612",
+      "part_number": "R2S1-10036",
+      "description": "10036 REV B YCM LATHE (R2Sonic, folder R2-10036-10037). Revised tool numbers. Tool T07 OD finish 35-deg (insert VNMG-430.5, library TO310).",
+      "op_number": 60
+    },
+    {
+      "o_number": "O0812",
+      "part_number": "R2S1-10981",
+      "description": "10981 SIDE 2. TPM-posted 2026-02-11. Tools: T07 general turning, T08 drill, T10 groove, T11 center drill.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O4270",
+      "part_number": "R2S1-10042",
+      "description": "[CANDIDATE — VERIFY] 10042 OP70 most likely (folder R2-10042-10164; 10164's OP70 is in O1647, leaving OP70 of 10042 unaccounted for). Header has only operator notes ('CHANGE PART', 'SWITCH TO HANDLE', 'TO USE TAILSTOCK BUTTONS') — no machine-readable part/op tag. Tool T01 OD 55-deg right (DNMP 150408).",
+      "op_number": 70
+    },
+    {
+      "o_number": "O2003",
+      "part_number": "ICO1-10-02003",
+      "description": "10-2003 SIDE 1. TPM-posted 2026-02-24. Tools: T03/T07 general turning, T05 groove, T06 reamer, T08 drill, T10 boring, T11 spot drill.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O0831",
+      "part_number": "R2S1-10983",
+      "description": "10983 SIDE 1. TPM-posted 2026-02-07. Tools: T02 spot drill, T03 groove, T04 drill, T07 general turning, T08 drill, T11 spot drill.",
+      "op_number": 50
+    },
+    {
+      "o_number": "O0877",
+      "part_number": "R2S1-10877",
+      "description": "10877P2 SIDE 1. Posted 2025-06-21 (legacy Mastercam header). Tools: T07 OD finish, T03 OD groove 2mm, T09 1mm OD groove, T08 .250 jobber, T6 3/8 SQ EM, T2 1/8 SQ EM, T4 1/16 SQ EM.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O4280",
+      "part_number": "R2S1-10042",
+      "description": "Op 80 of parts 10042 AND 10164 (dual-use shared program). 'OP 80 MILL-TURN' with improved threading. Tool T01 OD 55-deg right (DNMG-432). Folder R2-10042-10164.",
+      "op_number": 80
+    },
+    {
+      "o_number": "O2049",
+      "part_number": "",
+      "description": "FOCAS bootstrap: 475 samples over 1 day(s), 2026-02-27 to 2026-02-27. No NC code uploaded — verify program still on machine. No time-tracking match found in WO history (2026-02-27).",
+      "op_number": null
+    },
+    {
+      "o_number": "O0003",
+      "part_number": "",
+      "description": "IMPELLER_YCM_LATHE_775_DIA — generic impeller turning program (7.75 dia). Posted 2025-09-25. Single tool T01 80-deg OD rough. Part-agnostic; reused across multiple impeller jobs.",
+      "op_number": null
+    },
+    {
+      "o_number": "O0811",
+      "part_number": "R2S1-10981",
+      "description": "10981 SIDE 1. TPM-posted 2026-02-07. Tools: T02 spot drill, T03 groove, T04 drill, T07 general turning, T08 drill, T11 spot drill.",
+      "op_number": 50
+    },
+    {
+      "o_number": "O4256",
+      "part_number": "R2S1-10042",
+      "description": "Op 56 of part 10042. Faces and center drills both sides.",
+      "op_number": 56
+    },
+    {
+      "o_number": "O0819",
+      "part_number": "",
+      "description": "FOCAS bootstrap: 395 samples over 2 day(s), 2026-02-10 to 2026-02-11. No NC code uploaded — verify program still on machine. No time-tracking match found in WO history (2026-02-10→11).",
+      "op_number": null
+    },
+    {
+      "o_number": "O0971",
+      "part_number": "R2S1-10907",
+      "description": "10907P1 SIDE 1 V4. Posted 2025-09-17 (legacy Mastercam header). Tools: T07 OD finish, T03 OD groove 2mm, T09 1mm OD groove, T11 O4 spot drill, T08 .250 jobber, T6 3/8 SQ EM, T2 1/8 SQ EM, T4 1/16 SQ EM.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O0832",
+      "part_number": "R2S1-10983",
+      "description": "10983 SIDE 2. TPM-posted 2026-02-07. Single tool: T07 general turning.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O7004",
+      "part_number": "ICO1-10-02004",
+      "description": "Master program for subprogram O2004 — runs 5 parts of 10-2004 SIDE 1 in a loop (M98P2004L5). Stock stick out 2 inches from collet face.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O8772",
+      "part_number": "R2S1-10877",
+      "description": "10877P2 SIDE 2 — also used as 10907P1 SIDE 2 (shared between two parts). Posted 2025-06-22 (legacy Mastercam header). Tools: T07 OD finish, T10 Micro 100 QRRC3-017-375-180.",
+      "op_number": 70
+    },
+    {
+      "o_number": "O1481",
+      "part_number": "",
+      "description": "[CANDIDATE] By O14XY pattern (Item 14X, OP Y), this is likely ART1-148 Top Collar OP 1. NC files for Item 148 are not yet archived in PART FILES Traxis. Pattern verified: O1421/O1422 = Item 142, O1431/O1432 = Item 143, O1491/O1492 = Item 149. WO time-tracking on 2026-03-18 also matched R2S1-10311 op 2000 and LYN1-BH-A-E op 60. FOCAS observed 142 samples 2026-03-18.",
+      "op_number": null
+    },
+    {
+      "o_number": "O3719",
+      "part_number": "R2S1-10037",
+      "description": "10037 LATHE (revised 2026-02-17). R2Sonic, folder R2-10036-10037. Run via master O7002 (M98P3719L10). Tool T07 OD finish 35-deg (VNMG-431).",
+      "op_number": 60
+    },
+    {
+      "o_number": "O7002",
+      "part_number": "R2S1-10037",
+      "description": "Master program for subprogram O3719 — runs 10 parts of 10037 in a loop (M98P3719L10). Stock stick out 2 inches from collet face.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O3712",
+      "part_number": "R2S1-10037",
+      "description": "10037 LATHE (R2Sonic, folder R2-10036-10037). Posted 2023-10-29. Tool T07 OD finish 35-deg (VNMG-431). Likely superseded by O3719 (revised 2026-02-17 version).",
+      "op_number": 60
+    },
+    {
+      "o_number": "O0121",
+      "part_number": "",
+      "description": "FOCAS bootstrap: 81 samples over 2 day(s), 2026-02-08 to 2026-02-09. No NC code uploaded — verify program still on machine. No time-tracking match found in WO history (2026-02-08→09).",
+      "op_number": null
+    },
+    {
+      "o_number": "O1482",
+      "part_number": "",
+      "description": "[CANDIDATE] By O14XY pattern, likely ART1-148 Top Collar OP 2. See O1481 note for pattern. WO time-tracking on 2026-03-18→19 also matched R2S1-10311 / LYN1-BH-A-E. FOCAS observed 80 samples 2026-03-18→19.",
+      "op_number": null
+    },
+    {
+      "o_number": "O1492",
+      "part_number": "ART1-149",
+      "description": "ART1-149 Bottom Plate Door OP 2 — found in PART FILES Traxis/ARTIVION/Item 149 - Bottom Plate Door/NC Files/149 OP 2.nc. Mill program (T3 chamfer, T7 drill). FOCAS observed 71 samples 2026-03-17.",
+      "op_number": 2
+    },
+    {
+      "o_number": "O2009",
+      "part_number": "ICO1-10-02004",
+      "description": "BORE COLLET FIXTURE for ICO1-10-02004 — found in PART FILES Traxis/ICON TECH/10-02004/Bore Collet Fixture.nc. TPM-posted 2026-02-2x. Setup/fixture program, not a cutting op. FOCAS observed 50 samples 2026-02-25→27.",
+      "op_number": null
+    },
+    {
+      "o_number": "O2006",
+      "part_number": "ICO1-10-02002",
+      "description": "ICON 10-2002 OP 4 WEAR — found in PART FILES Traxis/ICON TECH/10-02002/Icon 10-2002 OP 4 wear.nc. Mill program (T9 .125 flat end mill) — likely live-tool on YCM. FOCAS observed 49 samples on 2026-02-25.",
+      "op_number": 4
+    },
+    {
+      "o_number": "O1491",
+      "part_number": "ART1-149",
+      "description": "ART1-149 Bottom Plate Door OP 1 — found in PART FILES Traxis/ARTIVION/Item 149 - Bottom Plate Door/NC Files/149 OP 1.nc. Mill program (T3 chamfer mill, T7 drill) — likely live-tool on YCM. FOCAS observed 39 samples 2026-03-12→13. NOTE: WO time-tracking matched ART1-143 Base Plate (different part) on same dates — the NC file is authoritative, the time-tracking entry was likely a misattribution.",
+      "op_number": 1
+    },
+    {
+      "o_number": "O0820",
+      "part_number": "",
+      "description": "FOCAS bootstrap: 26 samples over 1 day(s), 2026-02-11 to 2026-02-11. No NC code uploaded — verify program still on machine. No time-tracking match found in WO history (2026-02-11).",
+      "op_number": null
+    },
+    {
+      "o_number": "O0958",
+      "part_number": "R2S1-10958",
+      "description": "10958 SIDE 1. TPM-posted 2026-02-07. Tools: T01 general turning, T03 groove, T05 groove, T07 general turning.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O1499",
+      "part_number": "",
+      "description": "[CANDIDATE] Not found in PART FILES Traxis NC files. Item 149 has only O1490/O1491/O1492/O1493 archived; O1499 may be a test/debug program or a one-off. WO time-tracking on 2026-03-17→18 matched R2S1-10311 op 60/70/2000 and LYN1-BH-A-E op 60. FOCAS observed 25 samples.",
+      "op_number": null
+    },
+    {
+      "o_number": "O1489",
+      "part_number": "LYN1-BH-A-E",
+      "description": "FOCAS bootstrap: 23 samples over 1 day(s), 2026-03-19 to 2026-03-19. No NC code uploaded — verify program still on machine. [CANDIDATE — WO date] LYN1-BH-A-E op 60 ran on T2 on 2026-03-19 — single match in WO time-tracking. Verify on YCM. Alternative: by O14XY pattern, could be ART1-148 Top Collar fixture/jaws (no NC file archived for Item 148).",
+      "op_number": 60
+    },
+    {
+      "o_number": "O0880",
+      "part_number": "R2S1-10878",
+      "description": "10878P2 SIDE 2 V2. Posted 2025-09-24 (legacy Mastercam header). Tools: T10 ID groove, T07 OD finish.",
+      "op_number": 70
+    },
+    {
+      "o_number": "O0061",
+      "part_number": "",
+      "description": "REWORK OP61 — generic groove finishing rework. TPM-posted 2026-02-26. Single tool T03 groove turning. Part-agnostic; reused across rework jobs.",
+      "op_number": 61
+    },
+    {
+      "o_number": "O2010",
+      "part_number": "",
+      "description": "[CANDIDATE] O2010 reused across multiple 3D SYSTEMS programs in PART FILES Traxis: (a) 7301K32- TOP SIDE -1 → ProShop 3DS1-7301K32; (b) ST3315 Side Cover Plate (not in ProShop, likely obsolete). FOCAS observed 7 samples on 2026-02-25 — pick which on YCM.",
+      "op_number": null
+    },
+    {
+      "o_number": "O0821",
+      "part_number": "",
+      "description": "FOCAS bootstrap: 5 samples over 1 day(s), 2026-02-11 to 2026-02-11. No NC code uploaded — verify program still on machine. No time-tracking match found in WO history (2026-02-11).",
+      "op_number": null
+    },
+    {
+      "o_number": "O0792",
+      "part_number": "R2S1-10979",
+      "description": "10979 P2 SIDE 2. TPM-posted 2025-12-29. Tools: T07 general turning, T08 drill, T10 right hand tap, T11 spot drill.",
+      "op_number": 70
+    },
+    {
+      "o_number": "O2000",
+      "part_number": "",
+      "description": "SPACER_10 — generic spacer turning program. Posted 2025-09-27 (legacy Mastercam header). Tools: T07 OD finish, T08 drill .2 dia, T03 OD groove narrow.",
+      "op_number": null
+    },
+    {
+      "o_number": "O8000",
+      "part_number": "",
+      "description": "M CODES YCM NTC 2000SLY — reference list of M-codes (utility/documentation, not a cutting program).",
+      "op_number": null
+    },
+    {
+      "o_number": "O8100",
+      "part_number": "",
+      "description": "ID OD CHUCKING — chuck setup utility for YCM NTC2000SLY. Inside-clamp / outside-clamp test sequence. Not a cutting program.",
+      "op_number": null
+    },
+    {
+      "o_number": "O9000",
+      "part_number": "",
+      "description": "PART COUNTER LOOP — generic counter macro. Variables #101=target count, #102=reset flag. Calls subprogram M98P3125 each cycle. Utility, not a cutting program.",
+      "op_number": null
+    },
+    {
+      "o_number": "TAP1",
+      "part_number": "",
+      "description": "Tap macro (G1102 cycle) — utility, not a cutting program.",
+      "op_number": null
+    },
+    {
+      "o_number": "O1211",
+      "part_number": "AME1-121158",
+      "description": "AIROTOR — American Innovations 121158-001 lathe program (AI-121158-001). Posted 2024-03-05. Inactive customer per Mastercam path. Tools: T07 OD finish 35-deg, plus OD rough.",
+      "op_number": 50
+    },
+    {
+      "o_number": "O8860",
+      "part_number": "AUS1-Barb Fitting",
+      "description": "YCM BARB FITTING — Austin Pump barb fitting (folder AP-BARB-FITTING). Posted 2023-10-09. Single tool T01 CNMG-432.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O3860",
+      "part_number": "MON2-3000038 - Mod",
+      "description": "3000038 MOD — Monogram part 3000038 (folder MONOGRAM-3000038). Posted 2023-10-06. Inactive customer. Tool T03 OD cutoff.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O7221",
+      "part_number": "R2S1-10722",
+      "description": "10722 SIDE 1 (R2Sonic). Posted 2025-07-21 (legacy Mastercam header). Tools: T01 OD rough 80-deg, T07 OD finish 35-deg, T10 spot tool .50 dia, T08 drill .397 dia, T03 OD groove narrow.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O0126",
+      "part_number": "R2S1-10739",
+      "description": "10739A M8 STANDOFF 91MM LONG (R2Sonic, folder R2-10739). Posted 2023-11-14. Tool T01 OD rough 80-deg.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O0370",
+      "part_number": "R2S1-A0208-300-007",
+      "description": "AD0208-300-007 OP70 LATHE (R2Sonic). Posted 2023-09-11. Tools: T01 OD rough 80-deg, T03 OD finish 35-deg.",
+      "op_number": 70
+    },
+    {
+      "o_number": "O0760",
+      "part_number": "R2S1-A0208-300-007",
+      "description": "AD0208-300-007 OP60 LATHE (R2Sonic). Posted 2023-11-03. Tools: T01 OD rough 80-deg, plus OD rough finish path.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O0770",
+      "part_number": "R2S1-A0208-300-003",
+      "description": "AD0208-300-003 OP70 LATHE (R2Sonic). Note: filed under R2-AD208-300-007 folder but program is for the -003 variant. Posted 2023-11-06. Tools: T01 OD rough 80-deg, T03 OD finish 35-deg.",
+      "op_number": 70
+    },
+    {
+      "o_number": "O0011",
+      "part_number": "R2S1-10042",
+      "description": "OP50 10042 (R2Sonic CORNER STUD). Posted 2023-06-02. Tool T09 OD 55-deg right (DNMP 150408).",
+      "op_number": 50
+    },
+    {
+      "o_number": "O0012",
+      "part_number": "R2S1-10042",
+      "description": "OP60 10042 (R2Sonic CORNER STUD). Posted 2023-06-02. Tool T09 OD 55-deg right (DNMG-432).",
+      "op_number": 60
+    },
+    {
+      "o_number": "O4281",
+      "part_number": "R2S1-10042",
+      "description": "10042 SIDE -2 — titanium variant (material: TITANIUM INCH WROUGHT 140 BHN). R2Sonic, folder R2-10042-10164. Posted 2023-07-08. Tool T09 OD 55-deg right (DNMG-432).",
+      "op_number": 80
+    },
+    {
+      "o_number": "O4282",
+      "part_number": "R2S1-10042",
+      "description": "OP 80 MILL-TURN with improved threading. Shared between R2S1-10042 and R2S1-10164 (same dual-use pattern as O4280). Folder R2-10042-10164. Uses T09 (alt of O4280's T01).",
+      "op_number": 80
+    },
+    {
+      "o_number": "O1647",
+      "part_number": "R2S1-10164",
+      "description": "10164 OP70 LATHE (R2Sonic CORNER STUD-SHORT). Posted 2023-08-11. Tool T01 OD 55-deg right (DNMG-432) OD ROUGH.",
+      "op_number": 70
+    },
+    {
+      "o_number": "O3713",
+      "part_number": "R2S1-10037",
+      "description": "10037 LATHE subprogram (header warns: 'FOR SUBPROGRAM USE ONLY NO WORK OFFSETS'). R2Sonic, folder R2-10036-10037. Material: aluminum 7075 1-inch dia. Tool T03 OD finish 35-deg (VNMG-431).",
+      "op_number": 60
+    },
+    {
+      "o_number": "O7001",
+      "part_number": "R2S1-10036",
+      "description": "Master program for subprogram O3213 — calls multiple times with Z offsets (G52Z0.00, G52Z-0.55, etc.). Folder R2-10036-10037. Assigned to 10036 by elimination (O7002 is already the 10037 master).",
+      "op_number": 60
+    },
+    {
+      "o_number": "O6881",
+      "part_number": "UTA1-NP000688",
+      "description": "NP000688_1_CAD. Posted 2024-01-15 on YCM_NTC1600LY. Tools: T01 CNMG-432 OD rough 80-deg, T03 VPGR 331 OD finish 35-deg, T05 TDXU2E Ingersoll OD groove 2mm, T11 drill 1.063 dia, T08 80-deg ID finish, T02 1/8 SQ EM.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O1000",
+      "part_number": "",
+      "description": "IMPELLER_ARBOR — generic impeller arbor program. Posted 2024-01-02 on YCM_NTC1600LY. Tools: T01 OD rough, T08 .25 center drill, T03 OD finish 35-deg, T05 OD groove narrow, T09 OD thread right.",
+      "op_number": null
+    },
+    {
+      "o_number": "O1001",
+      "part_number": "AUS1-Barb Fitting",
+      "description": "IMPELLER TRIM — generic impeller trim program (OD 7.05 to 5.2, comment 'CHANGE DEPENDING ON PRODUCT'). Single tool T01 OD rough 80-deg. Pairs with subprogram O1002.",
+      "op_number": 60
+    },
+    {
+      "o_number": "O1002",
+      "part_number": "AUS1-Barb Fitting",
+      "description": "IMPELLER TRIM SUB — subprogram for O1001. Generic step/feed pattern with adjustable processing distance.",
+      "op_number": 60
+    }
+  ]
+}

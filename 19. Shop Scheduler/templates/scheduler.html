@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Scheduler — Traxis</title>
+    <link rel="stylesheet" href="/static/style.css?v={{ cache_bust }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build@3.9.0/event-calendar.min.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>Shop Scheduler</h1>
+        <nav class="header-nav">
+            <a href="/" class="active">Board</a>
+            <a href="/operator">Operator</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/tools">Tools</a>
+        </nav>
+        <div class="readiness-key">
+            <span class="key-label">Dots:</span>
+            <span class="key-item"><span class="light green"></span>Prog</span>
+            <span class="key-item"><span class="light green"></span>Mat</span>
+            <span class="key-item"><span class="light green"></span>Tools</span>
+            <span class="key-item"><span class="light green"></span>Machine</span>
+        </div>
+        <div class="header-actions">
+            <div class="zoom-controls">
+                <button class="zoom-btn" data-zoom="day">Day</button>
+                <button class="zoom-btn active" data-zoom="3day">3-Day</button>
+                <button class="zoom-btn" data-zoom="week">Week</button>
+                <button class="zoom-btn" data-zoom="month">Month</button>
+            </div>
+            <button class="btn" id="btn-today">Today</button>
+            <button id="btn-undo" disabled>Undo</button>
+            <button class="btn btn-danger" id="btn-clear-board">Clear Board</button>
+            <button class="btn btn-success" id="btn-auto-schedule">Auto-Schedule</button>
+            <button class="btn btn-primary" id="btn-sync">Sync</button>
+            <div class="sync-status">
+                <span class="sync-dot" id="sync-dot"></span>
+                <span id="sync-text">Ready</span>
+            </div>
+            <span class="version-label">v0.5</span>
+        </div>
+    </header>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar" id="filter-bar">
+        <button class="filter-toggle-btn" id="filter-toggle" title="Toggle filters">
+            <span class="filter-icon">&#9776;</span> Filters
+            <span class="filter-count" id="filter-active-count" style="display:none">0</span>
+        </button>
+        <div style="position:relative;display:inline-block">
+            <button class="btn" id="btn-hidden-wos" style="font-size:12px;padding:4px 10px">Hidden Items <span id="hidden-wo-count" style="display:none" class="filter-count">0</span></button>
+            <div class="hidden-wos-dropdown" id="hidden-wos-dropdown"></div>
+        </div>
+        <div class="filter-controls" id="filter-controls" style="display:none">
+            <input type="text" class="filter-input" id="filter-search" placeholder="Search WO#, part, op name...">
+
+            <select class="filter-select" id="filter-customer">
+                <option value="">All Customers</option>
+            </select>
+
+            <div class="filter-group">
+                <span class="filter-group-label">Status:</span>
+                <label class="filter-check"><input type="checkbox" id="filter-scheduled" checked> Scheduled</label>
+                <label class="filter-check"><input type="checkbox" id="filter-running" checked> Running</label>
+                <label class="filter-check"><input type="checkbox" id="filter-complete"> Complete</label>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-group-label">Urgency:</span>
+                <label class="filter-check"><input type="checkbox" id="filter-pastdue" checked> Past Due</label>
+                <label class="filter-check"><input type="checkbox" id="filter-urgent" checked> Urgent</label>
+                <label class="filter-check"><input type="checkbox" id="filter-normal" checked> Normal</label>
+                <label class="filter-check"><input type="checkbox" id="filter-nodate" checked> No Date</label>
+            </div>
+
+            <select class="filter-select" id="filter-material-type">
+                <option value="">All Materials</option>
+            </select>
+
+            <div class="filter-group">
+                <span class="filter-group-label">Needs:</span>
+                <label class="filter-check"><input type="checkbox" id="filter-needs-program"> Program</label>
+                <label class="filter-check"><input type="checkbox" id="filter-needs-material"> Material</label>
+                <label class="filter-check"><input type="checkbox" id="filter-needs-tools"> Tools</label>
+            </div>
+
+            <button class="btn filter-clear-btn" id="filter-clear">Clear Filters</button>
+        </div>
+    </div>
+
+    <!-- Toast for overlap errors -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="scheduler-container">
+        <div id="gantt-calendar"></div>
+
+        <div class="resize-handle" id="resize-handle"></div>
+
+        <div class="backlog-panel" id="backlog-panel">
+            <div class="backlog-header" id="backlog-toggle">
+                <span>Backlog — <span id="backlog-count">0</span> unscheduled ops</span>
+                <span id="backlog-arrow">&#9660;</span>
+            </div>
+            <div class="backlog-search">
+                <input type="text" id="backlog-search" placeholder="Search WO, part, customer...">
+            </div>
+            <div class="backlog-items" id="backlog-items"></div>
+        </div>
+    </div>
+
+    <!-- Side Panel for block details (bottom) -->
+    <div class="side-panel" id="side-panel">
+        <div class="side-panel-header">
+            <h2 id="panel-title">Block Details</h2>
+            <button class="btn" id="panel-close">&times;</button>
+        </div>
+        <div class="side-panel-body" id="panel-body"></div>
+    </div>
+
+    <!-- Right-side Machine Ops Panel -->
+    <div class="machine-panel" id="machine-panel">
+        <div class="machine-panel-header">
+            <h2 id="machine-panel-title">Machine Ops</h2>
+            <button class="btn" id="machine-panel-close">&times;</button>
+        </div>
+        <div class="machine-panel-body" id="machine-panel-body"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@3.9.0/event-calendar.min.js"></script>
+    <script>window.PROSHOP_BASE = "{{ proshop_base }}";</script>
+    <script src="/static/scheduler.js?v={{ cache_bust }}"></script>
+</body>
+</html>

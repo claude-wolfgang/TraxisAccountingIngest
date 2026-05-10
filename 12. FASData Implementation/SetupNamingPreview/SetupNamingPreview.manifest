@@ -1,0 +1,12 @@
+{
+    "autodeskProduct": "Fusion360",
+    "type": "addin",
+    "id": "SetupNamingPreview",
+    "author": "Traxis Manufacturing",
+    "description": {
+        "": "Preview and apply PART:OP naming convention to CAM setups. Dry-run first, apply only when you confirm."
+    },
+    "version": "1.0.0",
+    "runOnStartup": false,
+    "supportedOS": "windows"
+}

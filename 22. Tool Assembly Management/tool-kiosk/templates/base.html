@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tool Assembly Kiosk{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+</head>
+<body>
+    <header class="top-bar">
+        <h1 class="top-bar-title">Traxis Tool Assembly</h1>
+        <nav class="top-bar-nav">
+            <a href="/" class="nav-btn {% block nav_kiosk %}{% endblock %}">Kiosk</a>
+            <a href="/log" class="nav-btn {% block nav_log %}{% endblock %}">Log</a>
+        </nav>
+    </header>
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="toast-container"></div>
+
+    <div id="api-status" class="api-status">
+        <span class="status-dot"></span>
+        <span class="status-text">Checking...</span>
+    </div>
+
+    <script>
+    function showToast(message, type) {
+        var el = document.createElement('div');
+        el.className = 'toast toast-' + (type || 'info');
+        el.textContent = message;
+        document.getElementById('toast-container').appendChild(el);
+        setTimeout(function() { el.remove(); }, 5000);
+    }
+
+    function apiFetch(url, options) {
+        options = options || {};
+        options.headers = options.headers || {};
+        if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
+            options.headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(options.body);
+        }
+        return fetch(url, options).then(function(resp) {
+            return resp.json().then(function(data) {
+                if (!resp.ok) {
+                    var msg = data.error || 'Request failed';
+                    showToast(msg, 'error');
+                    throw new Error(msg);
+                }
+                return data;
+            });
+        }).catch(function(err) {
+            if (err.message === 'Failed to fetch') {
+                showToast('Cannot reach server. Is the kiosk running?', 'error');
+            }
+            throw err;
+        });
+    }
+
+    function checkHealth() {
+        fetch('/api/health').then(function(r) { return r.json(); }).then(function(h) {
+            var el = document.getElementById('api-status');
+            var dot = el.querySelector('.status-dot');
+            var txt = el.querySelector('.status-text');
+            if (h.api_reachable) {
+                dot.className = 'status-dot status-ok';
+                txt.textContent = 'Online';
+            } else {
+                dot.className = 'status-dot status-down';
+                txt.textContent = 'Offline';
+            }
+        }).catch(function() {
+            var el = document.getElementById('api-status');
+            el.querySelector('.status-dot').className = 'status-dot status-down';
+            el.querySelector('.status-text').textContent = 'Server down';
+        });
+    }
+    checkHealth();
+    setInterval(checkHealth, 60000);
+
+    // ── Global barcode scanner detector ──────────────────────────────────────
+    (function() {
+        var scanBuffer = '';
+        var scanTimeout = null;
+        var SCAN_CHAR_TIMEOUT = 80;
+
+        if (window.location.pathname !== '/') {
+            document.addEventListener('keydown', function(e) {
+                var tag = (e.target.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+                if (e.key === 'Enter' && scanBuffer.length >= 3) {
+                    e.preventDefault();
+                    var scanned = scanBuffer;
+                    scanBuffer = '';
+                    if (scanTimeout) { clearTimeout(scanTimeout); scanTimeout = null; }
+                    window.location.href = '/?scan=' + encodeURIComponent(scanned);
+                    return;
+                }
+                if (e.key.length === 1) {
+                    scanBuffer += e.key;
+                    if (scanTimeout) clearTimeout(scanTimeout);
+                    scanTimeout = setTimeout(function() {
+                        scanBuffer = '';
+                    }, SCAN_CHAR_TIMEOUT);
+                }
+            });
+        }
+    })();
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

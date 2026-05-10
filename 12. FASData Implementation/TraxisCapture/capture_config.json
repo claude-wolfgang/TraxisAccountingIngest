@@ -1,0 +1,13 @@
+{
+    "output_dir": "Programming Sessions/diffs",
+    "naming_pattern": "^[A-Z0-9_-]+:\\d+$",
+    "op_start_number": 60,
+    "op_increment": 10,
+    "nc_programs_root": "D:\\Dropbox\\NC Programs",
+    "dropbox_root": "D:\\Dropbox\\MACHINE COMM Traxis",
+    "log_level": "INFO",
+    "skip_keywords": ["fixture", "soft jaw", "softjaw", "jaws", "workholding", "vise"],
+    "part_number_patterns": [
+        "(NP\\d{4,8})"
+    ]
+}

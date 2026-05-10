@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+data/
+old/
+kiosk_launcher.log
+*.lnk
+chrome_profile/

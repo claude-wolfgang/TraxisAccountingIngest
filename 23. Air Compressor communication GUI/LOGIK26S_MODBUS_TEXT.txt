@@ -1,0 +1,105 @@
+Total pages: 13
+
+===== PAGE 1 =====
+LOGIK 26S MODBUS COMMUNICATION
+CONTENTS
+SERIAL CONNECTIONS .......................................................................................................... 2
+MODBUS COMMUNICATION ................................................................................................ 3
+MODBUS ADDRESS LIST ........................................................................................................ 4
+1
+
+===== PAGE 2 =====
+LOGIK 26S MODBUS COMMUNICATION
+SERIAL CONNECTIONS
+The serial communication type is RS485 and uses modbus RTU protocol.
+Each logik26S has 2 serial communcation ports on the termials
+M2(Master/slave - Multinuit) and M8(Inverter or stand alone
+comm. only)
+Master / Slave operation only two compressor must be connected
+via serial communication.In case of communication between two
+units, no need to use 120 Ω resistor for each end.
+Serial Connection Notes
+1. Use shielded flexible twisted cable
+2. Connect D+ and D- terminals through each compressor controller and connect shield part to terminal “M2-
+1 : GND” digital ground for each side as well.
+3. Do not connect the cables shield to the ground
+4. The cable lenght must not be longer than 400 meters
+5. The units on the serial net must be connected without any reversal connection and connections must be
+like :
+D+ -> D+ / D- -> D- / 0 -> 0
+Note :
+The serial port on the terminal M2 can be used for ;
+- Master / Slave Operation usage
+- Stand alone modbus communications (Scada Systems, modbus softwares on pc etc.)
+- Multi unit Operation
+The serial port on the terminal M8 can be used for inverter communications or for stand alone communication.
+2
+
+===== PAGE 3 =====
+LOGIK 26S MODBUS COMMUNICATION
+MODBUS COMMUNICATION
+The serial connection has described in Serial Connection Section.
+Logik26S has 1 RS485 Serial interface for modbus communication with external systems. This
+serial interface supports modbus RTU protocol and allow to read compressor data’s under the
+conditions :
+- Compressors must be working stand alone. If two compressors are working under
+master / slave mode, its not possible to use same serial line for external communication.
+- If compressors are working under the multiunit operation, then Logika ethernet serial
+converter interface is needed to make possible to read data from the compressors
+externally via modbus tcp protocol. (Serial ethernet interface also have capability to
+convert modbus rtu into the modbus tcp.)
+Note: Its not possible to use standard serial ethernet converter to convert the modbus
+rtu protocol into the modbus tcp, since the logik ethernet serial interface has special
+function to prevent master message interruption. Standard converters do not have
+such capability.
+Modbus communication parameters :
+Baud Rate : 9600
+Data Bits : 8
+Stop Bits : 1
+Parity : None
+These modbus connection parameters are constant and they are not able to change.
+Each compressor number is also modbus address of the relevant compressor. All the
+compressors must have different compressor number under the compressor number parameter
+setting C08.
+3
+
+===== PAGE 4 =====
+LOGIK 26S MODBUS COMMUNICATION
+MODBUS ADDRESS LIST FOR THE LOGIK 26S
+4
+
+===== PAGE 5 =====
+LOGIK 26S MODBUS COMMUNICATION
+5
+
+===== PAGE 6 =====
+LOGIK 26S MODBUS COMMUNICATION
+6
+
+===== PAGE 7 =====
+LOGIK 26S MODBUS COMMUNICATION
+7
+
+===== PAGE 8 =====
+LOGIK 26S MODBUS COMMUNICATION
+8
+
+===== PAGE 9 =====
+LOGIK 26S MODBUS COMMUNICATION
+9
+
+===== PAGE 10 =====
+LOGIK 26S MODBUS COMMUNICATION
+10
+
+===== PAGE 11 =====
+LOGIK 26S MODBUS COMMUNICATION
+11
+
+===== PAGE 12 =====
+LOGIK 26S MODBUS COMMUNICATION
+12
+
+===== PAGE 13 =====
+LOGIK 26S MODBUS COMMUNICATION
+13

@@ -1,0 +1,12 @@
+{
+    "autodeskProduct": "Fusion360",
+    "type": "addin",
+    "id": "TraxisCapture",
+    "author": "Traxis Manufacturing",
+    "description": {
+        "": "Logs programmer changes between CAM-generated toolpaths and final posted programs for continuous improvement."
+    },
+    "version": "1.0.1",
+    "runOnStartup": true,
+    "supportedOS": "windows"
+}

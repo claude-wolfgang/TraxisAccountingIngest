@@ -1,0 +1,1901 @@
+==========================================================================================
+TOOL FREQUENCY ANALYSIS REPORT
+Generated: 2026-03-17 19:21
+Analysis Period: March 2024 - March 2026 (past 2 years)
+Data Source: ProShop API - Part File Sequence Details
+==========================================================================================
+
+SUMMARY
+  Total Work Orders analyzed: 863
+  Unique parts with WOs: 375
+  Parts with sequence tool data: 274
+  Parts without sequence tool data: 127
+  Unique tools found in sequences: 554
+  Tool master records: 639
+
+==========================================================================================
+TOP TOOLS RANKED BY WORK ORDER VOLUME
+(WO-Weighted = sum of ordered qty across all WOs using this tool)
+==========================================================================================
+
+Rank  Tool #       Parts  WOs   WO Qty   Seq   Description                                  
+----- ------------ ------ ----- -------- ----- ---------------------------------------------
+1     L18          113    248   20628    351   1/4 x 2-1/2 4F 90° ChMill AlTiN
+2     O4           94     209   18888    164   1/4 90� SPOT DRILL 2.76 OAL
+3     A1           67     185   18300    160   1/8-.5LOC-1.5 OAL 3FL SQUARE
+4     A10          33     91    16157    171   3/8, 1 LOC, 2.5 OAL, 3FL
+5     A30          49     119   14964    143   1/4-.75 LOC-2.5 OAL 3FL
+6     I140         8      27    11374    11    ISCAR FACE MILL F45KT D2.5 -R07-410
+7     .166 JOBBER  3      11    9900     3     (not in tool master)
+8     .120         3      11    9900     3     (not in tool master)
+9     .125 HSS REAMERQ 3      11    9900     3     (not in tool master)
+10    LETTER P HSS JOBBER OR STUB .323" 3      11    9900     3     (not in tool master)
+11    L201         3      11    9900     3     1/4 120 4FL CHAMFERMILL
+12    A12          19     58    4146     38    3/8-1.0 LOC- 2.5 OAL 5FL
+13    A61          49     104   3726     245   1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CA
+14    A47          38     78    3685     103   3/16-.5625 LOC-2.0 OAL 3FL
+15    I460         20     59    3182     73    2" diameter Dodeka mini 45 shell mill.  KSHR2
+16    I132         28     73    2898     68    2" -90 degree Face Mill, 7 insert
+17    TO447        7      25    2572     20    DNMG432MS PR1535 1/2" Circle Diameter x 3/16"
+18    A28          15     34    2388     20    1/16-.250 LOC-1.5 OAL 2FL
+19    TO310        13     35    2243     26    1/64" .008"CR External 35° Profiling Insert V
+20    E479         2      13    2070     2     #3 Carbide Center Drill. 1/4" Diameter
+21    O17          20     40    1904     37    3/8 90� SPOT DRILL 3.5 OAL
+22    B77          7      19    1853     22    1/2-R0.03-.625 LOC- 2.5 OAL 5FL
+23    M425         11     35    1754     13    1/32 x .025 x 1.5 4F BALL EM C3
+24    K111         10     39    1751     11    .02 Corner radius cutter
+25    A157         6      17    1661     11    1/8-.5 LOC-1.5 OAL 4FL
+26    L199         4      12    1623     6     1/2″ Diam 82° 4-Flute Single End Solid Carbid
+27    5/8 COBALT HSS DRILL 1      8     1495     1     (not in tool master)
+28    D463         1      9     1455     1     GOdrill 10.3mm / .4055" 3xD SOLID CARBIDE DRI
+29    N95          1      9     1455     1     M10 and up 1.75mm pitch Thread Mill 4FL
+30    O3           3      10    1290     3     1/8 90� SPOT DRILL .75 OAL
+31    B46          9      29    1285     21    1/4-.375 LOC-2.5 OAL 3FL
+32    TK497_-_TR498 4      10    1202     4     (not in tool master)
+33    #55          2      8     1200     2     (not in tool master)
+34    D494         2      8     1200     2     0.75MM EX-SUS-GDS
+35    B23          11     35    1191     37    3/8 BALL 1.00 LOC-2.5 OAL 4FL
+36    L35          2      5     1119     2     1/8 90� 4FL CHAMFERMILL
+37    A14          16     39    1074     47    3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+38    B1006        7      34    1015     12    1/2 Corner Round End Mill, .02 Rad
+39    B267         4      15    994      15    1/4-.625 LOC-2.5 OAL .03 RAD 3FL
+40    B9           7      24    974      11    3/8-.625 LOC-3.0 OAL 2FL
+41    -            12     27    955      27    (not in tool master)
+42    TIPD417      11     37    942      18    Drill #30 (.1285) Cobalt Jobber
+43    R6           3      9     930      3     M4X.7 SPIRAL CUT TAP
+44    TIPD421      10     28    929      14    Drill Letter H(.266) Cobalt Jobber
+45    L103         6      21    925      16    3/16- 45- 4FL-.04 tip- CHAMFERMILL
+46    L202         1      4     919      2     .08 x 45 deg Back Deburring Mill
+47    (#30) .128 HSS JOBBER DRILL 1      4     919      1     (not in tool master)
+48    A16          10     29    908      29    1/2-.625 LOC -2.5 OAL 5FL
+49    EM 0.2500    1      7     900      6     (not in tool master)
+50    DRILL 0.1285 1      7     900      1     (not in tool master)
+51    A1003        6      32    880      38    3/8 X 3/8 X 1-1/4 LOC X 3 OAL X 3FL (ZRN)
+52    N120         8      25    866      9     M4 THREADMILL
+53    B109         7      24    833      15    1/8" Bull EM .015 Rad 1/4" LOC
+54    I437         2      8     790      5     50mm Dodeka™ Mini 45° • Shell Mill • Metric o
+55    A49          9      25    772      30    1/4-.500 LOC-2 OAL 5FL
+56    N119         8      22    738      10    M8 THREADMILL 11mm max thread depth
+57    TD476        2      7     728      3     Ultra-Dex 1/2 Shank Dia A06-SCLCR2 Steel INDE
+58    B181         7      23    720      22    3/32 x 1/8 x 3/8 x 1-1/2 4Fl Bull EM
+59    TC478        1      6     710      1     .7" Diameter Indexable Allied T-A Drill
+60    TIPD418      5      19    702      5     Drill #40 (.0980) Cobalt Jobber
+61    NO. 25       1      6     700      1     (not in tool master)
+62    R48          1      6     700      1     #8-32 FORMING TAP
+63    O1055        5      19    685      20    1/4 NC Spotting Drill
+64    A192         6      10    626      12    1/32 EM 1/8 LOC 2FL 1.500 LOA
+65    R1025        6      30    615      7     M4 Spiral Point STI Tap
+66    O1058        6      30    615      7     1/4 Spot drill 6"OAL
+67    L121         3      6     605      4     50 DEG P/S x .375 DIA x .157 LOC 2 FL
+68    TP454        7      18    597      18    ‎TDXU 2E-0.3 TT9080
+Double-ended pressed type
+69    K126         4      15    592      4     .118 CORNER RADIUS CUTTER
+70    L-18         10     18    581      31    (not in tool master)
+71    B11          10     31    577      34    .250 BALL x .750 LOC 2.5 OAL 4FL
+72    L144         4      8     570      11    .078 dia, 90 degree included angle chamfer mi
+73    N125         2      13    554      2     M3 THREADMILL .0906 dia 772724-c6
+74    .0995 135° JOBBER DRILL 2      6     550      3     (not in tool master)
+75    B1019        5      26    535      21    3/16 Ball End Mill
+76    K1048        5      26    535      18    0.093R corner radius, .045 Tip
+77    L1045        5      26    535      16    1/8 Chamfer Mill
+78    NO.38 .1015 HSS DRILL 1      6     530      1     (not in tool master)
+79    A22          6      12    529      11    3/32-.1875 LOC-1.5 OAL 4FL
+80    O51          4      12    512      6     1/4 140 degree � CARBIDE SPOT 3.0 OAL
+81    A34          7      14    510      13    3/8-.75 LOC-2.5 OAL 5FL
+82    C84          2      6     500      3     30 degree HSS Tapered End Mill
+83    NO. 16 JOBBER 2      5     500      3     (not in tool master)
+84    DRILL DRAWER 2      8     490      2     (not in tool master)
+85    A1020        2      8     480      2     .1875 End Mill, 3fl,
+86    B1005        2      11    466      8     1/2 Corner Round End Mill, .03 Rad
+87    B297         2      10    435      3     1/16 EM 3 FL BN 1/4 LOC
+88    A1041        4      20    430      31    5/8 3FLT LONG (4.0 LOC) FLAT EM, 8" OAL
+89    A1014        4      20    430      14    1/16 2FLT SQ EM .25 LOC
+90    YOU          3      7     430      4     (not in tool master)
+91    L76          2      5     402      4     3/16 90� 4FL CHAMFERMILL
+92    B1023        1      4     400      7     1/4" Ballnose End Mill, 3 Flute, 2-1/2" OAL, 
+93    B298         1      4     400      4     1/8 BALL 3FL 3/4 LOC EM
+94    NO. 22 HSS DRILL 1      4     400      1     (not in tool master)
+95    .15748" UNUSUAL THREE FLUTE 150 DEGREE DRILL 1      4     400      1     (not in tool master)
+96    M214         1      4     400      1     harvey tool- .250X220 Undercutting EM
+97    K290         1      4     400      1     0.03125 radius cutter
+98    A81          4      7     395      8     1/4x1/4x1-1/8x3/8x4 EM
+99    DRILL NO. 16 1      4     390      1     (not in tool master)
+100   TIPD423      7      15    355      7     Drill #7(.2010) Cobalt Jobber
+101   B292         5      20    355      23    1/2 BULL EM 3 FL .12 RAD
+102   3/8 HSS DRILL 3      11    340      3     (not in tool master)
+103   A1009        2      15    330      9     1/2 End mill
+104   A1039        2      15    330      6     5/8 x 3 x 6 3FL CARB EM ZRN
+105   B45          8      11    327      24    3/8-.03R-.875 LOC-2.5 OAL 5FL
+106   A1022        3      9     327      9     1/4 x 1/4 x 1 x 3 3F SE SQ Carb ZrN
+107   A81 OR 168   1      2     325      2     (not in tool master)
+108   A4           1      2     325      1     (not in tool master)
+109   №41 FROM DRILL DRAWER 1      2     325      1     (not in tool master)
+110   TO308        7      19    317      10    Internal and External 35° Profiling Insert VP
+111   A1030        2      6     315      3     3/4 x 3/4 x 2-1/2 x 5 3FL CARB EM
+112   A386         1      5     314      2     3/4 endmill 3fl sq s-carb 3/4 x 3/4 x 3.25 x 
+113   R66          1      5     314      2     #6-32 FORMING TAP
+114   11/64 (.1719") JOBBER DRILL HSS 1      5     314      1     (not in tool master)
+115   NO.31 (.120) 1      5     314      1     (not in tool master)
+116   .750 HSS DRILL 1      5     314      1     (not in tool master)
+117   11/64 .1719 HSS JOBBER 1      5     314      1     (not in tool master)
+118   NO.31 HSS JOBBER 1      5     314      1     (not in tool master)
+119   .125 COBALT 135 DEGJOBBER 1      5     314      1     (not in tool master)
+120   B259         6      11    311      15    .156 Ball EM
+121   R166         2      10    305      3     M6X1 STI CUT TAP
+122   N124         6      12    295      8     .180 dia for 1/4 THREADMILL, .750 max depth
+123   TIPD422      3      11    294      3     Drill #16(.1770) Cobalt Jobber
+124   CRIB A-61    1      5     290      3     (not in tool master)
+125   CRIB O-4     1      5     290      1     (not in tool master)
+126   CRIB L-18    1      5     290      1     (not in tool master)
+127   A-30         1      5     290      1     (not in tool master)
+128   A29          4      7     285      8     1/8-.250 LOC-1.5 OAL 5FL
+129   A1034        4      15    285      4     1" End Mill
+130   B1011        4      15    285      4     3/8 Ball End Mill
+131   R1024        4      15    285      4     Spiral Point 6-32 STI Tap
+132   R42          7      14    280      8     1/4-20 SPIRAL CUT TAP
+133   USE NEW COBALT NO. 35 .110 DRILL WITH 135 DEGREE TIP 2      4     280      2     (not in tool master)
+134   USE NEW COBALT NO. 29 .136" DRILL 2      4     280      2     (not in tool master)
+135   USE NEW COBALT NO. 19 .166" 2      4     280      2     (not in tool master)
+136   USE NEW COBALT NO. 26 .147" 2      4     280      2     (not in tool master)
+137   O74          3      6     274      8     3/16 90� SPOT DRILL 1.1875 OAL
+138   TL469        5      9     268      11    Carbide Boring insert Ultra-Dex by Arch 913-0
+139   K261         7      20    261      12    .062 RAD 3FL CORNER ROUNDING EM
+140   NO. 22 DRILL 2      3     255      2     (not in tool master)
+141   1/4" LETTER E HSS JOBBER DRILL 1      7     255      1     (not in tool master)
+142   D195         3      5     254      3     #29(.1360)5xD DR 2FL 1-3/8" F/L 135 PT *HLUBE
+143   D196         1      3     250      1     #19(.1660)5xD DR 2FL 1-5/8" F/L 135 PT *HLUBE
+144   D197         1      3     250      1     #26(.1470)5xD DR 2FL 1-3/8" F/L 135 PT *HLUBE
+145   D198         1      3     250      1     #35(.1100)5xD DR 2FL 1-1/4" F/L 135 PT *HLUBE
+146   N0. 16 HSS JOBBER 1      5     240      1     (not in tool master)
+147   A251         1      5     240      1     3/8 3FL SQ EM
+148   O-4          12     16    231      28    (not in tool master)
+149   B187         2      6     230      3     5/64 Endmill 4 FL BN 5/64 x 1/8 x 3/16 x 1-1/
+150   B1015        5      13    219      7     1/8 Ball End Mill
+151   LETTER F JOBBER DRILL 1      4     211      1     (not in tool master)
+152   A397         5      13    210      15    1/4- 1.25 LOC- 3 OAL 3FL EM NFI COATING
+153   B1004        4      12    209      8     3/8 Corner Round End Mill, .015 Rad
+154   B254         8      19    208      42    1/2-R0.09-2.0 LOC- 4.0 OAL 6FL
+155   K1047        3      11    205      15    .062 Corner Round, .046 Tip
+156   O1054        3      11    205      9     Countersink: #5
+157   K1050        3      11    205      6     KEO Corner Round 6mm
+158   D1053        3      11    205      3     39/64 Jacob Drill
+159   B1001        3      11    205      3     3/8 Ball End Mill
+160   A1042        3      11    205      3     1/2" Solid Carbide Route
+161   VPGR 331     2      4     204      4     (not in tool master)
+162   3MM ISCAR GROOVER 1      3     200      2     (not in tool master)
+163   STORED W/ FIXTURE 1      3     200      1     (not in tool master)
+164   A77          1      1     200      1     (not in tool master)
+165   TIPD424      2      6     193      3     Drill #23(.154) Cobalt Jobber
+166   B63          5      12    186      24    1/2-R.03-1.375 LOC-3.25 OAL 3FL
+167   A1043        3      9     180      3     5/8 ROUTING EM 2FLT
+168   A69          3      12    178      4     1/16-.125 LOC-1.5 OAL 4FL
+169   13-64        1      4     174      2     (not in tool master)
+170   A82          12     33    162      30    1/2 SQ EM 5FL - 1.25" LOC
+171   J159         2      8     160      3     3/8 X .062 KEYCUTTER
+172   A-49         5      8     159      17    (not in tool master)
+173   K207         4      10    157      5     0.039 radius cutter, double ended, .020 dia t
+174   TO485        8      16    147      22    80 Degree CNMG 432-TF IC807
+175   .277 DRILL   3      8     140      3     (not in tool master)
+176   B189         1      4     140      1     1/16 EM 2 FL BN 03B 1/16 x 1/8 x 3/16 x 1-1/2
+177   A222         4      7     138      5     1/16 SQ EM 3/16 LOC 1.5 OAL
+178   A248         9      19    137      26    1/2 5FL SQ EM
+179   R59          8      10    136      8     #10-32 SPIRAL CUT TAP
+180   A268         3      8     135      3     .25 SQ EM 1.5" LOC, 6" OAL, 3 FL
+181   B271         3      8     132      6     1/8 BALL EM 4FL
+182   B85          4      16    130      24    .250 x .500 x 2.00 5FL .015CR
+183   A-16         3      5     126      3     (not in tool master)
+184   B88          2      13    120      3     3/16 BALL EM 4FL
+185   NEW HSS DRILL 2      5     120      2     (not in tool master)
+186   R27          2      5     120      2     #4-40 SPIRAL CUT TAP
+187   .111 DIAMETER NO. 34 DRILL 2      4     115      2     (not in tool master)
+188   .201 # 7 COBALT 2      3     114      2     (not in tool master)
+189   B110         1      2     113      1     1/2" Bull EM .015 Rad 1" LOC
+190   .218  COBALT DRILL 1      2     113      1     (not in tool master)
+191   7/16 HSS DRILL 3      7     112      5     (not in tool master)
+192   M152         2      2     110      2     3/16 ENGRAVER .005 TIP
+193   TD464        2      8     108      2     M100 1/2 x 2.3/4 S/E Q/C HOLDER
+FOR 3/16 TOOL
+194   TI450        1      6     108      5     MG 12.7-08C23
+Internal grooving turning and t
+195   N105         1      6     108      2     M6 THREADMILL 4FL
+196   D114         1      6     108      1     4.5MM CARBIDE DRILL
+197   17-32 HSS DRILL 1      6     108      1     (not in tool master)
+198   B223         1      6     108      1     .25 LOC .5 OAL 2.5 FLT-4 Ball EM
+199   7/32 (.531") DIA 1      6     108      1     (not in tool master)
+200   TI449        1      6     108      1     MG 12.7-11C25
+Internal grooving turning and t
+201   ON TOP OF SHELF NEXT TO LATHE 1      6     108      1     (not in tool master)
+202   A-1          4      7     106      5     (not in tool master)
+203   I131         3      4     105      14    12J1P - 90° End Mill
+204   B205         3      6     105      6     .047 BULL EM .008 RAD 4FL
+205   A-1003       1      6     105      7     (not in tool master)
+206   A-1026       1      6     105      6     (not in tool master)
+207   A-1018       1      6     105      4     (not in tool master)
+208   A-1014       1      6     105      4     (not in tool master)
+209   A-1038       1      6     105      2     (not in tool master)
+210   #31 COBALT DRILL 1      6     105      2     (not in tool master)
+211   W DRILL .386 1      6     105      2     (not in tool master)
+212   A-1043       1      6     105      1     (not in tool master)
+213   # 9 DRILL .1968 1      6     105      1     (not in tool master)
+214   #20 DRILL .161 1      6     105      1     (not in tool master)
+215   #25 .1495 LONG DRILL 1      6     105      1     (not in tool master)
+216   # 16 DRILL .177 1      6     105      1     (not in tool master)
+217   Z DRILL .413 1      6     105      1     (not in tool master)
+218   .413 REAMER  1      6     105      1     (not in tool master)
+219   A-10         5      6     103      16    (not in tool master)
+220   A1026        2      5     100      12    5/8 End Mill
+221   A1018        2      5     100      8     1/8 End Mill
+222   F1057        1      5     100      1     Z Reamer
+223   #22 DRILL / .157 JOBBER HSS 1      2     100      1     (not in tool master)
+224   NO.18 DRILL (.1695) 1      2     100      1     (not in tool master)
+225   CNMG 432     1      1     100      1     (not in tool master)
+226   ISCAR ID THREADING TOOL SCAR 12.7-08C23 1      1     100      1     (not in tool master)
+227   2MM PART OFF INGERSOLL 1      1     100      1     (not in tool master)
+228   A-40         3      5     99       7     (not in tool master)
+229   B212         4      13    90       14    12MM Rougher End Mill 5FL
+230   3/64 HSS DRILL 1      2     90       1     (not in tool master)
+231   O-3          1      2     90       1     (not in tool master)
+232   A15          5      9     88       8     3/16-.750 LOC-2.50 OAL 5FL
+233   VPGR331      1      1     88       2     (not in tool master)
+234   3/8 SPOT DRILL 1      1     88       1     (not in tool master)
+235   B122         3      5     87       7     3/8 BULL EM .015 RAD 4FL
+236   A19          2      15    87       4     1/32-.250 LOC-1.5 OAL 2FL
+237   A-22         2      4     87       2     (not in tool master)
+238   TIPD420      2      4     85       4     Drill #52 (.0635) Cobalt Jobber
+239   TIPD419      2      4     85       2     Drill #18 (.1695) Cobalt Jobber
+240   D10315       1      4     80       2     0.3390 Jobber Drill 2Flt HSS (LTR. R)
+241   J139         1      4     80       1     .375 Dovetail Cutter, 30 degree per side, car
+242   A1013        1      4     80       1     3/32 End Mill
+243   D1068        1      4     80       1     #31 Cobalt Drill
+244   K1051        1      4     80       1     5 MM Corner Round
+245   D1067        1      4     80       1     #20 Cobalt Drill
+246   D10305       1      4     80       1     0.3230 Jobber Drill 2Flt HSS
+247   A1028        1      4     80       1     (not in tool master)
+248   A1010        1      4     80       1     1/2 Long End mill
+249   D1062        1      4     80       1     #25 Aircraft Drill
+250   D10361       1      4     80       1     0.4844 Jobber Drill 2Flt HSS
+251   D10166       1      4     80       1     0.1695 (#18) Screw Machine Drill 2Flt HSS
+252   NO. 38 .1015 HSS DRILL 1      2     80       1     (not in tool master)
+253   TP466        2      6     77       2     ‎TDXU 3E-0.3 TT9080
+Double-ended pressed type
+254   B-255        2      3     75       28    (not in tool master)
+255   B404         2      3     75       20    .118 (3mm) BALL HARD MILL 3x LOC 6FL NANO
+256   B256         2      3     75       15    8mm Bull EM .315 loc 4" 2mm (0.078") rad
+257   K156         2      3     75       13    .078R CR CUTTER
+258   A83          2      3     75       4     3/16 SQ EM 5 FL ENTENDED
+259   A-81         2      3     75       4     (not in tool master)
+260   .18 DIAMETER COBALT 1      4     75       1     (not in tool master)
+261   A-34         2      3     73       4     (not in tool master)
+262   0.4375 JOBBER DRILL 2FLT HSS 1      5     70       1     (not in tool master)
+263   0.375 JOBBER DRILL 2FLT HSS 1      5     70       1     (not in tool master)
+264   B185         2      4     64       5     .1875 X 1.125 LOC 3.00 OAL EM BALL NOSE
+265   L7           2      4     64       2     1/4 82deg 4FL CHAMFERMILL - .01" tip
+266   B148         5      8     63       15    .250 x .750 LOC x 2.5 OAL 4FL .015 CR
+267   A-14         1      2     63       2     (not in tool master)
+268   M-62         1      2     63       1     (not in tool master)
+269   5/32 JOBBER DRILL 1      1     60       1     (not in tool master)
+270   N0. 18 (.1695) JOBBER 1      1     60       1     (not in tool master)
+271   .302         2      3     53       2     (not in tool master)
+272   #37 DRILL    2      3     53       2     (not in tool master)
+273   L235         2      3     53       2     .08 x 45 deg Back Deburring Mill
+274   #5-40 PLUG TAP 2      3     53       2     (not in tool master)
+275   7/32 DRILL COBALT 1      2     52       1     (not in tool master)
+276   DRILL 0.2010 2      4     51       2     (not in tool master)
+277   NO. 24 HSS   1      1     50       2     (not in tool master)
+278   NO.#16 JOBBER DRILL 1      8     50       1     (not in tool master)
+279   LETTER G JOBBER DRILL 1      8     50       1     (not in tool master)
+280   LETTER W JOBBER DRILL 1      8     50       1     (not in tool master)
+281   .250 DRILL LETTER E 1      3     50       1     (not in tool master)
+282   1/4 HSS DRILL 1      3     50       1     (not in tool master)
+283   LETTER J HSS JOBBER 1      3     50       1     (not in tool master)
+284   A305         1      2     50       1     (not in tool master)
+285   R64          4      5     49       4     #8-32 SPIRAL CUT TAP
+286   NO. 20       1      1     48       1     (not in tool master)
+287   LETTER ( W )DRILL 1      2     44       1     (not in tool master)
+288   LETTER Q DRILL 1      2     44       1     (not in tool master)
+289   TAP 3/8-24   1      2     44       1     (not in tool master)
+290   STUB_LENGTH_#21_HSS_DRILL 1      2     43       2     (not in tool master)
+291   DRILL 0.1360 1      2     43       1     (not in tool master)
+292   Q            1      2     43       1     (not in tool master)
+293   BOTTOM TAP 3-8-24_UNF 1      2     43       1     (not in tool master)
+294   NEW COBALT 5/16 3      11    40       3     (not in tool master)
+295   7/16 JOBBER  1      2     40       1     (not in tool master)
+296   7/16 DRILL   1      2     40       1     (not in tool master)
+297   3/8 DRILL    1      2     40       1     (not in tool master)
+298   #54_SPLIT_POINT_135_DEGREE_JOBBER 1      1     40       1     (not in tool master)
+299   GURHING_PIONEX_M1.6_X_.35_RH_TAP 1      1     40       1     (not in tool master)
+300   B-148        1      2     38       8     (not in tool master)
+301   5            1      2     38       1     (not in tool master)
+302   B227         4      12    37       53    1/2"x1"x3" .060RAD BULL EM 4FL
+303   J278         2      3     32       2     .375D x .059R x .563 reach Full Radius Keysea
+304   A1056        1      6     31       2     1/32 End Mill
+305   K304         2      4     30       3     .125 R CORNER RADIUS CUTTER - .058 PILOT - 2F
+306   B182         1      1     30       2     (not in tool master)
+307   .484 JOBBER HSS 1      1     30       1     (not in tool master)
+308   TH465        1      1     30       1     2mm Middle Tmax adapters for external turning
+309   L217         2      3     28       6     90° Chamfer Mill .5" LOC.25" OAL 3" Flute-4 U
+310   B-260        1      1     25       4     (not in tool master)
+311   COOLANT BLAST TOOL 1      1     25       2     (not in tool master)
+312   CUSTOM COOLANT TOOL 1      1     25       2     (not in tool master)
+313   B-254        1      1     25       2     (not in tool master)
+314   COBALT 5/16  1      1     25       1     (not in tool master)
+315   B-256        1      1     25       1     (not in tool master)
+316   B-58         1      1     25       1     (not in tool master)
+317   27/64        1      1     25       1     (not in tool master)
+318   90 DEGREE .75 6 FLUTE COUNTERSINK 1      2     24       4     (not in tool master)
+319   A-12         1      2     24       1     (not in tool master)
+320   L-76         1      2     24       1     (not in tool master)
+321   D112         1      2     24       1     .266 CARBIDE DRILL (6.8 mm)
+322   D113         1      2     24       1     .1285 CARBIDE DRILL
+323   D10152       1      2     24       1     0.1570 Screw Machine Drill 2Flt HSS
+324   NO. 20 .161" 1      1     24       1     (not in tool master)
+325   7/16" DIA    1      1     24       1     (not in tool master)
+326   COBALT 2MM   2      2     22       2     (not in tool master)
+327   #29 DRILL    2      2     22       2     (not in tool master)
+328   23/64 COBALT DRILL 1      1     20       2     (not in tool master)
+329   NO. 47 COBALT (NEW) 1      2     20       2     (not in tool master)
+330   A188         1      2     20       2     5/64 Endmill 3 FL SQ LONG
+331   J230         1      3     20       2     1" KEYSEAT CUTTER .015 RAD
+332   L31          1      3     20       2     3/8 90� 4FL CHAMFERMILL
+333   .180 NO. 15 COBALT DRILL (NEW) 1      2     20       1     (not in tool master)
+334   P DRILL JOBBER 1      2     20       1     (not in tool master)
+335   COBALT .059 NO. 53 1      2     20       1     (not in tool master)
+336   COBALT .322 LETTER Q 1      2     20       1     (not in tool master)
+337   J93          1      2     20       1     1" X .375 KEYCUTTER 12FL
+338   L221         1      2     20       1     1/4 DOUBLE ANGLE CHAMFER .005 RAD
+339   L160         1      2     20       1     3MM CHAMFER
+340   .500 JOBBER DRILL 1      3     20       1     (not in tool master)
+341   .302 N HSS JOBBER 1      3     20       1     (not in tool master)
+342   NO. 53 HSS JOBBER DRILL 1      3     20       1     (not in tool master)
+343   F444         1      3     20       1     .062 Reamer, 4FL, 2.5 OAL
+344   F445         1      3     20       1     #52 (.0635") 4 Flute Carbide Straight Flute R
+345   NO. 12 HSS JOBBER DRILL 1      3     20       1     (not in tool master)
+346   10           1      1     20       1     (not in tool master)
+347   TO           1      1     18       2     (not in tool master)
+348   .125 SPLIT POINT STUB 1      1     18       1     (not in tool master)
+349   27/64 HSS DRILL 1      1     18       1     (not in tool master)
+350   B147         3      11    16       17    5 FLUTE RADIUS END 1/2" Cutting Diameter
+351   G            2      4     16       4     (not in tool master)
+352   R60          2      4     16       4     5/16-18 SPIRAL CUT TAP
+353   NO. 31 DRILL 2      2     16       3     (not in tool master)
+354   7/16 HSS     2      2     16       2     (not in tool master)
+355   7/16HSS      2      2     16       2     (not in tool master)
+356   B80          2      10    15       8     3/8 EXTENDED 5FL BULL .03 RAD RELIEVED
+357   A439         2      10    15       4     .250 x 1.25 7 FLUTE End Mill
+358   A234         2      10    15       4     4mm LOC 14mm  OAL50mm 4FL SQ EM
+359   I399         2      10    15       2     Ingersoll Indexable Face and Peripher Cutter 
+360   NEW COBALT 25/64 DRILL 2      10    15       2     (not in tool master)
+361   NEW 25/64 COBALT 2      10    15       2     (not in tool master)
+362   TIPD440      2      10    15       2     Drill Cobalt Letter Y (.404" dia)
+363   N218         2      10    15       2     7/16 Thread Mill 4FL
+364   N79          2      10    15       2     M4 THREADMILL LONG REACH
+365   #7           5      6     14       6     (not in tool master)
+366   TH467        3      4     14       4     3mm Middle Tmax adapters for external turning
+367   HARVEY  43760-C3 1      1     14       4     (not in tool master)
+368   23/32 HSS DRILL 1      1     14       1     (not in tool master)
+369   .500 HSS DRILL 1      1     14       1     (not in tool master)
+370   B20          2      2     12       14    1/2-0.625 LOC-4.0 OAL 2FL
+371   M486         2      4     12       4     .488 D x 48 DEG DOVETAIL, 2 FL AlTiN
+372   F            2      4     12       4     (not in tool master)
+373   5-16         2      4     12       4     (not in tool master)
+374   3-8          2      4     12       3     (not in tool master)
+375   3-8-16_UNC   2      4     12       3     (not in tool master)
+376   B-77         2      2     12       2     (not in tool master)
+377   21-64        2      4     12       2     (not in tool master)
+378   A269         1      3     12       6     5/32-.3125 LOC-2.0 OAL 3FL
+379   NO. 9 .196 HSS JOBBER 1      2     12       2     (not in tool master)
+380   R2           1      2     12       2     M6X1 SPIRAL CUT TAP
+381   TH493        1      1     12       2     .018" x .060 Radius OD Groove Tool, sintered 
+382   NO. 20 HSS DRILL 1      1     12       1     (not in tool master)
+383   LETTER U HSS JOBBER 1      1     12       1     (not in tool master)
+384   .081 HSS COBALT 1      1     12       1     (not in tool master)
+385   .063 HSS COBALT 1      1     12       1     (not in tool master)
+386   M2 X .4 PLUG TAP 1      1     12       1     (not in tool master)
+387   R489         1      1     12       1     M16x2.0 ISO2(6H), ANSI, Uncoated, Spiral Poin
+388   TN461        1      1     12       1     FLT-3R AC3R
+Internal and External 60° V-Threa
+389   TH495        1      1     11       1     Iscar Pentacut PCHR 19-24
+390   1-4          1      1     11       1     (not in tool master)
+391   R52          3      3     10       3     M8X1.25 FORMING TAP
+392   M443         1      1     10       5     1/2 4FL SOLID CARB EM STYLE CUTTER
+CUSTOM TOO
+393   L-31         1      1     10       4     (not in tool master)
+394   K138         1      1     10       2     0.039 radius cutter, double ended, .058 dia t
+395   NEW COBALT #16 JOBBER DRILL (.177") 1      1     10       1     (not in tool master)
+396   B-96         1      1     10       1     (not in tool master)
+397   DRILL HSS JOBBER 1      1     10       1     (not in tool master)
+398   ROBO BT30 KENNA 50MM FACE TOOL 1      1     10       1     (not in tool master)
+399   .1285 NO. 30 DRILL 1      1     10       1     (not in tool master)
+400   KENN 50 MM ROBO FACE MILL 1      1     10       1     (not in tool master)
+401   #53 COBLT JOBBER 1      1     10       1     (not in tool master)
+402   7/16 HSS STUB 1      1     9        3     (not in tool master)
+403   1/4-18 NPT PLUG TAP 1      1     9        3     (not in tool master)
+404   #8 DRILL     1      1     9        1     (not in tool master)
+405   #8           1      1     9        1     (not in tool master)
+406   .386 W DRILL 1      1     9        1     (not in tool master)
+407   R33          4      4     8        4     M4X.7 FORMING TAP
+408   7/16         1      1     8        1     (not in tool master)
+409   TAP 0.2500   1      2     8        1     (not in tool master)
+410   R438         4      4     7        7     M10 x 1.5 Plug SP PT TAP
+411   R67          3      3     6        3     M6X1 FORMING TAP
+412   1/2" SLOTTING TOOL 1      1     6        5     (not in tool master)
+413   NO. 16 HSS JOBBER 1      2     6        2     (not in tool master)
+414   TD474        1      2     6        2     KENNAMETAL 1/2 Shank Dia A08-SCLPR2  10" OAL 
+415   TD483        1      2     6        2     ULTRA-DEX® 957 (A06K SCLCR2), Ø3/8″ Steel Bor
+416   7/32 DRILL   1      1     6        1     (not in tool master)
+417   90 DEG. 3/8 COUNTERSINK 1      1     6        1     (not in tool master)
+418   1/2" 3FLT SQ 4IN LONG EM 1      1     6        1     (not in tool master)
+419   1-1/4 HSS DRILL 1      2     6        1     (not in tool master)
+420   A224         1      2     6        1     .0930 LOC .1390 x .5 OAL 2.5 FLT-4 Long Reach
+421   #25          1      2     6        1     (not in tool master)
+422   #10-24_UNC   1      2     6        1     (not in tool master)
+423   30196(GMHT12FS5) 6      5     5        27    (not in tool master)
+424   R146         4      4     5        4     1/4-20 STI TAP
+425   A32          2      2     5        5     3/32-.1875 LOC-1.5 OAL 2FL
+426   #40 JOBBER DRILL 1      1     5        1     (not in tool master)
+427   R26          1      1     5        1     M3X.5 SPIRAL CUT TAP
+428   D383_9MM_DRILL 5      4     4        5     (not in tool master)
+429   .339 LETTER R JOBBER 2      2     4        4     (not in tool master)
+430   LETTER W HSS JOBBER 2      2     4        2     (not in tool master)
+431   NO. 26 JOBBER .147 2      2     4        2     (not in tool master)
+432   7/32 JOBBER .218 2      2     4        2     (not in tool master)
+433   NO. 1 JOBBER .228 2      2     4        2     (not in tool master)
+434   6MM HSS .236 REAMER 2      2     4        2     (not in tool master)
+435   J432         1      1     4        2     Key Cutter .892 Dim x .188 thick x .312 Shank
+436   R44          1      1     4        2     #4-40 FORMING TAP
+437   B37          1      1     4        2     3/16-R.01-.3125 LOC-2.0 OAL 3FL
+438   B295         1      1     4        2     5/16 (R.06) BULL EM 3FL
+439   B293         1      1     4        2     1/8(R.03) x 3/8 x 1.5
+440   #50 HSS DRILL 1      1     4        2     (not in tool master)
+441   R106         1      1     4        2     #2-56 spiral cutting tap 2 FLUTED SPIRAL FLUT
+442   #43_DRILL    1      1     4        2     (not in tool master)
+443   #4-40_TAP    1      1     4        2     (not in tool master)
+444   NO. 38 HSS JOBBER 1      1     4        1     (not in tool master)
+445   3/8 HSS JOBBER 1      1     4        1     (not in tool master)
+446   5/8 HSS JOBBER 1      1     4        1     (not in tool master)
+447   NO 38 HSS JOBBER DRILL 1      1     4        1     (not in tool master)
+448   .120 HSS NO. 31 1      1     4        1     (not in tool master)
+449   .1495 HSS NO. 25 DRILL 1      1     4        1     (not in tool master)
+450   R99          1      1     4        1     #4-40 STI CUT TAP
+451   9/64 HSS JOBBER 1      1     4        1     (not in tool master)
+452   NO. 32 HSS JOBBER 1      1     4        1     (not in tool master)
+453   NO. 46 HSS JOBBER 1      1     4        1     (not in tool master)
+454   R133         1      1     4        1     M2.5X.45 SPIRAL CUT TAP
+455   NO. 20 .161 HSS JOBBER 1      1     4        1     (not in tool master)
+456   .290 LETTER L 1      1     4        1     (not in tool master)
+457   LETTER L JOBBER 1      1     4        1     (not in tool master)
+458   #7 JOBBER    1      1     4        1     (not in tool master)
+459   3-16_DRILL   1      1     4        1     (not in tool master)
+460   #30_DRILL    1      1     4        1     (not in tool master)
+461   10345(GM316F5) 4      3     3        19    (not in tool master)
+462   OMP40-2_A-5000-3709 4      3     3        4     (not in tool master)
+463   .266         3      3     3        3     (not in tool master)
+464   B294         2      2     3        4     1/4(R.06) X1.25 X 3.25
+465   TC92104      3      2     2        15    (not in tool master)
+466   10310(GM18FS5) 3      2     2        13    (not in tool master)
+467   A-61         3      2     2        9     (not in tool master)
+468   #1           3      2     2        9     (not in tool master)
+469   30260(GMHT14FS5) 3      2     2        6     (not in tool master)
+470   M8           3      2     2        5     (not in tool master)
+471   2556M-C3     3      2     2        3     (not in tool master)
+472   D226         3      2     2        3     4.5mm carbide drill
+473   UGMH07947    2      2     2        6     (not in tool master)
+474   10691(GMNR12F52.250) 2      2     2        4     (not in tool master)
+475   R75          2      2     2        2     M5X.8 SPIRAL CUT TAP
+476   17-64_DRILL  2      2     2        2     (not in tool master)
+477   D116         1      1     2        2     .201 CARBIDE DRILL
+478   KENNA2       1      2     2        2     (not in tool master)
+479   ARCH_ULTRA-DEX_913-000-164 1      2     2        2     (not in tool master)
+480   UGMH12S905   1      2     2        2     (not in tool master)
+481   #W           1      1     2        1     (not in tool master)
+482   D164         1      1     2        1     .1811 DRILL
+483   NO. 24 HSS JOBBER DRILL 1      1     2        1     (not in tool master)
+484   D305         1      1     2        1     5/16 CBORE CUTTER  - 4FL
+485   D306         1      1     2        1     23/64 CBORE CUTTER  - 4FL
+486   NO. 7 JOBBER HSS 1      1     2        1     (not in tool master)
+487   .147 JOBBER  1      1     2        1     (not in tool master)
+488   NO. 21 JOBBER 1      1     2        1     (not in tool master)
+489   NO. 31 .120 DIAMETER JOBBER 1      1     2        1     (not in tool master)
+490   .228/ NO. 1 JOBBER 1      1     2        1     (not in tool master)
+491   .339 / R JOBBER 1      1     2        1     (not in tool master)
+492   .235 REAMER  1      1     2        1     (not in tool master)
+493   .339 R JOBBER 1      1     2        1     (not in tool master)
+494   .147 / NO 26 JOBBER 1      1     2        1     (not in tool master)
+495   .183 / NO 14 JOBBER 1      1     2        1     (not in tool master)
+496   7/32 JOBBER  1      1     2        1     (not in tool master)
+497   NO. 29 (.136) JOBBER 1      1     2        1     (not in tool master)
+498   M62          1      1     2        1     60 Degree 1/8 ENGRAVING TOOL
+499   .159 STUB #21 1      1     2        1     (not in tool master)
+500   .246 STUB    1      1     2        1     (not in tool master)
+501   .251 REAMER  1      1     2        1     (not in tool master)
+502   LETTER R JOBBER 1      1     2        1     (not in tool master)
+503   LETTER H JOBBER 1      1     2        1     (not in tool master)
+504   17.32  HSS DRILL 1      1     2        1     (not in tool master)
+505   I431         1      2     2        1     (not in tool master)
+506   KENNA1       1      2     2        1     (not in tool master)
+507   C301         1      2     2        1     15 DEG. (30 DEG Included) TAPER EM Carbide 3F
+508   NO.15_180_DIAMETER_118DEGREE 1      2     2        1     (not in tool master)
+509   74456-C3     1      2     2        1     (not in tool master)
+510   O-17         2      1     1        2     (not in tool master)
+511   27/64 DRILL  2      2     1        2     (not in tool master)
+512   B255         1      1     1        4     1/2-R0.09-1.0 LOC- 3.0 OAL 4FL
+513   D10197       1      1     1        3     0.2010 Jobber Drill 2Flt HSS
+514   .5"D 2"LOC .03" CR 1      1     1        3     (not in tool master)
+515   R-42         1      1     1        2     (not in tool master)
+516   A-47         1      1     1        2     (not in tool master)
+517   R71          1      1     1        2     #6-32 SPIRAL CUT TAP
+518   N            1      1     1        2     (not in tool master)
+519   .138 NO. 19  1      1     1        1     (not in tool master)
+520   PLUG TAP     1      1     1        1     (not in tool master)
+521   NO. 36 .106 DRILL HSS 1      1     1        1     (not in tool master)
+522   FLOATING HOLDER 6-32 TAP 1      1     1        1     (not in tool master)
+523   LETTER D .246 HSS 1      1     1        1     (not in tool master)
+524   1/4 REAMER   1      1     1        1     (not in tool master)
+525   A-19         1      1     1        1     (not in tool master)
+526   5/16 HSS JOBBER 1      1     1        1     (not in tool master)
+527   3/8-16 PLUG  1      1     1        1     (not in tool master)
+528   B-45         1      1     1        1     (not in tool master)
+529   NO. 36 JOBBER HSS 1      1     1        1     (not in tool master)
+530   NO. 36       1      1     1        1     (not in tool master)
+531   A396         1      1     1        1     1/16" SQ Long Reach 0.062″ Dia, 0.093″ LOC, 3
+532   NO 21. .159 DRILL 1      1     1        1     (not in tool master)
+533   NO 18 JOBBER (MEASURE DRILL) 1      1     1        1     (not in tool master)
+534   NO 18 JOBBER 1      1     1        1     (not in tool master)
+535   .339 DRILL (R) 1      1     1        1     (not in tool master)
+536   5/16 DRILL   1      1     1        1     (not in tool master)
+537   I235         1      1     1        1     (not in tool master)
+538   B370         1      1     1        1     3/8 REDUCED NECK BULL EM - 3 FL - .06" RAD - 
+539   B25          1      1     1        1     1/8-R.01-0.375 LOC-1.5 OAL 3FL
+540   .196 SPLIT POINT COBALT 1      1     1        1     (not in tool master)
+541   #41          1      1     1        1     (not in tool master)
+542   54280-C3     1      1     1        1     (not in tool master)
+543   9/16 DRILL   1      1     1        1     (not in tool master)
+544   R76          1      1     1        1     (not in tool master)
+545   17/32 DRILL  1      1     1        1     (not in tool master)
+546   DRILL 0.4219 1      1     1        1     (not in tool master)
+547   TAP 0.5000   1      1     1        1     (not in tool master)
+548   J100         1      1     1        1     .500 x .0625 Keyseat Cutter SQ 8FL
+549   9/32 HSS JOBBER 1      1     0        2     (not in tool master)
+550   .547 DRILL HSS 1      0     0        1     (not in tool master)
+551   A-268        1      0     0        1     (not in tool master)
+552   B369         1      0     0        1     1/4 Ball End Mill
+553   D10085       1      0     0        1     0.0980 Jobber Drill 2Flt HSS
+554   T99          1      0     0        1     (not in tool master)
+
+==========================================================================================
+DETAILED TOOL BREAKDOWN
+==========================================================================================
+
+--- #1: L18 ---
+  Description:    1/4 x 2-1/2 4F 90° ChMill AlTiN
+  Tool Group:     L
+  Used in parts:  113
+  Work orders:    248
+  Total WO qty:   20628
+  Seq appearances:351
+  Parts:
+    ALM1-9204-60102                          (SPACER, LAMP) - 1 WOs, 18 pcs
+    ALM1-SLS-4650-10006                      (MANIFOLD, STABLE TEMP, N2) - 1 WOs, 9 pcs
+    ALM1-SLSI-9203-60150-001                 (BRACKET, COOLANT LINES, I/R RAIL,  EXPANDED) - 1 WOs, 20 pcs
+    ART1-142 Top Flange                      (PyC Furnace, Single Station) - 2 WOs, 6 pcs
+    ART1-143 Base Plate                      (PyC Furnace, Single Station) - 2 WOs, 6 pcs
+    ART1-144 Furnace Support Top             (Furnace Support Top) - 2 WOs, 8 pcs
+    ART1-145 Furnace Support Bottom          (Furnace Support Bottom) - 2 WOs, 8 pcs
+    ART1-149 Bottom Plate Door               (Bottom Plate Door) - 2 WOs, 6 pcs
+    ATO1-610631                              (Enclosure, Modified, NEMA 6P, TCP-RTU Converter) - 1 WOs, 6 pcs
+    CEL1-0882-0005 Item 1                    (Item 1 Universal CounterBalance Bottom) - 1 WOs, 55 pcs
+    CEL1-0882-0005 Item 2                    (Item 2 Universal CounterBalance Top) - 1 WOs, 55 pcs
+    DEP1-DT0890                              (Pumping Plate) - 1 WOs, 1 pcs
+    DEP1-Mini Toe Clamp                      (Mini Toe Clamp) - 1 WOs, 50 pcs
+    FRA1-EMS SITE CONTROLLER ENCLOSURE       (EMS SITE CONTROLLER ENCLOSURE) - 3 WOs, 100 pcs
+    FRA1-FRONT AND REAR PLATES ONLY EMS SITE CONTROLLER ENCLOSURE (EMS SITE CONTROLLER ENCLOSURE) - 2 WOs, 20 pcs
+    ICO1-10-01680                            (CABLE GUIDE , CUTTER OUTLET, CIR) - 4 WOs, 75 pcs
+    ICO1-10-01822                            (CUTTER MOUNT, CIR) - 1 WOs, 9 pcs
+    ICO1-10-02001                            (DRIVEN GEAR ARM, CIR NOZZLE FEED) - 2 WOs, 44 pcs
+    ICO1-10-02002                            (MOTOR MOUNT, CIR NOZZLE FEEDER, E-AXIS) - 2 WOs, 43 pcs
+    ICO1-10-02003                            (FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 2 WOs, 52 pcs
+    ICO1-10-02027                            (PLATE, STUFFING BOX FACE) - 2 WOs, 113 pcs
+    INF1-Bracket Assembly                    (Bracket Assembly) - 1 WOs, 3 pcs
+    LTD1-60363-001                           (INSPECTION PLATE) - 2 WOs, 2 pcs
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+    NOV2-0020-01995                          (Holder, Magnetal AL 300MM PVD) - 1 WOs, 2 pcs
+    NOV2-0020-75910                          (Pole Outer Magnet, source, WP AL 300MM PVD) - 1 WOs, 2 pcs
+    NOV2-0020-75911                          (Pole Inner Magnet, Source, WP AL 300mm PVD) - 1 WOs, 2 pcs
+    R2S1-10019                               (CONNECTOR PROTECTOR, 2024) - 8 WOs, 335 pcs
+    R2S1-10019-7                             (CONNECTOR PROTECTOR, 2024, 500m) - 1 WOs, 50 pcs
+    R2S1-10023 MOD                           (Mounting Plate, RCVR-MOD) - 1 WOs, 60 pcs
+    R2S1-10028 MOD                           (Mounting Plate, RCVR MOD) - 1 WOs, 30 pcs
+    R2S1-10051                               (Base-Valeport Sensor) - 3 WOs, 50 pcs
+    R2S1-10052                               (Cap-Valeport Sensor) - 3 WOs, 50 pcs
+    R2S1-10067                               (Capacitor MTG BRACKET A) - 7 WOs, 900 pcs
+    R2S1-10068                               (Capacitor MTG Bracket B) - 7 WOs, 900 pcs
+    R2S1-10097                               (CONNECTOR PROTECTOR, 2022) - 4 WOs, 140 pcs
+    R2S1-10106                               (LID, CAP BANK, 2026) - 1 WOs, 30 pcs
+    R2S1-10131                               (BLADDER COVER, 2020) - 1 WOs, 60 pcs
+    R2S1-10138                               (2020 CONNECTOR PROTECTOR) - 1 WOs, 60 pcs
+    R2S1-10139-1                             (2020 Cable Clamp, Top) - 2 WOs, 135 pcs
+    R2S1-10139-2                             (2020 Cable Clamp, Bottom) - 2 WOs, 100 pcs
+    R2S1-10142                               (HOUSING, CAP BANK, 10142, 2020) - 2 WOs, 105 pcs
+    R2S1-10156                               (BLADDER COVER, 500MM) - 4 WOs, 400 pcs
+    R2S1-10157                               (COVER, BLADDER, 10157 (2022)) - 2 WOs, 100 pcs
+    R2S1-10235                               (PLATE, CONN PROTECTOR, 2026T) - 4 WOs, 130 pcs
+    R2S1-10235-5                             (PLATE, CONN PROTECTOR, 2026T, 500m) - 1 WOs, 50 pcs
+    R2S1-10311                               (BRACKET, CBL CLMP, TOP DUAL .55, Xclrnc) - 4 WOs, 390 pcs
+    R2S1-10312                               (BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc) - 3 WOs, 300 pcs
+    R2S1-10312 (Ti inserts)                  (BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc, Ti) - 1 WOs, 100 pcs
+    R2S1-10417                               (HOUSING, CAP BANK 10417 g1/g2 6k) - 5 WOs, 314 pcs
+    R2S1-10418A                              (SHIM, PENETRATOR, 4.5 TH. DELRIN) - 2 WOs, 150 pcs
+    R2S1-10418B                              (Shim Curved DWtek Penetrator) - 4 WOs, 400 pcs
+    R2S1-10418B OLD OPERATIONS DO NOT USE PART () - 0 WOs, 0 pcs
+    R2S1-10469                               (housing mach'd aluminum tx xl 120 ch) - 1 WOs, 20 pcs
+    R2S1-10524                               (G2 Housing, Transmitter M (60)) - 1 WOs, 2 pcs
+    R2S1-10549                               (G2 Housing Receiver 192) - 2 WOs, 50 pcs
+    R2S1-10686                               (Flat Mount Plate temp G1-V) - 4 WOs, 80 pcs
+    R2S1-10689                               (Isolation Insert G1-V Flatmount) - 8 WOs, 1495 pcs
+    R2S1-10690                               (Sonic G1-V Flat Mount Custom Nut) - 9 WOs, 1455 pcs
+    R2S1-10700                               (Clamp Base, Ultra SV Sonic G1-V) - 4 WOs, 211 pcs
+    R2S1-10701                               (Clamp Lid, Ultra SV Sonic G1-V) - 7 WOs, 255 pcs
+    R2S1-10713                               (Lid, SVP Cradle, 2020V) - 8 WOs, 50 pcs
+    R2S1-10721                               (G1-V 2022 Flat Mount Plate) - 2 WOs, 40 pcs
+    R2S1-10726                               (Large Flat Mount Plate) - 2 WOs, 20 pcs
+    R2S1-10758                               (Wet Non-faired Side Mount Left) - 5 WOs, 8 pcs
+    R2S1-10785                               (Wet Non-faired Side Mount Right) - 5 WOs, 7 pcs
+    R2S1-10876                               (BASEPLATE, PENETRATOR, CONNECTORIZED, TX) - 6 WOs, 108 pcs
+    R2S1-10924P1 Rubber Test Mold Bottom     (10924P1 Rubber Test Mold Bottom) - 1 WOs, 1 pcs
+    R2S1-10951-001                           (MOLD, LOWER, RUBBER, CABLE TO CONNECTOR, MCIL12PF) - 1 WOs, 1 pcs
+    R2S1-10951-001 MOD                       () - 0 WOs, 0 pcs
+    R2S1-10951-002                           (MOLD, UPPER, RUBBER, CABLE TO CONNECTOR, MCIL12PF) - 1 WOs, 1 pcs
+    R2S1-10951-003                           (MOLD FRONT, RUBBER, CABLE TO CONNECTOR, MCIL12PF) - 1 WOs, 1 pcs
+    R2S1-AD201-01-0102                       (2022 Front Plate) - 5 WOs, 114 pcs
+    R2S1-Fixture 90 Mod                      (Fixture 90 Mod) - 1 WOs, 2 pcs
+    R2S1-HEATSINK TAPPED HOLES               (HEATSINK TAPPED HOLES) - 1 WOs, 1 pcs
+    R2S1-Middle Compression Plate            (Middle Compression Plate) - 1 WOs, 1 pcs
+    R2S1-Plunger Disk                        (Plunger Disk) - 1 WOs, 1 pcs
+    R3V1-10824                               (RX Trumpet Lid, G2 Penetrator) - 1 WOs, 14 pcs
+    R3V1-10852                               (LID, CAPACITOR BANK) - 3 WOs, 250 pcs
+    ROV1-TES24A-FAB1212                      (SHAFT GUARD SUPPORT) - 1 WOs, 3 pcs
+    ROV1-TES25B-W68-PRT097                   (Spacer A) - 1 WOs, 1 pcs
+    ROV1-TES25B-W68-PRT098                   (Spacer Type B Skyguard) - 1 WOs, 1 pcs
+    ROV1-TES25B-W68-PRT099                   (Spacer Type C Skyguard) - 1 WOs, 2 pcs
+    TES1-Busing Post A                       (Busing Post A) - 1 WOs, 2 pcs
+    TES1-Busing Post B                       (Busing Post B) - 1 WOs, 2 pcs
+    TES1-Front Jig Upper                     (Front Jig Upper) - 1 WOs, 12 pcs
+    TES1-Pilz Bracket v3                     (Pilz Bracket v3) - 1 WOs, 2 pcs
+    TES1-SC Standoff                         (SC Standoff) - 1 WOs, 4 pcs
+    TES1-SDS Pin Post                        (SDS Pin Post) - 1 WOs, 2 pcs
+    TES1-Sensor Post                         (Sensor Post) - 1 WOs, 2 pcs
+    TES1-THC Standoff                        (THC Standoff) - 1 WOs, 4 pcs
+    TRA1-10-02003                            (TEST FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 1 WOs, 1 pcs
+    TRA1-AD163 Side 2 Fixture Mod            (AD163 Side 2 Fixture Mod) - 2 WOs, 2 pcs
+    TRA1-Fixture 92                          (Fixture 92 - 10758 Side 2) - 1 WOs, 1 pcs
+    TRA1-Fixture 93                          (Fixture 93 - 10785 Side 2) - 1 WOs, 1 pcs
+    TRA1-Fixture 95                          (Side 2 multi part fixture 10067 / 68) - 1 WOs, 2 pcs
+    TRA1-Fixture 96                          (Fixture 96 - 10717 Side 2) - 1 WOs, 1 pcs
+    TRA1-Insert For Fixture Clamping R2SONIC 10689 (Insert For Fixture Clamping R2SONIC 10689) - 3 WOs, 85 pcs
+    TRA1-Mini Clamp Fixture                  (Mini Clamp Fixture) - 1 WOs, 1 pcs
+    TRA1-TEMP                                (TEMP) - 2 WOs, 2 pcs
+    TRA1-TOO 185                             (SETCOM Hook Jig) - 1 WOs, 1 pcs
+    ULT1-Adapter 3                           (Adapter 3) - 1 WOs, 2 pcs
+    UTA1-IP012515                            (Heat sink power supply electronics tray assy, darc host) - 1 WOs, 4 pcs
+    UTA1-IP012518                            (FILTER MOUNT, ELECTRONICS TRAY ASSY) - 1 WOs, 4 pcs
+    UTA1-NP000540-003                        (Heat Sink, RCC, Hull MTD, DARC, uPUMA) - 1 WOs, 4 pcs
+    UTA1-NP000674                            (HEAT SINK, AMPLIFIER, ALT RADIO, iCOGR) - 1 WOs, 4 pcs
+    WAL1-Curved blade scraper handle         (Curved blade scraper handle) - 1 WOs, 0 pcs
+    WAL1-Gas Key Mod                         (Gas Key Mod) - 1 WOs, 1 pcs
+    WAL1-Slot and Holes Mod                  (Slot and Holes Mod) - 1 WOs, 5 pcs
+    WAR1-1" cope                             (1" cope) - 1 WOs, 25 pcs
+    WAR1-Part A Coped Tube                   (Part A Coped Tube) - 1 WOs, 100 pcs
+  Operations: Add Mod Features, Cut Soft Jaws, Drill / Tap Holes / Chamfer Edges, Engrave then CS verify with gauge pin, Holes MOD, Holes Mod, Jergens Quick-Loc Fixture Prep, MILL FRONT PANEL, MILL OP10, MILL OP20
+  Holders: -, ER16 - 4", ER16 - 6", ER32, ER32 - 3"
+
+--- #2: O4 ---
+  Description:    1/4 90� SPOT DRILL 2.76 OAL
+  Tool Group:     O
+  Used in parts:  94
+  Work orders:    209
+  Total WO qty:   18888
+  Seq appearances:164
+  Parts:
+    ALM1-SLS-4650-10002                      (INSULATOR, HOLDER, IR SENSOR, STABLE TEMP) - 1 WOs, 30 pcs
+    ALM1-SLS-4650-10003                      (HOLDER, IR SENSOR, STABLE TEMP) - 1 WOs, 18 pcs
+    ALM1-SLS-4650-10006                      (MANIFOLD, STABLE TEMP, N2) - 1 WOs, 9 pcs
+    AME1-121158                              (ROTOR WHEEL, WIRE CHAINER, HDPE) - 3 WOs, 200 pcs
+    AME1-131394-003                          (ENCLOSURE, MODIFIED, GPS360) - 2 WOs, 249 pcs
+    ART1-144 Furnace Support Top             (Furnace Support Top) - 2 WOs, 8 pcs
+    ART1-145 Furnace Support Bottom          (Furnace Support Bottom) - 2 WOs, 8 pcs
+    DEP1-DT0498                              (Shield Lower Final) - 3 WOs, 20 pcs
+    DEP1-DT0890                              (Pumping Plate) - 1 WOs, 1 pcs
+    DEP1-Mini Toe Clamp                      (Mini Toe Clamp) - 1 WOs, 50 pcs
+    FRA1-Bottom Panel only                   (EMS SITE CONTROLLER ENCLOSURE (Bottom Plate Only)) - 1 WOs, 15 pcs
+    FRA1-EMS SITE CONTROLLER ENCLOSURE       (EMS SITE CONTROLLER ENCLOSURE) - 3 WOs, 100 pcs
+    FRA1-FRONT AND REAR PLATES ONLY EMS SITE CONTROLLER ENCLOSURE (EMS SITE CONTROLLER ENCLOSURE) - 2 WOs, 20 pcs
+    FRA1-UC-1A                               (Unit Controller, 1A) - 4 WOs, 919 pcs
+    ICO1-10-01680                            (CABLE GUIDE , CUTTER OUTLET, CIR) - 4 WOs, 75 pcs
+    ICO1-10-01822                            (CUTTER MOUNT, CIR) - 1 WOs, 9 pcs
+    ICO1-10-01883                            (OUTLET CONNECTOR, CIR FLEX LINE) - 1 WOs, 11 pcs
+    ICO1-10-02002                            (MOTOR MOUNT, CIR NOZZLE FEEDER, E-AXIS) - 2 WOs, 43 pcs
+    ICO1-10-02003                            (FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 2 WOs, 52 pcs
+    ICO1-10-02027                            (PLATE, STUFFING BOX FACE) - 2 WOs, 113 pcs
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+    R2S1-10037                               (END CAP, CAPACITOR BANK, 10037) - 6 WOs, 700 pcs
+    R2S1-10051                               (Base-Valeport Sensor) - 3 WOs, 50 pcs
+    R2S1-10052                               (Cap-Valeport Sensor) - 3 WOs, 50 pcs
+    R2S1-10057                               (LABOR, MACH, SIMBOX CASE) - 1 WOs, 10 pcs
+    R2S1-10068                               (Capacitor MTG Bracket B) - 7 WOs, 900 pcs
+    R2S1-10106                               (LID, CAP BANK, 2026) - 1 WOs, 30 pcs
+    R2S1-10131                               (BLADDER COVER, 2020) - 1 WOs, 60 pcs
+    R2S1-10138                               (2020 CONNECTOR PROTECTOR) - 1 WOs, 60 pcs
+    R2S1-10139-2                             (2020 Cable Clamp, Bottom) - 2 WOs, 100 pcs
+    R2S1-10156                               (BLADDER COVER, 500MM) - 4 WOs, 400 pcs
+    R2S1-10157                               (COVER, BLADDER, 10157 (2022)) - 2 WOs, 100 pcs
+    R2S1-10158                               (LABOR, MACH, SIMBOX CASE FOR INS) - 1 WOs, 6 pcs
+    R2S1-10198                               (Cover 2026 bumper) - 5 WOs, 240 pcs
+    R2S1-10311                               (BRACKET, CBL CLMP, TOP DUAL .55, Xclrnc) - 4 WOs, 390 pcs
+    R2S1-10312                               (BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc) - 3 WOs, 300 pcs
+    R2S1-10312 (Ti inserts)                  (BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc, Ti) - 1 WOs, 100 pcs
+    R2S1-10417                               (HOUSING, CAP BANK 10417 g1/g2 6k) - 5 WOs, 314 pcs
+    R2S1-10469                               (housing mach'd aluminum tx xl 120 ch) - 1 WOs, 20 pcs
+    R2S1-10524                               (G2 Housing, Transmitter M (60)) - 1 WOs, 2 pcs
+    R2S1-10549                               (G2 Housing Receiver 192) - 2 WOs, 50 pcs
+    R2S1-10681                               (Voxim Mounting Plate) - 1 WOs, 10 pcs
+    R2S1-10700                               (Clamp Base, Ultra SV Sonic G1-V) - 4 WOs, 211 pcs
+    R2S1-10701                               (Clamp Lid, Ultra SV Sonic G1-V) - 7 WOs, 255 pcs
+    R2S1-10713                               (Lid, SVP Cradle, 2020V) - 8 WOs, 50 pcs
+    R2S1-10717                               (Plate, Flat Mount 2020 V) - 5 WOs, 70 pcs
+    R2S1-10726                               (Large Flat Mount Plate) - 2 WOs, 20 pcs
+    R2S1-10758                               (Wet Non-faired Side Mount Left) - 5 WOs, 8 pcs
+    R2S1-10785                               (Wet Non-faired Side Mount Right) - 5 WOs, 7 pcs
+    R2S1-10819 Mod                           (10819 Mod) - 1 WOs, 2 pcs
+    R2S1-10833 Mod                           (10833 Rework) - 1 WOs, 10 pcs
+    R2S1-10957                               (INSERT, CONTACT SUPPORT, MICRO CIRCULAR, IN-LINE, 12 PIN, F) - 1 WOs, 1 pcs
+    R2S1-10979                               (PIN, 2.0mm CONTACT, MCIL CABLES) - 1 WOs, 12 pcs
+    R2S1-10981                               (SOCKET CONTACT BODY, 2.0 MCIL) - 4 WOs, 600 pcs
+    R2S1-10983                               (PIN CONTACT BODY, 2.0mm CONTACT, MCIL CABLES) - 4 WOs, 600 pcs
+    R2S1-AD163-001-022                       (Front Plate) - 8 WOs, 440 pcs
+    R2S1-AD181-001-01                        (LABOR, MACHG TI TX PLATE, 2026) - 4 WOs, 130 pcs
+    R2S1-AD201-01-0102                       (2022 Front Plate) - 5 WOs, 114 pcs
+    R2S1-AD246-02-0101                       (LABOR MACH, TI G2 TX FACE PLATE, L/M) - 2 WOs, 47 pcs
+    R2S1-HEATSINK TAPPED HOLES               (HEATSINK TAPPED HOLES) - 1 WOs, 1 pcs
+    R3V1-10824                               (RX Trumpet Lid, G2 Penetrator) - 1 WOs, 14 pcs
+    R3V1-10852                               (LID, CAPACITOR BANK) - 3 WOs, 250 pcs
+    TES1-Busing Post A                       (Busing Post A) - 1 WOs, 2 pcs
+    TES1-Busing Post B                       (Busing Post B) - 1 WOs, 2 pcs
+    TES1-Pilz Bracket v3                     (Pilz Bracket v3) - 1 WOs, 2 pcs
+    TES1-SC Standoff                         (SC Standoff) - 1 WOs, 4 pcs
+    TES1-SDS Pin Post                        (SDS Pin Post) - 1 WOs, 2 pcs
+    TES1-Sensor Post                         (Sensor Post) - 1 WOs, 2 pcs
+    TES1-THC Standoff                        (THC Standoff) - 1 WOs, 4 pcs
+    TRA1-10-02003                            (TEST FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 1 WOs, 1 pcs
+    TRA1-5AX Plastic Jaws 4 inch             (5AX Plastic Jaws 4 inch) - 1 WOs, 8 pcs
+    TRA1-AD163 Side 2 Fixture Mod            (AD163 Side 2 Fixture Mod) - 2 WOs, 2 pcs
+    TRA1-Fixture 130                         (Fixture 130) - 1 WOs, 0 pcs
+    TRA1-Fixture 92                          (Fixture 92 - 10758 Side 2) - 1 WOs, 1 pcs
+    TRA1-Fixture 93                          (Fixture 93 - 10785 Side 2) - 1 WOs, 1 pcs
+    TRA1-Fixture 95                          (Side 2 multi part fixture 10067 / 68) - 1 WOs, 2 pcs
+    TRA1-Fixture 96                          (Fixture 96 - 10717 Side 2) - 1 WOs, 1 pcs
+    TRA1-Mini Clamp Fixture                  (Mini Clamp Fixture) - 1 WOs, 1 pcs
+    TRA1-Mod Vise Aluminum Soft Jaws         () - 1 WOs, 4 pcs
+    ULT1-Adapter 3                           (Adapter 3) - 1 WOs, 2 pcs
+    UTA1-IP012515                            (Heat sink power supply electronics tray assy, darc host) - 1 WOs, 4 pcs
+    UTA1-IP012518                            (FILTER MOUNT, ELECTRONICS TRAY ASSY) - 1 WOs, 4 pcs
+    WAL1-Slot and Holes Mod                  (Slot and Holes Mod) - 1 WOs, 5 pcs
+    WAL1-TES24A-FAB0401                      (RFU Base Plate Mod) - 1 WOs, 1 pcs
+    WAL1-TES24A-FAB0501                      (FFU Base Plate Mod) - 1 WOs, 1 pcs
+    WAL1-Ti Ball mod                         (Ti Ball mod) - 1 WOs, 40 pcs
+    WAR1-Allston 1A                          (Allston 1A) - 1 WOs, 12 pcs
+    WAR1-Allston 1C                          (Allston 1C) - 1 WOs, 48 pcs
+    WAR1-Allston 1D                          (Allston 1D) - 1 WOs, 12 pcs
+    WAR1-Allston 2A                          (Allston 2A) - 1 WOs, 24 pcs
+    WAR1-Allston 2B                          (Allston 2B) - 1 WOs, 8 pcs
+    WAR1-Allston 2D                          (Allston 2D) - 1 WOs, 4 pcs
+  Operations: 1. Unboxing 2. Cut bosses inside w half turn fixture 3. Cut ports in side of box 4. Rebox, Add Mod Features, Add hole and thread 1/4-20 **KEEP PAIRS TOGETHER**, Clamp Bar Mod, Drill / Tap Holes / Chamfer Edges, MILL BASE PANEL, MILL FRONT PANEL, MILL OP10, MILL OP20, MILL OP40
+  Holders: -, Chuck, ER16, ER16 - 2", ER32, ER32 - 2"
+
+--- #3: A1 ---
+  Description:    1/8-.5LOC-1.5 OAL 3FL SQUARE
+  Tool Group:     A
+  Used in parts:  67
+  Work orders:    185
+  Total WO qty:   18300
+  Seq appearances:160
+  Parts:
+    AME1-131394-001                          (ENCLOSURE, MODIFIED, GPS300) - 3 WOs, 200 pcs
+    AME1-131394-003                          (ENCLOSURE, MODIFIED, GPS360) - 2 WOs, 249 pcs
+    ATO1-610522                              (Board Outline, Cell Washer) - 2 WOs, 20 pcs
+    ATO1-610631                              (Enclosure, Modified, NEMA 6P, TCP-RTU Converter) - 1 WOs, 6 pcs
+    CEL1-0882-0005 Item 1                    (Item 1 Universal CounterBalance Bottom) - 1 WOs, 55 pcs
+    CEL1-0882-0005 Item 2                    (Item 2 Universal CounterBalance Top) - 1 WOs, 55 pcs
+    DEP1-DT0498                              (Shield Lower Final) - 3 WOs, 20 pcs
+    DEP1-Mini Toe Clamp                      (Mini Toe Clamp) - 1 WOs, 50 pcs
+    FRA1-EMS SITE CONTROLLER ENCLOSURE       (EMS SITE CONTROLLER ENCLOSURE) - 3 WOs, 100 pcs
+    FRA1-FRONT AND REAR PLATES ONLY EMS SITE CONTROLLER ENCLOSURE (EMS SITE CONTROLLER ENCLOSURE) - 2 WOs, 20 pcs
+    FRA1-UC-1A                               (Unit Controller, 1A) - 4 WOs, 919 pcs
+    ICO1-10-02002                            (MOTOR MOUNT, CIR NOZZLE FEEDER, E-AXIS) - 2 WOs, 43 pcs
+    LTD1-60363-001                           (INSPECTION PLATE) - 2 WOs, 2 pcs
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+    R2S1-10016                               (HOUSING BACKSHELL MACHINED, 500MM, 2024) - 11 WOs, 230 pcs
+    R2S1-10016(Ti inserts)                   (HOUSING BACKSHELL MACHINED, 500MM, 2024) - 2 WOs, 50 pcs
+    R2S1-10057                               (LABOR, MACH, SIMBOX CASE) - 1 WOs, 10 pcs
+    R2S1-10143                               (END CAP, CAP BANK, 10143, 2020) - 2 WOs, 90 pcs
+    R2S1-10158                               (LABOR, MACH, SIMBOX CASE FOR INS) - 1 WOs, 6 pcs
+    R2S1-10524                               (G2 Housing, Transmitter M (60)) - 1 WOs, 2 pcs
+    R2S1-10717                               (Plate, Flat Mount 2020 V) - 5 WOs, 70 pcs
+    R2S1-10877                               (PLUG SHELL, PENETRATOR, CONNECTORIZED, TX) - 5 WOs, 58 pcs
+    R2S1-10907                               (PLUG SHELL, PENETRATOR, CONNECTORIZED, TX) - 3 WOs, 50 pcs
+    ROV1-TES24A                              (FAB1220-RWK) - 1 WOs, 3 pcs
+    SET1-13-1611AS                           (13-1611AS) - 3 WOs, 60 pcs
+    SET1-13-1611S                            (13-1611S) - 5 WOs, 900 pcs
+    SET1-13-1628AS                           (13-1628AS) - 3 WOs, 95 pcs
+    SET1-13-1628S                            (13-1628S) - 6 WOs, 850 pcs
+    SET1-13-1680NS                           (13-1680NS) - 3 WOs, 150 pcs
+    SET1-13-1680PF                           (13-1680PF) - 3 WOs, 60 pcs
+    SET1-13-1682NS                           (13-1682NS) - 2 WOs, 20 pcs
+    SET1-13-1683NS                           (13-1683NS) - 2 WOs, 40 pcs
+    SET1-13-1690                             (13-1690) - 2 WOs, 100 pcs
+    SET1-13-1695NS                           (13-1695NS) - 3 WOs, 300 pcs
+    SET1-13-1696NS                           (13-1696NS) - 3 WOs, 300 pcs
+    SET1-13-1699NS                           (13-1699NS) - 4 WOs, 400 pcs
+    SET1-13-3188                             (13-3188) - 4 WOs, 600 pcs
+    SET1-13-3191D                            (13-3191D) - 3 WOs, 50 pcs
+    SET1-13-3200A                            (13-3200A) - 2 WOs, 10 pcs
+    SET1-13-3238-1                           (13-3238-1) - 6 WOs, 300 pcs
+    SET1-13-3241                             (13-3241) - 2 WOs, 20 pcs
+    SET1-13-3247A                            (13-3247A) - 2 WOs, 50 pcs
+    SET1-13-3270                             (13-3270) - 3 WOs, 150 pcs
+    SET1-13-3279                             (13-3279) - 2 WOs, 10 pcs
+    SET1-13-3280D                            (13-3280D) - 2 WOs, 15 pcs
+    SET1-13-3288                             (13-3288) - 4 WOs, 180 pcs
+    SET1-13-3295-LID                         (13-3295-LID) - 3 WOs, 70 pcs
+    SET1-13-3297 Lid                         (13-3296DS TOP COVER DRILL) - 1 WOs, 20 pcs
+    SET1-13-3318                             (ENCLOSURE 13-3318) - 6 WOs, 530 pcs
+    SET1-13-3331                             (13-3331) - 3 WOs, 60 pcs
+    SET1-23-7212                             (23-7212) - 6 WOs, 350 pcs
+    SET1-23-7212H                            (23-7212H) - 1 WOs, 2 pcs
+    SET1-23-7214                             (23-7214) - 5 WOs, 220 pcs
+    SET1-23-7214A                            (23-7214A) - 3 WOs, 50 pcs
+    TES1-Ind Bracket v3                      (Ind Bracket v3) - 1 WOs, 2 pcs
+    TES1-Sensor Bracket                      (Sensor Bracket) - 1 WOs, 2 pcs
+    TRA1-AD163 Side 2 Fixture Mod            (AD163 Side 2 Fixture Mod) - 2 WOs, 2 pcs
+    TRA1-Fixture 130                         (Fixture 130) - 1 WOs, 0 pcs
+    TRA1-G10 Jaw for Mod Vise                (G10 Jaw for Mod Vise) - 1 WOs, 4 pcs
+    TRA1-Mini Clamp Fixture                  (Mini Clamp Fixture) - 1 WOs, 1 pcs
+    TRA1-Mod Vise Aluminum Soft Jaws         () - 1 WOs, 4 pcs
+    UTA1-IP012421                            (Tube, ground basket weldment, antenna, darc host) - 1 WOs, 4 pcs
+    UTA1-NP000674                            (HEAT SINK, AMPLIFIER, ALT RADIO, iCOGR) - 1 WOs, 4 pcs
+    WAL1-Curved blade scraper handle         (Curved blade scraper handle) - 1 WOs, 0 pcs
+    WAL1-Slot and Holes Mod                  (Slot and Holes Mod) - 1 WOs, 5 pcs
+  Operations: 1. Unboxing 2. Cut bosses inside w half turn fixture 3. Cut ports in side of box 4. Rebox, 4th axis mill work, Add Mod Features, Box Machine Side 1/Deburr, Cut lids on 3ax using the spacer w/ a cat picture.  Do not scratch, Lathe 1, Lid Machining, MILL FRONT PANEL, MILL OP10, MILL REAR PANEL
+  Holders: -, ER16, ER16 - 2", ER25, ER25 - 2", ER32
+
+--- #4: A10 ---
+  Description:    3/8, 1 LOC, 2.5 OAL, 3FL
+  Tool Group:     A
+  Used in parts:  33
+  Work orders:    91
+  Total WO qty:   16157
+  Seq appearances:171
+  Parts:
+    ALM1-SLS-4650-10006                      (MANIFOLD, STABLE TEMP, N2) - 1 WOs, 9 pcs
+    ALM1-SLSI-9203-60150-001                 (BRACKET, COOLANT LINES, I/R RAIL,  EXPANDED) - 1 WOs, 20 pcs
+    CEL1-0882-0005 Item 1                    (Item 1 Universal CounterBalance Bottom) - 1 WOs, 55 pcs
+    CEL1-0882-0005 Item 2                    (Item 2 Universal CounterBalance Top) - 1 WOs, 55 pcs
+    ICO1-10-01822                            (CUTTER MOUNT, CIR) - 1 WOs, 9 pcs
+    ICO1-10-02001                            (DRIVEN GEAR ARM, CIR NOZZLE FEED) - 2 WOs, 44 pcs
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+    R2S1-10037                               (END CAP, CAPACITOR BANK, 10037) - 6 WOs, 700 pcs
+    R2S1-10067                               (Capacitor MTG BRACKET A) - 7 WOs, 900 pcs
+    R2S1-10068                               (Capacitor MTG Bracket B) - 7 WOs, 900 pcs
+    R2S1-10131                               (BLADDER COVER, 2020) - 1 WOs, 60 pcs
+    R2S1-10139-1                             (2020 Cable Clamp, Top) - 2 WOs, 135 pcs
+    R2S1-10139-2                             (2020 Cable Clamp, Bottom) - 2 WOs, 100 pcs
+    R2S1-10142                               (HOUSING, CAP BANK, 10142, 2020) - 2 WOs, 105 pcs
+    R2S1-10143                               (END CAP, CAP BANK, 10143, 2020) - 2 WOs, 90 pcs
+    R2S1-10156                               (BLADDER COVER, 500MM) - 4 WOs, 400 pcs
+    R2S1-10157                               (COVER, BLADDER, 10157 (2022)) - 2 WOs, 100 pcs
+    R2S1-10311                               (BRACKET, CBL CLMP, TOP DUAL .55, Xclrnc) - 4 WOs, 390 pcs
+    R2S1-10312                               (BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc) - 3 WOs, 300 pcs
+    R2S1-10312 (Ti inserts)                  (BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc, Ti) - 1 WOs, 100 pcs
+    R2S1-10689                               (Isolation Insert G1-V Flatmount) - 8 WOs, 1495 pcs
+    R2S1-10713                               (Lid, SVP Cradle, 2020V) - 8 WOs, 50 pcs
+    R2S1-Fixture 90 Mod                      (Fixture 90 Mod) - 1 WOs, 2 pcs
+    ROV1-TES24A-FAB1210                      (Conveyor Clearance Plate) - 1 WOs, 6 pcs
+    ROV1-TES24A-FAB1212                      (SHAFT GUARD SUPPORT) - 1 WOs, 3 pcs
+    TRA1-Fixture 102                         (R2Sonic 10418_B Shim Fixture Side 1 and 2) - 1 WOs, 2 pcs
+    TRA1-Insert For Fixture Clamping R2SONIC 10689 (Insert For Fixture Clamping R2SONIC 10689) - 3 WOs, 85 pcs
+    TRA1-Mod Universal Small Pallet for 5AX Jaws (Mod Universal Small Pallet for Jaws) - 1 WOs, 0 pcs
+    UTA1-IP012518                            (FILTER MOUNT, ELECTRONICS TRAY ASSY) - 1 WOs, 4 pcs
+    UTA1-NP000540-003                        (Heat Sink, RCC, Hull MTD, DARC, uPUMA) - 1 WOs, 4 pcs
+    WAR1-1" cope                             (1" cope) - 1 WOs, 25 pcs
+  Operations: Cut Soft Jaws, MILL OP10, MILL OP20, MILL OP20 / POLISH, MILL SIDE 1, MILL SIDE 1 AND 2 4AX Full Array, MILL SIDE 1 AND 2 5AX Four Parts, MILL SIDE 2, MILL SIDE 3 4AX Multi, MILLL SIDE 1 AND 2 5AX
+  Holders: ER16 - 6", ER32
+
+--- #5: A30 ---
+  Description:    1/4-.75 LOC-2.5 OAL 3FL
+  Tool Group:     A
+  Used in parts:  49
+  Work orders:    119
+  Total WO qty:   14964
+  Seq appearances:143
+  Parts:
+    ART1-145 Furnace Support Bottom          (Furnace Support Bottom) - 2 WOs, 8 pcs
+    CEL1-0882-0005 Item 1                    (Item 1 Universal CounterBalance Bottom) - 1 WOs, 55 pcs
+    CEL1-0882-0005 Item 2                    (Item 2 Universal CounterBalance Top) - 1 WOs, 55 pcs
+    DEP1-DT0890                              (Pumping Plate) - 1 WOs, 1 pcs
+    DEP1-Mini Toe Clamp                      (Mini Toe Clamp) - 1 WOs, 50 pcs
+    ICO1-10-01822                            (CUTTER MOUNT, CIR) - 1 WOs, 9 pcs
+    ICO1-10-02001                            (DRIVEN GEAR ARM, CIR NOZZLE FEED) - 2 WOs, 44 pcs
+    ICO1-10-02002                            (MOTOR MOUNT, CIR NOZZLE FEEDER, E-AXIS) - 2 WOs, 43 pcs
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+    R2S1-10057                               (LABOR, MACH, SIMBOX CASE) - 1 WOs, 10 pcs
+    R2S1-10068                               (Capacitor MTG Bracket B) - 7 WOs, 900 pcs
+    R2S1-10130                               (Housing back mach'd delrin 2020) - 4 WOs, 80 pcs
+    R2S1-10156                               (BLADDER COVER, 500MM) - 4 WOs, 400 pcs
+    R2S1-10158                               (LABOR, MACH, SIMBOX CASE FOR INS) - 1 WOs, 6 pcs
+    R2S1-10245                               (BRACKET, CABLE CLAMP, UPPER, PORJ WB) - 4 WOs, 400 pcs
+    R2S1-10417                               (HOUSING, CAP BANK 10417 g1/g2 6k) - 5 WOs, 314 pcs
+    R2S1-10524                               (G2 Housing, Transmitter M (60)) - 1 WOs, 2 pcs
+    R2S1-10686                               (Flat Mount Plate temp G1-V) - 4 WOs, 80 pcs
+    R2S1-10721                               (G1-V 2022 Flat Mount Plate) - 2 WOs, 40 pcs
+    R2S1-AD246-02-0101                       (LABOR MACH, TI G2 TX FACE PLATE, L/M) - 2 WOs, 47 pcs
+    SET1-13-2026                             (13-2026) - 6 WOs, 660 pcs
+    SET1-13-3173                             (13-3173) - 4 WOs, 150 pcs
+    SET1-13-3191D                            (13-3191D) - 3 WOs, 50 pcs
+    SET1-13-3279                             (13-3279) - 2 WOs, 10 pcs
+    SET1-13-3285                             (13-3285) - 3 WOs, 75 pcs
+    SET1-23-7212                             (23-7212) - 6 WOs, 350 pcs
+    SET1-23-7212H                            (23-7212H) - 1 WOs, 2 pcs
+    SET1-23-7214                             (23-7214) - 5 WOs, 220 pcs
+    SET1-23-7214A                            (23-7214A) - 3 WOs, 50 pcs
+    SET1-23-7224D                            (Drilled Headset Fire Wireless - Vented Cup - Antenna) - 4 WOs, 420 pcs
+    SET1-23-7230D                            (23-7230D) - 4 WOs, 400 pcs
+    TRA1-5AX Plastic Jaws 4 inch             (5AX Plastic Jaws 4 inch) - 1 WOs, 8 pcs
+    TRA1-AD163 Side 2 Fixture Mod            (AD163 Side 2 Fixture Mod) - 2 WOs, 2 pcs
+    TRA1-Fixture 102                         (R2Sonic 10418_B Shim Fixture Side 1 and 2) - 1 WOs, 2 pcs
+    TRA1-Fixture 130                         (Fixture 130) - 1 WOs, 0 pcs
+    TRA1-Fixture 92                          (Fixture 92 - 10758 Side 2) - 1 WOs, 1 pcs
+    TRA1-Fixture 93                          (Fixture 93 - 10785 Side 2) - 1 WOs, 1 pcs
+    TRA1-Fixture 96                          (Fixture 96 - 10717 Side 2) - 1 WOs, 1 pcs
+    TRA1-G10 Jaw for Mod Vise                (G10 Jaw for Mod Vise) - 1 WOs, 4 pcs
+    TRA1-Mini Clamp Fixture                  (Mini Clamp Fixture) - 1 WOs, 1 pcs
+    UTA1-IP012421                            (Tube, ground basket weldment, antenna, darc host) - 1 WOs, 4 pcs
+    UTA1-NP000674                            (HEAT SINK, AMPLIFIER, ALT RADIO, iCOGR) - 1 WOs, 4 pcs
+    WAL1-Curved blade scraper design / build (Curved blade scraper design / build) - 1 WOs, 10 pcs
+    WAL1-TES24A-FAB0401                      (RFU Base Plate Mod) - 1 WOs, 1 pcs
+    WAL1-TES24A-FAB0501                      (FFU Base Plate Mod) - 1 WOs, 1 pcs
+    WAL1-Ti Ball mod                         (Ti Ball mod) - 1 WOs, 40 pcs
+    WAL1-sprocket opening mod                (sprocket opening mod) - 1 WOs, 1 pcs
+  Operations: 4th axis mill work, Clamp Bar Mod, Fixture Jaws, MILL OP20, MILL SIDE 1, MILL SIDE 2, MILL SIDE 3, MILL SIDE 4, MILL SIDE 5, MILL SIDE 6
+  Holders: -, 3" long ER 25 holderr, Chuck, ER16, ER16 - 2", ER25, ER25 - 2", ER32
+
+--- #6: I140 ---
+  Description:    ISCAR FACE MILL F45KT D2.5 -R07-410
+  Tool Group:     I
+  Used in parts:  8
+  Work orders:    27
+  Total WO qty:   11374
+  Seq appearances:11
+  Parts:
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+    R2S1-10068                               (Capacitor MTG Bracket B) - 7 WOs, 900 pcs
+    R2S1-10418A                              (SHIM, PENETRATOR, 4.5 TH. DELRIN) - 2 WOs, 150 pcs
+    R2S1-10418B                              (Shim Curved DWtek Penetrator) - 4 WOs, 400 pcs
+    ROV1-TES24A-FAB1214                      (Conveyor Side Rail) - 1 WOs, 12 pcs
+    TRA1-Fixture 130                         (Fixture 130) - 1 WOs, 0 pcs
+  Operations: MILL SIDE 3 4AX Multi, Mill OP 1, Mill OP 1 (ARRAY), Mill Side 1, Mill Side 3 NEW, Milling Side 1 and Side 1 shifted 12"
+
+--- #7: .166 JOBBER ---
+  Description:    
+  Used in parts:  3
+  Work orders:    11
+  Total WO qty:   9900
+  Seq appearances:3
+  Parts:
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+  Operations: Mill OP 1, Mill OP 1 (ARRAY)
+
+--- #8: .120 ---
+  Description:    
+  Used in parts:  3
+  Work orders:    11
+  Total WO qty:   9900
+  Seq appearances:3
+  Parts:
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+  Operations: Mill OP 1, Mill OP 1 (ARRAY)
+
+--- #9: .125 HSS REAMERQ ---
+  Description:    
+  Used in parts:  3
+  Work orders:    11
+  Total WO qty:   9900
+  Seq appearances:3
+  Parts:
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+  Operations: Mill OP 1, Mill OP 1 (ARRAY)
+
+--- #10: LETTER P HSS JOBBER OR STUB .323" ---
+  Description:    
+  Used in parts:  3
+  Work orders:    11
+  Total WO qty:   9900
+  Seq appearances:3
+  Parts:
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+  Operations: Mill OP 1, Mill OP 1 (ARRAY)
+
+--- #11: L201 ---
+  Description:    1/4 120 4FL CHAMFERMILL
+  Tool Group:     L
+  Used in parts:  3
+  Work orders:    11
+  Total WO qty:   9900
+  Seq appearances:3
+  Parts:
+    LYN1-BH-2024                             (Bolt Hat, 2024) - 1 WOs, 1000 pcs
+    LYN1-BH-A-DV                             (Bolt Hat, Dyna) - 2 WOs, 500 pcs
+    LYN1-BH-A-E                              (Bolt Hat, Enforcer) - 8 WOs, 8400 pcs
+  Operations: Mill OP 2
+
+--- #12: A12 ---
+  Description:    3/8-1.0 LOC- 2.5 OAL 5FL
+  Tool Group:     A
+  Used in parts:  19
+  Work orders:    58
+  Total WO qty:   4146
+  Seq appearances:38
+  Parts:
+    AME1-131435-006                          (MOLD INSERT, BACK, DIGITAL  VOLTMETER - DVM2130) - 2 WOs, 325 pcs
+    ART1-142 Top Flange                      (PyC Furnace, Single Station) - 2 WOs, 6 pcs
+    ART1-143 Base Plate                      (PyC Furnace, Single Station) - 2 WOs, 6 pcs
+    ICO1-10-02004                            (LATCH PIN, CIR NOZZLE ASSY, E-AXIS) - 4 WOs, 174 pcs
+    ICO1-10-02027                            (PLATE, STUFFING BOX FACE) - 2 WOs, 113 pcs
+    INF1-Bracket Assembly                    (Bracket Assembly) - 1 WOs, 3 pcs
+    NOV2-0020-01995                          (Holder, Magnetal AL 300MM PVD) - 1 WOs, 2 pcs
+    R2S1-10042                               (Mounting studs, corner, Ti, 2024/22) - 8 WOs, 1600 pcs
+    R2S1-10469                               (housing mach'd aluminum tx xl 120 ch) - 1 WOs, 20 pcs
+    R2S1-10690                               (Sonic G1-V Flat Mount Custom Nut) - 9 WOs, 1455 pcs
+    R2S1-10876                               (BASEPLATE, PENETRATOR, CONNECTORIZED, TX) - 6 WOs, 108 pcs
+    R2S1-10877                               (PLUG SHELL, PENETRATOR, CONNECTORIZED, TX) - 5 WOs, 58 pcs
+    R2S1-10878                               (COUPLING NUT, PENETRATOR, CONNECTORIZED, TX) - 6 WOs, 108 pcs
+    R2S1-10907                               (PLUG SHELL, PENETRATOR, CONNECTORIZED, TX) - 3 WOs, 50 pcs
+    R2S1-Plunger Disk                        (Plunger Disk) - 1 WOs, 1 pcs
+    ROV1-TES24A-FAB1209                      (MIDDLE CONVEYOR EXTENDED SHAFT) - 1 WOs, 2 pcs
+    WAL1-AMD Receiver                        (AMD Receiver) - 1 WOs, 1 pcs
+    WAR1-Allston 1A                          (Allston 1A) - 1 WOs, 12 pcs
+    WAR1-Part A Coped Tube                   (Part A Coped Tube) - 1 WOs, 100 pcs
+  Operations: Lathe 1, Lathe Side 1, Mill, Mill Machining Side 5, Mill Side 1, Mill Side 1 / Deburr, Mill Side 1 key slots, Mill Side 2, Mill Side 2 / Deburr, Mill Side 3
+  Holders: -, ER25, ER32
+
+--- #13: A61 ---
+  Description:    1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CARBIDE ALUMINUM ALU-POWER HPC 3-FLUTE
+  Tool Group:     A
+  Used in parts:  49
+  Work orders:    104
+  Total WO qty:   3726
+  Seq appearances:245
+  Parts:
+    ALM1-SLS-4650-10006                      (MANIFOLD, STABLE TEMP, N2) - 1 WOs, 9 pcs
+    AME1-131394-001                          (ENCLOSURE, MODIFIED, GPS300) - 3 WOs, 200 pcs
+    AME1-131394-003                          (ENCLOSURE, MODIFIED, GPS360) - 2 WOs, 249 pcs
+    ART1-144 Furnace Support Top             (Furnace Support Top) - 2 WOs, 8 pcs
+    ART1-145 Furnace Support Bottom          (Furnace Support Bottom) - 2 WOs, 8 pcs
+    DEP1-DT0498                              (Shield Lower Final) - 3 WOs, 20 pcs
+    DEP1-DT0890                              (Pumping Plate) - 1 WOs, 1 pcs
+    ICO1-10-01822                            (CUTTER MOUNT, CIR) - 1 WOs, 9 pcs
+    ICO1-10-02001                            (DRIVEN GEAR ARM, CIR NOZZLE FEED) - 2 WOs, 44 pcs
+    ICO1-10-02002                            (MOTOR MOUNT, CIR NOZZLE FEEDER, E-AXIS) - 2 WOs, 43 pcs
+    R2S1-10016                               (HOUSING BACKSHELL MACHINED, 500MM, 2024) - 11 WOs, 230 pcs
+    R2S1-10016(Ti inserts)                   (HOUSING BACKSHELL MACHINED, 500MM, 2024) - 2 WOs, 50 pcs
+    R2S1-10057                               (LABOR, MACH, SIMBOX CASE) - 1 WOs, 10 pcs
+    R2S1-10131                               (BLADDER COVER, 2020) - 1 WOs, 60 pcs
+    R2S1-10138                               (2020 CONNECTOR PROTECTOR) - 1 WOs, 60 pcs
+    R2S1-10156                               (BLADDER COVER, 500MM) - 4 WOs, 400 pcs
+    R2S1-10158                               (LABOR, MACH, SIMBOX CASE FOR INS) - 1 WOs, 6 pcs
+    R2S1-10198                               (Cover 2026 bumper) - 5 WOs, 240 pcs
+    R2S1-10243                               (BRACKET, CABLE CLAMP, LOWER, PROJ) - 4 WOs, 400 pcs
+    R2S1-10418A                              (SHIM, PENETRATOR, 4.5 TH. DELRIN) - 2 WOs, 150 pcs
+    R2S1-10418B                              (Shim Curved DWtek Penetrator) - 4 WOs, 400 pcs
+    R2S1-10418B OLD OPERATIONS DO NOT USE PART () - 0 WOs, 0 pcs
+    R2S1-10686                               (Flat Mount Plate temp G1-V) - 4 WOs, 80 pcs
+    R2S1-10717                               (Plate, Flat Mount 2020 V) - 5 WOs, 70 pcs
+    R2S1-10721                               (G1-V 2022 Flat Mount Plate) - 2 WOs, 40 pcs
+    R2S1-10726                               (Large Flat Mount Plate) - 2 WOs, 20 pcs
+    ROV1-TES24A-FAB1214                      (Conveyor Side Rail) - 1 WOs, 12 pcs
+    SET1-13-3043G                            (13-3043G) - 7 WOs, 612 pcs
+    SET1-13-3288                             (13-3288) - 4 WOs, 180 pcs
+    TES1-Busing Post A                       (Busing Post A) - 1 WOs, 2 pcs
+    TES1-Busing Post B                       (Busing Post B) - 1 WOs, 2 pcs
+    TES1-Pilz Bracket v3                     (Pilz Bracket v3) - 1 WOs, 2 pcs
+    TES1-SC Standoff                         (SC Standoff) - 1 WOs, 4 pcs
+    TES1-SDS Pin Post                        (SDS Pin Post) - 1 WOs, 2 pcs
+    TES1-Sensor Bracket                      (Sensor Bracket) - 1 WOs, 2 pcs
+    TES1-Sensor Post                         (Sensor Post) - 1 WOs, 2 pcs
+    TES1-THC Standoff                        (THC Standoff) - 1 WOs, 4 pcs
+    TRA1-AD163 Side 2 Fixture Mod            (AD163 Side 2 Fixture Mod) - 2 WOs, 2 pcs
+    TRA1-Fixture 130                         (Fixture 130) - 1 WOs, 0 pcs
+    TRA1-Fixture 92                          (Fixture 92 - 10758 Side 2) - 1 WOs, 1 pcs
+    TRA1-Fixture 93                          (Fixture 93 - 10785 Side 2) - 1 WOs, 1 pcs
+    TRA1-Fixture 96                          (Fixture 96 - 10717 Side 2) - 1 WOs, 1 pcs
+    TRA1-G10 Jaw for Mod Vise                (G10 Jaw for Mod Vise) - 1 WOs, 4 pcs
+    TRA1-Toolplate Mod Vise X Axis Stop      (Toolplate Mod Vise X Axis Stop) - 1 WOs, 2 pcs
+    UTA1-IP012421                            (Tube, ground basket weldment, antenna, darc host) - 1 WOs, 4 pcs
+    UTA1-IP012515                            (Heat sink power supply electronics tray assy, darc host) - 1 WOs, 4 pcs
+    UTA1-NP000674                            (HEAT SINK, AMPLIFIER, ALT RADIO, iCOGR) - 1 WOs, 4 pcs
+    WAL1-Curved blade scraper design / build (Curved blade scraper design / build) - 1 WOs, 10 pcs
+    WAL1-Curved blade scraper handle         (Curved blade scraper handle) - 1 WOs, 0 pcs
+  Operations: 1. Unboxing 2. Cut bosses inside w half turn fixture 3. Cut ports in side of box 4. Rebox, Jergens Quick-Loc Fixture Prep, MILL OP10, MILL OP20, MILL OP20 / INSTALL INSERTS, MILL OP50  (uses fixture #31 from R2 shelf), MILL SIDE 1, MILL SIDE 2, MILL SIDE 3, MILL SIDE 4
+  Holders: -, ER16 - 4", ER25M - 4", ER32, ER32 - 2", ER32 - 3", ER32- 3", Solid
+
+--- #14: A47 ---
+  Description:    3/16-.5625 LOC-2.0 OAL 3FL
+  Tool Group:     A
+  Used in parts:  38
+  Work orders:    78
+  Total WO qty:   3685
+  Seq appearances:103
+  Parts:
+    ALM1-9204-60102                          (SPACER, LAMP) - 1 WOs, 18 pcs
+    AME1-121158                              (ROTOR WHEEL, WIRE CHAINER, HDPE) - 3 WOs, 200 pcs
+    AME1-131394-003                          (ENCLOSURE, MODIFIED, GPS360) - 2 WOs, 249 pcs
+    ART1-148 Top Collar                      (Top Collar) - 2 WOs, 6 pcs
+    ATO1-330148                              (Enclosure, Modified, Shunt Resistor) - 1 WOs, 1 pcs
+    ATO1-610524-01                           (ENCLOSURE, MODIFIED  2.8 GALLON, BLACK  CELL WASHER) - 2 WOs, 16 pcs
+    CEL1-0882-0005 Item 1                    (Item 1 Universal CounterBalance Bottom) - 1 WOs, 55 pcs
+    CEL1-0882-0005 Item 2                    (Item 2 Universal CounterBalance Top) - 1 WOs, 55 pcs
+    DEP1-DT0498                              (Shield Lower Final) - 3 WOs, 20 pcs
+    FRA1-UC-1A                               (Unit Controller, 1A) - 4 WOs, 919 pcs
+    ICO1-10-01822                            (CUTTER MOUNT, CIR) - 1 WOs, 9 pcs
+    ICO1-10-02002                            (MOTOR MOUNT, CIR NOZZLE FEEDER, E-AXIS) - 2 WOs, 43 pcs
+    ICO1-10-02003                            (FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 2 WOs, 52 pcs
+    LTD1-60363-001                           (INSPECTION PLATE) - 2 WOs, 2 pcs
+    R2S1-10131                               (BLADDER COVER, 2020) - 1 WOs, 60 pcs
+    R2S1-10138                               (2020 CONNECTOR PROTECTOR) - 1 WOs, 60 pcs
+    R2S1-10157                               (COVER, BLADDER, 10157 (2022)) - 2 WOs, 100 pcs
+    R2S1-10243                               (BRACKET, CABLE CLAMP, LOWER, PROJ) - 4 WOs, 400 pcs
+    R2S1-10311                               (BRACKET, CBL CLMP, TOP DUAL .55, Xclrnc) - 4 WOs, 390 pcs
+    R2S1-10312                               (BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc) - 3 WOs, 300 pcs
+    R2S1-10312 (Ti inserts)                  (BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc, Ti) - 1 WOs, 100 pcs
+    R2S1-10681                               (Voxim Mounting Plate) - 1 WOs, 10 pcs
+    R2S1-10713                               (Lid, SVP Cradle, 2020V) - 8 WOs, 50 pcs
+    R2S1-10717                               (Plate, Flat Mount 2020 V) - 5 WOs, 70 pcs
+    SET1-13-3052/SP                          (13-3052/SP) - 4 WOs, 200 pcs
+    SET1-13-3288                             (13-3288) - 4 WOs, 180 pcs
+    TES1-Pilz Bracket v3                     (Pilz Bracket v3) - 1 WOs, 2 pcs
+    TES1-SC Baseplate                        (SC Baseplate) - 1 WOs, 2 pcs
+    TES1-SDS Baseplate                       (SDS Baseplate) - 1 WOs, 1 pcs
+    TES1-THC Baseplate                       (THC Baseplate) - 1 WOs, 1 pcs
+    TRA1-10-02003                            (TEST FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 1 WOs, 1 pcs
+    TRA1-Fixture 90                          (Fixture 90) - 1 WOs, 2 pcs
+    TRA1-Fixture 92                          (Fixture 92 - 10758 Side 2) - 1 WOs, 1 pcs
+    TRA1-Fixture 93                          (Fixture 93 - 10785 Side 2) - 1 WOs, 1 pcs
+    TRA1-Fixture 95                          (Side 2 multi part fixture 10067 / 68) - 1 WOs, 2 pcs
+    TRA1-Fixture 96                          (Fixture 96 - 10717 Side 2) - 1 WOs, 1 pcs
+    TRA1-Toolplate Mod Vise X Axis Stop      (Toolplate Mod Vise X Axis Stop) - 1 WOs, 2 pcs
+    UTA1-IP012518                            (FILTER MOUNT, ELECTRONICS TRAY ASSY) - 1 WOs, 4 pcs
+  Operations: 1. Unboxing 2. Cut bosses inside w half turn fixture 3. Cut ports in side of box 4. Rebox, FRONT PANEL MILL MACHINING, Lathe 1, MILL OP10, MILL OP20 / INSTALL INSERTS, MILL SIDE 1, Make soft Jaws, Mill All Sides/Deburr while running, Mill Machining All Sides, One Fixturing, Mill Side 1
+  Holders: ER16 - 6", ER32, ER32 - 2"
+
+--- #15: I460 ---
+  Description:    2" diameter Dodeka mini 45 shell mill.  KSHR200HN4345M3
+  Tool Group:     I
+  Used in parts:  20
+  Work orders:    59
+  Total WO qty:   3182
+  Seq appearances:73
+  Parts:
+    ALM1-9204-60102                          (SPACER, LAMP) - 1 WOs, 18 pcs
+    ALM1-SLS-4650-10002                      (INSULATOR, HOLDER, IR SENSOR, STABLE TEMP) - 1 WOs, 30 pcs
+    ALM1-SLS-4650-10006                      (MANIFOLD, STABLE TEMP, N2) - 1 WOs, 9 pcs
+    ART1-142 Top Flange                      (PyC Furnace, Single Station) - 2 WOs, 6 pcs
+    ART1-143 Base Plate                      (PyC Furnace, Single Station) - 2 WOs, 6 pcs
+    ART1-144 Furnace Support Top             (Furnace Support Top) - 2 WOs, 8 pcs
+    ART1-145 Furnace Support Bottom          (Furnace Support Bottom) - 2 WOs, 8 pcs
+    DEP1-DT0890                              (Pumping Plate) - 1 WOs, 1 pcs
+    ICO1-10-01822                            (CUTTER MOUNT, CIR) - 1 WOs, 9 pcs
+    ICO1-10-02001                            (DRIVEN GEAR ARM, CIR NOZZLE FEED) - 2 WOs, 44 pcs
+    ICO1-10-02002                            (MOTOR MOUNT, CIR NOZZLE FEEDER, E-AXIS) - 2 WOs, 43 pcs
+    R2S1-10016                               (HOUSING BACKSHELL MACHINED, 500MM, 2024) - 11 WOs, 230 pcs
+    R2S1-10016(Ti inserts)                   (HOUSING BACKSHELL MACHINED, 500MM, 2024) - 2 WOs, 50 pcs
+    R2S1-10067                               (Capacitor MTG BRACKET A) - 7 WOs, 900 pcs
+    R2S1-10068                               (Capacitor MTG Bracket B) - 7 WOs, 900 pcs
+    R2S1-10417                               (HOUSING, CAP BANK 10417 g1/g2 6k) - 5 WOs, 314 pcs
+    R2S1-10418A                              (SHIM, PENETRATOR, 4.5 TH. DELRIN) - 2 WOs, 150 pcs
+    R2S1-10418B                              (Shim Curved DWtek Penetrator) - 4 WOs, 400 pcs
+    ROV1-TES25B-W68-PRT099                   (Spacer Type C Skyguard) - 1 WOs, 2 pcs
+    UTA1-NP000674                            (HEAT SINK, AMPLIFIER, ALT RADIO, iCOGR) - 1 WOs, 4 pcs
+  Operations: Jergens Quick-Loc Fixture Prep, MILL OP10, MILL OP20, MILL SIDE 1, MILL SIDE 2, MILL SIDE 3, Make Side 2 Fixture For 144 and 145, Mill SIDE 3 3AX, Mill Side 1, Mill Side 1-2-3
+  Holders: -
+
+--- #16: I132 ---
+  Description:    2" -90 degree Face Mill, 7 insert
+  Tool Group:     I
+  Used in parts:  28
+  Work orders:    73
+  Total WO qty:   2898
+  Seq appearances:68
+  Parts:
+    CEL1-0882-0005 Item 1                    (Item 1 Universal CounterBalance Bottom) - 1 WOs, 55 pcs
+    CEL1-0882-0005 Item 2                    (Item 2 Universal CounterBalance Top) - 1 WOs, 55 pcs
+    DEP1-DT0498                              (Shield Lower Final) - 3 WOs, 20 pcs
+    DEP1-Mini Toe Clamp                      (Mini Toe Clamp) - 1 WOs, 50 pcs
+    ICO1-10-02027                            (PLATE, STUFFING BOX FACE) - 2 WOs, 113 pcs
+    INF1-Bracket Assembly                    (Bracket Assembly) - 1 WOs, 3 pcs
+    LTD1-242-A010-p004                       (rod support plate) - 1 WOs, 1 pcs
+    LTD1-60363-001                           (INSPECTION PLATE) - 2 WOs, 2 pcs
+    R2S1-10016-OLD                           () - 0 WOs, 0 pcs
+    R2S1-10020                               (HOUSING BACKSHELL, MACHINED,250 MM) - 5 WOs, 100 pcs
+    R2S1-10067                               (Capacitor MTG BRACKET A) - 7 WOs, 900 pcs
+    R2S1-10130                               (Housing back mach'd delrin 2020) - 4 WOs, 80 pcs
+    R2S1-10156                               (BLADDER COVER, 500MM) - 4 WOs, 400 pcs
+    R2S1-10163                               (HOUSING, MACH'D, 2026 Tx) - 6 WOs, 105 pcs
+    R2S1-10418A                              (SHIM, PENETRATOR, 4.5 TH. DELRIN) - 2 WOs, 150 pcs
+    R2S1-10418B                              (Shim Curved DWtek Penetrator) - 4 WOs, 400 pcs
+    R2S1-10549                               (G2 Housing Receiver 192) - 2 WOs, 50 pcs
+    R2S1-10686                               (Flat Mount Plate temp G1-V) - 4 WOs, 80 pcs
+    R2S1-10717                               (Plate, Flat Mount 2020 V) - 5 WOs, 70 pcs
+    R2S1-10721                               (G1-V 2022 Flat Mount Plate) - 2 WOs, 40 pcs
+    R2S1-10726                               (Large Flat Mount Plate) - 2 WOs, 20 pcs
+    R2S1-10876                               (BASEPLATE, PENETRATOR, CONNECTORIZED, TX) - 6 WOs, 108 pcs
+    TRA1-Fixture 102                         (R2Sonic 10418_B Shim Fixture Side 1 and 2) - 1 WOs, 2 pcs
+    TRA1-Fixture 130                         (Fixture 130) - 1 WOs, 0 pcs
+    TRA1-Insert For Fixture Clamping R2SONIC 10689 (Insert For Fixture Clamping R2SONIC 10689) - 3 WOs, 85 pcs
+    TRA1-Mini Clamp Fixture                  (Mini Clamp Fixture) - 1 WOs, 1 pcs
+    UTA1-IP012515                            (Heat sink power supply electronics tray assy, darc host) - 1 WOs, 4 pcs
+    UTA1-IP012518                            (FILTER MOUNT, ELECTRONICS TRAY ASSY) - 1 WOs, 4 pcs
+  Operations: MILL OP10, MILL OP20, MILL OP30, MILL OP40, MILL OP50, MILL OP60, Machining First Side, Mill Machining OP1, Mill Machining Side 1 (Multi-Side), Mill Machining Side 2 (Bottom)
+  Holders: -, Face, Solid
+
+--- #17: TO447 ---
+  Description:    DNMG432MS PR1535 1/2" Circle Diameter x 3/16" Thickness PVD Coated Carbide Indexable Turning Insert
+  Tool Group:     TO
+  Used in parts:  7
+  Work orders:    25
+  Total WO qty:   2572
+  Seq appearances:20
+  Parts:
+    ICO1-10-01680                            (CABLE GUIDE , CUTTER OUTLET, CIR) - 4 WOs, 75 pcs
+    ICO1-10-02003                            (FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 2 WOs, 52 pcs
+    ICO1-10-02004                            (LATCH PIN, CIR NOZZLE ASSY, E-AXIS) - 4 WOs, 174 pcs
+    R2S1-10042                               (Mounting studs, corner, Ti, 2024/22) - 8 WOs, 1600 pcs
+    R2S1-10164                               (2026 CORNER STUD BOLT) - 5 WOs, 470 pcs
+    TES1-Pin Casting Assy Rod                (Pin Casting Assy) - 1 WOs, 200 pcs
+    TRA1-10-02003                            (TEST FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 1 WOs, 1 pcs
+  Operations: Lathe Side 1, Lathe Side 2, Turn Side 1, Turning OP1 / Turning OP2, Turning OP1 and OP2 50 and 60, Turning OP3
+  Holders: -
+
+--- #18: A28 ---
+  Description:    1/16-.250 LOC-1.5 OAL 2FL
+  Tool Group:     A
+  Used in parts:  15
+  Work orders:    34
+  Total WO qty:   2388
+  Seq appearances:20
+  Parts:
+    ALM1-SLS-4650-10003                      (HOLDER, IR SENSOR, STABLE TEMP) - 1 WOs, 18 pcs
+    FRA1-UC-1A                               (Unit Controller, 1A) - 4 WOs, 919 pcs
+    R2S1-10057                               (LABOR, MACH, SIMBOX CASE) - 1 WOs, 10 pcs
+    R2S1-10158                               (LABOR, MACH, SIMBOX CASE FOR INS) - 1 WOs, 6 pcs
+    SET1-13-1680NS                           (13-1680NS) - 3 WOs, 150 pcs
+    SET1-13-1680PF                           (13-1680PF) - 3 WOs, 60 pcs
+    SET1-13-1682NS                           (13-1682NS) - 2 WOs, 20 pcs
+    SET1-13-1683NS                           (13-1683NS) - 2 WOs, 40 pcs
+    SET1-13-1695NS                           (13-1695NS) - 3 WOs, 300 pcs
+    SET1-13-1696NS                           (13-1696NS) - 3 WOs, 300 pcs
+    SET1-13-1699NS                           (13-1699NS) - 4 WOs, 400 pcs
+    SET1-13-3200A                            (13-3200A) - 2 WOs, 10 pcs
+    SET1-13-3270                             (13-3270) - 3 WOs, 150 pcs
+    UTA1-NP000674                            (HEAT SINK, AMPLIFIER, ALT RADIO, iCOGR) - 1 WOs, 4 pcs
+    WAL1-sprocket opening mod                (sprocket opening mod) - 1 WOs, 1 pcs
+  Operations: MILL SIDE 2, Machine Front Port Holes, Machine Front Ports, Mill 5AX All sides / REMOVE LID TAB, Mill Machining All Sides, One Fixturing, Mill Machining All Sides, One Fixturing/Install Insert, Mill holes in one of the panels, Turn Side 2 / DB / Clean, cut to size sprocket opening to fit shaft
+  Holders: -, ER25 - 2", ER32
+
+--- #19: TO310 ---
+  Description:    1/64" .008"CR External 35° Profiling Insert VPGR 330.5
+  Tool Group:     TO
+  Used in parts:  13
+  Work orders:    35
+  Total WO qty:   2243
+  Seq appearances:26
+  Parts:
+    ART1-148 Top Collar                      (Top Collar) - 2 WOs, 6 pcs
+    ART1-149 Bottom Plate Door               (Bottom Plate Door) - 2 WOs, 6 pcs
+    ICO1-10-01883                            (OUTLET CONNECTOR, CIR FLEX LINE) - 1 WOs, 11 pcs
+    ICO1-10-02004                            (LATCH PIN, CIR NOZZLE ASSY, E-AXIS) - 4 WOs, 174 pcs
+    R2S1-10036                               (HOUSING, CAPACITOR BANK, 10036) - 6 WOs, 710 pcs
+    R2S1-10878                               (COUPLING NUT, PENETRATOR, CONNECTORIZED, TX) - 6 WOs, 108 pcs
+    R2S1-10957                               (INSERT, CONTACT SUPPORT, MICRO CIRCULAR, IN-LINE, 12 PIN, F) - 1 WOs, 1 pcs
+    R2S1-10958                               (COMPRESSION DISK, MICRO CICULAR, IN-LINE, 12P, MOLD) - 1 WOs, 1 pcs
+    R2S1-10979                               (PIN, 2.0mm CONTACT, MCIL CABLES) - 1 WOs, 12 pcs
+    R2S1-10981                               (SOCKET CONTACT BODY, 2.0 MCIL) - 4 WOs, 600 pcs
+    R2S1-10983                               (PIN CONTACT BODY, 2.0mm CONTACT, MCIL CABLES) - 4 WOs, 600 pcs
+    TES1-Threaded Shaft                      (Threaded Shaft) - 1 WOs, 12 pcs
+    TRA1-TEMP                                (TEMP) - 2 WOs, 2 pcs
+  Operations: Lathe 2, Lathe Side 1, Lathe Side 2, Milling 2, Side 1, TURN OP10, OP20 and Polish / Clean, Turn Deburr, Turn Side 1, Turn Side 2, Turning Front
+  Holders: -
+
+--- #20: E479 ---
+  Description:    #3 Carbide Center Drill. 1/4" Diameter
+  Tool Group:     E
+  Used in parts:  2
+  Work orders:    13
+  Total WO qty:   2070
+  Seq appearances:2
+  Parts:
+    R2S1-10042                               (Mounting studs, corner, Ti, 2024/22) - 8 WOs, 1600 pcs
+    R2S1-10164                               (2026 CORNER STUD BOLT) - 5 WOs, 470 pcs
+  Operations: Turning OP1 / Turning OP2, Turning OP1 and OP2 50 and 60
+
+--- #21: O17 ---
+  Description:    3/8 90� SPOT DRILL 3.5 OAL
+  Tool Group:     O
+  Used in parts:  20
+  Work orders:    40
+  Total WO qty:   1904
+  Seq appearances:37
+  Parts:
+    ALM1-SLSI-9203-60150-001                 (BRACKET, COOLANT LINES, I/R RAIL,  EXPANDED) - 1 WOs, 20 pcs
+    ICO1-10-01883                            (OUTLET CONNECTOR, CIR FLEX LINE) - 1 WOs, 11 pcs
+    ICO1-10-02003                            (FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 2 WOs, 52 pcs
+    ICO1-10-02004                            (LATCH PIN, CIR NOZZLE ASSY, E-AXIS) - 4 WOs, 174 pcs
+    NOV2-0020-01995                          (Holder, Magnetal AL 300MM PVD) - 1 WOs, 2 pcs
+    R2S1-10469                               (housing mach'd aluminum tx xl 120 ch) - 1 WOs, 20 pcs
+    R2S1-10524                               (G2 Housing, Transmitter M (60)) - 1 WOs, 2 pcs
+    R2S1-10686                               (Flat Mount Plate temp G1-V) - 4 WOs, 80 pcs
+    R2S1-10690                               (Sonic G1-V Flat Mount Custom Nut) - 9 WOs, 1455 pcs
+    R2S1-10721                               (G1-V 2022 Flat Mount Plate) - 2 WOs, 40 pcs
+    R2S1-10726                               (Large Flat Mount Plate) - 2 WOs, 20 pcs
+    ROV1-TES24A-FAB1210                      (Conveyor Clearance Plate) - 1 WOs, 6 pcs
+    ROV1-TES24A-FAB1212                      (SHAFT GUARD SUPPORT) - 1 WOs, 3 pcs
+    ROV1-TES25B-W68-PRT097                   (Spacer A) - 1 WOs, 1 pcs
+    ROV1-TES25B-W68-PRT098                   (Spacer Type B Skyguard) - 1 WOs, 1 pcs
+    ROV1-TES25B-W68-PRT099                   (Spacer Type C Skyguard) - 1 WOs, 2 pcs
+    TES1-SC Baseplate                        (SC Baseplate) - 1 WOs, 2 pcs
+    TES1-THC Baseplate                       (THC Baseplate) - 1 WOs, 1 pcs
+    TRA1-10-02003                            (TEST FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 1 WOs, 1 pcs
+    TRA1-TEMP                                (TEMP) - 2 WOs, 2 pcs
+  Operations: Lathe Side 1, Lathe Side 2, Mill Machining OP1, Mill Machining OP2, Mill Machining Side 1, Mill Machining Side 2, Mill Machining Side 5, Mill Side 1, Mill side 1, Milling 2
+  Holders: -
+
+--- #22: B77 ---
+  Description:    1/2-R0.03-.625 LOC- 2.5 OAL 5FL
+  Tool Group:     B
+  Used in parts:  7
+  Work orders:    19
+  Total WO qty:   1853
+  Seq appearances:22
+  Parts:
+    ICO1-10-02027                            (PLATE, STUFFING BOX FACE) - 2 WOs, 113 pcs
+    NOV2-0020-01995                          (Holder, Magnetal AL 300MM PVD) - 1 WOs, 2 pcs
+    R2S1-10106                               (LID, CAP BANK, 2026) - 1 WOs, 30 pcs
+    R2S1-10690                               (Sonic G1-V Flat Mount Custom Nut) - 9 WOs, 1455 pcs
+    R2S1-10924P1 Rubber Test Mold Bottom     (10924P1 Rubber Test Mold Bottom) - 1 WOs, 1 pcs
+    R3V1-10852                               (LID, CAPACITOR BANK) - 3 WOs, 250 pcs
+    TRA1-TEMP                                (TEMP) - 2 WOs, 2 pcs
+  Operations: MILL SIDE 1, MILL STOCK: FLATNESS, MILL STOCK: WIDTH, Mill Side 1, Mill Side 2, Milling 1, mill side 1, mill side 2
+  Holders: -, ER32, Face
+
+--- #23: M425 ---
+  Description:    1/32 x .025 x 1.5 4F BALL EM C3
+  Tool Group:     M
+  Used in parts:  11
+  Work orders:    35
+  Total WO qty:   1754
+  Seq appearances:13
+  Parts:
+    ALM1-SSI-9303-62975                      (PLATE, COVER, PART PISTON, HI-TEMP) - 1 WOs, 4 pcs
+    R2S1-10037                               (END CAP, CAPACITOR BANK, 10037) - 6 WOs, 700 pcs
+    R2S1-10097                               (CONNECTOR PROTECTOR, 2022) - 4 WOs, 140 pcs
+    R2S1-10417                               (HOUSING, CAP BANK 10417 g1/g2 6k) - 5 WOs, 314 pcs
+    R2S1-AD163-001-022                       (Front Plate) - 8 WOs, 440 pcs
+    R2S1-AD201-01-0102                       (2022 Front Plate) - 5 WOs, 114 pcs
+    R2S1-AD232-04-0101                       (TI G2 TX Face Plate) - 2 WOs, 38 pcs
+    TRA1-Fixture 130                         (Fixture 130) - 1 WOs, 0 pcs
+    TRA1-Fixture 95                          (Side 2 multi part fixture 10067 / 68) - 1 WOs, 2 pcs
+    TRA1-Fixture 96                          (Fixture 96 - 10717 Side 2) - 1 WOs, 1 pcs
+    TRA1-TOO 185                             (SETCOM Hook Jig) - 1 WOs, 1 pcs
+  Operations: Engraving (CHECK GRAIN DIRECTION), Engraving serials, MILL OP30, Machining side 2 (grained side), Mill Side 1, Mill Side 1 Array, Mill Side 2, Serialize
+  Holders: ER16, ER16M
+
+--- #24: K111 ---
+  Description:    .02 Corner radius cutter
+  Tool Group:     K
+  Used in parts:  10
+  Work orders:    39
+  Total WO qty:   1751
+  Seq appearances:11
+  Parts:
+    R2S1-10156                               (BLADDER COVER, 500MM) - 4 WOs, 400 pcs
+    R2S1-10157                               (COVER, BLADDER, 10157 (2022)) - 2 WOs, 100 pcs
+    R2S1-10700                               (Clamp Base, Ultra SV Sonic G1-V) - 4 WOs, 211 pcs
+    R2S1-10701                               (Clamp Lid, Ultra SV Sonic G1-V) - 7 WOs, 255 pcs
+    R2S1-AD-229-04-0102                      (384 Element Ti Plate) - 2 WOs, 63 pcs
+    R2S1-AD163-001-022                       (Front Plate) - 8 WOs, 440 pcs
+    R2S1-AD181-001-01                        (LABOR, MACHG TI TX PLATE, 2026) - 4 WOs, 130 pcs
+    R2S1-AD201-01-0102                       (2022 Front Plate) - 5 WOs, 114 pcs
+    R2S1-AD245-01-0102                       (Ti Plate - 192 Element) - 2 WOs, 24 pcs
+    R3V1-10824                               (RX Trumpet Lid, G2 Penetrator) - 1 WOs, 14 pcs
+  Operations: MILL OP10, MILL OP20 / POLISH, Machining side 1 (rough), Mill Side 1, Mill Side 2, Mill side 1, Mill side 2, New Fixture Side 1 and 2, Side 2
+  Holders: ER25, ER32
+
+--- #25: A157 ---
+  Description:    1/8-.5 LOC-1.5 OAL 4FL
+  Tool Group:     A
+  Used in parts:  6
+  Work orders:    17
+  Total WO qty:   1661
+  Seq appearances:11
+  Parts:
+    R2S1-10689                               (Isolation Insert G1-V Flatmount) - 8 WOs, 1495 pcs
+    R2S1-10957                               (INSERT, CONTACT SUPPORT, MICRO CIRCULAR, IN-LINE, 12 PIN, F) - 1 WOs, 1 pcs
+    R2S1-AD181-001-01                        (LABOR, MACHG TI TX PLATE, 2026) - 4 WOs, 130 pcs
+    R3V1-10824                               (RX Trumpet Lid, G2 Penetrator) - 1 WOs, 14 pcs
+    R3V1-10837                               (RX Housing W/ Threads, G2 Penetrator) - 2 WOs, 20 pcs
+    WAL1-Gas Key Mod                         (Gas Key Mod) - 1 WOs, 1 pcs
+  Operations: Mill Side 1, Mill Side 2, Mill Side 3, Mill side 1 and 2, Side 2
+  Holders: -, ER16 - 6"
+
+--- #26: L199 ---
+  Description:    1/2″ Diam 82° 4-Flute Single End Solid Carbide Chamfer Mill
+  Tool Group:     L
+  Used in parts:  4
+  Work orders:    12
+  Total WO qty:   1623
+  Seq appearances:6
+  Parts:
+    FRA1-UC-1A                               (Unit Controller, 1A) - 4 WOs, 919 pcs
+    R2S1-10037                               (END CAP, CAPACITOR BANK, 10037) - 6 WOs, 700 pcs
+    UTA1-IP012518                            (FILTER MOUNT, ELECTRONICS TRAY ASSY) - 1 WOs, 4 pcs
+    WAL1-Curved blade scraper handle         (Curved blade scraper handle) - 1 WOs, 0 pcs
+  Operations: Mill Side 1, Mill Side 1Top Piece, Mill Side 2, Mill holes in enclosure, Side 1
+
+--- #27: 5/8 COBALT HSS DRILL ---
+  Description:    
+  Used in parts:  1
+  Work orders:    8
+  Total WO qty:   1495
+  Seq appearances:1
+  Parts:
+    R2S1-10689                               (Isolation Insert G1-V Flatmount) - 8 WOs, 1495 pcs
+  Operations: Mill side 1 and 2
+
+--- #28: D463 ---
+  Description:    GOdrill 10.3mm / .4055" 3xD SOLID CARBIDE DRILL (THROUGH COOLANT)
+  Tool Group:     D
+  Used in parts:  1
+  Work orders:    9
+  Total WO qty:   1455
+  Seq appearances:1
+  Parts:
+    R2S1-10690                               (Sonic G1-V Flat Mount Custom Nut) - 9 WOs, 1455 pcs
+  Operations: Mill Side 1
+
+--- #29: N95 ---
+  Description:    M10 and up 1.75mm pitch Thread Mill 4FL
+  Tool Group:     N
+  Used in parts:  1
+  Work orders:    9
+  Total WO qty:   1455
+  Seq appearances:1
+  Parts:
+    R2S1-10690                               (Sonic G1-V Flat Mount Custom Nut) - 9 WOs, 1455 pcs
+  Operations: Mill Side 1
+
+--- #30: O3 ---
+  Description:    1/8 90� SPOT DRILL .75 OAL
+  Tool Group:     O
+  Used in parts:  3
+  Work orders:    10
+  Total WO qty:   1290
+  Seq appearances:3
+  Parts:
+    R2S1-10143                               (END CAP, CAP BANK, 10143, 2020) - 2 WOs, 90 pcs
+    R2S1-10981                               (SOCKET CONTACT BODY, 2.0 MCIL) - 4 WOs, 600 pcs
+    R2S1-10983                               (PIN CONTACT BODY, 2.0mm CONTACT, MCIL CABLES) - 4 WOs, 600 pcs
+  Operations: MILL OP10, Turning Front
+  Holders: -
+
+--- #31: B46 ---
+  Description:    1/4-.375 LOC-2.5 OAL 3FL
+  Tool Group:     B
+  Used in parts:  9
+  Work orders:    29
+  Total WO qty:   1285
+  Seq appearances:21
+  Parts:
+    R2S1-10016                               (HOUSING BACKSHELL MACHINED, 500MM, 2024) - 11 WOs, 230 pcs
+    R2S1-10016(Ti inserts)                   (HOUSING BACKSHELL MACHINED, 500MM, 2024) - 2 WOs, 50 pcs
+    R2S1-10156                               (BLADDER COVER, 500MM) - 4 WOs, 400 pcs
+    R2S1-10418A                              (SHIM, PENETRATOR, 4.5 TH. DELRIN) - 2 WOs, 150 pcs
+    R2S1-10418B                              (Shim Curved DWtek Penetrator) - 4 WOs, 400 pcs
+    TRA1-Fixture 130                         (Fixture 130) - 1 WOs, 0 pcs
+    UTA1-NP000674                            (HEAT SINK, AMPLIFIER, ALT RADIO, iCOGR) - 1 WOs, 4 pcs
+    WAL1-Curved blade scraper handle         (Curved blade scraper handle) - 1 WOs, 0 pcs
+    WAL1-TES24A-FAB0401                      (RFU Base Plate Mod) - 1 WOs, 1 pcs
+  Operations: MILL SIDE 5, MILL SIDE 6, Machining First Side, Mill Side 1, Mill Side 1 Bottom Piece, Mill Side 1Top Piece, Mill Sides 1 AND 2 - 4AX, Mill Sides 1 AND 2 - 5AX, Mill Sides 1 and 2, New OP 4 - Top Finishing
+  Holders: -, ER32 - 2"
+
+--- #32: TK497_-_TR498 ---
+  Description:    
+  Used in parts:  4
+  Work orders:    10
+  Total WO qty:   1202
+  Seq appearances:4
+  Parts:
+    R2S1-10957                               (INSERT, CONTACT SUPPORT, MICRO CIRCULAR, IN-LINE, 12 PIN, F) - 1 WOs, 1 pcs
+    R2S1-10958                               (COMPRESSION DISK, MICRO CICULAR, IN-LINE, 12P, MOLD) - 1 WOs, 1 pcs
+    R2S1-10981                               (SOCKET CONTACT BODY, 2.0 MCIL) - 4 WOs, 600 pcs
+    R2S1-10983                               (PIN CONTACT BODY, 2.0mm CONTACT, MCIL CABLES) - 4 WOs, 600 pcs
+  Operations: Turn Side 1, Turning Front
+  Holders: -
+
+--- #33: #55 ---
+  Description:    
+  Used in parts:  2
+  Work orders:    8
+  Total WO qty:   1200
+  Seq appearances:2
+  Parts:
+    R2S1-10981                               (SOCKET CONTACT BODY, 2.0 MCIL) - 4 WOs, 600 pcs
+    R2S1-10983                               (PIN CONTACT BODY, 2.0mm CONTACT, MCIL CABLES) - 4 WOs, 600 pcs
+  Operations: Turning Front
+  Holders: -
+
+--- #34: D494 ---
+  Description:    0.75MM EX-SUS-GDS
+  Tool Group:     D
+  Used in parts:  2
+  Work orders:    8
+  Total WO qty:   1200
+  Seq appearances:2
+  Parts:
+    R2S1-10981                               (SOCKET CONTACT BODY, 2.0 MCIL) - 4 WOs, 600 pcs
+    R2S1-10983                               (PIN CONTACT BODY, 2.0mm CONTACT, MCIL CABLES) - 4 WOs, 600 pcs
+  Operations: Turning Front
+  Holders: -
+
+--- #35: B23 ---
+  Description:    3/8 BALL 1.00 LOC-2.5 OAL 4FL
+  Tool Group:     B
+  Used in parts:  11
+  Work orders:    35
+  Total WO qty:   1191
+  Seq appearances:37
+  Parts:
+    ART1-144 Furnace Support Top             (Furnace Support Top) - 2 WOs, 8 pcs
+    ART1-145 Furnace Support Bottom          (Furnace Support Bottom) - 2 WOs, 8 pcs
+    R2S1-10311                               (BRACKET, CBL CLMP, TOP DUAL .55, Xclrnc) - 4 WOs, 390 pcs
+    R2S1-10312                               (BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc) - 3 WOs, 300 pcs
+    R2S1-10312 (Ti inserts)                  (BRACKET, CBL CLMP, BTM DUAL .55, Xclrnc, Ti) - 1 WOs, 100 pcs
+    R2S1-10686                               (Flat Mount Plate temp G1-V) - 4 WOs, 80 pcs
+    R2S1-10713                               (Lid, SVP Cradle, 2020V) - 8 WOs, 50 pcs
+    R2S1-10717                               (Plate, Flat Mount 2020 V) - 5 WOs, 70 pcs
+    R2S1-10721                               (G1-V 2022 Flat Mount Plate) - 2 WOs, 40 pcs
+    R2S1-10726                               (Large Flat Mount Plate) - 2 WOs, 20 pcs
+    WAR1-1" cope                             (1" cope) - 1 WOs, 25 pcs
+  Operations: MILL SIDE 1, MILL SIDE 2, Mill Side, Mill Side 1, Mill Side 2, Mill side 2
+  Holders: -, ER32, ER32- 3"
+
+--- #36: L35 ---
+  Description:    1/8 90� 4FL CHAMFERMILL
+  Tool Group:     L
+  Used in parts:  2
+  Work orders:    5
+  Total WO qty:   1119
+  Seq appearances:2
+  Parts:
+    FRA1-UC-1A                               (Unit Controller, 1A) - 4 WOs, 919 pcs
+    R2S1-10381-50200040                      (SCREW, SOCKETHEAD M4, 26MM CAPTIVE) - 1 WOs, 200 pcs
+  Operations: Mill holes in one of the panels, Mill side 1
+
+--- #37: A14 ---
+  Description:    3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+  Tool Group:     A
+  Used in parts:  16
+  Work orders:    39
+  Total WO qty:   1074
+  Seq appearances:47
+  Parts:
+    FRA1-SCATTERWASH SWING PANEL CUTOUT      (SCATTERWASH SWING PANEL CUTOUT) - 1 WOs, 1 pcs
+    ICO1-10-02003                            (FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 2 WOs, 52 pcs
+    ICO1-10-02027                            (PLATE, STUFFING BOX FACE) - 2 WOs, 113 pcs
+    INF1-Bracket Assembly                    (Bracket Assembly) - 1 WOs, 3 pcs
+    R2S1-10106                               (LID, CAP BANK, 2026) - 1 WOs, 30 pcs
+    R2S1-10758                               (Wet Non-faired Side Mount Left) - 5 WOs, 8 pcs
+    R2S1-10785                               (Wet Non-faired Side Mount Right) - 5 WOs, 7 pcs
+    R2S1-10924P1 Rubber Test Mold Bottom     (10924P1 Rubber Test Mold Bottom) - 1 WOs, 1 pcs
+    R2S1-AD163-001-022                       (Front Plate) - 8 WOs, 440 pcs
+    R2S1-AD181-001-01                        (LABOR, MACHG TI TX PLATE, 2026) - 4 WOs, 130 pcs
+    R2S1-Middle Compression Plate            (Middle Compression Plate) - 1 WOs, 1 pcs
+    R3V1-10824                               (RX Trumpet Lid, G2 Penetrator) - 1 WOs, 14 pcs
+    R3V1-10837                               (RX Housing W/ Threads, G2 Penetrator) - 2 WOs, 20 pcs
+    R3V1-10852                               (LID, CAPACITOR BANK) - 3 WOs, 250 pcs
+    ROV1-TES24A-FAB-SIGNAL SHIELD 1          (TES24A INTERFERENCE SHIELD, RFU) - 1 WOs, 3 pcs
+    TRA1-10-02003                            (TEST FEEDER SHAFT BOTTOM NOZZLE, CIR, SHUTTLE) - 1 WOs, 1 pcs
+  Operations: MILL SIDE 1, MILL SIDE 1 AND 2, Machining side 1 (rough), Machining side 2 (grained side), Mill Opening in Panel, Mill Side 1, Mill Side 2, Mill Side 3, Mill Side 4, Side 1
+  Holders: -, ER25M
+
+--- #38: B1006 ---
+  Description:    1/2 Corner Round End Mill, .02 Rad
+  Tool Group:     B
+  Used in parts:  7
+  Work orders:    34
+  Total WO qty:   1015
+  Seq appearances:12
+  Parts:
+    R2S1-10016                               (HOUSING BACKSHELL MACHINED, 500MM, 2024) - 11 WOs, 230 pcs
+    R2S1-10016(Ti inserts)                   (HOUSING BACKSHELL MACHINED, 500MM, 2024) - 2 WOs, 50 pcs
+    R2S1-10016-OLD                           () - 0 WOs, 0 pcs
+    R2S1-10020                               (HOUSING BACKSHELL, MACHINED,250 MM) - 5 WOs, 100 pcs
+    R2S1-10130                               (Housing back mach'd delrin 2020) - 4 WOs, 80 pcs
+    R2S1-10163                               (HOUSING, MACH'D, 2026 Tx) - 6 WOs, 105 pcs
+    R2S1-10245                               (BRACKET, CABLE CLAMP, UPPER, PORJ WB) - 4 WOs, 400 pcs
+  Operations: MILL OP60, MILL Side 1, MILL Side 2, Mill Machining Side 1 (Multi-Side), New OP 3 - Bottom Finishing
+  Holders: Solid, Solid - 2"
+
+--- #39: B267 ---
+  Description:    1/4-.625 LOC-2.5 OAL .03 RAD 3FL
+  Tool Group:     B
+  Used in parts:  4
+  Work orders:    15
+  Total WO qty:   994
+  Seq appearances:15
+  Parts:
+    R2S1-10068                               (Capacitor MTG Bracket B) - 7 WOs, 900 pcs
+    R2S1-10717                               (Plate, Flat Mount 2020 V) - 5 WOs, 70 pcs
+    R2S1-10726                               (Large Flat Mount Plate) - 2 WOs, 20 pcs
+    UTA1-NP000540-003                        (Heat Sink, RCC, Hull MTD, DARC, uPUMA) - 1 WOs, 4 pcs
+  Operations: MILL SIDE 1, MILLL SIDE 1 AND 2 5AX, Mill Side 2, Mill side 1, Mill side 2
+
+--- #40: B9 ---
+  Description:    3/8-.625 LOC-3.0 OAL 2FL
+  Tool Group:     B
+  Used in parts:  7
+  Work orders:    24
+  Total WO qty:   974
+  Seq appearances:11
+  Parts:
+    ART1-143 Base Plate                      (PyC Furnace, Single Station) - 2 WOs, 6 pcs
+    R2S1-10051                               (Base-Valeport Sensor) - 3 WOs, 50 pcs
+    R2S1-10052                               (Cap-Valeport Sensor) - 3 WOs, 50 pcs
+    R2S1-10243                               (BRACKET, CABLE CLAMP, LOWER, PROJ) - 4 WOs, 400 pcs
+    R2S1-10700                               (Clamp Base, Ultra SV Sonic G1-V) - 4 WOs, 211 pcs
+    R2S1-10701                               (Clamp Lid, Ultra SV Sonic G1-V) - 7 WOs, 255 pcs
+    TRA1-Side Clamp Bar 10469                (Side Clamp Bar 10469) - 1 WOs, 2 pcs
+  Operations: MILL OP10, MILL SIDE 1, MILL SIDE 2, Mill Side 1, Mill Side 2, Mill side 1, Mill side 2
+  Holders: -, ER32, ER32 - 2", Solid - 2"
+
+--- #41: - ---
+  Description:    
+  Used in parts:  12
+  Work orders:    27
+  Total WO qty:   955
+  Seq appearances:27
+  Parts:
+    ART1-144 Furnace Support Top             (Furnace Support Top) - 2 WOs, 8 pcs
+    ART1-145 Furnace Support Bottom          (Furnace Support Bottom) - 2 WOs, 8 pcs
+    ICO1-10-01883                            (OUTLET CONNECTOR, CIR FLEX LINE) - 1 WOs, 11 pcs
+    ICO1-10-02004                            (LATCH PIN, CIR NOZZLE ASSY, E-AXIS) - 4 WOs, 174 pcs
+    R2S1-10721                               (G1-V 2022 Flat Mount Plate) - 2 WOs, 40 pcs
+    R2S1-10876                               (BASEPLATE, PENETRATOR, CONNECTORIZED, TX) - 6 WOs, 108 pcs
+    R2S1-10951-003                           (MOLD FRONT, RUBBER, CABLE TO CONNECTOR, MCIL12PF) - 1 WOs, 1 pcs
+    R2S1-10957                               (INSERT, CONTACT SUPPORT, MICRO CIRCULAR, IN-LINE, 12 PIN, F) - 1 WOs, 1 pcs
+    R2S1-10958                               (COMPRESSION DISK, MICRO CICULAR, IN-LINE, 12P, MOLD) - 1 WOs, 1 pcs
+    R2S1-10981                               (SOCKET CONTACT BODY, 2.0 MCIL) - 4 WOs, 600 pcs
+    R2S1-Plunger Disk                        (Plunger Disk) - 1 WOs, 1 pcs
+    TRA1-TEMP                                (TEMP) - 2 WOs, 2 pcs
+  Operations: Lathe Side 1, Lathe Side 2, Lathe Turn Collet, Mill Side 1, Mill Side 2, Mill Side 4, Milling 2, Side 1, Turn Side 1, Turning Front
+  Holders: -
+
+--- #42: TIPD417 ---
+  Description:    Drill #30 (.1285) Cobalt Jobber
+  Tool Group:     TiPD
+  Used in parts:  11
+  Work orders:    37
+  Total WO qty:   942
+  Seq appearances:18
+  Parts:
+    R2S1-10378                               (10378 Labor, Mach, RX TI Housing, XL/L, 384 CH) - 1 WOs, 25 pcs
+    R2S1-10469                               (housing mach'd aluminum tx xl 120 ch) - 1 WOs, 20 pcs
+    R2S1-10549                               (G2 Housing Receiver 192) - 2 WOs, 50 pcs
+    R2S1-10758                               (Wet Non-faired Side Mount Left) - 5 WOs, 8 pcs
+    R2S1-10785                               (Wet Non-faired Side Mount Right) - 5 WOs, 7 pcs
+    R2S1-AD-229-04-0102                      (384 Element Ti Plate) - 2 WOs, 63 pcs
+    R2S1-AD163-001-022                       (Front Plate) - 8 WOs, 440 pcs
+    R2S1-AD181-001-01                        (LABOR, MACHG TI TX PLATE, 2026) - 4 WOs, 130 pcs
+    R2S1-AD201-01-0102                       (2022 Front Plate) - 5 WOs, 114 pcs
+    R2S1-AD232-04-0101                       (TI G2 TX Face Plate) - 2 WOs, 38 pcs
+    R2S1-AD246-02-0101                       (LABOR MACH, TI G2 TX FACE PLATE, L/M) - 2 WOs, 47 pcs
+  Operations: Machining side 1 (rough), Mill Machining OP1, Mill Machining OP2, Mill Machining Side 5, Mill Side 1, Mill Side 2, Mill Side 4, Side 1, Side 2, mill machining op2
+  Holders: ER16 - 4"
+
+--- #43: R6 ---
+  Description:    M4X.7 SPIRAL CUT TAP
+  Tool Group:     R
+  Used in parts:  3
+  Work orders:    9
+  Total WO qty:   930
+  Seq appearances:3
+  Parts:
+    ALM1-SLSI-9203-60150-001                 (BRACKET, COOLANT LINES, I/R RAIL,  EXPANDED) - 1 WOs, 20 pcs
+    R2S1-10068                               (Capacitor MTG Bracket B) - 7 WOs, 900 pcs
+    R2S1-10681                               (Voxim Mounting Plate) - 1 WOs, 10 pcs
+  Operations: MILLL SIDE 1 AND 2 5AX, Mill side 2, Side 2
+
+--- #44: TIPD421 ---
+  Description:    Drill Letter H(.266) Cobalt Jobber
+  Tool Group:     TiPD
+  Used in parts:  10
+  Work orders:    28
+  Total WO qty:   929
+  Seq appearances:14
+  Parts:
+    R2S1-10378                               (10378 Labor, Mach, RX TI Housing, XL/L, 384 CH) - 1 WOs, 25 pcs
+    R2S1-10469                               (housing mach'd aluminum tx xl 120 ch) - 1 WOs, 20 pcs
+    R2S1-10524                               (G2 Housing, Transmitter M (60)) - 1 WOs, 2 pcs
+    R2S1-10549                               (G2 Housing Receiver 192) - 2 WOs, 50 pcs
+    R2S1-AD-229-04-0102                      (384 Element Ti Plate) - 2 WOs, 63 pcs
+    R2S1-AD163-001-022                       (Front Plate) - 8 WOs, 440 pcs
+    R2S1-AD181-001-01                        (LABOR, MACHG TI TX PLATE, 2026) - 4 WOs, 130 pcs
+    R2S1-AD201-01-0102                       (2022 Front Plate) - 5 WOs, 114 pcs
+    R2S1-AD232-04-0101                       (TI G2 TX Face Plate) - 2 WOs, 38 pcs
+    R2S1-AD246-02-0101                       (LABOR MACH, TI G2 TX FACE PLATE, L/M) - 2 WOs, 47 pcs
+  Operations: Machining side 1 (rough), Mill Machining OP1, Mill Machining OP2, Mill Machining Side 1, Mill Machining Side 2, Mill Side 1, Side 1, Side 2, mill machining op2
+  Holders: ER16 - 4"
+
+--- #45: L103 ---
+  Description:    3/16- 45- 4FL-.04 tip- CHAMFERMILL
+  Tool Group:     L
+  Used in parts:  6
+  Work orders:    21
+  Total WO qty:   925
+  Seq appearances:16
+  Parts:
+    R2S1-AD163-001-022                       (Front Plate) - 8 WOs, 440 pcs
+    R2S1-AD181-001-01                        (LABOR, MACHG TI TX PLATE, 2026) - 4 WOs, 130 pcs
+    R2S1-AD232-04-0101                       (TI G2 TX Face Plate) - 2 WOs, 38 pcs
+    R2S1-AD246-02-0101                       (LABOR MACH, TI G2 TX FACE PLATE, L/M) - 2 WOs, 47 pcs
+    R3V1-10837                               (RX Housing W/ Threads, G2 Penetrator) - 2 WOs, 20 pcs
+    R3V1-10852                               (LID, CAPACITOR BANK) - 3 WOs, 250 pcs
+  Operations: MILL SIDE 1 AND 2, Machining side 1 (rough), Machining side 2 (grained side), Mill Machining OP2, Mill Side 1, Mill Side 2, Side 1, Side 2
+  Holders: ER16, ER16 - 4"
+
+--- #46: L202 ---
+  Description:    .08 x 45 deg Back Deburring Mill
+  Tool Group:     L
+  Used in parts:  1
+  Work orders:    4
+  Total WO qty:   919
+  Seq appearances:2
+  Parts:
+    FRA1-UC-1A                               (Unit Controller, 1A) - 4 WOs, 919 pcs
+  Operations: Mill holes in one of the panels
+
+--- #47: (#30) .128 HSS JOBBER DRILL ---
+  Description:    
+  Used in parts:  1
+  Work orders:    4
+  Total WO qty:   919
+  Seq appearances:1
+  Parts:
+    FRA1-UC-1A                               (Unit Controller, 1A) - 4 WOs, 919 pcs
+  Operations: Mill holes in enclosure, Side 1
+
+--- #48: A16 ---
+  Description:    1/2-.625 LOC -2.5 OAL 5FL
+  Tool Group:     A
+  Used in parts:  10
+  Work orders:    29
+  Total WO qty:   908
+  Seq appearances:29
+  Parts:
+    ART1-142 Top Flange                      (PyC Furnace, Single Station) - 2 WOs, 6 pcs
+    ART1-143 Base Plate                      (PyC Furnace, Single Station) - 2 WOs, 6 pcs
+    ICO1-10-02027                            (PLATE, STUFFING BOX FACE) - 2 WOs, 113 pcs
+    R2S1-10549                               (G2 Housing Receiver 192) - 2 WOs, 50 pcs
+    R2S1-10924P1 Rubber Test Mold Bottom     (10924P1 Rubber Test Mold Bottom) - 1 WOs, 1 pcs
+    R2S1-10957                               (INSERT, CONTACT SUPPORT, MICRO CIRCULAR, IN-LINE, 12 PIN, F) - 1 WOs, 1 pcs
+    R2S1-AD163-001-022                       (Front Plate) - 8 WOs, 440 pcs
+    R2S1-AD181-001-01                        (LABOR, MACHG TI TX PLATE, 2026) - 4 WOs, 130 pcs
+    R2S1-AD201-01-0102                       (2022 Front Plate) - 5 WOs, 114 pcs
+    R2S1-AD246-02-0101                       (LABOR MACH, TI G2 TX FACE PLATE, L/M) - 2 WOs, 47 pcs
+  Operations: Machining side 1 (rough), Machining side 2 (grained side), Mill Side 1, Mill Side 2, Side 1, Side 2, mill machining op2
+  Holders: -, ER25, ER25 - 4", ER25M, ER32
+
+--- #49: EM 0.2500 ---
+  Description:    
+  Used in parts:  1
+  Work orders:    7
+  Total WO qty:   900
+  Seq appearances:6
+  Parts:
+    R2S1-10067                               (Capacitor MTG BRACKET A) - 7 WOs, 900 pcs
+  Operations: MILL SIDE 1 AND 2 4AX Full Array, MILL SIDE 1 AND 2 5AX Four Parts
+
+--- #50: DRILL 0.1285 ---
+  Description:    
+  Used in parts:  1
+  Work orders:    7
+  Total WO qty:   900
+  Seq appearances:1
+  Parts:
+    R2S1-10068                               (Capacitor MTG Bracket B) - 7 WOs, 900 pcs
+  Operations: MILLL SIDE 1 AND 2 5AX
+
+==========================================================================================
+TOP 30 PARTS BY WORK ORDER VOLUME (for context)
+==========================================================================================
+
+Rank  Part Number                              WOs   Total Qty  Part Name
+----- ---------------------------------------- ----- ---------- ------------------------------
+1     SET1-14-7014                             11    11000      14-7014
+2     LYN1-BH-A-E                              8     8400       Bolt Hat, Enforcer
+3     R2S1-10042                               8     1600       Mounting studs, corner, Ti, 2024/22
+4     R2S1-10689                               8     1495       Isolation Insert G1-V Flatmount
+5     R2S1-10690                               9     1455       Sonic G1-V Flat Mount Custom Nut
+6     LYN1-BH-2024                             1     1000       Bolt Hat, 2024
+7     FRA1-UC-1A                               4     919        Unit Controller, 1A
+8     SET1-13-1611S                            5     900        13-1611S
+9     R2S1-10067                               7     900        Capacitor MTG BRACKET A
+10    R2S1-10068                               7     900        Capacitor MTG Bracket B
+11    SET1-13-1628S                            6     850        13-1628S
+12    AUS1-UCTDA                               41    791        
+13    R2S1-10036                               6     710        HOUSING, CAPACITOR BANK, 10036
+14    R2S1-10037                               6     700        END CAP, CAPACITOR BANK, 10037
+15    AUS1-Barb Fitting                        2     666        Barb Fitting
+16    SET1-13-2026                             6     660        13-2026
+17    SET1-13-3043G                            7     612        13-3043G
+18    SET1-13-3188                             4     600        13-3188
+19    R2S1-10981                               4     600        SOCKET CONTACT BODY, 2.0 MCIL
+20    R2S1-10983                               4     600        PIN CONTACT BODY, 2.0mm CONTACT, MCIL CABLES
+21    SET1-13-3318                             6     530        ENCLOSURE 13-3318
+22    LYN1-BH-A-DV                             2     500        Bolt Hat, Dyna
+23    R2S1-10164                               5     470        2026 CORNER STUD BOLT
+24    SET1-13-1698NS                           4     450        13-1698NS
+25    R2S1-AD163-001-022                       8     440        Front Plate
+26    SET1-23-7224D                            4     420        Drilled Headset Fire Wireless - Vented Cup - Antenna
+27    SET1-23-7230D                            4     400        23-7230D
+28    R2S1-10243                               4     400        BRACKET, CABLE CLAMP, LOWER, PROJ
+29    R2S1-10245                               4     400        BRACKET, CABLE CLAMP, UPPER, PORJ WB
+30    SET1-13-1699NS                           4     400        13-1699NS

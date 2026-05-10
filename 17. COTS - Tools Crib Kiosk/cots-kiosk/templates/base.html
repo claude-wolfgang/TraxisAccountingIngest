@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}COTS Crib Kiosk{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="top-bar">
+        <h1 class="top-bar-title">Traxis Crib</h1>
+        <nav class="top-bar-nav">
+            <a href="/" class="nav-btn {% block nav_kiosk %}{% endblock %}">Kiosk</a>
+            <a href="/browse" class="nav-btn {% block nav_browse %}{% endblock %}">Browse</a>
+            <a href="/edit" class="nav-btn {% block nav_add %}{% endblock %}">Add Item</a>
+            <a href="/log" class="nav-btn {% block nav_log %}{% endblock %}">Log</a>
+        </nav>
+    </header>
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="toast-container"></div>
+
+    <div id="api-status" class="api-status">
+        <span class="status-dot"></span>
+        <span class="status-text">Checking...</span>
+    </div>
+
+    <script>
+    function showToast(message, type) {
+        var el = document.createElement('div');
+        el.className = 'toast toast-' + (type || 'info');
+        el.textContent = message;
+        document.getElementById('toast-container').appendChild(el);
+        setTimeout(function() { el.remove(); }, 5000);
+    }
+
+    function apiFetch(url, options) {
+        options = options || {};
+        options.headers = options.headers || {};
+        if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
+            options.headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(options.body);
+        }
+        return fetch(url, options).then(function(resp) {
+            return resp.json().then(function(data) {
+                if (!resp.ok) {
+                    var msg = data.error || 'Request failed';
+                    showToast(msg, 'error');
+                    throw new Error(msg);
+                }
+                return data;
+            });
+        }).catch(function(err) {
+            if (err.message === 'Failed to fetch') {
+                showToast('Cannot reach server. Is the kiosk running?', 'error');
+            }
+            throw err;
+        });
+    }
+
+    function checkHealth() {
+        fetch('/api/health').then(function(r) { return r.json(); }).then(function(h) {
+            var el = document.getElementById('api-status');
+            var dot = el.querySelector('.status-dot');
+            var txt = el.querySelector('.status-text');
+            if (h.api_reachable) {
+                dot.className = 'status-dot status-ok';
+                txt.textContent = 'Online';
+            } else {
+                dot.className = 'status-dot status-down';
+                txt.textContent = 'Offline';
+            }
+        }).catch(function() {
+            var el = document.getElementById('api-status');
+            el.querySelector('.status-dot').className = 'status-dot status-down';
+            el.querySelector('.status-text').textContent = 'Server down';
+        });
+    }
+    checkHealth();
+    setInterval(checkHealth, 60000);
+
+    // ── Global barcode scanner detector ──────────────────────────────────────
+    // Scanners type characters very fast (<50ms between keys) then hit Enter.
+    // If a scan is detected on a non-kiosk page, redirect to kiosk with the value.
+    // On the kiosk page, kiosk.js handles its own scan capture.
+    (function() {
+        var scanBuffer = '';
+        var scanTimeout = null;
+        var SCAN_CHAR_TIMEOUT = 80; // ms — max gap between chars for scanner input
+
+        // Only run this detector on non-kiosk pages
+        if (window.location.pathname !== '/') {
+            document.addEventListener('keydown', function(e) {
+                // Ignore if user is typing in an actual input/textarea
+                var tag = (e.target.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+                if (e.key === 'Enter' && scanBuffer.length >= 3) {
+                    e.preventDefault();
+                    var scanned = scanBuffer;
+                    scanBuffer = '';
+                    if (scanTimeout) { clearTimeout(scanTimeout); scanTimeout = null; }
+                    // Redirect to kiosk with scanned value
+                    window.location.href = '/?scan=' + encodeURIComponent(scanned);
+                    return;
+                }
+
+                // Only buffer printable single characters
+                if (e.key.length === 1) {
+                    scanBuffer += e.key;
+                    if (scanTimeout) clearTimeout(scanTimeout);
+                    scanTimeout = setTimeout(function() {
+                        scanBuffer = '';  // Too slow — not a scanner
+                    }, SCAN_CHAR_TIMEOUT);
+                }
+            });
+        }
+    })();
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Transaction Log - COTS Crib{% endblock %}
+{% block nav_log %}nav-active{% endblock %}
+
+{% block content %}
+<h2 style="margin-bottom:16px">Transaction Log</h2>
+
+<div style="overflow-x:auto">
+    <table class="items-table log-table" id="log-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Employee</th>
+                <th>Action</th>
+                <th>Item</th>
+                <th>ID</th>
+                <th>Qty</th>
+                <th>New Qty</th>
+            </tr>
+        </thead>
+        <tbody id="log-tbody">
+            <tr><td colspan="7" class="loading">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    apiFetch('/api/transactions?n=100').then(function(rows) {
+        var tbody = document.getElementById('log-tbody');
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="loading">No transactions yet.</td></tr>';
+            return;
+        }
+        var html = '';
+        rows.forEach(function(r) {
+            var actionClass = r.action === 'checkout' ? 'log-checkout' : 'log-checkin';
+            var actionLabel = r.action === 'checkout' ? 'OUT' : 'IN';
+            html += '<tr>' +
+                '<td style="white-space:nowrap">' + esc(formatTime(r.timestamp)) + '</td>' +
+                '<td>' + esc(r.employee) + '</td>' +
+                '<td class="' + actionClass + '"><strong>' + actionLabel + '</strong></td>' +
+                '<td>' + esc(r.item_name) + '</td>' +
+                '<td>' + esc(r.ots_id) + '</td>' +
+                '<td>' + esc(r.quantity) + '</td>' +
+                '<td>' + esc(r.new_qty) + '</td>' +
+                '</tr>';
+        });
+        tbody.innerHTML = html;
+    }).catch(function() {
+        document.getElementById('log-tbody').innerHTML =
+            '<tr><td colspan="7" class="loading">Failed to load log.</td></tr>';
+    });
+});
+
+function formatTime(ts) {
+    if (!ts) return '';
+    try {
+        var d = new Date(ts);
+        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+    } catch(e) { return ts; }
+}
+
+function esc(s) {
+    if (!s) return '';
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+}
+</script>
+{% endblock %}

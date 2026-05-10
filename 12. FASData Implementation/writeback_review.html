@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Writeback Review — Traxis CAM Intelligence</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #0f172a; color: #e2e8f0; padding: 20px;
+    }
+    h1 { color: #f8fafc; margin-bottom: 4px; font-size: 24px; }
+    h2 { color: #94a3b8; margin: 24px 0 12px; font-size: 18px;
+         border-bottom: 1px solid #334155; padding-bottom: 6px; }
+    .meta { color: #64748b; font-size: 13px; margin-bottom: 20px; }
+    .stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+    .stat-box { background: #1e293b; border-radius: 8px; padding: 16px;
+                flex: 1; min-width: 120px; text-align: center; }
+    .stat-value { font-size: 28px; font-weight: bold; }
+    .stat-label { color: #94a3b8; font-size: 12px; margin-top: 4px; }
+    .card { background: #1e293b; border-radius: 8px; padding: 16px;
+            margin-bottom: 12px; }
+    .candidate {
+        background: #1e293b; border-radius: 8px; padding: 16px;
+        margin-bottom: 12px; border-left: 4px solid #334155;
+    }
+    .candidate.high { border-left-color: #22c55e; }
+    .candidate.medium { border-left-color: #eab308; }
+    .candidate.low { border-left-color: #64748b; }
+    .candidate-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 8px;
+    }
+    .candidate-title { font-size: 16px; font-weight: 600; }
+    .badge {
+        display: inline-block; padding: 2px 8px; border-radius: 12px;
+        font-size: 11px; font-weight: 600; text-transform: uppercase;
+    }
+    .badge-high { background: #166534; color: #22c55e; }
+    .badge-medium { background: #854d0e; color: #eab308; }
+    .badge-low { background: #334155; color: #94a3b8; }
+    .badge-approved { background: #1e3a5f; color: #60a5fa; }
+    .badge-rejected { background: #7f1d1d; color: #fca5a5; }
+    .badge-written { background: #14532d; color: #86efac; }
+    .badge-pending { background: #78350f; color: #fbbf24; }
+    .detail-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 8px; margin: 8px 0;
+    }
+    .detail-item { font-size: 13px; }
+    .detail-label { color: #64748b; }
+    .detail-value { color: #e2e8f0; font-weight: 500; }
+    .jobs-list { color: #94a3b8; font-size: 12px; margin-top: 4px; }
+    .actions { margin-top: 12px; display: flex; gap: 8px; }
+    .btn {
+        padding: 6px 16px; border: none; border-radius: 6px; cursor: pointer;
+        font-size: 13px; font-weight: 600; text-transform: uppercase;
+    }
+    .btn-approve { background: #166534; color: #22c55e; }
+    .btn-approve:hover { background: #15803d; }
+    .btn-reject { background: #7f1d1d; color: #fca5a5; }
+    .btn-reject:hover { background: #991b1b; }
+    .btn-reset { background: #334155; color: #94a3b8; }
+    .btn-reset:hover { background: #475569; }
+    .section-empty { color: #64748b; font-style: italic; padding: 12px; }
+    .change-arrow { color: #94a3b8; margin: 0 4px; }
+</style>
+</head>
+<body>
+<h1>Writeback Review</h1>
+<p class="meta">Traxis CAM Intelligence &mdash; {{ now }}</p>
+
+<div class="stat-row">
+    <div class="stat-box">
+        <div class="stat-value" style="color:#fbbf24">{{ pending|length }}</div>
+        <div class="stat-label">Pending Review</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value" style="color:#60a5fa">{{ approved|length }}</div>
+        <div class="stat-label">Approved</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value" style="color:#86efac">{{ written|length }}</div>
+        <div class="stat-label">Written to Library</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value" style="color:#fca5a5">{{ rejected|length }}</div>
+        <div class="stat-label">Rejected</div>
+    </div>
+</div>
+
+<!-- Pending Approval -->
+<h2>Pending Approval ({{ pending|length }})</h2>
+{% if pending %}
+{% for c in pending %}
+<div class="candidate {{ c.confidence }}">
+    <div class="candidate-header">
+        <span class="candidate-title">
+            {{ c.preset_field }} &mdash; {{ c.tool_id }}
+        </span>
+        <span class="badge badge-{{ c.confidence }}">{{ c.confidence }}</span>
+    </div>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-label">Current:</span>
+            <span class="detail-value">{{ c.current_value }}</span>
+            <span class="change-arrow">&rarr;</span>
+            <span class="detail-value" style="color:#22c55e">{{ c.proposed_value }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Occurrences:</span>
+            <span class="detail-value">{{ c.occurrences }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Library:</span>
+            <span class="detail-value">{{ c.tool_library or '—' }}</span>
+        </div>
+    </div>
+    <div class="jobs-list">
+        Evidence: {{ c.evidence_jobs|join(', ') }}
+    </div>
+    <div class="actions">
+        <form method="POST" action="/update" style="display:inline">
+            <input type="hidden" name="pattern_id" value="{{ c.pattern_id }}">
+            <input type="hidden" name="status" value="approved">
+            <button type="submit" class="btn btn-approve">Approve</button>
+        </form>
+        <form method="POST" action="/update" style="display:inline">
+            <input type="hidden" name="pattern_id" value="{{ c.pattern_id }}">
+            <input type="hidden" name="status" value="rejected">
+            <button type="submit" class="btn btn-reject">Reject</button>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<p class="section-empty">No candidates pending review.</p>
+{% endif %}
+
+<!-- Approved -->
+<h2>Approved ({{ approved|length }})</h2>
+{% if approved %}
+{% for c in approved %}
+<div class="candidate" style="border-left-color: #60a5fa;">
+    <div class="candidate-header">
+        <span class="candidate-title">
+            {{ c.preset_field }} &mdash; {{ c.tool_id }}
+        </span>
+        <span class="badge badge-approved">Approved</span>
+    </div>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-label">Change:</span>
+            <span class="detail-value">{{ c.current_value }}</span>
+            <span class="change-arrow">&rarr;</span>
+            <span class="detail-value" style="color:#22c55e">{{ c.proposed_value }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Occurrences:</span>
+            <span class="detail-value">{{ c.occurrences }}</span>
+        </div>
+    </div>
+    <div class="actions">
+        <form method="POST" action="/update" style="display:inline">
+            <input type="hidden" name="pattern_id" value="{{ c.pattern_id }}">
+            <input type="hidden" name="status" value="written">
+            <button type="submit" class="btn btn-approve">Mark Written</button>
+        </form>
+        <form method="POST" action="/update" style="display:inline">
+            <input type="hidden" name="pattern_id" value="{{ c.pattern_id }}">
+            <input type="hidden" name="status" value="pending_approval">
+            <button type="submit" class="btn btn-reset">Reset to Pending</button>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<p class="section-empty">No approved candidates.</p>
+{% endif %}
+
+<!-- Written -->
+{% if written %}
+<h2>Written to Library ({{ written|length }})</h2>
+{% for c in written %}
+<div class="candidate" style="border-left-color: #86efac;">
+    <div class="candidate-header">
+        <span class="candidate-title">
+            {{ c.preset_field }} &mdash; {{ c.tool_id }}
+        </span>
+        <span class="badge badge-written">Written</span>
+    </div>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-value">{{ c.current_value }}</span>
+            <span class="change-arrow">&rarr;</span>
+            <span class="detail-value">{{ c.proposed_value }}</span>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- Rejected -->
+{% if rejected %}
+<h2>Rejected ({{ rejected|length }})</h2>
+{% for c in rejected %}
+<div class="candidate" style="border-left-color: #fca5a5;">
+    <div class="candidate-header">
+        <span class="candidate-title">
+            {{ c.preset_field }} &mdash; {{ c.tool_id }}
+        </span>
+        <span class="badge badge-rejected">Rejected</span>
+    </div>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-value">{{ c.current_value }}</span>
+            <span class="change-arrow">&rarr;</span>
+            <span class="detail-value">{{ c.proposed_value }}</span>
+        </div>
+    </div>
+    <div class="actions">
+        <form method="POST" action="/update" style="display:inline">
+            <input type="hidden" name="pattern_id" value="{{ c.pattern_id }}">
+            <input type="hidden" name="status" value="pending_approval">
+            <button type="submit" class="btn btn-reset">Reconsider</button>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+</body>
+</html>

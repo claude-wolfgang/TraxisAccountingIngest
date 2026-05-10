@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="300">
+<title>Traxis Manufacturing - Shop Floor Dashboard</title>
+<style>
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+    width:1920px; height:1080px; overflow:hidden;
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    background: #0e0a05;
+    color: #e8dcc8;
+}
+
+/* ── CSS Variables ────────────────────────────────────────── */
+:root {
+    --obsidian: #0e0a05;
+    --dark-stone: #1a1208;
+    --stone: #251c0e;
+    --stone-mid: #2f2415;
+    --light-stone: #3d2e18;
+    --terracotta: #c45a3c;
+    --terracotta-dk: #8b3a25;
+    --gold: #d4a926;
+    --gold-dk: #8b7117;
+    --jade: #2d8659;
+    --jade-lt: #3aad72;
+    --turquoise: #3eb8a0;
+    --blood: #b91c1c;
+    --blood-lt: #dc2626;
+    --warm-white: #e8dcc8;
+    --warm-gray: #a39580;
+}
+
+/* ── Dashboard Grid ───────────────────────────────────────── */
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    width: 1920px;
+    height: 1080px;
+}
+
+/* ── Aztec Band Pattern ───────────────────────────────────── */
+.aztec-band {
+    height: 8px;
+    flex-shrink: 0;
+    background: repeating-linear-gradient(90deg,
+        var(--terracotta) 0 28px,
+        var(--gold-dk) 28px 32px,
+        var(--obsidian) 32px 36px,
+        var(--gold-dk) 36px 40px,
+        var(--turquoise) 40px 68px,
+        var(--gold-dk) 68px 72px,
+        var(--obsidian) 72px 76px,
+        var(--gold-dk) 76px 80px
+    );
+}
+.aztec-band-thin {
+    height: 4px;
+    flex-shrink: 0;
+    background: repeating-linear-gradient(90deg,
+        var(--terracotta) 0 14px,
+        var(--gold-dk) 14px 16px,
+        var(--turquoise) 16px 30px,
+        var(--gold-dk) 30px 32px
+    );
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.header {
+    height: 80px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #1a1208 0%, #120e06 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    border-bottom: 2px solid var(--terracotta-dk);
+}
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.header-title {
+    display: flex;
+    flex-direction: column;
+}
+.header-title .company {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--terracotta);
+}
+.header-title .subtitle {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warm-white);
+}
+.header-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+.clock {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+}
+.header-date {
+    font-size: 13px;
+    color: var(--warm-gray);
+    letter-spacing: 1px;
+}
+.aztec-sun {
+    opacity: 0.85;
+}
+
+/* ── Machine Cards Area ───────────────────────────────────── */
+.machines {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 20px;
+    padding: 24px 36px;
+}
+
+/* ── Machine Card ─────────────────────────────────────────── */
+.machine-card {
+    flex: 1;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--dark-stone);
+    border: 2px solid var(--light-stone);
+    box-shadow:
+        0 0 20px var(--sg),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: box-shadow 0.3s;
+}
+
+/* Aztec zigzag decorations on cards */
+.card-aztec-top, .card-aztec-bottom {
+    height: 10px;
+    flex-shrink: 0;
+    background:
+        linear-gradient(135deg, var(--terracotta) 33%, transparent 33%) 0 0 / 10px 10px,
+        linear-gradient(225deg, var(--terracotta) 33%, transparent 33%) 0 0 / 10px 10px,
+        linear-gradient(315deg, var(--gold-dk) 33%, transparent 33%) 0 0 / 10px 10px,
+        linear-gradient(45deg, var(--gold-dk) 33%, transparent 33%) 0 0 / 10px 10px;
+    background-color: var(--dark-stone);
+}
+
+.card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 12px;
+    gap: 6px;
+    /* Subtle stone texture */
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(196,90,60,0.04) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(62,184,160,0.03) 0%, transparent 60%),
+        var(--dark-stone);
+}
+
+.card-id {
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--warm-white);
+    letter-spacing: 4px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.card-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--warm-gray);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.card-gauge {
+    width: 100%;
+    max-width: 220px;
+}
+.gauge {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 0 6px var(--sg));
+}
+
+/* Gauge arc animation */
+.gauge-arc {
+    animation: arc-fill 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes arc-fill {
+    from { stroke-dashoffset: 490.1; }
+}
+
+.card-detail {
+    font-size: 16px;
+    color: var(--warm-gray);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+.card-detail-sub {
+    font-size: 13px;
+    color: #6b5d4a;
+}
+
+.card-status {
+    margin-top: 8px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sc);
+    text-shadow: 0 0 12px var(--sg);
+    padding: 4px 16px;
+    border: 2px solid var(--sc);
+    border-radius: 4px;
+    background: rgba(0,0,0,0.3);
+}
+
+/* Status-specific card styles */
+.status-green { border-color: var(--jade); }
+.status-green .card-aztec-top,
+.status-green .card-aztec-bottom {
+    background:
+        linear-gradient(135deg, var(--jade) 33%, transparent 33%) 0 0 / 10px 10px,
+        linear-gradient(225deg, var(--jade) 33%, transparent 33%) 0 0 / 10px 10px,
+        linear-gradient(315deg, var(--gold-dk) 33%, transparent 33%) 0 0 / 10px 10px,
+        linear-gradient(45deg, var(--gold-dk) 33%, transparent 33%) 0 0 / 10px 10px;
+    background-color: var(--dark-stone);
+}
+
+.status-yellow { border-color: var(--gold-dk); }
+
+.status-red { border-color: var(--blood); }
+.status-red .card-aztec-top,
+.status-red .card-aztec-bottom {
+    background:
+        linear-gradient(135deg, var(--blood) 33%, transparent 33%) 0 0 / 10px 10px,
+        linear-gradient(225deg, var(--blood) 33%, transparent 33%) 0 0 / 10px 10px,
+        linear-gradient(315deg, var(--terracotta-dk) 33%, transparent 33%) 0 0 / 10px 10px,
+        linear-gradient(45deg, var(--terracotta-dk) 33%, transparent 33%) 0 0 / 10px 10px;
+    background-color: var(--dark-stone);
+}
+
+.status-offline {
+    border-color: #333;
+    opacity: 0.6;
+}
+.status-offline .card-status {
+    animation: offline-pulse 3s ease-in-out infinite;
+}
+@keyframes offline-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* ── Summary Bar ──────────────────────────────────────────── */
+.summary-bar {
+    height: 100px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #12100a 0%, #1a1208 100%);
+    border-top: 2px solid var(--light-stone);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0 40px;
+}
+.summary-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 20px;
+    position: relative;
+}
+.summary-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 15%;
+    height: 70%;
+    width: 2px;
+    background: linear-gradient(180deg, transparent, var(--terracotta-dk), transparent);
+}
+.summary-value {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
+}
+.summary-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--warm-gray);
+    margin-top: 2px;
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+.footer {
+    height: 36px;
+    flex-shrink: 0;
+    background: var(--obsidian);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    font-size: 12px;
+    color: #5a4d3a;
+    letter-spacing: 1px;
+}
+.footer span { opacity: 0.7; }
+
+/* ── Utility ──────────────────────────────────────────────── */
+.diamond-sep {
+    display: inline-block;
+    color: var(--terracotta-dk);
+    margin: 0 8px;
+    font-size: 10px;
+}
+</style>
+</head>
+<body>
+<div class="dashboard">
+
+    <!-- Top Aztec band -->
+    <div class="aztec-band"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <svg viewBox="0 0 60 60" width="56" height="56" class="aztec-sun">
+  <circle cx="30" cy="30" r="27" fill="none" stroke="#c45a3c" stroke-width="1.5" opacity="0.7"/>
+  <circle cx="30" cy="30" r="20" fill="none" stroke="#d4a926" stroke-width="1" opacity="0.6"/>
+  <circle cx="30" cy="30" r="11" fill="none" stroke="#c45a3c" stroke-width="2"/>
+  <circle cx="30" cy="30" r="4" fill="#d4a926"/>
+  <polygon points="30,1 27.5,9 32.5,9" fill="#d4a926" opacity="0.8"/>
+  <polygon points="30,59 27.5,51 32.5,51" fill="#d4a926" opacity="0.8"/>
+  <polygon points="1,30 9,27.5 9,32.5" fill="#d4a926" opacity="0.8"/>
+  <polygon points="59,30 51,27.5 51,32.5" fill="#d4a926" opacity="0.8"/>
+  <polygon points="9,9 13.5,14 16,11.5" fill="#c45a3c" opacity="0.6"/>
+  <polygon points="51,51 46.5,46 44,48.5" fill="#c45a3c" opacity="0.6"/>
+  <polygon points="51,9 46.5,14 44,11.5" fill="#c45a3c" opacity="0.6"/>
+  <polygon points="9,51 13.5,46 16,48.5" fill="#c45a3c" opacity="0.6"/>
+  <circle cx="30" cy="16" r="2" fill="#3eb8a0" opacity="0.7"/>
+  <circle cx="30" cy="44" r="2" fill="#3eb8a0" opacity="0.7"/>
+  <circle cx="16" cy="30" r="2" fill="#3eb8a0" opacity="0.7"/>
+  <circle cx="44" cy="30" r="2" fill="#3eb8a0" opacity="0.7"/>
+</svg>
+            <div class="header-title">
+                <span class="company">Traxis Manufacturing</span>
+                <span class="subtitle">Machine Utilization</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="clock" id="clock">--:--:--</div>
+            <div class="header-date">2026-02-02 to 2026-03-11</div>
+        </div>
+    </header>
+
+    <div class="aztec-band-thin"></div>
+
+    <!-- Machine Cards -->
+    <div class="machines">
+
+        <div class="machine-card status-red"
+             style="--sc:#b91c1c;--sg:rgba(185,28,28,0.5)">
+            <div class="card-aztec-top"></div>
+            <div class="card-body">
+                <div class="card-id">M2</div>
+                <div class="card-name">FANUC Mill 2</div>
+                <div class="card-gauge"><svg viewBox="0 0 200 200" class="gauge"><circle cx="100" cy="100" r="78" fill="none" stroke="#1a1508" stroke-width="14"/><circle cx="100" cy="100" r="78" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round" class="gauge-arc" transform="rotate(-90 100 100)" style="stroke-dasharray:490.1;stroke-dashoffset:448.9"/><line x1="162.8" y1="120.4" x2="185.6" y2="127.8" stroke="#4a3a20" stroke-width="2"/><line x1="138.8" y1="46.6" x2="152.9" y2="27.2" stroke="#4a3a20" stroke-width="2"/><text x="100" y="108" text-anchor="middle" fill="#b91c1c" font-size="46" font-weight="bold" font-family="Arial,sans-serif">8.4%</text></svg></div>
+                <div class="card-detail">28.8h cutting / 342.9h avail</div><div class="card-detail-sub">50.9% spindle only</div>
+                <div class="card-status">CRITICAL</div>
+            </div>
+            <div class="card-aztec-bottom"></div>
+        </div>
+
+        <div class="machine-card status-yellow"
+             style="--sc:#d4a926;--sg:rgba(212,169,38,0.5)">
+            <div class="card-aztec-top"></div>
+            <div class="card-body">
+                <div class="card-id">M3</div>
+                <div class="card-name">FANUC Mill 3</div>
+                <div class="card-gauge"><svg viewBox="0 0 200 200" class="gauge"><circle cx="100" cy="100" r="78" fill="none" stroke="#1a1508" stroke-width="14"/><circle cx="100" cy="100" r="78" fill="none" stroke="#d4a926" stroke-width="14" stroke-linecap="round" class="gauge-arc" transform="rotate(-90 100 100)" style="stroke-dasharray:490.1;stroke-dashoffset:404.3"/><line x1="162.8" y1="120.4" x2="185.6" y2="127.8" stroke="#4a3a20" stroke-width="2"/><line x1="138.8" y1="46.6" x2="152.9" y2="27.2" stroke="#4a3a20" stroke-width="2"/><text x="100" y="108" text-anchor="middle" fill="#d4a926" font-size="46" font-weight="bold" font-family="Arial,sans-serif">17.5%</text></svg></div>
+                <div class="card-detail">60.1h cutting / 342.9h avail</div><div class="card-detail-sub">46.8% spindle only</div>
+                <div class="card-status">BELOW TARGET</div>
+            </div>
+            <div class="card-aztec-bottom"></div>
+        </div>
+
+        <div class="machine-card status-yellow"
+             style="--sc:#d4a926;--sg:rgba(212,169,38,0.5)">
+            <div class="card-aztec-top"></div>
+            <div class="card-body">
+                <div class="card-id">M6</div>
+                <div class="card-name">FANUC Mill 6</div>
+                <div class="card-gauge"><svg viewBox="0 0 200 200" class="gauge"><circle cx="100" cy="100" r="78" fill="none" stroke="#1a1508" stroke-width="14"/><circle cx="100" cy="100" r="78" fill="none" stroke="#d4a926" stroke-width="14" stroke-linecap="round" class="gauge-arc" transform="rotate(-90 100 100)" style="stroke-dasharray:490.1;stroke-dashoffset:415.1"/><line x1="162.8" y1="120.4" x2="185.6" y2="127.8" stroke="#4a3a20" stroke-width="2"/><line x1="138.8" y1="46.6" x2="152.9" y2="27.2" stroke="#4a3a20" stroke-width="2"/><text x="100" y="108" text-anchor="middle" fill="#d4a926" font-size="46" font-weight="bold" font-family="Arial,sans-serif">15.3%</text></svg></div>
+                <div class="card-detail">52.5h cutting / 342.8h avail</div><div class="card-detail-sub">58.6% spindle only</div>
+                <div class="card-status">BELOW TARGET</div>
+            </div>
+            <div class="card-aztec-bottom"></div>
+        </div>
+
+        <div class="machine-card status-yellow"
+             style="--sc:#d4a926;--sg:rgba(212,169,38,0.5)">
+            <div class="card-aztec-top"></div>
+            <div class="card-body">
+                <div class="card-id">M8</div>
+                <div class="card-name">FANUC Mill 8</div>
+                <div class="card-gauge"><svg viewBox="0 0 200 200" class="gauge"><circle cx="100" cy="100" r="78" fill="none" stroke="#1a1508" stroke-width="14"/><circle cx="100" cy="100" r="78" fill="none" stroke="#d4a926" stroke-width="14" stroke-linecap="round" class="gauge-arc" transform="rotate(-90 100 100)" style="stroke-dasharray:490.1;stroke-dashoffset:361.7"/><line x1="162.8" y1="120.4" x2="185.6" y2="127.8" stroke="#4a3a20" stroke-width="2"/><line x1="138.8" y1="46.6" x2="152.9" y2="27.2" stroke="#4a3a20" stroke-width="2"/><text x="100" y="108" text-anchor="middle" fill="#d4a926" font-size="46" font-weight="bold" font-family="Arial,sans-serif">26.2%</text></svg></div>
+                <div class="card-detail">89.9h cutting / 342.8h avail</div><div class="card-detail-sub">55.6% spindle only</div>
+                <div class="card-status">BELOW TARGET</div>
+            </div>
+            <div class="card-aztec-bottom"></div>
+        </div>
+
+        <div class="machine-card status-yellow"
+             style="--sc:#d4a926;--sg:rgba(212,169,38,0.5)">
+            <div class="card-aztec-top"></div>
+            <div class="card-body">
+                <div class="card-id">T2</div>
+                <div class="card-name">YCM NTC1600LY</div>
+                <div class="card-gauge"><svg viewBox="0 0 200 200" class="gauge"><circle cx="100" cy="100" r="78" fill="none" stroke="#1a1508" stroke-width="14"/><circle cx="100" cy="100" r="78" fill="none" stroke="#d4a926" stroke-width="14" stroke-linecap="round" class="gauge-arc" transform="rotate(-90 100 100)" style="stroke-dasharray:490.1;stroke-dashoffset:438.6"/><line x1="162.8" y1="120.4" x2="185.6" y2="127.8" stroke="#4a3a20" stroke-width="2"/><line x1="138.8" y1="46.6" x2="152.9" y2="27.2" stroke="#4a3a20" stroke-width="2"/><text x="100" y="108" text-anchor="middle" fill="#d4a926" font-size="46" font-weight="bold" font-family="Arial,sans-serif">10.5%</text></svg></div>
+                <div class="card-detail">36.1h cutting / 342.9h avail</div><div class="card-detail-sub">66.6% spindle only</div>
+                <div class="card-status">BELOW TARGET</div>
+            </div>
+            <div class="card-aztec-bottom"></div>
+        </div>
+    </div>
+
+    <!-- Summary Bar -->
+    <div class="summary-bar">
+        <div class="summary-item">
+            <div class="summary-value" style="color:#d4a926">15.6%</div>
+            <div class="summary-label">Shop Average</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value" style="color:var(--turquoise)">5 / 5</div>
+            <div class="summary-label">Active Machines</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value" style="color:#8aafcf">267.4h <span style="font-size:20px;color:var(--warm-gray)">/ 1714.3h</span></div>
+            <div class="summary-label">Cutting / Available</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value" style="color:var(--warm-gray)">6:00 - 19:00</div>
+            <div class="summary-label">Shift Hours</div>
+        </div>
+    </div>
+
+    <div class="aztec-band-thin"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <span>Last updated: May 10, 2026  01:48 PM</span>
+        <span class="diamond-sep">&#9670;</span>
+        <span>Auto-refresh: 5 min</span>
+        <span class="diamond-sep">&#9670;</span>
+        <span>FASData Monitoring System</span>
+    </footer>
+
+    <div class="aztec-band"></div>
+</div>
+
+<script>
+(function() {
+    function pad(n) { return n < 10 ? '0' + n : n; }
+    function tick() {
+        var d = new Date();
+        var h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+        var ap = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        document.getElementById('clock').textContent =
+            h + ':' + pad(m) + ':' + pad(s) + ' ' + ap;
+    }
+    tick();
+    setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>

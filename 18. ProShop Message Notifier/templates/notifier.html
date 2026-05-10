@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProShop Message Notifier</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ── Header ── */
+        .header {
+            width: 100%;
+            padding: 16px 24px;
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 1.1rem; color: #94a3b8; font-weight: 600; }
+        .header .user-info { color: #22c55e; font-weight: 600; }
+        .btn-change {
+            background: none; border: 1px solid #475569; color: #94a3b8;
+            padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+        }
+        .btn-change:hover { border-color: #94a3b8; color: #e2e8f0; }
+
+        /* ── Screens ── */
+        .screen { display: none; width: 100%; max-width: 700px; padding: 40px 20px; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+        /* ── Employee Selection ── */
+        .select-heading { font-size: 1.6rem; margin-bottom: 24px; color: #f1f5f9; }
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
+        .employee-btn {
+            height: 70px; font-size: 1.15rem; font-weight: 600;
+            background: #1e293b; border: 2px solid #334155; border-radius: 10px;
+            color: #e2e8f0; cursor: pointer; transition: all 0.15s;
+        }
+        .employee-btn:hover { border-color: #22c55e; background: #1a3a2a; }
+        .employee-btn:active { background: #15803d; border-color: #22c55e; }
+
+        /* ── Listening State ── */
+        .listening-area {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; flex: 1; min-height: 60vh;
+        }
+        .listening-dot {
+            width: 16px; height: 16px; border-radius: 50%; background: #334155;
+            margin-bottom: 16px; animation: listening-pulse 3s ease-in-out infinite;
+        }
+        @keyframes listening-pulse {
+            0%, 100% { background: #334155; box-shadow: 0 0 0 0 rgba(51,65,85,0); }
+            50% { background: #475569; box-shadow: 0 0 20px 5px rgba(71,85,105,0.3); }
+        }
+        .listening-text { color: #475569; font-size: 1rem; }
+
+        /* ── Notification Disc ── */
+        .disc-container {
+            position: relative;
+            width: 300px; height: 300px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+
+        .sonar-ring {
+            position: absolute;
+            width: 200px; height: 200px;
+            border: 2px solid #22c55e;
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .sonar-ring span {
+            position: absolute;
+            bottom: -22px; left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 14px; font-weight: 700;
+            color: #22c55e;
+        }
+        .ring-1 { animation: sonar 3s ease-out infinite 0s; }
+        .ring-2 { animation: sonar 3s ease-out infinite 1s; }
+        .ring-3 { animation: sonar 3s ease-out infinite 2s; }
+
+        @keyframes sonar {
+            0% { width: 200px; height: 200px; opacity: 0.9; border-width: 3px; }
+            100% { width: 320px; height: 320px; opacity: 0; border-width: 1px; }
+        }
+
+        .notification-disc {
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #4ade80 0%, #22c55e 40%, #15803d 100%);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            box-shadow: 0 0 40px rgba(34, 197, 94, 0.4);
+            animation: disc-throb 2s ease-in-out infinite;
+            z-index: 10;
+            position: relative;
+        }
+
+        @keyframes disc-throb {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(34, 197, 94, 0.4), inset 0 -4px 12px rgba(0,0,0,0.15);
+            }
+            50% {
+                transform: scale(1.06);
+                box-shadow: 0 0 60px rgba(34, 197, 94, 0.7), inset 0 -4px 12px rgba(0,0,0,0.1);
+            }
+        }
+
+        .disc-text-new {
+            font-size: 1.6rem; font-weight: 800; color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            letter-spacing: 2px;
+        }
+        .disc-text-message {
+            font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.9);
+            letter-spacing: 1px; margin-top: 2px;
+        }
+        .disc-sep {
+            width: 60px; height: 1px; background: rgba(255,255,255,0.4);
+            border: none; margin: 10px 0 8px;
+        }
+        .disc-sender {
+            font-size: 1.1rem; font-weight: 700; color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .disc-count {
+            font-size: 0.8rem; color: rgba(255,255,255,0.7);
+            margin-top: 4px;
+        }
+
+        .notification-area {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; flex: 1; min-height: 60vh;
+        }
+
+        /* ── Sound Toggle ── */
+        .sound-toggle {
+            position: fixed; bottom: 16px; right: 16px;
+            background: #1e293b; border: 1px solid #334155;
+            color: #94a3b8; padding: 8px 14px; border-radius: 6px;
+            cursor: pointer; font-size: 0.85rem;
+        }
+        .sound-toggle:hover { border-color: #94a3b8; color: #e2e8f0; }
+        .sound-toggle.active { border-color: #22c55e; color: #22c55e; }
+
+        /* ── Status ── */
+        .status-bar {
+            position: fixed; bottom: 16px; left: 16px;
+            font-size: 0.75rem; color: #475569;
+        }
+        .status-dot {
+            display: inline-block; width: 8px; height: 8px;
+            border-radius: 50%; background: #475569; margin-right: 6px;
+            vertical-align: middle;
+        }
+        .status-dot.ok { background: #22c55e; }
+        .status-dot.err { background: #ef4444; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ProShop Message Notifier</h1>
+        <div id="header-user" class="hidden">
+            <span class="user-info" id="header-name"></span>
+            <button class="btn-change" onclick="changeUser()">Change</button>
+        </div>
+    </div>
+
+    <!-- Screen 1: Who are you? -->
+    <div id="screen-select" class="screen active">
+        <h2 class="select-heading">Who are you?</h2>
+        <div id="employee-grid" class="employee-grid">
+            <div style="color:#475569; grid-column:1/-1; text-align:center; padding:40px;">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Screen 2: Monitoring -->
+    <div id="screen-monitor" class="screen">
+        <!-- Listening state (no new messages) -->
+        <div id="listening" class="listening-area">
+            <div class="listening-dot"></div>
+            <div class="listening-text">No new messages</div>
+            <button onclick="pollNow()" style="margin-top:20px; padding:10px 24px; background:#1e293b; border:1px solid #334155; color:#94a3b8; border-radius:6px; cursor:pointer; font-size:0.9rem;">Check Now</button>
+        </div>
+
+        <!-- Notification state (new messages!) -->
+        <div id="notification" class="notification-area hidden" onclick="openMessages()">
+            <div class="disc-container">
+                <div class="sonar-ring ring-1"><span>CLICK HERE</span></div>
+                <div class="sonar-ring ring-2"><span>CLICK HERE</span></div>
+                <div class="sonar-ring ring-3"><span>CLICK HERE</span></div>
+                <div class="notification-disc">
+                    <span class="disc-text-new">NEW</span>
+                    <span class="disc-text-message">MESSAGE</span>
+                    <hr class="disc-sep">
+                    <span class="disc-sender" id="disc-sender"></span>
+                    <span class="disc-count" id="disc-count"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="sound-btn" class="sound-toggle active" onclick="toggleSound()">Sound: ON</button>
+
+    <div class="status-bar">
+        <span id="status-dot" class="status-dot"></span>
+        <span id="status-text">Connecting...</span>
+    </div>
+
+    <script>
+    var POLL_INTERVAL = {{ poll_interval }} * 1000;
+    var MESSAGES_URL = "{{ messages_url }}";
+    var selectedUser = null;
+    var pollTimer = null;
+    var soundEnabled = true;
+    var hasNotification = false;
+
+    // ── Employee Selection ──
+
+    function loadEmployees() {
+        fetch('/api/users').then(function(r) { return r.json(); }).then(function(users) {
+            var grid = document.getElementById('employee-grid');
+            grid.innerHTML = '';
+            users.forEach(function(u) {
+                var btn = document.createElement('button');
+                btn.className = 'employee-btn';
+                btn.textContent = u.firstName + ' ' + u.lastName.charAt(0) + '.';
+                btn.onclick = function() { selectUser(u.id, u.firstName + ' ' + u.lastName); };
+                grid.appendChild(btn);
+            });
+        }).catch(function() {
+            document.getElementById('employee-grid').innerHTML =
+                '<div style="color:#ef4444;grid-column:1/-1;text-align:center;padding:40px;">Failed to load. Is the server running?</div>';
+        });
+    }
+
+    function selectUser(userId, displayName) {
+        selectedUser = { id: userId, name: displayName };
+        localStorage.setItem('notifier_user', JSON.stringify(selectedUser));
+        requestNotificationPermission();
+        startMonitoring();
+    }
+
+    function changeUser() {
+        selectedUser = null;
+        localStorage.removeItem('notifier_user');
+        if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+        document.getElementById('screen-monitor').classList.remove('active');
+        document.getElementById('screen-select').classList.add('active');
+        document.getElementById('header-user').classList.add('hidden');
+        hasNotification = false;
+    }
+
+    function startMonitoring() {
+        document.getElementById('screen-select').classList.remove('active');
+        document.getElementById('screen-monitor').classList.add('active');
+        document.getElementById('header-user').classList.remove('hidden');
+        document.getElementById('header-name').textContent = selectedUser.name;
+        showListening();
+        pollNow();
+        // Auto-poll disabled to reduce API load — use Check Now button
+        if (POLL_INTERVAL > 0) {
+            pollTimer = setInterval(pollNow, POLL_INTERVAL);
+        }
+    }
+
+    // ── Polling ──
+
+    function pollNow() {
+        fetch('/api/messages/' + encodeURIComponent(selectedUser.id) + '/check')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            updateStatus('ok', 'Connected');
+            if (data.has_new) {
+                showNotification(data.count, data.sender);
+            } else {
+                showListening();
+            }
+        })
+        .catch(function(err) {
+            updateStatus('err', 'Connection lost');
+        });
+    }
+
+    // ── UI States ──
+
+    function showListening() {
+        if (!hasNotification) {
+            document.getElementById('listening').classList.remove('hidden');
+            document.getElementById('notification').classList.add('hidden');
+        }
+    }
+
+    function showNotification(count, sender) {
+        if (!hasNotification) {
+            // First time showing — play sound + desktop notification
+            if (soundEnabled) playChime();
+            sendDesktopNotification(count, sender);
+            startTitleFlash(sender);
+        }
+        hasNotification = true;
+        document.getElementById('listening').classList.add('hidden');
+        document.getElementById('notification').classList.remove('hidden');
+        document.getElementById('disc-sender').textContent = sender || '';
+        document.getElementById('disc-count').textContent = count > 1 ? count + ' messages' : '';
+    }
+
+    function openMessages() {
+        window.open(MESSAGES_URL, '_blank');
+        // Acknowledge
+        fetch('/api/messages/' + encodeURIComponent(selectedUser.id) + '/acknowledge', { method: 'POST' });
+        hasNotification = false;
+        stopTitleFlash();
+        showListening();
+        document.getElementById('listening').classList.remove('hidden');
+        document.getElementById('notification').classList.add('hidden');
+    }
+
+    // ── Sound ──
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        var btn = document.getElementById('sound-btn');
+        btn.textContent = 'Sound: ' + (soundEnabled ? 'ON' : 'OFF');
+        btn.classList.toggle('active', soundEnabled);
+    }
+
+    function playChime() {
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            playNote(ctx, 523, 0, 0.25);
+            playNote(ctx, 659, 0.12, 0.25);
+            playNote(ctx, 784, 0.24, 0.35);
+        } catch(e) {}
+    }
+
+    function playNote(ctx, freq, delay, dur) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.15, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + dur);
+    }
+
+    // ── Desktop Notifications ──
+
+    function requestNotificationPermission() {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    }
+
+    function sendDesktopNotification(count, sender) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        var title = 'New ProShop Message';
+        var body = sender ? ('From: ' + sender) : '';
+        if (count > 1) body += (body ? '\n' : '') + count + ' messages';
+        var n = new Notification(title, {
+            body: body,
+            icon: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="30" fill="%2322c55e"/><text x="32" y="40" text-anchor="middle" fill="white" font-size="28" font-weight="bold">!</text></svg>'),
+            requireInteraction: true
+        });
+        n.onclick = function() {
+            window.focus();
+            openMessages();
+            n.close();
+        };
+    }
+
+    // ── Title Flash ──
+
+    var titleFlashTimer = null;
+    var originalTitle = document.title;
+
+    function startTitleFlash(sender) {
+        if (titleFlashTimer) return;
+        var on = true;
+        var alertTitle = sender ? ('NEW MESSAGE from ' + sender) : 'NEW MESSAGE';
+        titleFlashTimer = setInterval(function() {
+            document.title = on ? alertTitle : originalTitle;
+            on = !on;
+        }, 1000);
+    }
+
+    function stopTitleFlash() {
+        if (titleFlashTimer) {
+            clearInterval(titleFlashTimer);
+            titleFlashTimer = null;
+        }
+        document.title = originalTitle;
+    }
+
+    // ── Status ──
+
+    function updateStatus(state, text) {
+        document.getElementById('status-dot').className = 'status-dot ' + state;
+        document.getElementById('status-text').textContent = text;
+    }
+
+    // ── Init ──
+
+    loadEmployees();
+
+    // Restore saved user
+    try {
+        var saved = JSON.parse(localStorage.getItem('notifier_user'));
+        if (saved && saved.id) {
+            selectedUser = saved;
+            requestNotificationPermission();
+            startMonitoring();
+        }
+    } catch(e) {}
+    </script>
+</body>
+</html>

@@ -1,0 +1,1219 @@
+====================================================================================================
+MACHINE-SPECIFIC TOOL FREQUENCY ANALYSIS
+Generated: 2026-03-29 10:59
+Analysis Period: 2024 - 2026
+Data Source: ProShop API — WO Operations + Part Sequence Details
+====================================================================================================
+
+OVERALL SUMMARY
+  Work Orders analyzed: 874
+  Machines found: 9
+  Tool master records: 646
+
+MACHINE OVERVIEW
+  Machine      Pockets   Loaded   WOs     Parts   Unique Tools  Top5 Cover%
+  ------------ --------- -------- ------- ------- ------------- ------------
+  Mill-1       40        22       50      36      175           84.0%
+  Mill-2       31        10       31      23      126           87.1%
+  Mill-3       30        13       47      41      158           85.1%
+  Mill-4       14        3        50      36      104           84.0%
+  Mill-5       14        0        62      46      89            83.9%
+  Mill-6       25        14       61      39      139           85.2%
+  Mill-7       14        12       91      43      26            92.3%
+  Mill-8       30        12       35      25      113           85.7%
+  T2           12        6        57      26      69            78.9%
+
+====================================================================================================
+  Mill-1
+  Pockets: 40 total, 22 currently loaded
+  WOs: 50  |  Parts: 36  |  Unique tools: 175
+====================================================================================================
+
+  CURRENT POCKET CONTENTS:
+  Pocket   Tool ID         Holder          OOH
+  -------- --------------- --------------- --------
+  None     b1006                           None
+  None     B292                            None
+  None     A1003                           None
+  None     A1039                           None
+  None     a1                              None
+  None     RADIUS TOOL                     None
+  None     7/32 Drill                      None
+  None     A61                             None
+  None     A1009                           None
+  None     M214                            None
+  None     R Drill                         None
+  None     R438                            None
+  None     B260                            None
+  None     b46             er16 long       None
+  None     O1058                           None
+  None     D1062                           None
+  None     R1024                           None
+  None     27/64 drill                     None
+  None     L18             ER25 - 3"       1.0
+  None     r78                             None
+  None     R1025                           None
+  None     D1067                           None
+
+  TOOL FREQUENCY RANKING (by # of parts using tool on this machine):
+  Rank  Tool #           Parts   WOs     Cum%    Description
+  ----- ---------------- ------- ------- ------- ---------------------------------------------
+  1     O4               16      17      34.0    1/4 90� SPOT DRILL 2.76 OAL
+  2     L18              13      18      48.0    1/4 x 2-1/2 4F 90° ChMill AlTiN
+  3     I132             11      20      68.0    2" -90 degree Face Mill, 7 insert
+  4     A1               11      14      84.0    1/8-.5LOC-1.5 OAL 3FL SQUARE
+  5     A30              9       12      84.0    1/4-.75 LOC-2.5 OAL 3FL
+  6     A61              8       11      84.0    1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CA
+  7     O1058            6       13      84.0    1/4 Spot drill 6"OAL
+  8     B1006            5       12      84.0    1/2 Corner Round End Mill, .02 Rad
+  9     R1025            5       12      84.0    M4 Spiral Point STI Tap
+  10    A1014            5       10      84.0    1/16 2FLT SQ EM .25 LOC
+  11    L1045            5       10      84.0    1/8 Chamfer Mill
+  12    B46              5       8       84.0    1/4-.375 LOC-2.5 OAL 3FL
+  13    A47              5       5       92.0    3/16-.5625 LOC-2.0 OAL 3FL
+  14    B1019            4       9       92.0    3/16 Ball End Mill
+  15    A1003            4       9       92.0    3/8 X 3/8 X 1-1/4 LOC X 3 OAL X 3FL (ZRN)
+  16    K1048            4       9       92.0    0.093R corner radius, .045 Tip
+  17    A1043            4       9       92.0    5/8 ROUTING EM 2FLT
+  18    O1055            4       8       92.0    1/4 NC Spotting Drill
+  19    A1034            4       8       92.0    1" End Mill
+  20    B1011            4       8       92.0    3/8 Ball End Mill
+  21    R1024            4       8       92.0    Spiral Point 6-32 STI Tap
+  22    I460             4       7       92.0    2" diameter Dodeka mini 45 shell mill.  KSHR2
+  23    B292             4       6       92.0    1/2 BULL EM 3 FL .12 RAD
+  24    B1004            4       6       92.0    3/8 Corner Round End Mill, .015 Rad
+  25    B1015            4       6       92.0    1/8 Ball End Mill
+  26    R59              4       4       92.0    #10-32 SPIRAL CUT TAP
+  27    A1041            3       7       92.0    5/8 3FLT LONG (4.0 LOC) FLAT EM, 8" OAL
+  28    A1026            3       5       92.0    5/8 End Mill
+  29    K1047            3       5       92.0    .062 Corner Round, .046 Tip
+  30    A1018            3       5       92.0    1/8 End Mill
+  31    O1054            3       5       92.0    Countersink: #5
+  32    K1050            3       5       92.0    KEO Corner Round 6mm
+  33    D1053            3       5       92.0    39/64 Jacob Drill
+  34    B1001            3       5       92.0    3/8 Ball End Mill
+  35    A1042            3       5       92.0    1/2" Solid Carbide Route
+  36    A12              3       4       94.0    3/8-1.0 LOC- 2.5 OAL 5FL
+  37    O17              3       3       94.0    3/8 90� SPOT DRILL 3.5 OAL
+  38    K261             3       3       96.0    .062 RAD 3FL CORNER ROUNDING EM
+  39    A1009            2       4       96.0    1/2 End mill
+  40    B181             2       4       96.0    3/32 x 1/8 x 3/8 x 1-1/2 4Fl Bull EM
+  41    A1039            2       3       96.0    5/8 x 3 x 6 3FL CARB EM ZRN
+  42    O51              2       3       96.0    1/4 140 degree � CARBIDE SPOT 3.0 OAL
+  43    B85              2       2       96.0    .250 x .500 x 2.00 5FL .015CR
+  44    A10              2       2       96.0    3/8, 1 LOC, 2.5 OAL, 3FL
+  45    B227             2       2       96.0    1/2"x1"x3" .060RAD BULL EM 4FL
+  46    B11              2       2       96.0    .250 BALL x .750 LOC 2.5 OAL 4FL
+  47    B254             2       2       96.0    1/2-R0.09-2.0 LOC- 4.0 OAL 6FL
+  48    B212             2       2       96.0    12MM Rougher End Mill 5FL
+  49    B80              2       2       96.0    3/8 EXTENDED 5FL BULL .03 RAD RELIEVED
+  50    B147             2       2       96.0    5 FLUTE RADIUS END 1/2" Cutting Diameter
+  51    A32              2       2       96.0    3/32-.1875 LOC-1.5 OAL 2FL
+  52    A234             2       2       96.0    4mm LOC 14mm  OAL50mm 4FL SQ EM
+  53    A248             2       2       96.0    1/2 5FL SQ EM
+  54    A14              2       2       96.0    3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+  55    A82              2       2       96.0    1/2 SQ EM 5FL - 1.25" LOC
+  56    A192             2       2       96.0    1/32 EM 1/8 LOC 2FL 1.500 LOA
+  57    B45              2       2       98.0    3/8-.03R-.875 LOC-2.5 OAL 5FL
+  58    I399             2       2       98.0    Ingersoll Indexable Face and Peripher Cutter 
+  59    NEW COBALT 25/64 DRILL 2       2       98.0    (not in master)
+  60    NEW COBALT 5/16  2       2       98.0    (not in master)
+
+  PARETO MILESTONES:
+    50% WO coverage: 3 tools
+    70% WO coverage: 4 tools
+    80% WO coverage: 4 tools
+    90% WO coverage: 13 tools
+    95% WO coverage: 38 tools
+    100% WO coverage: 122 tools
+
+  RESIDENT TOOL RECOMMENDATION (budget: 40 pockets):
+    Resident budget (70% of pockets): 28
+    Job-specific reserve (30%): 12
+    Top 28 tools cover 92.0% of WOs on this machine
+
+    Already loaded & recommended: 7
+      A1003            3/8 X 3/8 X 1-1/4 LOC X 3 OAL X 3FL (ZRN)
+      A61              1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CARBIDE
+      B292             1/2 BULL EM 3 FL .12 RAD
+      L18              1/4 x 2-1/2 4F 90° ChMill AlTiN
+      O1058            1/4 Spot drill 6"OAL
+      R1024            Spiral Point 6-32 STI Tap
+      R1025            M4 Spiral Point STI Tap
+    Recommended but NOT loaded: 21
+      A1               1/8-.5LOC-1.5 OAL 3FL SQUARE
+      A1014            1/16 2FLT SQ EM .25 LOC
+      A1026            5/8 End Mill
+      A1034            1" End Mill
+      A1041            5/8 3FLT LONG (4.0 LOC) FLAT EM, 8" OAL
+      A1043            5/8 ROUTING EM 2FLT
+      A30              1/4-.75 LOC-2.5 OAL 3FL
+      A47              3/16-.5625 LOC-2.0 OAL 3FL
+      B1004            3/8 Corner Round End Mill, .015 Rad
+      B1006            1/2 Corner Round End Mill, .02 Rad
+      B1011            3/8 Ball End Mill
+      B1015            1/8 Ball End Mill
+      B1019            3/16 Ball End Mill
+      B46              1/4-.375 LOC-2.5 OAL 3FL
+      I132             2" -90 degree Face Mill, 7 insert
+      I460             2" diameter Dodeka mini 45 shell mill.  KSHR200HN4
+      K1048            0.093R corner radius, .045 Tip
+      L1045            1/8 Chamfer Mill
+      O1055            1/4 NC Spotting Drill
+      O4               1/4 90� SPOT DRILL 2.76 OAL
+      R59              #10-32 SPIRAL CUT TAP
+    Currently loaded but NOT in top 28: 15
+      27/64 drill      
+      7/32 Drill       
+      A1009            1/2 End mill
+      A1039            5/8 x 3 x 6 3FL CARB EM ZRN
+      B260             3mm Ball EM
+      D1062            #25 Aircraft Drill
+      D1067            #20 Cobalt Drill
+      M214             harvey tool- .250X220 Undercutting EM
+      R Drill          
+      R438             M10 x 1.5 Plug SP PT TAP
+      RADIUS TOOL      
+      a1               
+      b1006            
+      b46              
+      r78              
+
+====================================================================================================
+  Mill-2
+  Pockets: 31 total, 10 currently loaded
+  WOs: 31  |  Parts: 23  |  Unique tools: 126
+====================================================================================================
+
+  CURRENT POCKET CONTENTS:
+  Pocket   Tool ID         Holder          OOH
+  -------- --------------- --------------- --------
+  None     i460                            None
+  None     A61                             None
+  None     Q Drill                         None
+  None     A30                             None
+  None     A1022                           None
+  None     W Drill                         None
+  None     L18                             None
+  None     3/8-24 Tap                      None
+  None     ef433                           None
+  None     probe                           None
+
+  TOOL FREQUENCY RANKING (by # of parts using tool on this machine):
+  Rank  Tool #           Parts   WOs     Cum%    Description
+  ----- ---------------- ------- ------- ------- ---------------------------------------------
+  1     L18              16      21      67.7    1/4 x 2-1/2 4F 90° ChMill AlTiN
+  2     O4               10      13      87.1    1/4 90� SPOT DRILL 2.76 OAL
+  3     A16              5       6       87.1    1/2-.625 LOC -2.5 OAL 5FL
+  4     A12              5       5       87.1    3/8-1.0 LOC- 2.5 OAL 5FL
+  5     A1               4       5       87.1    1/8-.5LOC-1.5 OAL 3FL SQUARE
+  6     A222             4       5       87.1    1/16 SQ EM 3/16 LOC 1.5 OAL
+  7     B148             4       4       87.1    .250 x .750 LOC x 2.5 OAL 4FL .015 CR
+  8     I460             4       4       87.1    2" diameter Dodeka mini 45 shell mill.  KSHR2
+  9     #7               4       4       87.1    (not in master)
+  10    L103             3       4       87.1    3/16- 45- 4FL-.04 tip- CHAMFERMILL
+  11    A157             3       4       87.1    1/8-.5 LOC-1.5 OAL 4FL
+  12    B181             3       4       87.1    3/32 x 1/8 x 3/8 x 1-1/2 4Fl Bull EM
+  13    TIPD417          3       4       87.1    Drill #30 (.1285) Cobalt Jobber
+  14    B109             3       4       87.1    1/8" Bull EM .015 Rad 1/4" LOC
+  15    N120             3       4       87.1    M4 THREADMILL
+  16    I132             3       4       96.8    2" -90 degree Face Mill, 7 insert
+  17    TIPD421          3       4       96.8    Drill Letter H(.266) Cobalt Jobber
+  18    N119             3       4       96.8    M8 THREADMILL 11mm max thread depth
+  19    A22              3       4       96.8    3/32-.1875 LOC-1.5 OAL 4FL
+  20    K111             3       4       96.8    .02 Corner radius cutter
+  21    A61              3       3       96.8    1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CA
+  22    A82              3       3       96.8    1/2 SQ EM 5FL - 1.25" LOC
+  23    A14              3       3       96.8    3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+  24    A10              3       3       100.0   3/8, 1 LOC, 2.5 OAL, 3FL
+  25    A30              3       3       100.0   1/4-.75 LOC-2.5 OAL 3FL
+  26    O17              3       3       100.0   3/8 90� SPOT DRILL 3.5 OAL
+  27    B227             2       3       100.0   1/2"x1"x3" .060RAD BULL EM 4FL
+  28    B212             2       3       100.0   12MM Rougher End Mill 5FL
+  29    B85              2       3       100.0   .250 x .500 x 2.00 5FL .015CR
+  30    B88              2       3       100.0   3/16 BALL EM 4FL
+  31    NEW 25/64 COBALT 2       3       100.0   (not in master)
+  32    N124             2       3       100.0   .180 dia for 1/4 THREADMILL, .750 max depth
+  33    B298             2       3       100.0   1/8 BALL 3FL 3/4 LOC EM
+  34    NEW HSS DRILL    2       3       100.0   (not in master)
+  35    R27              2       3       100.0   #4-40 SPIRAL CUT TAP
+  36    10345(GM316F5)   2       2       100.0   (not in master)
+  37    30196(GMHT12FS5) 2       2       100.0   (not in master)
+  38    TC92104          2       2       100.0   (not in master)
+  39    10310(GM18FS5)   2       2       100.0   (not in master)
+  40    A248             2       2       100.0   1/2 5FL SQ EM
+  41    A83              2       2       100.0   3/16 SQ EM 5 FL ENTENDED
+  42    B205             2       2       100.0   .047 BULL EM .008 RAD 4FL
+  43    B122             2       2       100.0   3/8 BULL EM .015 RAD 4FL
+  44    #1               2       2       100.0   (not in master)
+  45    UGMH07947        2       2       100.0   (not in master)
+  46    A1022            2       2       100.0   1/4 x 1/4 x 1 x 3 3F SE SQ Carb ZrN
+  47    TIPD420          2       2       100.0   Drill #52 (.0635) Cobalt Jobber
+  48    B77              2       2       100.0   1/2-R0.03-.625 LOC- 2.5 OAL 5FL
+  49    M8               2       2       100.0   (not in master)
+  50    30260(GMHT14FS5) 2       2       100.0   (not in master)
+  51    10691(GMNR12F52.250) 2       2       100.0   (not in master)
+  52    M486             2       2       100.0   .488 D x 48 DEG DOVETAIL, 2 FL AlTiN
+  53    F                2       2       100.0   (not in master)
+  54    5-16             2       2       100.0   (not in master)
+  55    3-8              2       2       100.0   (not in master)
+  56    3-8-16_UNC       2       2       100.0   (not in master)
+  57    K207             2       2       100.0   0.039 radius cutter, double ended, .020 dia t
+  58    TIPD419          2       2       100.0   Drill #18 (.1695) Cobalt Jobber
+  59    N208             2       2       100.0   M2 THREAD MILL
+  60    TIPD418          2       2       100.0   Drill #40 (.0980) Cobalt Jobber
+
+  PARETO MILESTONES:
+    50% WO coverage: 1 tools
+    70% WO coverage: 2 tools
+    80% WO coverage: 2 tools
+    90% WO coverage: 16 tools
+    95% WO coverage: 16 tools
+    100% WO coverage: 24 tools
+
+  RESIDENT TOOL RECOMMENDATION (budget: 31 pockets):
+    Resident budget (70% of pockets): 21
+    Job-specific reserve (30%): 10
+    Top 21 tools cover 96.8% of WOs on this machine
+
+    Already loaded & recommended: 2
+      A61              1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CARBIDE
+      L18              1/4 x 2-1/2 4F 90° ChMill AlTiN
+    Recommended but NOT loaded: 19
+      #7               
+      A1               1/8-.5LOC-1.5 OAL 3FL SQUARE
+      A12              3/8-1.0 LOC- 2.5 OAL 5FL
+      A157             1/8-.5 LOC-1.5 OAL 4FL
+      A16              1/2-.625 LOC -2.5 OAL 5FL
+      A22              3/32-.1875 LOC-1.5 OAL 4FL
+      A222             1/16 SQ EM 3/16 LOC 1.5 OAL
+      B109             1/8" Bull EM .015 Rad 1/4" LOC
+      B148             .250 x .750 LOC x 2.5 OAL 4FL .015 CR
+      B181             3/32 x 1/8 x 3/8 x 1-1/2 4Fl Bull EM
+      I132             2" -90 degree Face Mill, 7 insert
+      I460             2" diameter Dodeka mini 45 shell mill.  KSHR200HN4
+      K111             .02 Corner radius cutter
+      L103             3/16- 45- 4FL-.04 tip- CHAMFERMILL
+      N119             M8 THREADMILL 11mm max thread depth
+      N120             M4 THREADMILL
+      O4               1/4 90� SPOT DRILL 2.76 OAL
+      TIPD417          Drill #30 (.1285) Cobalt Jobber
+      TIPD421          Drill Letter H(.266) Cobalt Jobber
+    Currently loaded but NOT in top 21: 8
+      3/8-24 Tap       
+      A1022            1/4 x 1/4 x 1 x 3 3F SE SQ Carb ZrN
+      A30              1/4-.75 LOC-2.5 OAL 3FL
+      Q Drill          
+      W Drill          
+      ef433            
+      i460             
+      probe            
+
+====================================================================================================
+  Mill-3
+  Pockets: 30 total, 13 currently loaded
+  WOs: 47  |  Parts: 41  |  Unique tools: 158
+====================================================================================================
+
+  CURRENT POCKET CONTENTS:
+  Pocket   Tool ID         Holder          OOH
+  -------- --------------- --------------- --------
+  None     A61                             None
+  None     A61                             None
+  None     A30                             None
+  None     A1022                           None
+  None     .136 Drill                      None
+  None     L18                             None
+  None     A47                             None
+  None     O4                              None
+  None     R64                             None
+  None     R42                             None
+  None     .201 Drill                      None
+  None     #21 Drill                       None
+  None     R59                             None
+
+  TOOL FREQUENCY RANKING (by # of parts using tool on this machine):
+  Rank  Tool #           Parts   WOs     Cum%    Description
+  ----- ---------------- ------- ------- ------- ---------------------------------------------
+  1     L18              32      36      76.6    1/4 x 2-1/2 4F 90° ChMill AlTiN
+  2     O4               24      24      85.1    1/4 90� SPOT DRILL 2.76 OAL
+  3     A61              14      15      85.1    1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CA
+  4     A47              11      13      85.1    3/16-.5625 LOC-2.0 OAL 3FL
+  5     A10              9       11      85.1    3/8, 1 LOC, 2.5 OAL, 3FL
+  6     A30              8       9       85.1    1/4-.75 LOC-2.5 OAL 3FL
+  7     M425             6       6       91.5    1/32 x .025 x 1.5 4F BALL EM C3
+  8     I132             5       7       91.5    2" -90 degree Face Mill, 7 insert
+  9     A49              5       6       95.7    1/4-.500 LOC-2 OAL 5FL
+  10    A14              5       6       95.7    3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+  11    A1               5       5       95.7    1/8-.5LOC-1.5 OAL 3FL SQUARE
+  12    B23              4       5       95.7    3/8 BALL 1.00 LOC-2.5 OAL 4FL
+  13    B254             4       4       95.7    1/2-R0.09-2.0 LOC- 4.0 OAL 6FL
+  14    A16              4       4       95.7    1/2-.625 LOC -2.5 OAL 5FL
+  15    B11              4       4       95.7    .250 BALL x .750 LOC 2.5 OAL 4FL
+  16    K111             4       4       95.7    .02 Corner radius cutter
+  17    N124             4       4       95.7    .180 dia for 1/4 THREADMILL, .750 max depth
+  18    L103             3       4       95.7    3/16- 45- 4FL-.04 tip- CHAMFERMILL
+  19    A157             3       4       95.7    1/8-.5 LOC-1.5 OAL 4FL
+  20    B181             3       4       95.7    3/32 x 1/8 x 3/8 x 1-1/2 4Fl Bull EM
+  21    I460             3       4       95.7    2" diameter Dodeka mini 45 shell mill.  KSHR2
+  22    A22              3       4       95.7    3/32-.1875 LOC-1.5 OAL 4FL
+  23    B109             3       3       95.7    1/8" Bull EM .015 Rad 1/4" LOC
+  24    O17              3       3       95.7    3/8 90� SPOT DRILL 3.5 OAL
+  25    TIPD417          3       3       95.7    Drill #30 (.1285) Cobalt Jobber
+  26    N120             3       3       95.7    M4 THREADMILL
+  27    TIPD421          3       3       95.7    Drill Letter H(.266) Cobalt Jobber
+  28    N119             3       3       95.7    M8 THREADMILL 11mm max thread depth
+  29    TIPD423          3       3       95.7    Drill #7(.2010) Cobalt Jobber
+  30    R52              3       3       95.7    M8X1.25 FORMING TAP
+  31    .266             3       3       95.7    (not in master)
+  32    R146             3       3       95.7    1/4-20 STI TAP
+  33    B45              2       3       95.7    3/8-.03R-.875 LOC-2.5 OAL 5FL
+  34    O74              2       3       95.7    3/16 90� SPOT DRILL 1.1875 OAL
+  35    B88              2       3       95.7    3/16 BALL EM 4FL
+  36    A1022            2       3       95.7    1/4 x 1/4 x 1 x 3 3F SE SQ Carb ZrN
+  37    B85              2       2       95.7    .250 x .500 x 2.00 5FL .015CR
+  38    B227             2       2       95.7    1/2"x1"x3" .060RAD BULL EM 4FL
+  39    B267             2       2       95.7    1/4-.625 LOC-2.5 OAL .03 RAD 3FL
+  40    B147             2       2       95.7    5 FLUTE RADIUS END 1/2" Cutting Diameter
+  41    A12              2       2       95.7    3/8-1.0 LOC- 2.5 OAL 5FL
+  42    B271             2       2       95.7    1/8 BALL EM 4FL
+  43    B46              2       2       95.7    1/4-.375 LOC-2.5 OAL 3FL
+  44    A439             2       2       95.7    .250 x 1.25 7 FLUTE End Mill
+  45    TIPD424          2       2       95.7    Drill #23(.154) Cobalt Jobber
+  46    B148             2       2       95.7    .250 x .750 LOC x 2.5 OAL 4FL .015 CR
+  47    A222             2       2       95.7    1/16 SQ EM 3/16 LOC 1.5 OAL
+  48    A34              2       2       95.7    3/8-.75 LOC-2.5 OAL 5FL
+  49    TIPD418          2       2       95.7    Drill #40 (.0980) Cobalt Jobber
+  50    N125             2       2       95.7    M3 THREADMILL .0906 dia 772724-c6
+  51    D195             2       2       95.7    #29(.1360)5xD DR 2FL 1-3/8" F/L 135 PT *HLUBE
+  52    LETTER W HSS JOBBER 2       2       95.7    (not in master)
+  53    R64              2       2       95.7    #8-32 SPIRAL CUT TAP
+  54    I140             2       2       95.7    ISCAR FACE MILL F45KT D2.5 -R07-410
+  55    TIPD422          2       2       95.7    Drill #16(.1770) Cobalt Jobber
+  56    K126             2       2       95.7    .118 CORNER RADIUS CUTTER
+  57    R59              2       2       95.7    #10-32 SPIRAL CUT TAP
+  58    R42              2       2       95.7    1/4-20 SPIRAL CUT TAP
+  59    R33              2       2       95.7    M4X.7 FORMING TAP
+  60    R67              2       2       95.7    M6X1 FORMING TAP
+
+  PARETO MILESTONES:
+    50% WO coverage: 1 tools
+    70% WO coverage: 1 tools
+    80% WO coverage: 2 tools
+    90% WO coverage: 7 tools
+    95% WO coverage: 9 tools
+    100% WO coverage: 157 tools
+
+  RESIDENT TOOL RECOMMENDATION (budget: 30 pockets):
+    Resident budget (70% of pockets): 21
+    Job-specific reserve (30%): 9
+    Top 21 tools cover 95.7% of WOs on this machine
+
+    Already loaded & recommended: 5
+      A30              1/4-.75 LOC-2.5 OAL 3FL
+      A47              3/16-.5625 LOC-2.0 OAL 3FL
+      A61              1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CARBIDE
+      L18              1/4 x 2-1/2 4F 90° ChMill AlTiN
+      O4               1/4 90� SPOT DRILL 2.76 OAL
+    Recommended but NOT loaded: 16
+      A1               1/8-.5LOC-1.5 OAL 3FL SQUARE
+      A10              3/8, 1 LOC, 2.5 OAL, 3FL
+      A14              3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+      A157             1/8-.5 LOC-1.5 OAL 4FL
+      A16              1/2-.625 LOC -2.5 OAL 5FL
+      A49              1/4-.500 LOC-2 OAL 5FL
+      B11              .250 BALL x .750 LOC 2.5 OAL 4FL
+      B181             3/32 x 1/8 x 3/8 x 1-1/2 4Fl Bull EM
+      B23              3/8 BALL 1.00 LOC-2.5 OAL 4FL
+      B254             1/2-R0.09-2.0 LOC- 4.0 OAL 6FL
+      I132             2" -90 degree Face Mill, 7 insert
+      I460             2" diameter Dodeka mini 45 shell mill.  KSHR200HN4
+      K111             .02 Corner radius cutter
+      L103             3/16- 45- 4FL-.04 tip- CHAMFERMILL
+      M425             1/32 x .025 x 1.5 4F BALL EM C3
+      N124             .180 dia for 1/4 THREADMILL, .750 max depth
+    Currently loaded but NOT in top 21: 7
+      #21 Drill        
+      .136 Drill       
+      .201 Drill       
+      A1022            1/4 x 1/4 x 1 x 3 3F SE SQ Carb ZrN
+      R42              1/4-20 SPIRAL CUT TAP
+      R59              #10-32 SPIRAL CUT TAP
+      R64              #8-32 SPIRAL CUT TAP
+
+====================================================================================================
+  Mill-4
+  Pockets: 14 total, 3 currently loaded
+  WOs: 50  |  Parts: 36  |  Unique tools: 104
+====================================================================================================
+
+  CURRENT POCKET CONTENTS:
+  Pocket   Tool ID         Holder          OOH
+  -------- --------------- --------------- --------
+  None     A61                             None
+  None     A1                              None
+  None     EF433                           None
+
+  TOOL FREQUENCY RANKING (by # of parts using tool on this machine):
+  Rank  Tool #           Parts   WOs     Cum%    Description
+  ----- ---------------- ------- ------- ------- ---------------------------------------------
+  1     O4               21      30      60.0    1/4 90� SPOT DRILL 2.76 OAL
+  2     L18              20      25      72.0    1/4 x 2-1/2 4F 90° ChMill AlTiN
+  3     A61              11      13      82.0    1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CA
+  4     A10              9       12      84.0    3/8, 1 LOC, 2.5 OAL, 3FL
+  5     A47              8       12      84.0    3/16-.5625 LOC-2.0 OAL 3FL
+  6     A1               6       7       92.0    1/8-.5LOC-1.5 OAL 3FL SQUARE
+  7     B9               4       7       92.0    3/8-.625 LOC-3.0 OAL 2FL
+  8     B11              4       7       92.0    .250 BALL x .750 LOC 2.5 OAL 4FL
+  9     B63              4       5       92.0    1/2-R.03-1.375 LOC-3.25 OAL 3FL
+  10    A30              4       5       92.0    1/4-.75 LOC-2.5 OAL 3FL
+  11    B23              3       5       92.0    3/8 BALL 1.00 LOC-2.5 OAL 4FL
+  12    R166             3       5       92.0    M6X1 STI CUT TAP
+  13    K111             3       5       92.0    .02 Corner radius cutter
+  14    A49              3       4       96.0    1/4-.500 LOC-2 OAL 5FL
+  15    B259             3       3       96.0    .156 Ball EM
+  16    B185             2       4       96.0    .1875 X 1.125 LOC 3.00 OAL EM BALL NOSE
+  17    K126             2       3       96.0    .118 CORNER RADIUS CUTTER
+  18    L76              2       2       96.0    3/16 90� 4FL CHAMFERMILL
+  19    B1005            2       2       96.0    1/2 Corner Round End Mill, .03 Rad
+  20    L144             2       2       96.0    .078 dia, 90 degree included angle chamfer mi
+  21    B20              2       2       96.0    1/2-0.625 LOC-4.0 OAL 2FL
+  22    O17              2       2       96.0    3/8 90� SPOT DRILL 3.5 OAL
+  23    D10239           2       2       96.0    0.2420 Jobber Drill 2Flt HSS
+  24    D10267           2       2       96.0    0.2780 Jobber Drill 2Flt HSS
+  25    A192             2       2       96.0    1/32 EM 1/8 LOC 2FL 1.500 LOA
+  26    N124             2       2       96.0    .180 dia for 1/4 THREADMILL, .750 max depth
+  27    J278             2       2       98.0    .375D x .059R x .563 reach Full Radius Keysea
+  28    NO. 16 JOBBER    2       2       98.0    (not in master)
+  29    A1022            1       3       98.0    1/4 x 1/4 x 1 x 3 3F SE SQ Carb ZrN
+  30    N0. 16 HSS JOBBER 1       3       98.0    (not in master)
+  31    3/8 HSS DRILL    1       3       98.0    (not in master)
+  32    A251             1       3       98.0    3/8 3FL SQ EM
+  33    B45              1       2       98.0    3/8-.03R-.875 LOC-2.5 OAL 5FL
+  34    LETTER J HSS JOBBER 1       2       98.0    (not in master)
+  35    DRILL NO. 16     1       2       98.0    (not in master)
+  36    K261             1       2       98.0    .062 RAD 3FL CORNER ROUNDING EM
+  37    LETTER F JOBBER DRILL 1       2       98.0    (not in master)
+  38    1/4" LETTER E HSS JOBBER DRILL 1       2       98.0    (not in master)
+  39    B267             1       2       98.0    1/4-.625 LOC-2.5 OAL .03 RAD 3FL
+  40    O74              1       2       98.0    3/16 90� SPOT DRILL 1.1875 OAL
+  41    COBALT .059 NO. 53 1       2       98.0    (not in master)
+  42    COBALT .322 LETTER Q 1       2       98.0    (not in master)
+  43    A157             1       2       98.0    1/8-.5 LOC-1.5 OAL 4FL
+  44    J93              1       2       98.0    1" X .375 KEYCUTTER 12FL
+  45    L160             1       2       98.0    3MM CHAMFER
+  46    B85              1       1       98.0    .250 x .500 x 2.00 5FL .015CR
+  47    A34              1       1       98.0    3/8-.75 LOC-2.5 OAL 5FL
+  48    A397             1       1       98.0    1/4- 1.25 LOC- 3 OAL 3FL EM NFI COATING
+  49    A22              1       1       98.0    3/32-.1875 LOC-1.5 OAL 4FL
+  50    B109             1       1       98.0    1/8" Bull EM .015 Rad 1/4" LOC
+  51    O3               1       1       98.0    1/8 90� SPOT DRILL .75 OAL
+  52    I437             1       1       98.0    50mm Dodeka™ Mini 45° • Shell Mill • Metric o
+  53    A14              1       1       98.0    3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+  54    A19              1       1       100.0   1/32-.250 LOC-1.5 OAL 2FL
+  55    TIPD421          1       1       100.0   Drill Letter H(.266) Cobalt Jobber
+  56    TIPD417          1       1       100.0   Drill #30 (.1285) Cobalt Jobber
+  57    A16              1       1       100.0   1/2-.625 LOC -2.5 OAL 5FL
+  58    N119             1       1       100.0   M8 THREADMILL 11mm max thread depth
+  59    N120             1       1       100.0   M4 THREADMILL
+  60    TIPD423          1       1       100.0   Drill #7(.2010) Cobalt Jobber
+
+  PARETO MILESTONES:
+    50% WO coverage: 1 tools
+    70% WO coverage: 2 tools
+    80% WO coverage: 3 tools
+    90% WO coverage: 6 tools
+    95% WO coverage: 14 tools
+    100% WO coverage: 54 tools
+
+  RESIDENT TOOL RECOMMENDATION (budget: 14 pockets):
+    Resident budget (70% of pockets): 9
+    Job-specific reserve (30%): 5
+    Top 9 tools cover 92.0% of WOs on this machine
+
+    Already loaded & recommended: 2
+      A1               1/8-.5LOC-1.5 OAL 3FL SQUARE
+      A61              1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CARBIDE
+    Recommended but NOT loaded: 7
+      A10              3/8, 1 LOC, 2.5 OAL, 3FL
+      A47              3/16-.5625 LOC-2.0 OAL 3FL
+      B11              .250 BALL x .750 LOC 2.5 OAL 4FL
+      B63              1/2-R.03-1.375 LOC-3.25 OAL 3FL
+      B9               3/8-.625 LOC-3.0 OAL 2FL
+      L18              1/4 x 2-1/2 4F 90° ChMill AlTiN
+      O4               1/4 90� SPOT DRILL 2.76 OAL
+    Currently loaded but NOT in top 9: 1
+      EF433            
+
+====================================================================================================
+  Mill-5
+  Pockets: 14 total, 0 currently loaded
+  WOs: 62  |  Parts: 46  |  Unique tools: 89
+====================================================================================================
+
+  TOOL FREQUENCY RANKING (by # of parts using tool on this machine):
+  Rank  Tool #           Parts   WOs     Cum%    Description
+  ----- ---------------- ------- ------- ------- ---------------------------------------------
+  1     L18              22      25      40.3    1/4 x 2-1/2 4F 90° ChMill AlTiN
+  2     O4               18      26      61.3    1/4 90� SPOT DRILL 2.76 OAL
+  3     A47              12      18      74.2    3/16-.5625 LOC-2.0 OAL 3FL
+  4     A1               10      10      82.3    1/8-.5LOC-1.5 OAL 3FL SQUARE
+  5     A10              9       13      83.9    3/8, 1 LOC, 2.5 OAL, 3FL
+  6     A61              6       9       85.5    1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CA
+  7     A30              5       6       90.3    1/4-.75 LOC-2.5 OAL 3FL
+  8     M425             4       8       90.3    1/32 x .025 x 1.5 4F BALL EM C3
+  9     B23              3       3       90.3    3/8 BALL 1.00 LOC-2.5 OAL 4FL
+  10    A28              3       3       90.3    1/16-.250 LOC-1.5 OAL 2FL
+  11    I460             3       3       90.3    2" diameter Dodeka mini 45 shell mill.  KSHR2
+  12    O17              3       3       90.3    3/8 90� SPOT DRILL 3.5 OAL
+  13    DRILL DRAWER     2       6       90.3    (not in master)
+  14    I437             2       3       90.3    50mm Dodeka™ Mini 45° • Shell Mill • Metric o
+  15    A49              2       2       90.3    1/4-.500 LOC-2 OAL 5FL
+  16    A12              2       2       90.3    3/8-1.0 LOC- 2.5 OAL 5FL
+  17    A14              2       2       90.3    3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+  18    M62              2       2       93.5    60 Degree 1/8 ENGRAVING TOOL
+  19    B9               2       2       93.5    3/8-.625 LOC-3.0 OAL 2FL
+  20    NO. 22 DRILL     2       2       93.5    (not in master)
+  21    R42              2       2       93.5    1/4-20 SPIRAL CUT TAP
+  22    NO. 25           1       5       93.5    (not in master)
+  23    R48              1       5       93.5    #8-32 FORMING TAP
+  24    L199             1       4       93.5    1/2″ Diam 82° 4-Flute Single End Solid Carbid
+  25    A1003            1       2       93.5    3/8 X 3/8 X 1-1/4 LOC X 3 OAL X 3FL (ZRN)
+  26    B1023            1       2       93.5    1/4" Ballnose End Mill, 3 Flute, 2-1/2" OAL, 
+  27    O1055            1       2       93.5    1/4 NC Spotting Drill
+  28    B298             1       2       93.5    1/8 BALL 3FL 3/4 LOC EM
+  29    B1006            1       2       93.5    1/2 Corner Round End Mill, .02 Rad
+  30    STORED W/ FIXTURE 1       2       93.5    (not in master)
+  31    A1020            1       2       93.5    .1875 End Mill, 3fl,
+  32    B63              1       1       93.5    1/2-R.03-1.375 LOC-3.25 OAL 3FL
+  33    1/2" SLOTTING TOOL 1       1       93.5    (not in master)
+  34    A22              1       1       93.5    3/32-.1875 LOC-1.5 OAL 4FL
+  35    A19              1       1       95.2    1/32-.250 LOC-1.5 OAL 2FL
+  36    B88              1       1       95.2    3/16 BALL EM 4FL
+  37    D10171           1       1       95.2    0.1770 (#16)Jobber Drill 2Flt HSS
+  38    D10257           1       1       95.2    0.2610 Jobber Drill 2Flt HSS
+  39    D10337           1       1       95.2    0.3860 Jobber Drill 2Flt HSS
+  40    L7               1       1       95.2    1/4 82deg 4FL CHAMFERMILL - .01" tip
+  41    L76              1       1       95.2    3/16 90� 4FL CHAMFERMILL
+  42    B20              1       1       96.8    1/2-0.625 LOC-4.0 OAL 2FL
+  43    K138             1       1       96.8    0.039 radius cutter, double ended, .058 dia t
+  44    R166             1       1       96.8    M6X1 STI CUT TAP
+  45    NO. 31 DRILL     1       1       96.8    (not in master)
+  46    B181             1       1       96.8    3/32 x 1/8 x 3/8 x 1-1/2 4Fl Bull EM
+  47    11/64 HSS JOBBER 1       1       96.8    (not in master)
+  48    B170             1       1       96.8    3/8 (R.12) x 3/8 x 1/2 (2-1/8) x 4
+  49    .138 NO. 19      1       1       96.8    (not in master)
+  50    PLUG TAP         1       1       96.8    (not in master)
+  51    1                1       1       98.4    (not in master)
+  52    5/16 HSS JOBBER  1       1       98.4    (not in master)
+  53    3/8-16 PLUG      1       1       98.4    (not in master)
+  54    B45              1       1       98.4    3/8-.03R-.875 LOC-2.5 OAL 5FL
+  55    NO.38 .1015 HSS DRILL 1       1       98.4    (not in master)
+  56    NO. 7 JOBBER HSS 1       1       98.4    (not in master)
+  57    ROBO BT30 KENNA 50MM FACE TOOL 1       1       98.4    (not in master)
+  58    .1285 NO. 30 DRILL 1       1       98.4    (not in master)
+  59    KENN 50 MM ROBO FACE MILL 1       1       98.4    (not in master)
+  60    R6               1       1       98.4    M4X.7 SPIRAL CUT TAP
+
+  PARETO MILESTONES:
+    50% WO coverage: 2 tools
+    70% WO coverage: 3 tools
+    80% WO coverage: 4 tools
+    90% WO coverage: 7 tools
+    95% WO coverage: 35 tools
+    100% WO coverage: 78 tools
+
+  RESIDENT TOOL RECOMMENDATION (budget: 14 pockets):
+    Resident budget (70% of pockets): 9
+    Job-specific reserve (30%): 5
+    Top 9 tools cover 90.3% of WOs on this machine
+
+    Already loaded & recommended: 0
+    Recommended but NOT loaded: 9
+      A1               1/8-.5LOC-1.5 OAL 3FL SQUARE
+      A10              3/8, 1 LOC, 2.5 OAL, 3FL
+      A30              1/4-.75 LOC-2.5 OAL 3FL
+      A47              3/16-.5625 LOC-2.0 OAL 3FL
+      A61              1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CARBIDE
+      B23              3/8 BALL 1.00 LOC-2.5 OAL 4FL
+      L18              1/4 x 2-1/2 4F 90° ChMill AlTiN
+      M425             1/32 x .025 x 1.5 4F BALL EM C3
+      O4               1/4 90� SPOT DRILL 2.76 OAL
+    Currently loaded but NOT in top 9: 0
+
+====================================================================================================
+  Mill-6
+  Pockets: 25 total, 14 currently loaded
+  WOs: 61  |  Parts: 39  |  Unique tools: 139
+====================================================================================================
+
+  CURRENT POCKET CONTENTS:
+  Pocket   Tool ID         Holder          OOH
+  -------- --------------- --------------- --------
+  None     3/16 Drill                      None
+  None     A61             ER32            2.0
+  None     #43 Drill                       None
+  None     A30             ER32            1.5
+  None     B46                             None
+  None     A1              Hydraulic       0.8
+  None     L18             ER25 - 3"       1.4
+  None     #30 Drill                       None
+  None     R27                             None
+  None     B20                             None
+  None     I460                            None
+  None     B292                            None
+  None     A28                             None
+  None     B9                              None
+
+  TOOL FREQUENCY RANKING (by # of parts using tool on this machine):
+  Rank  Tool #           Parts   WOs     Cum%    Description
+  ----- ---------------- ------- ------- ------- ---------------------------------------------
+  1     L18              24      37      60.7    1/4 x 2-1/2 4F 90° ChMill AlTiN
+  2     O4               19      30      80.3    1/4 90� SPOT DRILL 2.76 OAL
+  3     A61              11      16      83.6    1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CA
+  4     A1               9       14      85.2    1/8-.5LOC-1.5 OAL 3FL SQUARE
+  5     A30              9       10      85.2    1/4-.75 LOC-2.5 OAL 3FL
+  6     B23              8       13      85.2    3/8 BALL 1.00 LOC-2.5 OAL 4FL
+  7     I132             7       13      85.2    2" -90 degree Face Mill, 7 insert
+  8     K111             6       16      85.2    .02 Corner radius cutter
+  9     A16              6       14      85.2    1/2-.625 LOC -2.5 OAL 5FL
+  10    O17              6       9       85.2    3/8 90� SPOT DRILL 3.5 OAL
+  11    N120             5       14      85.2    M4 THREADMILL
+  12    N119             5       14      85.2    M8 THREADMILL 11mm max thread depth
+  13    N124             5       13      85.2    .180 dia for 1/4 THREADMILL, .750 max depth
+  14    A10              5       10      85.2    3/8, 1 LOC, 2.5 OAL, 3FL
+  15    K156             5       7       85.2    .078R CR CUTTER
+  16    TIPD417          4       13      85.2    Drill #30 (.1285) Cobalt Jobber
+  17    TIPD421          4       13      85.2    Drill Letter H(.266) Cobalt Jobber
+  18    A49              4       12      85.2    1/4-.500 LOC-2 OAL 5FL
+  19    TIPD423          4       10      85.2    Drill #7(.2010) Cobalt Jobber
+  20    B267             4       8       85.2    1/4-.625 LOC-2.5 OAL .03 RAD 3FL
+  21    A14              4       8       88.5    3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+  22    A397             4       7       88.5    1/4- 1.25 LOC- 3 OAL 3FL EM NFI COATING
+  23    A248             4       5       88.5    1/2 5FL SQ EM
+  24    I460             4       4       88.5    2" diameter Dodeka mini 45 shell mill.  KSHR2
+  25    TIPD422          3       12      88.5    Drill #16(.1770) Cobalt Jobber
+  26    N125             3       12      88.5    M3 THREADMILL .0906 dia 772724-c6
+  27    TIPD418          3       12      88.5    Drill #40 (.0980) Cobalt Jobber
+  28    M425             3       11      88.5    1/32 x .025 x 1.5 4F BALL EM C3
+  29    K126             3       11      88.5    .118 CORNER RADIUS CUTTER
+  30    B254             3       4       88.5    1/2-R0.09-2.0 LOC- 4.0 OAL 6FL
+  31    B259             3       4       88.5    .156 Ball EM
+  32    A40              3       4       88.5    1/8-.250 LOC-1.5 OAL 4FL
+  33    A47              3       4       90.2    3/16-.5625 LOC-2.0 OAL 3FL
+  34    I140             3       4       90.2    ISCAR FACE MILL F45KT D2.5 -R07-410
+  35    3/8 HSS DRILL    3       4       90.2    (not in master)
+  36    .277 DRILL       3       4       90.2    (not in master)
+  37    A29              3       4       91.8    1/8-.250 LOC-1.5 OAL 5FL
+  38    -                3       3       91.8    (not in master)
+  39    A15              3       3       91.8    3/16-.750 LOC-2.50 OAL 5FL
+  40    B109             2       10      91.8    1/8" Bull EM .015 Rad 1/4" LOC
+  41    L103             2       9       91.8    3/16- 45- 4FL-.04 tip- CHAMFERMILL
+  42    A157             2       6       91.8    1/8-.5 LOC-1.5 OAL 4FL
+  43    B88              2       5       91.8    3/16 BALL EM 4FL
+  44    B255             2       3       91.8    1/2-R0.09-1.0 LOC- 3.0 OAL 4FL
+  45    B404             2       3       91.8    .118 (3mm) BALL HARD MILL 3x LOC 6FL NANO
+  46    B256             2       3       91.8    8mm Bull EM .315 loc 4" 2mm (0.078") rad
+  47    A81              2       3       91.8    1/4x1/4x1-1/8x3/8x4 EM
+  48    B212             2       3       91.8    12MM Rougher End Mill 5FL
+  49    7/16 HSS DRILL   2       3       91.8    (not in master)
+  50    A19              2       3       96.7    1/32-.250 LOC-1.5 OAL 2FL
+  51    B110             2       3       96.7    1/2" Bull EM .015 Rad 1" LOC
+  52    L121             2       3       96.7    50 DEG P/S x .375 DIA x .157 LOC 2 FL
+  53    .166 JOBBER      2       3       96.7    (not in master)
+  54    .120             2       3       96.7    (not in master)
+  55    .125 HSS REAMERQ 2       3       96.7    (not in master)
+  56    LETTER P HSS JOBBER OR STUB .323" 2       3       96.7    (not in master)
+  57    L201             2       3       96.7    1/4 120 4FL CHAMFERMILL
+  58    L76              2       2       96.7    3/16 90� 4FL CHAMFERMILL
+  59    B77              2       2       96.7    1/2-R0.03-.625 LOC- 2.5 OAL 5FL
+  60    A1056            2       2       100.0   1/32 End Mill
+
+  PARETO MILESTONES:
+    50% WO coverage: 1 tools
+    70% WO coverage: 2 tools
+    80% WO coverage: 2 tools
+    90% WO coverage: 33 tools
+    95% WO coverage: 50 tools
+    100% WO coverage: 60 tools
+
+  RESIDENT TOOL RECOMMENDATION (budget: 25 pockets):
+    Resident budget (70% of pockets): 17
+    Job-specific reserve (30%): 8
+    Top 17 tools cover 85.2% of WOs on this machine
+
+    Already loaded & recommended: 4
+      A1               1/8-.5LOC-1.5 OAL 3FL SQUARE
+      A30              1/4-.75 LOC-2.5 OAL 3FL
+      A61              1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CARBIDE
+      L18              1/4 x 2-1/2 4F 90° ChMill AlTiN
+    Recommended but NOT loaded: 13
+      A10              3/8, 1 LOC, 2.5 OAL, 3FL
+      A16              1/2-.625 LOC -2.5 OAL 5FL
+      B23              3/8 BALL 1.00 LOC-2.5 OAL 4FL
+      I132             2" -90 degree Face Mill, 7 insert
+      K111             .02 Corner radius cutter
+      K156             .078R CR CUTTER
+      N119             M8 THREADMILL 11mm max thread depth
+      N120             M4 THREADMILL
+      N124             .180 dia for 1/4 THREADMILL, .750 max depth
+      O17              3/8 90� SPOT DRILL 3.5 OAL
+      O4               1/4 90� SPOT DRILL 2.76 OAL
+      TIPD417          Drill #30 (.1285) Cobalt Jobber
+      TIPD421          Drill Letter H(.266) Cobalt Jobber
+    Currently loaded but NOT in top 17: 10
+      #30 Drill        
+      #43 Drill        
+      3/16 Drill       
+      A28              1/16-.250 LOC-1.5 OAL 2FL
+      B20              1/2-0.625 LOC-4.0 OAL 2FL
+      B292             1/2 BULL EM 3 FL .12 RAD
+      B46              1/4-.375 LOC-2.5 OAL 3FL
+      B9               3/8-.625 LOC-3.0 OAL 2FL
+      I460             2" diameter Dodeka mini 45 shell mill.  KSHR200HN4
+      R27              #4-40 SPIRAL CUT TAP
+
+====================================================================================================
+  Mill-7
+  Pockets: 14 total, 12 currently loaded
+  WOs: 91  |  Parts: 43  |  Unique tools: 26
+====================================================================================================
+
+  CURRENT POCKET CONTENTS:
+  Pocket   Tool ID         Holder          OOH
+  -------- --------------- --------------- --------
+  None     a1                              None
+  None     a30                             None
+  None     b267                            None
+  None     a61                             None
+  None     a47                             None
+  None     a28                             None
+  None     o4                              None
+  None     l18                             None
+  None     a1014                           None
+  None     b46                             None
+  None     m425                            None
+  None     ef433                           None
+
+  TOOL FREQUENCY RANKING (by # of parts using tool on this machine):
+  Rank  Tool #           Parts   WOs     Cum%    Description
+  ----- ---------------- ------- ------- ------- ---------------------------------------------
+  1     A1               28      57      62.6    1/8-.5LOC-1.5 OAL 3FL SQUARE
+  2     A30              12      30      81.3    1/4-.75 LOC-2.5 OAL 3FL
+  3     A28              9       16      81.3    1/16-.250 LOC-1.5 OAL 2FL
+  4     L18              7       7       89.0    1/4 x 2-1/2 4F 90° ChMill AlTiN
+  5     A61              4       6       92.3    1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CA
+  6     I460             4       4       93.4    2" diameter Dodeka mini 45 shell mill.  KSHR2
+  7     L7               3       8       96.7    1/4 82deg 4FL CHAMFERMILL - .01" tip
+  8     A10              3       6       96.7    3/8, 1 LOC, 2.5 OAL, 3FL
+  9     O4               3       6       96.7    1/4 90� SPOT DRILL 2.76 OAL
+  10    A268             3       6       96.7    .25 SQ EM 1.5" LOC, 6" OAL, 3 FL
+  11    A47              2       6       100.0   3/16-.5625 LOC-2.0 OAL 3FL
+  12    DRILL 0.1285     2       2       100.0   (not in master)
+  13    R6               2       2       100.0   M4X.7 SPIRAL CUT TAP
+  14    B46              2       2       100.0   1/4-.375 LOC-2.5 OAL 3FL
+  15    A157             2       2       100.0   1/8-.5 LOC-1.5 OAL 4FL
+  16    .0995 135° JOBBER DRILL 2       2       100.0   (not in master)
+  17    B267             1       4       100.0   1/4-.625 LOC-2.5 OAL .03 RAD 3FL
+  18    NO. 30 (.128)    1       3       100.0   (not in master)
+  19    EM 0.2500        1       1       100.0   (not in master)
+  20    7/16 HSS STUB    1       1       100.0   (not in master)
+  21    1/4-18 NPT PLUG TAP 1       1       100.0   (not in master)
+  22    B182             1       1       100.0   (not in master)
+  23    A248             1       1       100.0   1/2 5FL SQ EM
+  24    B297             1       1       100.0   1/16 EM 3 FL BN 1/4 LOC
+  25    NO.38 .1015 HSS DRILL 1       1       100.0   (not in master)
+  26    5/8 COBALT HSS DRILL 1       1       100.0   (not in master)
+
+  PARETO MILESTONES:
+    50% WO coverage: 1 tools
+    70% WO coverage: 2 tools
+    80% WO coverage: 2 tools
+    90% WO coverage: 5 tools
+    95% WO coverage: 7 tools
+    100% WO coverage: 11 tools
+
+  RESIDENT TOOL RECOMMENDATION (budget: 14 pockets):
+    Resident budget (70% of pockets): 9
+    Job-specific reserve (30%): 5
+    Top 9 tools cover 96.7% of WOs on this machine
+
+    Already loaded & recommended: 0
+    Recommended but NOT loaded: 9
+      A1               1/8-.5LOC-1.5 OAL 3FL SQUARE
+      A10              3/8, 1 LOC, 2.5 OAL, 3FL
+      A28              1/16-.250 LOC-1.5 OAL 2FL
+      A30              1/4-.75 LOC-2.5 OAL 3FL
+      A61              1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CARBIDE
+      I460             2" diameter Dodeka mini 45 shell mill.  KSHR200HN4
+      L18              1/4 x 2-1/2 4F 90° ChMill AlTiN
+      L7               1/4 82deg 4FL CHAMFERMILL - .01" tip
+      O4               1/4 90� SPOT DRILL 2.76 OAL
+    Currently loaded but NOT in top 9: 12
+      a1               
+      a1014            
+      a28              
+      a30              
+      a47              
+      a61              
+      b267             
+      b46              
+      ef433            
+      l18              
+      m425             
+      o4               
+
+====================================================================================================
+  Mill-8
+  Pockets: 30 total, 12 currently loaded
+  WOs: 35  |  Parts: 25  |  Unique tools: 113
+====================================================================================================
+
+  CURRENT POCKET CONTENTS:
+  Pocket   Tool ID         Holder          OOH
+  -------- --------------- --------------- --------
+  None     i140/g142                       None
+  None     O4              ER32 - 2"       1.2
+  None     Letter P HSS Jobber or Stub .323                 None
+  None     L18             ER16 - 3"       1.1
+  None     L201                            None
+  None     A1              Hydraulic       0.85
+  None     A30             ER25 - 2"       1.25
+  None     A30             ER25 - 2"       1.3
+  None     a10                             None
+  None     .166 jobber                     None
+  None     .120                            None
+  None     .125 HSS reamerq                 None
+
+  TOOL FREQUENCY RANKING (by # of parts using tool on this machine):
+  Rank  Tool #           Parts   WOs     Cum%    Description
+  ----- ---------------- ------- ------- ------- ---------------------------------------------
+  1     L18              15      22      62.9    1/4 x 2-1/2 4F 90° ChMill AlTiN
+  2     O4               12      16      74.3    1/4 90� SPOT DRILL 2.76 OAL
+  3     A61              8       12      82.9    1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CA
+  4     I132             8       11      85.7    2" -90 degree Face Mill, 7 insert
+  5     A30              6       8       85.7    1/4-.75 LOC-2.5 OAL 3FL
+  6     A1               6       8       85.7    1/8-.5LOC-1.5 OAL 3FL SQUARE
+  7     A10              6       7       85.7    3/8, 1 LOC, 2.5 OAL, 3FL
+  8     B11              4       6       85.7    .250 BALL x .750 LOC 2.5 OAL 4FL
+  9     A47              4       6       85.7    3/16-.5625 LOC-2.0 OAL 3FL
+  10    B227             4       4       85.7    1/2"x1"x3" .060RAD BULL EM 4FL
+  11    K261             4       4       88.6    .062 RAD 3FL CORNER ROUNDING EM
+  12    I460             4       4       91.4    2" diameter Dodeka mini 45 shell mill.  KSHR2
+  13    A12              3       6       91.4    3/8-1.0 LOC- 2.5 OAL 5FL
+  14    TIPD417          3       5       91.4    Drill #30 (.1285) Cobalt Jobber
+  15    B23              3       3       91.4    3/8 BALL 1.00 LOC-2.5 OAL 4FL
+  16    O17              3       3       91.4    3/8 90� SPOT DRILL 3.5 OAL
+  17    O51              2       5       91.4    1/4 140 degree � CARBIDE SPOT 3.0 OAL
+  18    B80              2       4       91.4    3/8 EXTENDED 5FL BULL .03 RAD RELIEVED
+  19    B212             2       4       91.4    12MM Rougher End Mill 5FL
+  20    A14              2       4       91.4    3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+  21    A234             2       4       91.4    4mm LOC 14mm  OAL50mm 4FL SQ EM
+  22    A248             2       4       91.4    1/2 5FL SQ EM
+  23    NEW 25/64 COBALT 2       4       91.4    (not in master)
+  24    N218             2       4       91.4    7/16 Thread Mill 4FL
+  25    N79              2       4       91.4    M4 THREADMILL LONG REACH
+  26    L76              2       3       91.4    3/16 90� 4FL CHAMFERMILL
+  27    K111             2       3       91.4    .02 Corner radius cutter
+  28    LETTER P HSS JOBBER OR STUB .323" 2       3       91.4    (not in master)
+  29    I140             2       3       91.4    ISCAR FACE MILL F45KT D2.5 -R07-410
+  30    B9               2       3       94.3    3/8-.625 LOC-3.0 OAL 2FL
+  31    K156             2       3       94.3    .078R CR CUTTER
+  32    B85              2       2       94.3    .250 x .500 x 2.00 5FL .015CR
+  33    B147             2       2       94.3    5 FLUTE RADIUS END 1/2" Cutting Diameter
+  34    N119             2       2       94.3    M8 THREADMILL 11mm max thread depth
+  35    N124             2       2       94.3    .180 dia for 1/4 THREADMILL, .750 max depth
+  36    B45              2       2       94.3    3/8-.03R-.875 LOC-2.5 OAL 5FL
+  37    TIPD421          2       2       94.3    Drill Letter H(.266) Cobalt Jobber
+  38    A19              2       2       100.0   1/32-.250 LOC-1.5 OAL 2FL
+  39    L201             2       2       100.0   1/4 120 4FL CHAMFERMILL
+  40    A34              2       2       100.0   3/8-.75 LOC-2.5 OAL 5FL
+  41    TIPD423          2       2       100.0   Drill #7(.2010) Cobalt Jobber
+  42    COBALT 2MM       2       2       100.0   (not in master)
+  43    A15              2       2       100.0   3/16-.750 LOC-2.50 OAL 5FL
+  44    NEW COBALT 25/64 DRILL 2       2       100.0   (not in master)
+  45    NEW COBALT 5/16  2       2       100.0   (not in master)
+  46    I399             2       2       100.0   Ingersoll Indexable Face and Peripher Cutter 
+  47    D128             2       2       100.0   3/4 DIA Countersink 90 Degree, HSS
+  48    B88              2       2       100.0   3/16 BALL EM 4FL
+  49    NEW COBALT LETTER Z 2       2       100.0   (not in master)
+  50    TIPD440          2       2       100.0   Drill Cobalt Letter Y (.404" dia)
+  51    N105             1       4       100.0   M6 THREADMILL 4FL
+  52    J159             1       4       100.0   3/8 X .062 KEYCUTTER
+  53    B223             1       4       100.0   .25 LOC .5 OAL 2.5 FLT-4 Ball EM
+  54    B181             1       3       100.0   3/32 x 1/8 x 3/8 x 1-1/2 4Fl Bull EM
+  55    A69              1       3       100.0   1/16-.125 LOC-1.5 OAL 4FL
+  56    L144             1       3       100.0   .078 dia, 90 degree included angle chamfer mi
+  57    B271             1       3       100.0   1/8 BALL EM 4FL
+  58    L31              1       2       100.0   3/8 90� 4FL CHAMFERMILL
+  59    A192             1       2       100.0   1/32 EM 1/8 LOC 2FL 1.500 LOA
+  60    J230             1       2       100.0   1" KEYSEAT CUTTER .015 RAD
+
+  PARETO MILESTONES:
+    50% WO coverage: 1 tools
+    70% WO coverage: 2 tools
+    80% WO coverage: 3 tools
+    90% WO coverage: 12 tools
+    95% WO coverage: 38 tools
+    100% WO coverage: 38 tools
+
+  RESIDENT TOOL RECOMMENDATION (budget: 30 pockets):
+    Resident budget (70% of pockets): 21
+    Job-specific reserve (30%): 9
+    Top 21 tools cover 91.4% of WOs on this machine
+
+    Already loaded & recommended: 4
+      A1               1/8-.5LOC-1.5 OAL 3FL SQUARE
+      A30              1/4-.75 LOC-2.5 OAL 3FL
+      L18              1/4 x 2-1/2 4F 90° ChMill AlTiN
+      O4               1/4 90� SPOT DRILL 2.76 OAL
+    Recommended but NOT loaded: 17
+      A10              3/8, 1 LOC, 2.5 OAL, 3FL
+      A12              3/8-1.0 LOC- 2.5 OAL 5FL
+      A14              3/16 x 3/16 x 5/8 x 2 5FL GMX-35
+      A234             4mm LOC 14mm  OAL50mm 4FL SQ EM
+      A47              3/16-.5625 LOC-2.0 OAL 3FL
+      A61              1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CARBIDE
+      B11              .250 BALL x .750 LOC 2.5 OAL 4FL
+      B212             12MM Rougher End Mill 5FL
+      B227             1/2"x1"x3" .060RAD BULL EM 4FL
+      B23              3/8 BALL 1.00 LOC-2.5 OAL 4FL
+      B80              3/8 EXTENDED 5FL BULL .03 RAD RELIEVED
+      I132             2" -90 degree Face Mill, 7 insert
+      I460             2" diameter Dodeka mini 45 shell mill.  KSHR200HN4
+      K261             .062 RAD 3FL CORNER ROUNDING EM
+      O17              3/8 90� SPOT DRILL 3.5 OAL
+      O51              1/4 140 degree � CARBIDE SPOT 3.0 OAL
+      TIPD417          Drill #30 (.1285) Cobalt Jobber
+    Currently loaded but NOT in top 21: 7
+      .120             
+      .125 HSS reamerq 
+      .166 jobber      
+      L201             1/4 120 4FL CHAMFERMILL
+      Letter P HSS Jobber or Stub .323 
+      a10              
+      i140/g142        
+
+====================================================================================================
+  T2
+  Pockets: 12 total, 6 currently loaded
+  WOs: 57  |  Parts: 26  |  Unique tools: 69
+====================================================================================================
+
+  CURRENT POCKET CONTENTS:
+  Pocket   Tool ID         Holder          OOH
+  -------- --------------- --------------- --------
+  None     TF484 / TO485                   None
+  None     Penta groove (needs library entry)                 None
+  None     TB492 / TN461                   None
+  None     a47                             None
+  None     TF307 / TO308                   None
+  None     TD476 / TL470                   None
+
+  TOOL FREQUENCY RANKING (by # of parts using tool on this machine):
+  Rank  Tool #           Parts   WOs     Cum%    Description
+  ----- ---------------- ------- ------- ------- ---------------------------------------------
+  1     TO310            14      21      36.8    1/64" .008"CR External 35° Profiling Insert V
+  2     O4               8       10      45.6    1/4 90� SPOT DRILL 2.76 OAL
+  3     TP454            7       14      56.1    ‎TDXU 2E-0.3 TT9080
+Double-ended pressed type
+  4     TO485            7       9       56.1    80 Degree CNMG 432-TF IC807
+  5     A12              6       22      78.9    3/8-1.0 LOC- 2.5 OAL 5FL
+  6     TO447            6       19      86.0    DNMG432MS PR1535 1/2" Circle Diameter x 3/16"
+  7     TO308            6       10      86.0    Internal and External 35° Profiling Insert VP
+  8     TL469            5       11      86.0    Carbide Boring insert Ultra-Dex by Arch 913-0
+  9     -                5       8       86.0    (not in master)
+  10    O17              4       10      87.7    3/8 90� SPOT DRILL 3.5 OAL
+  11    TK497_-_TR498    4       4       87.7    (not in master)
+  12    A1               3       8       87.7    1/8-.5LOC-1.5 OAL 3FL SQUARE
+  13    E479             2       6       87.7    #3 Carbide Center Drill. 1/4" Diameter
+  14    A69              2       5       87.7    1/16-.125 LOC-1.5 OAL 4FL
+  15    TD476            2       4       87.7    Ultra-Dex 1/2 Shank Dia A06-SCLCR2 Steel INDE
+  16    TD464            2       4       87.7    M100 1/2 x 2.3/4 S/E Q/C HOLDER
+FOR 3/16 TOOL
+  17    TP496            2       2       87.7    Iscar PENTA Item Designation: 24N100J006 
+Fam
+  18    TH465            2       2       87.7    2mm Middle Tmax adapters for external turning
+  19    TH467            2       2       87.7    3mm Middle Tmax adapters for external turning
+  20    #55              2       2       87.7    (not in master)
+  21    O3               2       2       87.7    1/8 90� SPOT DRILL .75 OAL
+  22    D494             2       2       87.7    0.75MM EX-SUS-GDS
+  23    13-64            1       4       87.7    (not in master)
+  24    R42              1       4       87.7    1/4-20 SPIRAL CUT TAP
+  25    TP466            1       4       87.7    ‎TDXU 3E-0.3 TT9080
+Double-ended pressed type
+  26    .18 DIAMETER COBALT 1       4       87.7    (not in master)
+  27    3                1       3       93.0    (not in master)
+  28    11               1       3       93.0    (not in master)
+  29    8                1       3       93.0    (not in master)
+  30    10               1       3       93.0    (not in master)
+  31    TC478            1       3       93.0    .7" Diameter Indexable Allied T-A Drill
+  32    .302             1       3       93.0    (not in master)
+  33    TI450            1       2       93.0    MG 12.7-08C23
+Internal grooving turning and t
+  34    A49              1       2       96.5    1/4-.500 LOC-2 OAL 5FL
+  35    A47              1       2       96.5    3/16-.5625 LOC-2.0 OAL 3FL
+  36    TI449            1       2       96.5    MG 12.7-11C25
+Internal grooving turning and t
+  37    A268             1       1       96.5    .25 SQ EM 1.5" LOC, 6" OAL, 3 FL
+  38    VPGR331          1       1       98.2    (not in master)
+  39    TO               1       1       98.2    (not in master)
+  40    TH493            1       1       98.2    .018" x .060 Radius OD Groove Tool, sintered 
+  41    TD480            1       1       98.2    ULTRA-DEX® 920 (C03H SCLDR1.2), 3/16″ Carbide
+  42    TD474            1       1       98.2    KENNAMETAL 1/2 Shank Dia A08-SCLPR2  10" OAL 
+  43    ARNO_FBM_3.0_L_-_TGF_3.0_AL 1       1       98.2    (not in master)
+  44    TD487            1       1       98.2    Boring bar for brass, No markings
+  45    TD483            1       1       98.2    ULTRA-DEX® 957 (A06K SCLCR2), Ø3/8″ Steel Bor
+  46    VPGR 331         1       1       100.0   (not in master)
+  47    3/8 SPOT DRILL   1       1       100.0   (not in master)
+  48    CNMG 432         1       1       100.0   (not in master)
+  49    L18              1       1       100.0   1/4 x 2-1/2 4F 90° ChMill AlTiN
+  50    ISCAR ID THREADING TOOL SCAR 12.7-08C23 1       1       100.0   (not in master)
+  51    2MM PART OFF INGERSOLL 1       1       100.0   (not in master)
+  52    .484 JOBBER HSS  1       1       100.0   (not in master)
+  53    27/64 HSS DRILL  1       1       100.0   (not in master)
+  54    A28              1       1       100.0   1/16-.250 LOC-1.5 OAL 2FL
+  55    .532" DIA        1       1       100.0   (not in master)
+  56    C301             1       1       100.0   15 DEG. (30 DEG Included) TAPER EM Carbide 3F
+  57    A15              1       1       100.0   3/16-.750 LOC-2.50 OAL 5FL
+  58    B259             1       1       100.0   .156 Ball EM
+  59    .063 HSS COBALT  1       1       100.0   (not in master)
+  60    M2 X .4 PLUG TAP 1       1       100.0   (not in master)
+
+  PARETO MILESTONES:
+    50% WO coverage: 3 tools
+    70% WO coverage: 5 tools
+    80% WO coverage: 6 tools
+    90% WO coverage: 27 tools
+    95% WO coverage: 34 tools
+    100% WO coverage: 46 tools
+
+  RESIDENT TOOL RECOMMENDATION (budget: 12 pockets):
+    Resident budget (70% of pockets): 8
+    Job-specific reserve (30%): 4
+    Top 8 tools cover 86.0% of WOs on this machine
+
+    Already loaded & recommended: 0
+    Recommended but NOT loaded: 8
+      A12              3/8-1.0 LOC- 2.5 OAL 5FL
+      O4               1/4 90� SPOT DRILL 2.76 OAL
+      TL469            Carbide Boring insert Ultra-Dex by Arch 913-000-16
+      TO308            Internal and External 35° Profiling Insert VPGR 33
+      TO310            1/64" .008"CR External 35° Profiling Insert VPGR 3
+      TO447            DNMG432MS PR1535 1/2" Circle Diameter x 3/16" Thic
+      TO485            80 Degree CNMG 432-TF IC807
+      TP454            ‎TDXU 2E-0.3 TT9080
+Double-ended pressed type mult
+    Currently loaded but NOT in top 8: 6
+      Penta groove (needs library entry) 
+      TB492 / TN461    
+      TD476 / TL470    
+      TF307 / TO308    
+      TF484 / TO485    
+      a47              
+
+====================================================================================================
+CROSS-MACHINE ANALYSIS: TOOLS THAT APPEAR ON MULTIPLE MACHINES
+====================================================================================================
+
+  189 tools appear on 2+ machines
+
+  Tool #           Machines Description                                   Machine List
+  ---------------- ----- --------------------------------------------- ------------------------------
+  L18              9     1/4 x 2-1/2 4F 90° ChMill AlTiN               Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-7, Mill-8, T2
+  O4               9     1/4 90� SPOT DRILL 2.76 OAL                   Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-7, Mill-8, T2
+  A1               9     1/8-.5LOC-1.5 OAL 3FL SQUARE                  Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-7, Mill-8, T2
+  A47              9     3/16-.5625 LOC-2.0 OAL 3FL                    Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-7, Mill-8, T2
+  A61              8     1/2-1.5 LOC- 4.0 OAL 3FL 
+HIGH PERFORMANCE CA Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-7, Mill-8
+  O17              8     3/8 90� SPOT DRILL 3.5 OAL                    Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-8, T2
+  A30              8     1/4-.75 LOC-2.5 OAL 3FL                       Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-7, Mill-8
+  A12              8     3/8-1.0 LOC- 2.5 OAL 5FL                      Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-8, T2
+  A10              8     3/8, 1 LOC, 2.5 OAL, 3FL                      Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-7, Mill-8
+  K111             7     .02 Corner radius cutter                      Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-8
+  B88              7     3/16 BALL EM 4FL                              Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-8
+  A49              7     1/4-.500 LOC-2 OAL 5FL                        Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-8, T2
+  A14              7     3/16 x 3/16 x 5/8 x 2 5FL GMX-35              Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-8
+  I460             7     2" diameter Dodeka mini 45 shell mill.  KSHR2 Mill-1, Mill-2, Mill-3, Mill-5, Mill-6, Mill-7, Mill-8
+  TIPD417          6     Drill #30 (.1285) Cobalt Jobber               Mill-1, Mill-2, Mill-3, Mill-4, Mill-6, Mill-8
+  N124             6     .180 dia for 1/4 THREADMILL, .750 max depth   Mill-2, Mill-3, Mill-4, Mill-5, Mill-6, Mill-8
+  M425             6     1/32 x .025 x 1.5 4F BALL EM C3               Mill-1, Mill-2, Mill-3, Mill-4, Mill-5, Mill-6
+  A248             6     1/2 5FL SQ EM                                 Mill-1, Mill-2, Mill-3, Mill-6, Mill-7, Mill-8
+  B85              6     .250 x .500 x 2.00 5FL .015CR                 Mill-1, Mill-2, Mill-3, Mill-4, Mill-6, Mill-8
+  B181             6     3/32 x 1/8 x 3/8 x 1-1/2 4Fl Bull EM          Mill-1, Mill-2, Mill-3, Mill-5, Mill-6, Mill-8
+  B45              6     3/8-.03R-.875 LOC-2.5 OAL 5FL                 Mill-1, Mill-3, Mill-4, Mill-5, Mill-6, Mill-8
+  B11              6     .250 BALL x .750 LOC 2.5 OAL 4FL              Mill-1, Mill-2, Mill-3, Mill-4, Mill-6, Mill-8
+  A15              6     3/16-.750 LOC-2.50 OAL 5FL                    Mill-2, Mill-3, Mill-4, Mill-6, Mill-8, T2
+  I132             5     2" -90 degree Face Mill, 7 insert             Mill-1, Mill-2, Mill-3, Mill-6, Mill-8
+  B23              5     3/8 BALL 1.00 LOC-2.5 OAL 4FL                 Mill-3, Mill-4, Mill-5, Mill-6, Mill-8
+  TIPD421          5     Drill Letter H(.266) Cobalt Jobber            Mill-2, Mill-3, Mill-4, Mill-6, Mill-8
+  N119             5     M8 THREADMILL 11mm max thread depth           Mill-2, Mill-3, Mill-4, Mill-6, Mill-8
+  N120             5     M4 THREADMILL                                 Mill-2, Mill-3, Mill-4, Mill-6, Mill-8
+  TIPD422          5     Drill #16(.1770) Cobalt Jobber                Mill-1, Mill-2, Mill-3, Mill-4, Mill-6
+  TIPD418          5     Drill #40 (.0980) Cobalt Jobber               Mill-1, Mill-2, Mill-3, Mill-4, Mill-6
+  L76              5     3/16 90� 4FL CHAMFERMILL                      Mill-1, Mill-4, Mill-5, Mill-6, Mill-8
+  N125             5     M3 THREADMILL .0906 dia 772724-c6             Mill-1, Mill-2, Mill-3, Mill-4, Mill-6
+  B212             5     12MM Rougher End Mill 5FL                     Mill-1, Mill-2, Mill-3, Mill-6, Mill-8
+  B254             5     1/2-R0.09-2.0 LOC- 4.0 OAL 6FL                Mill-1, Mill-2, Mill-3, Mill-6, Mill-8
+  TIPD423          5     Drill #7(.2010) Cobalt Jobber                 Mill-2, Mill-3, Mill-4, Mill-6, Mill-8
+  A22              5     3/32-.1875 LOC-1.5 OAL 4FL                    Mill-2, Mill-3, Mill-4, Mill-5, Mill-6
+  A19              5     1/32-.250 LOC-1.5 OAL 2FL                     Mill-1, Mill-4, Mill-5, Mill-6, Mill-8
+  A157             5     1/8-.5 LOC-1.5 OAL 4FL                        Mill-2, Mill-3, Mill-4, Mill-6, Mill-7
+  A28              5     1/16-.250 LOC-1.5 OAL 2FL                     Mill-1, Mill-5, Mill-6, Mill-7, T2
+  A1003            5     3/8 X 3/8 X 1-1/4 LOC X 3 OAL X 3FL (ZRN)     Mill-1, Mill-2, Mill-3, Mill-5, Mill-6
+  B46              5     1/4-.375 LOC-2.5 OAL 3FL                      Mill-1, Mill-2, Mill-3, Mill-6, Mill-7
+  B9               5     3/8-.625 LOC-3.0 OAL 2FL                      Mill-1, Mill-2, Mill-4, Mill-5, Mill-8
+  B63              5     1/2-R.03-1.375 LOC-3.25 OAL 3FL               Mill-1, Mill-3, Mill-4, Mill-5, Mill-8
+  O51              5     1/4 140 degree � CARBIDE SPOT 3.0 OAL         Mill-1, Mill-2, Mill-3, Mill-5, Mill-8
+  B267             4     1/4-.625 LOC-2.5 OAL .03 RAD 3FL              Mill-3, Mill-4, Mill-6, Mill-7
+  B109             4     1/8" Bull EM .015 Rad 1/4" LOC                Mill-2, Mill-3, Mill-4, Mill-6
+  B148             4     .250 x .750 LOC x 2.5 OAL 4FL .015 CR         Mill-1, Mill-2, Mill-3, Mill-6
+  K126             4     .118 CORNER RADIUS CUTTER                     Mill-2, Mill-3, Mill-4, Mill-6
+  M62              4     60 Degree 1/8 ENGRAVING TOOL                  Mill-3, Mill-5, Mill-6, Mill-8
+  K207             4     0.039 radius cutter, double ended, .020 dia t Mill-2, Mill-3, Mill-6, Mill-8
+  A397             4     1/4- 1.25 LOC- 3 OAL 3FL EM NFI COATING       Mill-3, Mill-4, Mill-6, Mill-8
+  -                4                                                   Mill-1, Mill-6, Mill-8, T2
+  L144             4     .078 dia, 90 degree included angle chamfer mi Mill-1, Mill-4, Mill-6, Mill-8
+  A81              4     1/4x1/4x1-1/8x3/8x4 EM                        Mill-1, Mill-2, Mill-3, Mill-6
+  A16              4     1/2-.625 LOC -2.5 OAL 5FL                     Mill-2, Mill-3, Mill-4, Mill-6
+  B259             4     .156 Ball EM                                  Mill-1, Mill-4, Mill-6, T2
+  A34              4     3/8-.75 LOC-2.5 OAL 5FL                       Mill-3, Mill-4, Mill-6, Mill-8
+  B77              4     1/2-R0.03-.625 LOC- 2.5 OAL 5FL               Mill-2, Mill-3, Mill-4, Mill-6
+  A1022            4     1/4 x 1/4 x 1 x 3 3F SE SQ Carb ZrN           Mill-2, Mill-3, Mill-4, Mill-6
+  L199             4     1/2″ Diam 82° 4-Flute Single End Solid Carbid Mill-1, Mill-3, Mill-5, Mill-8
+  R42              4     1/4-20 SPIRAL CUT TAP                         Mill-2, Mill-3, Mill-5, T2
+  R6               4     M4X.7 SPIRAL CUT TAP                          Mill-1, Mill-3, Mill-5, Mill-7
+  R64              4     #8-32 SPIRAL CUT TAP                          Mill-1, Mill-2, Mill-3, Mill-5
+  A222             4     1/16 SQ EM 3/16 LOC 1.5 OAL                   Mill-1, Mill-2, Mill-3, Mill-5
+  K261             4     .062 RAD 3FL CORNER ROUNDING EM               Mill-1, Mill-3, Mill-4, Mill-8
+  A192             4     1/32 EM 1/8 LOC 2FL 1.500 LOA                 Mill-1, Mill-2, Mill-4, Mill-8
+  B227             4     1/2"x1"x3" .060RAD BULL EM 4FL                Mill-1, Mill-2, Mill-3, Mill-8
+  B147             4     5 FLUTE RADIUS END 1/2" Cutting Diameter      Mill-1, Mill-2, Mill-3, Mill-8
+  NEW COBALT 25/64 DRILL 4                                                   Mill-1, Mill-2, Mill-3, Mill-8
+  NEW COBALT 5/16  4                                                   Mill-1, Mill-2, Mill-3, Mill-8
+  I399             4     Ingersoll Indexable Face and Peripher Cutter  Mill-1, Mill-2, Mill-3, Mill-8
+  L103             3     3/16- 45- 4FL-.04 tip- CHAMFERMILL            Mill-2, Mill-3, Mill-6
+  B122             3     3/8 BULL EM .015 RAD 4FL                      Mill-2, Mill-6, Mill-8
+  7/16 HSS DRILL   3                                                   Mill-1, Mill-6, Mill-8
+  3/8 HSS DRILL    3                                                   Mill-4, Mill-6, Mill-8
+  K156             3     .078R CR CUTTER                               Mill-1, Mill-6, Mill-8
+  B255             3     1/2-R0.09-1.0 LOC- 3.0 OAL 4FL                Mill-1, Mill-3, Mill-6
+  A83              3     3/16 SQ EM 5 FL ENTENDED                      Mill-1, Mill-2, Mill-6
+  A224             3     .0930 LOC .1390 x .5 OAL 2.5 FLT-4 Long Reach Mill-1, Mill-2, Mill-6
+  I131             3     12J1P - 90° End Mill                          Mill-3, Mill-4, Mill-6

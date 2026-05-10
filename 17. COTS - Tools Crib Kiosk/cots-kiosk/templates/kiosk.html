@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Kiosk - COTS Crib{% endblock %}
+{% block nav_kiosk %}nav-active{% endblock %}
+
+{% block content %}
+<!-- Screen 1: Who are you? -->
+<section id="screen-employee" class="kiosk-screen active">
+    <h2 class="kiosk-heading">Who are you?</h2>
+    <div id="employee-grid" class="employee-grid">
+        <div class="loading">Loading employees...</div>
+    </div>
+</section>
+
+<!-- Screen 2: Scan or search -->
+<section id="screen-scan" class="kiosk-screen">
+    <h2 class="kiosk-heading">Scan QR Code or Type Item ID</h2>
+    <p class="kiosk-subtitle">Employee: <strong id="selected-employee"></strong></p>
+
+    <div class="scan-area">
+        <input type="text" id="scan-input" class="scan-input"
+               placeholder="Waiting for scan..."
+               autocomplete="off" autocorrect="off" autocapitalize="off"
+               spellcheck="false">
+        <p class="scan-hint">Scanner will auto-submit, or type an ID and press Enter.</p>
+    </div>
+
+    <div id="item-preview" class="item-preview hidden">
+        <h3 id="preview-name"></h3>
+        <div class="preview-details">
+            <div class="detail-row">
+                <span class="detail-label">ID:</span>
+                <span id="preview-id" class="detail-value"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Type:</span>
+                <span id="preview-type" class="detail-value"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Location:</span>
+                <span id="preview-location" class="detail-value"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Qty on hand:</span>
+                <span id="preview-qty" class="detail-value qty-badge"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="kioskGoBack()">Back</button>
+        <button class="btn btn-primary btn-large hidden" id="btn-continue"
+                onclick="kioskGoToQuantity()">Continue</button>
+    </div>
+</section>
+
+<!-- Screen 3: How many? -->
+<section id="screen-quantity" class="kiosk-screen">
+    <h2 class="kiosk-heading">How many?</h2>
+    <div class="qty-context">
+        <p><strong id="qty-item-name"></strong></p>
+        <p>Employee: <strong id="qty-employee"></strong></p>
+        <p>Current qty: <strong id="qty-current"></strong></p>
+    </div>
+
+    <div class="action-toggle">
+        <button class="toggle-btn active" id="btn-action-checkout" onclick="setAction('checkout')">
+            Item Out
+        </button>
+        <button class="toggle-btn" id="btn-action-checkin" onclick="setAction('checkin')">
+            Item In
+        </button>
+    </div>
+
+    <!-- WO reference -->
+    <div id="ref-input-area" class="ref-input-area numpad-target" onclick="setNumpadTarget('wo')">
+        <label class="ref-label">Work Order #</label>
+        <input type="text" id="ref-input" class="ref-input"
+               placeholder="Scan or type WO #..."
+               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    </div>
+
+    <div id="qty-numpad-area" class="qty-numpad-area" onclick="setNumpadTarget('qty')">
+        <label class="qty-label">Quantity</label>
+        <div class="numpad-display">
+            <span id="numpad-value">0</span>
+        </div>
+    </div>
+    <div class="numpad">
+        <button class="numpad-btn" onclick="numpadPress('1')">1</button>
+        <button class="numpad-btn" onclick="numpadPress('2')">2</button>
+        <button class="numpad-btn" onclick="numpadPress('3')">3</button>
+        <button class="numpad-btn" onclick="numpadPress('4')">4</button>
+        <button class="numpad-btn" onclick="numpadPress('5')">5</button>
+        <button class="numpad-btn" onclick="numpadPress('6')">6</button>
+        <button class="numpad-btn" onclick="numpadPress('7')">7</button>
+        <button class="numpad-btn" onclick="numpadPress('8')">8</button>
+        <button class="numpad-btn" onclick="numpadPress('9')">9</button>
+        <button class="numpad-btn numpad-clear" onclick="numpadClear()">C</button>
+        <button class="numpad-btn" onclick="numpadPress('0')">0</button>
+        <button class="numpad-btn numpad-back" onclick="numpadBackspace()">&#8592;</button>
+    </div>
+
+    <div class="kiosk-actions">
+        <button class="btn btn-back" onclick="kioskGoBack()">Cancel</button>
+        <button class="btn btn-confirm btn-large" id="btn-confirm"
+                onclick="kioskConfirm()" disabled>Confirm</button>
+    </div>
+</section>
+
+<!-- Screen 4: Done -->
+<section id="screen-done" class="kiosk-screen">
+    <div class="done-message">
+        <div class="done-icon">&#10003;</div>
+        <h2 id="done-headline"></h2>
+        <p id="done-details"></p>
+
+        <div id="low-stock-warning" class="warning-banner hidden">
+            <strong>LOW STOCK WARNING</strong>
+            <p id="low-stock-message"></p>
+        </div>
+    </div>
+
+    <div class="done-countdown">
+        Returning home in <span id="countdown">{{ auto_return }}</span>s...
+    </div>
+    <button class="btn btn-primary btn-large" onclick="kioskGoHome()">Done</button>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var AUTO_RETURN = {{ auto_return }};
+var INACTIVITY_TIMEOUT = {{ inactivity_timeout }};
+</script>
+<script src="/static/kiosk.js"></script>
+{% endblock %}

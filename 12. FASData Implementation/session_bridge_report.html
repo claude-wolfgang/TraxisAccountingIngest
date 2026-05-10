@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Bridge Report</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                         sans-serif;
+           background: #0f172a; color: #e2e8f0; padding: 20px;
+           max-width: 1200px; margin: 0 auto; }
+    h1 { color: #f8fafc; margin-bottom: 4px; font-size: 24px; }
+    h2 { color: #cbd5e1; margin: 20px 0 8px; font-size: 18px; }
+    h3 { color: #94a3b8; margin: 16px 0 8px; font-size: 14px;
+          text-transform: uppercase; letter-spacing: 0.5px; }
+    .meta { color: #64748b; font-size: 13px; margin-bottom: 16px; }
+    .card { background: #1e293b; border-radius: 8px; padding: 20px;
+             margin-bottom: 16px; }
+    .stat-row { display: flex; gap: 16px; flex-wrap: wrap;
+                 margin-bottom: 20px; }
+    .stat-box { background: #1e293b; border-radius: 8px; padding: 16px;
+                 flex: 1; min-width: 140px; text-align: center; }
+    .stat-value { font-size: 32px; font-weight: bold; }
+    .stat-label { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px;
+             margin-bottom: 12px; }
+    th { text-align: left; padding: 6px 10px; background: #334155;
+          color: #94a3b8; font-weight: 600; font-size: 12px; }
+    td { padding: 6px 10px; border-bottom: 1px solid #334155; }
+    code { background: #334155; padding: 2px 6px; border-radius: 3px;
+            font-size: 12px; }
+    .session-card { border-left: 3px solid #334155; }
+    .session-header { display: flex; justify-content: space-between;
+                       align-items: flex-start; margin-bottom: 12px; }
+    .fidelity-badge { text-align: center; padding: 8px 16px;
+                       border: 2px solid; border-radius: 8px;
+                       min-width: 80px; }
+    .exec-grid { display: grid;
+                   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                   gap: 12px; margin-bottom: 12px; }
+    .exec-item { background: #334155; border-radius: 6px;
+                   padding: 10px; text-align: center; }
+    .exec-value { font-size: 20px; font-weight: bold; color: #f8fafc; }
+    .exec-label { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .override-row { padding: 8px 0; font-size: 14px; }
+</style>
+</head>
+<body>
+<h1>Session Bridge &mdash; CAM vs Machine Execution</h1>
+<p class="meta">Generated 2026-03-04 10:19 &mdash; Traxis Manufacturing</p>
+
+
+        <div style="background:#92400e;color:#fef3c7;padding:12px 20px;
+                    border-radius:8px;margin-bottom:20px;text-align:center;
+                    font-weight:600">
+            DEMO DATA &mdash; This report shows sample data to preview the
+            layout. Real data will appear after TraxisCapture sessions run
+            on CNC machines.
+        </div>
+
+<div class="stat-row">
+    <div class="stat-box">
+        <div class="stat-value">3</div>
+        <div class="stat-label">Matched Sessions</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value" style="color:#eab308">78.3%</div>
+        <div class="stat-label">Avg Fidelity</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value" style="color:#ef4444">9</div>
+        <div class="stat-label">Discrepancies</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value" style="color:#ef4444">1</div>
+        <div class="stat-label">Alarms</div>
+    </div>
+</div>
+
+
+        <div class="card session-card">
+            <div class="session-header">
+                <div>
+                    <h2 style="margin:0">3847-C v2</h2>
+                    <span class="meta">
+                        2026-03-01 &middot;
+                        FANUC Mill 8 (M8) &middot;
+                        Origin: prior_program
+                    </span>
+                </div>
+                <div class="fidelity-badge" style="border-color:#22c55e">
+                    <div style="color:#22c55e;font-size:28px;font-weight:bold">
+                        92.0%</div>
+                    <div style="color:#94a3b8;font-size:11px">Fidelity</div>
+                </div>
+            </div>
+
+            
+
+            <h3>Parameter Changes</h3>
+            <table>
+                <tr><th>Operation</th><th>Field</th>
+                    <th>From</th><th>To</th><th>Category</th></tr>
+                
+                <tr>
+                    <td>2D Contour [1]</td>
+                    <td><code>stepdown</code></td>
+                    <td>0.125</td>
+                    <td>0.1</td>
+                    <td>passes</td>
+                </tr>
+            </table>
+
+            <h3>Machine Execution</h3>
+            <div class="exec-grid">
+                <div class="exec-item">
+                    <div class="exec-value">8500.0</div>
+                    <div class="exec-label">Avg RPM</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">8500</div>
+                    <div class="exec-label">Max RPM</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">84.0</div>
+                    <div class="exec-label">Avg Feed</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">38.0%</div>
+                    <div class="exec-label">Avg Spindle Load</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">38%</div>
+                    <div class="exec-label">Max Spindle Load</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">14.0 min</div>
+                    <div class="exec-label">Duration</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">15</div>
+                    <div class="exec-label">Samples</div>
+                </div>
+            </div>
+
+            <h3>Operator Overrides</h3>
+            <div class="override-row">
+                <span>Feed Override: <span style='color:#e2e8f0'>100%</span></span>
+                <span style="margin-left:32px">
+                    Spindle Override: <span style='color:#e2e8f0'>100%</span></span>
+            </div>
+
+            
+            
+            
+            <h3>Discrepancies (Programmed vs Actual)</h3>
+            <table>
+                <tr><th>Type</th><th>Operation</th>
+                    <th>Programmed</th><th>Actual Avg</th>
+                    <th>Deviation</th></tr>
+                
+                <tr>
+                    <td>Spindle RPM</td>
+                    <td>2D Contour [1]</td>
+                    <td>6000</td>
+                    <td>8500.0</td>
+                    <td style="color:#ef4444;font-weight:bold">
+                        41.7%</td>
+                </tr>
+                <tr>
+                    <td>Feed Rate</td>
+                    <td>2D Contour [1]</td>
+                    <td>30.0</td>
+                    <td>84.0</td>
+                    <td style="color:#ef4444;font-weight:bold">
+                        180.0%</td>
+                </tr>
+            </table>
+        </div>
+        <div class="card session-card">
+            <div class="session-header">
+                <div>
+                    <h2 style="margin:0">SA001211 v1</h2>
+                    <span class="meta">
+                        2026-03-02 &middot;
+                        FANUC Mill 6 (M6) &middot;
+                        Origin: toolpath
+                    </span>
+                </div>
+                <div class="fidelity-badge" style="border-color:#f97316">
+                    <div style="color:#f97316;font-size:28px;font-weight:bold">
+                        65.0%</div>
+                    <div style="color:#94a3b8;font-size:11px">Fidelity</div>
+                </div>
+            </div>
+
+            
+            <h3>Operation Changes</h3>
+            <table>
+                <tr><th>Action</th><th>Operation</th>
+                    <th>Type</th><th>Tool</th></tr>
+                
+                <tr>
+                    <td style="color:#22c55e">+ Added</td>
+                    <td>2D Contour [2]</td>
+                    <td>contour2d</td>
+                    <td>1/4-4FL-EM</td>
+                </tr>
+                <tr>
+                    <td style="color:#ef4444">- Removed</td>
+                    <td>Pocket [1]</td>
+                    <td>pocket2d</td>
+                    <td>3/8-3FL-EM</td>
+                </tr>
+            </table>
+
+            <h3>Parameter Changes</h3>
+            <table>
+                <tr><th>Operation</th><th>Field</th>
+                    <th>From</th><th>To</th><th>Category</th></tr>
+                
+                <tr>
+                    <td>Adaptive Clearing [1]</td>
+                    <td><code>spindle_rpm</code></td>
+                    <td>8000</td>
+                    <td>10000</td>
+                    <td>feeds</td>
+                </tr>
+                <tr>
+                    <td>Adaptive Clearing [1]</td>
+                    <td><code>cutting_feedrate</code></td>
+                    <td>80.0</td>
+                    <td>95.0</td>
+                    <td>feeds</td>
+                </tr>
+                <tr>
+                    <td>Adaptive Clearing [1]</td>
+                    <td><code>stepover</code></td>
+                    <td>0.15</td>
+                    <td>0.1</td>
+                    <td>passes</td>
+                </tr>
+                <tr>
+                    <td>Finishing Pass [1]</td>
+                    <td><code>stock_to_leave</code></td>
+                    <td>0.005</td>
+                    <td>0.002</td>
+                    <td>passes</td>
+                </tr>
+            </table>
+
+            <h3>Machine Execution</h3>
+            <div class="exec-grid">
+                <div class="exec-item">
+                    <div class="exec-value">8200.0</div>
+                    <div class="exec-label">Avg RPM</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">8200</div>
+                    <div class="exec-label">Max RPM</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">85.0</div>
+                    <div class="exec-label">Avg Feed</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">55.0%</div>
+                    <div class="exec-label">Avg Spindle Load</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">55%</div>
+                    <div class="exec-label">Max Spindle Load</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">24.0 min</div>
+                    <div class="exec-label">Duration</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">25</div>
+                    <div class="exec-label">Samples</div>
+                </div>
+            </div>
+
+            <h3>Operator Overrides <span style='color:#ef4444;font-weight:bold'>OPERATOR OVERRIDE</span></h3>
+            <div class="override-row">
+                <span>Feed Override: <span style='color:#e2e8f0'>100%</span></span>
+                <span style="margin-left:32px">
+                    Spindle Override: <span style='color:#ef4444'>82%</span></span>
+            </div>
+
+            
+            <h3>Tool Wear During Session</h3>
+            <table>
+                <tr><th>Tool</th><th>Length Wear</th>
+                    <th>Diameter Wear</th></tr>
+                
+                <tr>
+                    <td>T3</td>
+                    <td>-0.0060 mm</td>
+                    <td>-0.0020 mm</td>
+                </tr>
+            </table>
+            
+            <h3 style="color:#ef4444">Alarms</h3>
+            <table>
+                <tr><th>Time</th><th>Alarm #</th><th>Message</th></tr>
+                
+                <tr>
+                    <td>2026-03-02T15:12:00</td>
+                    <td>510</td>
+                    <td style="color:#ef4444">SPINDLE ALARM - OVERLOAD</td>
+                </tr>
+            </table>
+            
+            <h3>Discrepancies (Programmed vs Actual)</h3>
+            <table>
+                <tr><th>Type</th><th>Operation</th>
+                    <th>Programmed</th><th>Actual Avg</th>
+                    <th>Deviation</th></tr>
+                
+                <tr>
+                    <td>Spindle RPM</td>
+                    <td>Adaptive Clearing [1]</td>
+                    <td>10000</td>
+                    <td>8200.0</td>
+                    <td style="color:#ef4444;font-weight:bold">
+                        18.0%</td>
+                </tr>
+                <tr>
+                    <td>Feed Rate</td>
+                    <td>Adaptive Clearing [1]</td>
+                    <td>95.0</td>
+                    <td>85.0</td>
+                    <td style="color:#eab308;font-weight:bold">
+                        10.5%</td>
+                </tr>
+                <tr>
+                    <td>Spindle RPM</td>
+                    <td>Finishing Pass [1]</td>
+                    <td>12000</td>
+                    <td>8200.0</td>
+                    <td style="color:#ef4444;font-weight:bold">
+                        31.7%</td>
+                </tr>
+                <tr>
+                    <td>Feed Rate</td>
+                    <td>Finishing Pass [1]</td>
+                    <td>45.0</td>
+                    <td>85.0</td>
+                    <td style="color:#ef4444;font-weight:bold">
+                        88.9%</td>
+                </tr>
+                <tr>
+                    <td>Feed Rate</td>
+                    <td>2D Contour [2]</td>
+                    <td>30.0</td>
+                    <td>85.0</td>
+                    <td style="color:#ef4444;font-weight:bold">
+                        183.3%</td>
+                </tr>
+            </table>
+        </div>
+        <div class="card session-card">
+            <div class="session-header">
+                <div>
+                    <h2 style="margin:0">10150 v3</h2>
+                    <span class="meta">
+                        2026-03-03 &middot;
+                        FANUC Mill 2 (M2) &middot;
+                        Origin: prior_program
+                    </span>
+                </div>
+                <div class="fidelity-badge" style="border-color:#eab308">
+                    <div style="color:#eab308;font-size:28px;font-weight:bold">
+                        78.0%</div>
+                    <div style="color:#94a3b8;font-size:11px">Fidelity</div>
+                </div>
+            </div>
+
+            
+
+            <h3>Parameter Changes</h3>
+            <table>
+                <tr><th>Operation</th><th>Field</th>
+                    <th>From</th><th>To</th><th>Category</th></tr>
+                
+                <tr>
+                    <td>3D Contour [1]</td>
+                    <td><code>stepover</code></td>
+                    <td>0.01</td>
+                    <td>0.008</td>
+                    <td>passes</td>
+                </tr>
+                <tr>
+                    <td>3D Contour [1]</td>
+                    <td><code>tolerance</code></td>
+                    <td>0.001</td>
+                    <td>0.0005</td>
+                    <td>passes</td>
+                </tr>
+            </table>
+
+            <h3>Machine Execution</h3>
+            <div class="exec-grid">
+                <div class="exec-item">
+                    <div class="exec-value">15000.0</div>
+                    <div class="exec-label">Avg RPM</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">15000</div>
+                    <div class="exec-label">Max RPM</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">108.0</div>
+                    <div class="exec-label">Avg Feed</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">22.0%</div>
+                    <div class="exec-label">Avg Spindle Load</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">22%</div>
+                    <div class="exec-label">Max Spindle Load</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">29.0 min</div>
+                    <div class="exec-label">Duration</div>
+                </div>
+                <div class="exec-item">
+                    <div class="exec-value">30</div>
+                    <div class="exec-label">Samples</div>
+                </div>
+            </div>
+
+            <h3>Operator Overrides <span style='color:#ef4444;font-weight:bold'>OPERATOR OVERRIDE</span></h3>
+            <div class="override-row">
+                <span>Feed Override: <span style='color:#eab308'>90%</span></span>
+                <span style="margin-left:32px">
+                    Spindle Override: <span style='color:#e2e8f0'>100%</span></span>
+            </div>
+
+            
+            <h3>Tool Wear During Session</h3>
+            <table>
+                <tr><th>Tool</th><th>Length Wear</th>
+                    <th>Diameter Wear</th></tr>
+                
+                <tr>
+                    <td>T12</td>
+                    <td>-0.0040 mm</td>
+                    <td>-0.0010 mm</td>
+                </tr>
+            </table>
+            
+            
+            <h3>Discrepancies (Programmed vs Actual)</h3>
+            <table>
+                <tr><th>Type</th><th>Operation</th>
+                    <th>Programmed</th><th>Actual Avg</th>
+                    <th>Deviation</th></tr>
+                
+                <tr>
+                    <td>Spindle RPM</td>
+                    <td>Face [1]</td>
+                    <td>4000</td>
+                    <td>15000.0</td>
+                    <td style="color:#ef4444;font-weight:bold">
+                        275.0%</td>
+                </tr>
+                <tr>
+                    <td>Feed Rate</td>
+                    <td>Face [1]</td>
+                    <td>60.0</td>
+                    <td>108.0</td>
+                    <td style="color:#ef4444;font-weight:bold">
+                        80.0%</td>
+                </tr>
+            </table>
+        </div>
+
+
+
+<p class="meta" style="margin-top:32px;text-align:center">
+    Session Bridge Report &mdash; Traxis Manufacturing
+</p>
+</body>
+</html>

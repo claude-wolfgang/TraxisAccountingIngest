@@ -1,84 +1,151 @@
+# ============================================================================
 # Secrets — NEVER commit
+# ============================================================================
 .traxis.env
 *.env
+!*.env.example
+!*.env.template
 secrets.*
 credentials.*
 Keys/
 **/claudeapikey.txt
 **/.claude/settings.local.json
 
-# Dropbox cloud-only folders (not downloaded on this machine — add after syncing)
-# To include: run `dropbox-cli start`, wait for sync, then `git add "<folder>"`
+# Private keys / certs (catch the existing leaks of key.pem and signing_key.pem)
+*.pem
+*.key
+*.pfx
+*.p12
+*_rsa
+*_dsa
+*_ed25519
+*.crt
+*.cer
+
+# ============================================================================
+# Project folders not deployed via git (Fusion add-ins, post processors,
+# Chrome extensions, research/analysis, etc.) Kept out for size/scope hygiene
+# even though they may be downloaded locally.
+# ============================================================================
 2. YCM Post Processor Development/
 3. Setting Up Customer Portal/
 4. Inspection Print and Proshop Automation/
 6. Chevalier Post Processor Development/
 9. Shop Floor Cameras/
-12. FASData Implementation/
 14. Workstation Display/
 15. Proshop Replacement Research and Architecture/
-17. COTS - Tools Crib Kiosk/
-18. ProShop Message Notifier/
-19. Shop Scheduler/
 20. Traxis Data/
 21. Haas communication investigation/
-22. Tool Assembly Management/
-23. Air Compressor communication GUI/
-25. Agent Exploration/
 26. SMT Post Processor Development/
 API Projects/
 Git Recovery/
 OLD/
 
-# Temp files (editor backups, Claude Code temp writes)
-*.tmp
-*.tmp.*
-
-# Python
+# ============================================================================
+# Python build/cache artifacts
+# ============================================================================
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 .Python
 *.egg-info/
+*.egg
 dist/
 build/
-*.egg
 .venv/
 venv/
 env/
+.python-version
 
-# Database / local state
+# ============================================================================
+# Runtime data (DBs, logs, reports, cached state)
+# ============================================================================
 *.db
+*.db-journal
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
+*.log
+*.log.*
+*.pkl
+logs/
+reports/
 
-# Scanned / email attachment files (large, not source)
+# Service state files
+service_heartbeat.json
+last_digest.json
+runtime_snapshot.js
+runtime_snapshot.json
+
+# P25 audit reports + scanner output
+25. Agent Exploration/reports/
+25. Agent Exploration/audit.db
+25. Agent Exploration/service_heartbeat.json
+25. Agent Exploration/last_digest.json
+
+# P31 Photo Upload — photos and per-entity dirs
+31. Photo Upload Service/photo-uploader/data/
+
+# P17 / P22 kiosk runtime data
+17. COTS - Tools Crib Kiosk/cots-kiosk/data/
+22. Tool Assembly Management/tool-kiosk/data/
+
+# P19 Shop Scheduler local cache
+19. Shop Scheduler/scheduler.db
+
+# P1 Proshop Automations runtime junk
+1. Proshop Automations/austin_po_files/
+1. Proshop Automations/austin_po_results.pkl
+1. Proshop Automations/ProgrammingTimer/programming_time_log.jsonl
+1. Proshop Automations/ProgrammingTimer/document_mappings.json
+1. Proshop Automations/**/conflicted copy*
+
+# C# / .NET build artifacts (P12 FASData — source preserved, builds excluded)
+**/bin/
+**/obj/
+*.dll
+*.exe
+!**/nssm-*/win64/nssm.exe
+!**/nssm-*/win32/nssm.exe
+
+# ============================================================================
+# Photos / generated images / scanned docs
+# ============================================================================
+**/photos/
+**/scraper_screenshots/
+**/scanned/
 "Accounting Inbox/Scanned/"
 "Accounting Inbox/From Email/"
 "Accounting Inbox/QBO Inbox/"
+TEMP UPLOADS/
 
-# IDE / OS
+# Generated label PNGs (per-service label generators)
+**/labels/*.png
+**/output/*.png
+
+# Photo-uploader uploaded photos already covered by data/ above
+
+# ============================================================================
+# Editor / OS
+# ============================================================================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.tmp
+*.tmp.*
+*.bak
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# Windows shortcuts
 *.lnk
+.ipynb_checkpoints/
+
+# Node / web build
+node_modules/
 
 # Preserved git histories from embedded repos (renamed from .git)
 git-history/
-
-# Jupyter checkpoints
-.ipynb_checkpoints/
-
-# Fusion 360 compiled add-in artifacts
-*.pyc
-
-# Log files
-*.log
