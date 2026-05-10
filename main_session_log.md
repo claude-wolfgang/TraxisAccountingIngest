@@ -7,6 +7,95 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-10
 
+### Cross-cutting: srv-01 build-out + Phase A refactor (env-driven, waitress, leader-election strip)
+
+**Date:** 2026-05-10
+
+**Task:** Wolfgang opened with "I have all the pieces for the new server, I wanted to set that up and migrate the services from .71 to it." Goal: take the Dell OptiPlex 7060 Micro from a desk-side build to a headless upstairs box running all Overseer-managed services, with all the deferred service-hygiene work (waitress, env vars, leader-election removal) folded into the migration so srv-01 is *clean* state, not a copy of .71's tech debt.
+
+**What was done (in rough order):**
+
+1. **Phase A code refactor on the local Dropbox tree (so .71 keeps working but srv-01 can be config-driven):**
+   - `overseer.py`, `service_wrapper.py`, `25. Agent Exploration/config.py` — paths and the three inline `PROSHOP_CLIENT_SECRET` literals replaced with `_env()`/`_get_env()` reads. Backwards-compat: defaults match `.71`'s `TRAXIS` user paths and the existing hex secrets, so .71 keeps running unchanged.
+   - **Werkzeug → waitress sweep** across 9 Flask services: `Overseer/overseer.py`, `FASDataDashboard/fasdata_live.py`, `TimeTrackerDashboard/time_status_display_v1.0.py`, `COTSCribKiosk app.py`, `MessageNotifier app.py`, `ShopScheduler app.py`, `ToolAssemblyKiosk app.py`, `tool-kiosk/print_service.py`, `AirCompressor/compressor_web.py`, `photo-uploader/app.py`. Each gets an inlined `_serve_with_shutdown(app, host, port)` helper that adds `POST /api/shutdown` and runs under `waitress.create_server()`. Closes the LISTEN-socket-zombie hole from 2026-05-04.
+   - `Overseer._stop_process` updated to POST `/api/shutdown` first (2s budget), wait 5s for natural exit, then fall through to `terminate()` and `kill()`.
+   - **Leader election stripped from `service_wrapper.py`.** Wolfgang chose "drop leader election, srv-01 only" — heartbeat I/O, role state machine, priority map, `service_heartbeat.json` all removed. File is now a thin Overseer-launcher (~250 lines from ~525). Decision rationale: keeps cutover atomic and avoids dual-poll conflicts on Telegram and ProShop basic-auth.
+   - `25. Agent Exploration/requirements.txt` **created** (was undocumented; TelegramBot had been silently dead for 25 days since 2026-04-15 because Overseer's subprocess uses DEVNULL and hid the `ModuleNotFoundError: telegram`).
+   - `1. Proshop Automations/install_waitress.bat` created for one-click `pip install waitress` on .71 (used during the .71 transition).
+   - 4 requirements.txt files (P17, P19, P22, P31) had `waitress>=2.1` appended.
+
+2. **Verified Phase A on .71 *before* touching srv-01.** Wolfgang ran `install_waitress.bat` on .71, then `run_overseer.bat` started Overseer with the new code. Dashboard came up, 12/13 services healthy (TelegramBot DOWN initially) — investigation found `python-telegram-bot` and `anthropic` packages weren't installed on .71's main Python (silent for 25 days). Installed via direct pip; TelegramBot recovered. **Memory saved:** `project_p25_pip_deps_undocumented.md`.
+
+3. **GitHub repo rewrite.** Existing `claude-wolfgang/TraxisAccountingIngest` was tracking only a subset of projects (.gitignore explicitly excluded P17/18/19/22/23/25/31). Removed those project-folder exclusions, added aggressive runtime-data exclusions (`*.db`, `*.log`, `*.pkl`, `data/`, `reports/`, photos/, `service_heartbeat.json`, generated-snapshot files). Confirmed no new secrets entering the commit; verified `git status` showed 429 additions / 52 deletions / 7 modifications. Pushed commit `ed57dae`. **Two existing tracked leaks flagged** (P11 `certs/key.pem`, P30 `deployment/signing_key.pem`) — untracked going forward but history still exposes them; rotation tracked as a follow-up.
+
+4. **srv-01 bootstrap scripts under `1. Proshop Automations/srv-01-setup/`** (since srv-01 doesn't have Dropbox, paired `.bat`+`.ps1` files Wolfgang transfers manually via RDP clipboard/USB):
+   - `01_install_ssh.bat`/`.ps1` — installs OpenSSH Server, adds Claude's pubkey to `administrators_authorized_keys` with correct ACLs, sets PowerShell as default SSH shell.
+   - `02_baseline.bat`/`.ps1` — server power plan, long-path support, time zone (Central), NTP (pool.ntp.org), Defender exclusions for `C:\traxis`, no-auto-restart Windows Update, telemetry minimums.
+   - `03_install_sata_drive.md` — diagnostic walkthrough for the BX500 SATA SSD (originally thought needed a cable).
+   - `04_install_tooling.ps1` — direct-download installs of Python 3.14, Git for Windows, NSSM (winget was broken over SSH due to source-context issue on fresh Win 11 — `0x8a15000f`), GitHub CLI. NSSM download failed because `nssm.cc` was 503; pulled `nssm.exe` from `.71`'s `Dropbox\Graf\services\nssm-2.24\win64\` and scp'd over.
+
+5. **srv-01 install over SSH from this dev seat.** Wolfgang ran 01_install_ssh.bat on the console; from then on everything was SSH-driven from .178:
+   - Tooling: Python 3.14.0, Git 2.54.0, NSSM 2.24, gh CLI 2.92.0 all installed.
+   - Env vars set at both **User and Machine** scope: `TRAXIS_BASE_DIR`, `TRAXIS_PYTHON`, `TRAXIS_PYTHONW`, `TRAXIS_AIRCOMPRESSOR_PYTHONW`, `TRAXIS_DATA`, `TRAXIS_LOGS`, `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` (Machine scope because NSSM service runs as LocalSystem).
+   - `.traxis.env` copied from local Dropbox to both `C:\Users\traxi\.traxis.env` and `T:\traxis\services\1. Proshop Automations\.traxis.env` (multiple search paths cover different services). Confirmed identical content to .71's copy modulo CRLF.
+   - `gh` authenticated via `gh auth token` from dev seat piped to `gh auth login --with-token` on srv-01.
+   - Repo cloned to `C:\traxis\services\` (later moved to `T:\`). 779 files, 99 MB.
+   - `pip install` per service: waitress, flask, requests baseline + per-service `requirements.txt` (P17, P19, P22, P25, P31, P27, P32). `claude-agent-sdk>=0.2` in P25's req file failed (max version on PyPI is 0.1.80) — commented out in the file with note that it's optional. `pymodbus` installed for AirCompressor.
+
+6. **OptiPlex 7060 Micro SATA SSD drama.** The 2TB Crucial BX500 was physically in the case but Windows couldn't see it (only NVMe boot + USB backup visible). Wolfgang reported he saw "only a rigid connector at the edge" of the motherboard. Spent considerable time hunting for the Dell-specific SATA cable on Amazon/eBay/Dell.com (false leads on optical-drive cables, SFF cables, Tower cables) — Wolfgang got frustrated. **Web research found the actual answer:** the 7060 Micro uses a **cable-less direct-mount** design — the SATA data+power connector is hard-soldered to the motherboard, the drive tray seats onto it via a tool-less latch. Quoted ServeTheHome review confirming this. Wolfgang reseated the cage, Windows immediately saw the drive. Initialized as **`T:` labeled "traxis"**, 1.86 TB free.
+
+7. **Migrated `C:\traxis\` → `T:\traxis\` per the original shoestring plan.** `robocopy /E /MOVE` at 12 GB/min (services were down, no contention). Updated all Machine + User env vars from `C:\` to `T:\`, NSSM `AppDirectory` + log paths, Defender exclusion. Verified TraxisOverseer starts cleanly from `T:\traxis\services\1. Proshop Automations\Overseer\overseer.py`, all 11 web ports bind.
+
+8. **NSSM installed `TraxisOverseer` service.** Auto-start mode, AppStdout/AppStderr to `T:\traxis\logs\overseer\`, restart-on-failure 5s delay. Verified end-to-end: start, all 13 services come up, dashboard responds, stop. Tested twice (once on C:, once on T:).
+
+9. **Verified srv-01 services in fresh state** (no DBs copied from .71 yet): 9 healthy out of 13. The 4 not-healthy all had identified causes: TimeTrackerDashboard (basic-auth single-session conflict with .71's bot — resolves at cutover), FASDataDashboard (no `C:\FASData\monitoring.db` yet — state migration), FocasMonitor (C# Windows service not installed on srv-01 — task #13), LabelPrintService (.242 is powered off — separate concern). AgentScheduler shows "degraded" by-design (audit found data quality issues, exit 1).
+
+10. **Headless pre-flight + relocation.**
+    - Hostname renamed `TRAXISMACHDESK` → `TRAXIS-SRV-01`.
+    - Set **static IP `10.1.1.161`** on the Intel I219-LM adapter (Wolfgang couldn't find DHCP reservation UI on his older Google Fiber Network Box; static is cleaner anyway). Subnet /24, gateway 10.1.1.1, DNS 8.8.8.8 + 1.1.1.1.
+    - Rebooted to verify all auto-start: sshd, TraxisOverseer, all 11 service ports came back automatically within ~90s. Confirmed.
+    - Wolfgang shut down cleanly, carried the box upstairs, plugged in ethernet + power, hit power button. Confirmed back online at 10.1.1.161 within 90s of power-on, all services up.
+
+11. **Stopped srv-01's TraxisOverseer** + set Start mode to `SERVICE_DEMAND_START` so it doesn't auto-launch on boot while .71 is still primary. Confirmed .71 stabilized: 11 healthy + 1 by-design-degraded + 1 unrelated-down (LPS). **Critical:** at cutover, flip TraxisOverseer back to `SERVICE_AUTO_START` before starting.
+
+**Files modified (Phase A refactor):**
+- `1. Proshop Automations/Overseer/overseer.py`
+- `1. Proshop Automations/FASDataDashboard/fasdata_live.py`
+- `1. Proshop Automations/TimeTrackerDashboard/time_status_display_v1.0.py`
+- `1. Proshop Automations/install_waitress.bat` (new)
+- `1. Proshop Automations/srv-01-setup/01_install_ssh.{bat,ps1}` (new)
+- `1. Proshop Automations/srv-01-setup/02_baseline.{bat,ps1}` (new)
+- `1. Proshop Automations/srv-01-setup/03_install_sata_drive.md` (new)
+- `1. Proshop Automations/srv-01-setup/04_install_tooling.ps1` (new)
+- `17. COTS - Tools Crib Kiosk/cots-kiosk/app.py` + `requirements.txt`
+- `18. ProShop Message Notifier/app.py`
+- `19. Shop Scheduler/app.py` + `requirements.txt`
+- `22. Tool Assembly Management/tool-kiosk/app.py` + `print_service.py` + `requirements.txt`
+- `23. Air Compressor communication GUI/compressor_web.py`
+- `25. Agent Exploration/config.py`
+- `25. Agent Exploration/service_wrapper.py` (rewritten — leader election removed)
+- `25. Agent Exploration/requirements.txt` (new)
+- `31. Photo Upload Service/photo-uploader/app.py` + `requirements.txt`
+- `.gitignore` (rewritten: drop project-folder exclusions for deployment-critical projects, add aggressive runtime-data exclusions)
+
+**Key decisions:**
+- **Deploy via GitHub, not Dropbox-on-srv-01.** Reuses existing `claude-wolfgang/TraxisAccountingIngest` repo (misnamed historically — actually carries the full deploy tree now). Future deploys: `git pull` on srv-01, `nssm restart TraxisOverseer`.
+- **Drop leader election entirely** — srv-01 is sole production host going forward. .71 is on a deprecation runway; manual restart only if needed during the soak.
+- **Skip Tailscale, skip auto-login** — LAN access via SSH is sufficient; services run as LocalSystem and don't need a user session. Headless reboot test confirmed everything comes back on its own.
+- **Static IP, not DHCP reservation** — Wolfgang's Network Box admin UI doesn't expose reservations cleanly; static is one config on the server side and self-contained.
+- **LabelPrintService stays at `.242`** — Brother PT-P700 is USB-attached there; moving the service means moving the printer, and labels are picked up at .242's location.
+- **Services on T: drive (BX500 SSD), not C: boot drive** — per the original shoestring plan, even though we briefly fell back to C: when the SATA drive looked broken.
+- **`C:\traxis\` → `T:\traxis\` migration done now** (before any state data exists) so it's a 185 MB code-only move; doing it post-cutover would be a much bigger lift.
+- **Don't fix .71's startup mechanism** — .71's TraxisOverseer.lnk-only Startup-folder mechanism is fragile (no auto-restart-on-crash, only fires at logon), but it's on deprecation runway. Don't burn time on it.
+- **Memories saved**: `project_p25_pip_deps_undocumented.md`, `project_programmingtimer_keep_deployed.md` (from earlier in session).
+- **Tasks added**: #17 rotate leaked .pem keys (P11 `certs/key.pem`, P30 `deployment/signing_key.pem`) — not migration-blocking.
+
+**Status:** srv-01 is upstairs, headless, static-IP'd at 10.1.1.161, TraxisOverseer NSSM service installed but stopped + manual-start mode. .71 is production-stable. Phase A refactor verified in both environments. **Pending for cutover: state DB migration, FocasMonitor binary install, kiosk PC bookmark updates, flip TraxisOverseer to auto-start, decommission .71's Startup shortcut.** No external blockers — just operational work + soak time.
+
+**Diversion: leaked private keys.** During the .gitignore audit, found two `.pem` private keys tracked in the GitHub repo history (P11 `proshop-mobile-backend/certs/key.pem`, P30 `deployment/signing_key.pem`). New `.gitignore` untracks them going forward, but the history retains them. Rotation tracked as task #17 (not on srv-01 critical path). Repo is private but anyone with repo access has had these.
+
+---
+
 ### P31: photo-uploader material label was empty — wrong GraphQL path on WorkOrder
 
 **Date:** 2026-05-10

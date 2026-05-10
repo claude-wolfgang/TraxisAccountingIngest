@@ -1,6 +1,6 @@
 requests>=2.31
 python-telegram-bot>=22.0
 anthropic>=0.40
-# Optional: only needed for agent.py / mcp_tools.py (interactive Claude Agent SDK queries)
-# Bot + scheduler do not need it.
-claude-agent-sdk>=0.2
+# Optional: only needed for agent.py / mcp_tools.py (interactive Claude Agent SDK queries).
+# Bot + scheduler do not need it. Uncomment to enable agent.py.
+# claude-agent-sdk>=0.1

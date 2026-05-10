@@ -70,9 +70,9 @@ Add `contacts:r+toolpots:r` to the OAuth client in ProShop Admin to enable custo
 - ProShop base URL: https://traxismfg.adionsystems.com/procnc
 
 ## Interfaces
-Produces: Overseer dashboard (port 8060), /api/status, /api/services/*/restart|stop|start, /api/programming-sessions, programming_time_log.jsonl, overseer.log
-Consumes: Health endpoints from 13 managed services (ports 5000-8101 + 5003), FOCAS monitoring.db, ProShop GraphQL API (via managed services), P25 Agent Exploration (TelegramBot :8100, AgentScheduler :8101), P31 Photo Upload Service (:5003)
-Contracts: Overseer expects each HTTP service to expose a health URL returning JSON. Validators in VALIDATORS dict must match service names in SERVICES_CONFIG. P25 services use PYTHON_EXE (not PYTHONW_EXE) with -u flag. AGENT_DIR path must match P25 folder location.
+Produces: Overseer dashboard (port 8060) under waitress with POST /api/shutdown, /api/status, /api/services/*/restart|stop|start, /api/programming-sessions, programming_time_log.jsonl, overseer.log
+Consumes: Health endpoints from 13 managed services (ports 5000-8101 + 5003), FOCAS monitoring.db (path via `TRAXIS_FOCAS_DB` env var; default `C:\FASData\monitoring.db`), ProShop GraphQL API (via managed services), P25 Agent Exploration (TelegramBot :8100, AgentScheduler :8101), P31 Photo Upload Service (:5003)
+Contracts: Overseer expects each HTTP service to expose a health URL returning JSON. Validators in VALIDATORS dict must match service names in SERVICES_CONFIG. P25 services use PYTHON_EXE (not PYTHONW_EXE) with -u flag. AGENT_DIR path must match P25 folder location. **All managed Flask services expose POST /api/shutdown** — Overseer's `_stop_process` POSTs there first (2s timeout) and waits 5s for natural exit before terminate()/kill(). Paths and Python interpreter are env-driven via `TRAXIS_BASE_DIR`, `TRAXIS_PYTHON`, `TRAXIS_PYTHONW`, `TRAXIS_AIRCOMPRESSOR_PYTHONW` (defaults preserve .71's `TRAXIS` user paths). Per-service OAuth secrets (`PROSHOP_CLIENT_SECRET_BRIDGE` for MsgNotifier+COTSCribKiosk, `PROSHOP_CLIENT_SECRET_TOOLKIOSK` for ToolAssemblyKiosk) injected via env={} in SERVICES_CONFIG.
 
 ## Version
 Current: 1.4.0 — increment version in both .manifest and .py docstring on changes

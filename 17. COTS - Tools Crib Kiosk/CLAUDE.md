@@ -17,6 +17,6 @@ Touch-screen kiosk for tool crib COTS inventory checkout via QR scanning. Also i
 
 ## Interfaces
 
-Produces: COTS label PNGs (450px wide, 128px tall, 180 DPI), transaction log CSV, Flask kiosk UI (port 5000)
+Produces: COTS label PNGs (450px wide, 128px tall, 180 DPI), transaction log CSV, Flask kiosk UI under waitress (port 5000) with /api/health + POST /api/shutdown
 Consumes: ProShop GraphQL API (OAuth client credentials, scope `ots:rwdp+cots:rwdp+parts:r+users:r`), Brother PT-P700 print service at http://10.1.1.242:5002/api/print-image, COTS_Labels_All.csv
 Contracts: Print payload `{image_base64, copies, label_name}` to P22 print service `/api/print-image` (same as P9/P30). Labels are 128px tall, 450px wide (2.5"), 180 DPI. QR codes encode full ProShop URL (`https://traxismfg.adionsystems.com/procnc/ots/{TYPE}/{COTS_ID}`).

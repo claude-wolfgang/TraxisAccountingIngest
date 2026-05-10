@@ -280,6 +280,6 @@ Template created -- needs real data from Garrett/Thomas.
 | Lathe-2 | T2 | YCM NTC1600LY | Yes |
 
 ## Interfaces
-Produces: audit.db (SQLite), reports/latest.md, project_index.json, service_heartbeat.json, Telegram bot responses, /api/health on ports 8100 (TelegramBot) and 8101 (AgentScheduler)
-Consumes: ProShop GraphQL API, FOCAS monitoring.db (read-only), NC Programs filesystem, Anthropic API, Telegram Bot API, Overseer (managed service on ports 8100/8101)
-Contracts: service_wrapper.py launches Overseer which manages TelegramBot + AgentScheduler. Health endpoints must respond JSON with `"status": "ok"` for Overseer validation. agent_scheduler.py runs check_reminders.py/run_audit.py/scan_projects.py as subprocesses from PROJECT_ROOT.
+Produces: audit.db (SQLite), reports/latest.md, project_index.json, Telegram bot responses, /api/health on ports 8100 (TelegramBot) and 8101 (AgentScheduler), requirements.txt (added 2026-05-10 — was undocumented)
+Consumes: ProShop GraphQL API (via PROSHOP_CLIENT_ID/SECRET env vars + literal fallbacks in config.py), FOCAS monitoring.db (read-only; path via `TRAXIS_FOCAS_DB` env var with literal fallback to `C:\FASData\monitoring.db`), NC Programs filesystem, Anthropic API, Telegram Bot API, Overseer (managed service on ports 8100/8101)
+Contracts: service_wrapper.py launches Overseer and restarts on crash (exponential backoff 30-300s). **Leader election removed 2026-05-10** — srv-01 is sole production host going forward; no more `service_heartbeat.json`. Health endpoints must respond JSON with `"status": "ok"` for Overseer validation. agent_scheduler.py runs check_reminders.py/run_audit.py/scan_projects.py as subprocesses from PROJECT_ROOT. OVERSEER_PYTHON + base path derive from `TRAXIS_PYTHON` + `TRAXIS_BASE_DIR` env vars.
