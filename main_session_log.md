@@ -5,6 +5,62 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-09
+
+### P25: lathe_programs.json — canonicalization, op# fill, NC-file forensics for FOCAS time-tracking
+
+**Date:** 2026-05-07 → 2026-05-09 (multi-day forensic session, closed 2026-05-09)
+
+**Task:** Wolfgang opened with "let's try to sort out these NC files" pointing at `TEMP UPLOADS/`. Initial framing was a directory reorg, but he reframed it: the NC files are forensic input for figuring out which T2 (YCM lathe) FOCAS-observed O-numbers map to which ProShop parts, so the audit can cross-reference machine time to work orders. Goal: reduce the open mappings in `25. Agent Exploration/lathe_programs.json` (originally 63 entries, 8 cross-ref-ready).
+
+**What was done:**
+
+1. **TEMP UPLOADS reorg parked.** Built an inventory (134 files → 97 unique, 34 duplicate groups), drafted a target tree in `_plan.md`, but Wolfgang clarified mid-session: TEMP UPLOADS is forensic, not a canonical library. Reorg was unnecessary. Workspace artifacts (`_inventory.py`, `_inventory.md`, `_plan.md`) deleted; original NC files left intact.
+
+2. **30 op#s applied from Wolfgang's checklist.** Generated `LATHE_PROGRAMS_CHECKLIST.md` from `lathe_programs.json`, Wolfgang filled in op# values across 30 entries grouped by part. Applied to JSON in one batch. Cross-ref-ready jumped 8 → 38.
+
+3. **O7001 → 10036 by elimination, O4282 → R2S1-10042 (shared with R2S1-10164).** Two existing-entry questions resolved. O7001 is a master program for subprogram O3213 in the R2-10036-10037 folder; O7002 was already 10037, so O7001 is 10036. O4282 confirmed by Wolfgang as another dual-use OP80 like O4280 (10042 + 10164).
+
+4. **Reserved-range rule established.** Wolfgang: "O8000–O8999 and O9000–O9999 are reserved for macros and machine functions on YCM." Saved as feedback memory. Removed 20 speculative additions I'd made earlier (C# `_inventory`-driven NC-file additions that were never FOCAS-observed) — Wolfgang's reframe made clear that adding NC-file O-numbers without FOCAS observation just adds noise. Encoding mojibake on em-dashes from cp1252-default `open()` was caught and reversed via `text.encode('cp1252').decode('utf-8')`.
+
+5. **All 38 part_numbers canonicalized to ProShop customer-prefix form.** Probed `parts(filter:{partNumber:})` against ProShop API for every existing part_number. Discovered ProShop does loose-form matching (both `10042` and `R2S1-10042` return the same record) but stored canonical form is the prefixed one. Several entries previously didn't match anything in ProShop: `BARB-FITTING` → `AUS1-Barb Fitting`, `10-2004` → `ICO1-10-02004`, `AD0208-300-007` → `R2S1-A0208-300-007` (note the D→A typo correction in NC file headers). Bulk rewrite via mapping table; all 38 now resolve to canonical form.
+
+6. **O1001/O1002 → AUS1-Barb Fitting OP60.** Applied from checklist despite legacy "IMPELLER TRIM" headers — Wolfgang confirmed the programs were repurposed for the barb fitting.
+
+7. **FOCAS-orphan WO date lookup.** For the 14 `FOCAS bootstrap: no NC code uploaded` entries, fetched all 790 active+completed/shipped/invoiced WOs from ProShop, pulled `timeTracking.records` for each, filtered to `timeIn` falling in any orphan's date range. 6 of 14 hit time-tracking matches; 8 were silent (likely typed at YCM without anyone clocked in). Single confident match: O1489 → LYN1-BH-A-E op 60. Cluster of 5 March-2026 orphans had ambiguous candidates (R2S1-10311 vs LYN1-BH-A-E) — annotated in descriptions, part_number left empty pending Wolfgang's pick.
+
+8. **NC-file content search across `Dropbox/PART FILES Traxis/`.** Walked 1827 .nc/.nci/.txt files looking for orphan O-numbers in headers. Found:
+   - **O2006** → `ICON TECH/10-02002/Icon 10-2002 OP 4 wear.nc` → ICO1-10-02002 OP 4 (mill, likely live-tool on YCM).
+   - **O2009** → `ICON TECH/10-02004/Bore Collet Fixture.nc` → ICO1-10-02004 (fixture, no numbered op).
+   - **O1491** → `ARTIVION/Item 149 - Bottom Plate Door/NC Files/149 OP 1.nc` → ART1-149 OP 1.
+   - **O1492** → `ART1-149` OP 2.
+   - **O2010** → two candidates in 3D SYSTEMS folder (3DS1-7301K32 vs ST3315-obsolete) — needs YCM disambiguation.
+   - **Pattern discovered:** Artivion items use O14XY where X = item suffix, Y = op (O1421/22 = Item 142, O1431/32 = Item 143, O1490-93 = Item 149). By pattern, O1481/O1482 are likely ART1-148 Top Collar OP1/OP2 (Item 148 NC files not archived yet). O1499 not found — possibly test/one-off.
+
+9. **Contradiction surfaced.** WO time-tracking matched O1491 to ART1-143 Base Plate (inspection op on T2 work center), but the NC file content matches ART1-149 Bottom Plate Door. NC file wins; the time-tracking match was likely a misattribution (someone clocked in on T2 for the inspection op of a different Artivion item). Flagged in description.
+
+10. **Two new memories saved:**
+    - `lathe_programs.json forensic purpose` — map FOCAS-seen O-numbers→parts only; NC files are forensic input, not a comprehensive catalog; O8XXX/O9XXX reserved.
+    - `ProShop part_number canonical form` — customer-prefix codes (R2S1-, ICO1-, AUS1-, MON2-, AME1-, UTA1-, 3DS1-, ART1-, LYN1-) are canonical; some simple forms drop revision/suffix info (e.g. `10739A` → `R2S1-10739` drops the A; `121158-001` → `AME1-121158` drops -001).
+
+**Final state:**
+- 63 entries, **45 cross-ref-ready** (started session at 8), 46 with part_number, 46 with op_number.
+- 18 still incomplete: 5 Feb-2026 orphans with no Dropbox NC trail and no time-tracking match (need YCM-side `MDI > PROG > DIR` inspection); 3 candidate-only (O1481/O1482 by pattern, O1499 unmatched); O2010 ambiguous; O2000 SPACER_10 deferred; O0061 generic rework (intentionally empty); 7 utility/macro entries intentionally empty per reserved-range rule.
+
+**Files modified:**
+- `25. Agent Exploration/lathe_programs.json` — extensive: 30 op#s + canonicalization + 6 candidate-fills from NC/WO matches + description annotations. (P25 is gitignored as Dropbox-cloud-only — change persists via Dropbox sync, not in git.)
+- `25. Agent Exploration/CLAUDE.md` — Next Steps item 1 rewritten to reflect current state.
+- `~/.claude/projects/.../memory/MEMORY.md` + 2 new memory files.
+
+**Key decisions:**
+- Don't dedupe TEMP UPLOADS — forensic role complete, not worth the reorg.
+- Use canonical ProShop form (with customer prefix) for all part_numbers — future cross-reference code can rely on exact match.
+- Add candidate annotations to description rather than auto-filling part_number when match is ambiguous.
+
+**Status:** Done. Open follow-ups for Wolfgang: (1) March-cluster pick R2S1-10311 vs LYN1-BH-A-E for O1481/O1482/O1499; (2) O2010 disambiguation 3DS1-7301K32 vs other; (3) the 5 Feb-2026 orphans need YCM-side check.
+
+---
+
 ## 2026-05-07
 
 ### P27 (continued): bug-fix during first backfill + GUI usability + PO attach-surface discovery
