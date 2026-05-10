@@ -5,6 +5,40 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-10
+
+### P31: photo-uploader material label was empty — wrong GraphQL path on WorkOrder
+
+**Date:** 2026-05-10
+
+**Task:** Wolfgang reported the P30 Chrome extension prints a correct material label but the photo-uploader's Print Material button doesn't. Asked to investigate.
+
+**What was done:**
+
+1. **Diagnosed the divergence.** P30 extension's primary path is DOM scraping the rendered ProShop WO page's "Part Stock" cell (`content.js:31-80`); ProShop's frontend has already done all the schema joining. Its API fallback is also broken (`workOrders(woNumber:)` — wrong arg name on the plural query) but rarely fires. P31 has no DOM, so it relies entirely on GraphQL.
+
+2. **Confirmed root cause via live introspection.** P31's `_wo_label_data` in `proshop_client.py:597-622` was selecting `materialType materialGrade customerPoNumber` on the singular `workOrder(workOrderNumber:)` query. Live API responds `INVALID_SELECTION: Unexpected field materialType in selection list for workOrder`. Schema introspection confirmed: the `WorkOrder` GraphQL type has NO `materialType`/`materialGrade` — only `asMaterialComments`, `partstockNote`, `partStockStatuses`, `wipCogsMaterials`. The code caught `GraphQLError`, fell through to the minimal fallback (no material at all), and rendered labels with empty material text. `customerPONumber` is also an OBJECT not a scalar — it was throwing the same INVALID_SELECTION (silent box-label bug discovered in passing).
+
+3. **Mapped the correct schema path.** Material lives on `workOrder.partStockStatuses.records[].{material, materialGrade, partStockType, stockSpec}` (type `WorkOrderPartStock`). Probed four real WOs: 26-0001 → "Aluminum 5086 Plate", 26-0050 → "Stainless Steel 304 Plate", 26-0100 → "Brass Round Bar", 26-0010 → empty (no stock record populated). Customer PO scalar is `customerPONumberPlainText`.
+
+4. **Fixed `_wo_label_data`** in `31. Photo Upload Service/photo-uploader/proshop_client.py`. New query traverses `partStockStatuses.records[0]` and joins `material + materialGrade + partStockType` with spaces. Uses `customerPONumberPlainText` for the box-label customer PO field. Verified end-to-end against all four test WOs — fresh PNGs render correctly with material populated.
+
+5. **Restarted PhotoUploadService cleanly via Overseer's `/api/services/PhotoUploadService/restart`.** New PID 24584 (was 9548), single listener on 5003, fresh OAuth token, `/api/health` ok. The 9-zombie-listener state from 2026-05-04 was already gone before today's session — the OS rebooted at some point, freeing port 5003.
+
+6. **Print attempt failed with "Print service unreachable" — unrelated to fix.** Diagnosed: `10.1.1.242` (Brother PT-P700 print service host) is fully offline at the network layer (no ICMP, no ARP cache entry on `.71`). Not in `.71`'s ARP table at all. The Chrome extension would fail the same way right now. Wolfgang confirmed the PC is powered off; no further code change needed — printing across P9/P22/P30/P31 will all resume once `.242` is back on.
+
+**Files modified:**
+- `31. Photo Upload Service/photo-uploader/proshop_client.py` — `_wo_label_data` rewrite (new schema path + customerPONumberPlainText scalar).
+- New memory: `project_proshop_workorder_schema_gotchas.md`.
+
+**Key decisions:**
+- Include `partStockType` in the joined material string (gives "Aluminum 5086 Plate" vs the extension's API-fallback intent of just "material + grade"). The extension's DOM scrape reads what ProShop displays, which already includes type — so this matches operator expectations.
+- Did not patch the extension's broken API fallback (`workOrders(woNumber:)` arg name). It's a near-dead code path because DOM scrape almost always succeeds, and the user only reported the photo-uploader symptom. Leaving for a future P30 sweep.
+
+**Status:** Fix shipped. Next operator print attempt will work as soon as `.242` is powered back on.
+
+---
+
 ## 2026-05-09
 
 ### P25: lathe_programs.json — canonicalization, op# fill, NC-file forensics for FOCAS time-tracking

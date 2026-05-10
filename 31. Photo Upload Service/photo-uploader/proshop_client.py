@@ -591,14 +591,21 @@ class ProShopClient:
         return {"error": f"No label support for entity type '{entity_type}'"}
 
     def _wo_label_data(self, wo_number):
-        """Material+box label data for a WO. Tries enriched fields first,
-        falls back to the minimum guaranteed fields if the schema differs."""
-        # Try with all material+PO fields. If unknown fields, retry minimal.
+        """Material+box label data for a WO.
+
+        Material does NOT live on WorkOrder directly — it's on
+        WorkOrderPartStock records reached via partStockStatuses. We take
+        the first record and join material + grade + stock type (e.g.
+        "Aluminum 5086 Plate"). customerPONumber is an object field, so
+        we read the scalar customerPONumberPlainText instead.
+        """
         for query in (
             """query ($wo: String!) {
                 workOrder(workOrderNumber: $wo) {
-                    workOrderNumber partPlainText
-                    materialType materialGrade customerPoNumber
+                    workOrderNumber partPlainText customerPONumberPlainText
+                    partStockStatuses {
+                        records { material materialGrade partStockType }
+                    }
                 }
             }""",
             """query ($wo: String!) {
@@ -611,14 +618,20 @@ class ProShopClient:
                 result = self._execute(query, {"wo": wo_number})
                 wo = (result.get("data") or {}).get("workOrder") or {}
                 if wo:
+                    records = (wo.get("partStockStatuses") or {}).get("records") or []
+                    stock = records[0] if records else {}
                     material = " ".join(
-                        v for v in (wo.get("materialType"), wo.get("materialGrade")) if v
+                        v for v in (
+                            stock.get("material"),
+                            stock.get("materialGrade"),
+                            stock.get("partStockType"),
+                        ) if v
                     ).strip()
                     return {
                         "wo_number": wo.get("workOrderNumber") or wo_number,
                         "part_number": wo.get("partPlainText") or "",
                         "material": material,
-                        "customer_po": wo.get("customerPoNumber") or "",
+                        "customer_po": wo.get("customerPONumberPlainText") or "",
                     }
             except GraphQLError:
                 continue
