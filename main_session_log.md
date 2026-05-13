@@ -7,6 +7,44 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-13
 
+### P1 ProShopBridge: Fusion install + skip suppressed ops + remove fake 256KB limit
+
+**Task:** Wolfgang: "Why isn't proshop bridge add-in available in fusion?" → expanded into a v1.5.1 → v1.5.3 round-trip fixing suppressed-op handling and removing a piece of folklore.
+
+**What was done:**
+
+1. **Fusion install diagnosis.** Add-in didn't appear in Fusion's Add-Ins list on this PC (`Superuser`) because there was no symlink/junction for `ProShopBridge` in `%APPDATA%\Autodesk\Autodesk Fusion 360\API\AddIns\`. The other 5 Traxis add-ins (FusionToolAuditor, ProgrammingTimer, ToolRenumber, TraxisCapture, TraxisProgramManager) were all symlinked there 2026-05-09. Created a directory junction (no admin needed, same volume) so Fusion picks it up. Real symlink will be created when Wolfgang re-runs `setup_fusion_addins.bat` as admin on this PC — the installer already includes ProShopBridge (line 130) and even cleans up the old `ProShopConnector` symlink (lines 138-142).
+
+2. **v1.5.1 — Suppression filter (FAILED — silent no-op).** Wolfgang reported ProShopBridge posted tools of two suppressed operations into the sequence detail. Added `_filter_active()` helper at both return paths of `get_all_operations()`, filtering on `getattr(op, 'isActive', True)`. Bumped manifest+docstring to 1.5.1, wrote CHANGELOG entry, committed (`6ae1658`).
+
+3. **v1.5.2 — Suppression filter actually working.** Wolfgang retested: "still outputs the suppressed operations". Diagnosis: `isActive` isn't exposed on `adsk.cam.Operation` in this Fusion version, so `getattr(... , True)` returned the default True for every op and the filter never removed anything. Rewrote as `_is_op_suppressed(op)` checking `op.isSuppressed` directly, then walking the `parent` chain (bounded to 16 hops) checking each ancestor's `isSuppressed` — covers both directly-suppressed ops and ops inside a suppressed folder/pattern. Log line now names the skipped ops for forensics. Wolfgang confirmed working.
+
+4. **v1.5.3 — Removed fake "~256KB written-description limit".** Wolfgang: "can we get rid of the idea of 256kb proshop limit? that is fake". Three places were built on this folklore — one harmful, two misleading:
+   - `ProShopBridge.py` (push flow): if payload > 250 KB, silently re-rendered written-description HTML with ALL screenshots stripped before sending. **Actively destructive** on the rare big push that would have worked.
+   - `proshop_selenium_helper.py`: pre-flight check that hard-aborted with `sys.exit(1)` over 250 KB. Selenium now attempts any size.
+   - `composite_screenshots.ps1`: comment justifying the 1280×720 quadrant target with the fake limit. Kept the dimensions as a reasonable default; dropped the false reason.
+
+5. **Separate issue flagged, not fixed.** During testing, Wolfgang's Text Commands panel showed Selenium written-description push failing with `Save FAILED: Save not verified — marker not in response (HTTP 200, 289543 chars)`. Marker `push-1778698658` injected into the content via JS, then not found in the 289KB response body. Payload was only ~57.8KB, so size isn't the cause. Most likely either ProShop sanitization strips the marker, OR the response is a different rendered view of the saved content. Save likely succeeded server-side. Not investigated this session — added to Next Steps.
+
+**Files modified:**
+- `1. Proshop Automations/ProShopBridge/ProShopBridge.py` — v1.5.1 (committed) → v1.5.2 → v1.5.3
+- `1. Proshop Automations/ProShopBridge/ProShopBridge.manifest` — version bumps
+- `1. Proshop Automations/ProShopBridge/CHANGELOG.md` — 3 entries
+- `1. Proshop Automations/ProShopBridge/proshop_selenium_helper.py` — 256KB pre-flight abort removed
+- `1. Proshop Automations/ProShopBridge/composite_screenshots.ps1` — comment cleanup
+- `1. Proshop Automations/CLAUDE.md` — ProShopConnector → ProShopBridge throughout + Next Steps section + version 1.4.0 → 1.5.3
+- `%APPDATA%\Autodesk\Autodesk Fusion 360\API\AddIns\ProShopBridge` — directory junction (not in repo)
+
+**Key decisions:**
+- Used a junction not a symlink for the AddIns install — same behavior to Fusion, no admin needed. Acceptable as a stopgap until `setup_fusion_addins.bat` is re-run.
+- `_is_op_suppressed()` uses `getattr` defaults so it gracefully handles op types (e.g. manual NC) that may not expose `isSuppressed` — those default to "not suppressed", erring toward inclusion rather than silent drop.
+- Did NOT shrink/grow the 1280×720 screenshot canvas — the fake limit was the only stated reason for that size, but without a confirmed need to change it, left dimensions alone.
+- Did NOT investigate the Selenium save-verifier failure this session — flagged for next time.
+
+**Status:** ProShopBridge v1.5.3 deployed on this PC via junction. Suppression filter confirmed working by Wolfgang. 256KB folklore removed. Selenium WD save-verifier false-failure flagged but unfixed.
+
+---
+
 ### Overseer recovered after 2-day silent death + LabelPrintService waitress gap closed on .242
 
 **Date:** 2026-05-13

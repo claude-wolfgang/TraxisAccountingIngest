@@ -1,5 +1,43 @@
 # ProShopBridge Changelog
 
+## 2026-05-13 — v1.5.3 — Drop fake ~256KB written-description limit
+
+The "ProShop has a ~256KB limit on the written description field" rule was
+folklore, not real. Three pieces of defensive code built on top of it were
+either harmless-but-misleading or actively harmful:
+
+- `ProShopBridge.py` push flow: if payload > 250 KB, silently regenerated the
+  written-description HTML with all screenshots stripped before sending.
+  Removed — pushes that would have worked now go through with their images.
+- `proshop_selenium_helper.py`: pre-flight check that hard-aborted with
+  `sys.exit(1)` if payload > 250 KB. Removed — Selenium will attempt any size.
+- `composite_screenshots.ps1`: comment justifying the 1280×720 quadrant target
+  with the fake limit. Updated to drop the reason. Dimensions kept as a
+  reasonable default; bump them later if you want sharper screenshots.
+
+Unrelated to the suppression-filter work in v1.5.1/v1.5.2 — those are still in
+effect.
+
+## 2026-05-13 — v1.5.2 — Suppression filter: use isSuppressed + parent walk
+
+### Bug
+v1.5.1 still let suppressed operations through to sequence detail and written
+description.
+
+### Root Cause
+v1.5.1 filtered on `getattr(op, 'isActive', True)`. `isActive` is not exposed on
+`adsk.cam.Operation` in this Fusion version, so `getattr` returned the default
+`True` for every op and the filter never removed anything — a silent no-op.
+
+### Fix
+New `_is_op_suppressed()` helper checks `op.isSuppressed` directly, then walks
+the parent chain (bounded to 16 hops) checking each ancestor's `isSuppressed`.
+That covers both a directly-suppressed op and an op inside a suppressed
+folder/pattern.
+
+Log line now names each skipped op so we can verify behavior in Text Commands:
+`Skipped 2 suppressed op(s) in setup 'Op10': Drill Ø.250, Chamfer`.
+
 ## 2026-05-13 — v1.5.1 — Skip suppressed operations
 
 ### Bug

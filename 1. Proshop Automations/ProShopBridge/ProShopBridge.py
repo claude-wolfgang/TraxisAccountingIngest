@@ -1,6 +1,6 @@
 """
 ProShop Bridge for Fusion 360
-v1.5.1 — Traxis Manufacturing
+v1.5.3 — Traxis Manufacturing
 
 Unified add-in: WO browser + CAM export + push to ProShop.
 Replaces ProShopConnector, EXPORT TO PROSHOP, and proshop_gui.
@@ -629,13 +629,41 @@ def get_cam_product():
 # CAM Data Extraction (from EXPORT TO PROSHOP script)
 # ===========================================================================
 
+def _is_op_suppressed(op):
+    """True if the op itself or any ancestor folder/pattern is suppressed."""
+    try:
+        if bool(getattr(op, 'isSuppressed', False)):
+            return True
+    except Exception:
+        pass
+    try:
+        node = getattr(op, 'parent', None)
+        # Bound the walk in case parent traversal loops or never terminates.
+        for _ in range(16):
+            if node is None:
+                break
+            if bool(getattr(node, 'isSuppressed', False)):
+                return True
+            node = getattr(node, 'parent', None)
+    except Exception:
+        pass
+    return False
+
+
 def _filter_active(operations, setup_name):
-    # isActive is False if the op itself is suppressed OR any ancestor folder/pattern/setup is.
-    active_ops = [op for op in operations if getattr(op, 'isActive', True)]
-    skipped = len(operations) - len(active_ops)
-    if skipped:
+    active_ops = []
+    skipped_names = []
+    for op in operations:
+        if _is_op_suppressed(op):
+            try:
+                skipped_names.append(getattr(op, 'name', '?'))
+            except Exception:
+                skipped_names.append('?')
+        else:
+            active_ops.append(op)
+    if skipped_names:
         try:
-            log(f"Skipped {skipped} suppressed/inactive operation(s) in setup '{setup_name}'")
+            log(f"Skipped {len(skipped_names)} suppressed op(s) in setup '{setup_name}': {', '.join(skipped_names)}")
         except Exception:
             pass
     return active_ops
@@ -1927,18 +1955,6 @@ def _process_next_setup():
                                                 "total": total, "setup_name": setup.name})
             html_content = generate_written_description_html(
                 setup_data, setup_idx + 1, final_screenshots, doc_name)
-
-            # ProShop has a ~256KB limit on the written description field.
-            # If we're over, strip screenshots (tool list + header are always small).
-            content_bytes = len(html_content.encode("utf-8"))
-            if content_bytes > 250_000:
-                log(f"Written description too large ({content_bytes:,} bytes), "
-                    f"stripping embedded images to fit under 256KB limit")
-                html_content = generate_written_description_html(
-                    setup_data, setup_idx + 1, [], doc_name)
-                content_bytes = len(html_content.encode("utf-8"))
-                log(f"Written description without images: {content_bytes:,} bytes")
-
             wd_ok, wd_msg = _run_selenium_written_desc(part_number, op_number, html_content)
         else:
             wd_skipped = True

@@ -438,19 +438,7 @@ def _run_written_description(driver, args, html_content):
         sys.exit(1)
     _log.info(f"[ckeditor] Ready after {time.time() - t0:.1f}s")
 
-    # ProShop has a ~256KB (262144 byte) server-side limit on the written
-    # description field. Content exceeding this is silently discarded.
-    # Warn if we're close; error if we're way over.
-    MAX_CONTENT_BYTES = 250_000  # conservative limit (server cuts at ~256KB)
     content_size = len(html_content.encode("utf-8"))
-    if content_size > MAX_CONTENT_BYTES:
-        _log.error(f"Content too large: {content_size:,} bytes (limit ~{MAX_CONTENT_BYTES:,}). "
-                   f"ProShop will silently discard the save.")
-        print(f"ERROR: Content too large ({content_size:,} bytes, limit ~{MAX_CONTENT_BYTES:,}). "
-              f"Reduce image quality or resolution.")
-        sys.exit(1)
-    elif content_size > MAX_CONTENT_BYTES * 0.9:
-        _log.warning(f"Content is {content_size:,} bytes — close to the ~{MAX_CONTENT_BYTES:,} byte limit")
 
     t0 = time.time()
     _log.info("Setting written description content...")

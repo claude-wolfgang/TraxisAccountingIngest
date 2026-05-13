@@ -22,9 +22,7 @@ try {
     $imgRight = [System.Drawing.Image]::FromFile($rightPng)
     $imgIso   = [System.Drawing.Image]::FromFile($isoPng)
 
-    # Scale quadrants to fit ProShop's ~256KB content limit.
-    # Target canvas: 1280x720 (640x360 per quadrant) at JPEG q65
-    # yields ~80-120KB base64, leaving room for the tool list HTML.
+    # Target canvas: 1280x720 (640x360 per quadrant) at JPEG q65.
     $maxCanvasW = 1280
     $maxCanvasH = 720
     $srcW = $imgTop.Width

@@ -1,13 +1,19 @@
-# ProShop Connector — Fusion 360 Add-in
+# ProShop Bridge — Fusion 360 Add-in
 
 ## What This Is
 A Fusion 360 palette add-in that connects to ProShop ERP via GraphQL API.
-Lets users browse work orders and operations without leaving Fusion.
+Lets users browse work orders, export CAM data, and push sequence-detail tools
+and written-description HTML back to ProShop — all without leaving Fusion.
+
+Replaces the earlier `ProShopConnector` (now in `OLD/`), `EXPORT TO PROSHOP`,
+and `proshop_gui`.
 
 ## Architecture
-- `ProShopConnector.py` — Python add-in: toolbar button, OAuth, GraphQL queries, palette bridge
+- `ProShopBridge.py` — Python add-in: toolbar button, OAuth, GraphQL queries, palette bridge, push-to-ProShop orchestration
 - `palette.html` — Embedded HTML/CSS/JS UI panel (runs in Fusion's Chromium)
-- `ProShopConnector.manifest` — Fusion add-in metadata
+- `ProShopBridge.manifest` — Fusion add-in metadata
+- `proshop_selenium_helper.py` — Out-of-process Selenium helper for CKEditor written-description push (system Python, not Fusion's)
+- `composite_screenshots.ps1` — PowerShell quadrant composite (top/front/right/iso) for the written description
 
 ## Key Technical Details
 - Palette communicates with Python via `adsk.fusionSendData()` bridge
@@ -37,7 +43,7 @@ Lets users browse work orders and operations without leaving Fusion.
 - CAM workspace panel IDs confirmed via dump: UtilitiesTab > CAMScriptsAddinsPanel, etc.
 - Current approach: creates own panel on UtilitiesTab (shows as PROSHOP dropdown)
 
-## Implementation Status (v1.4.0)
+## Implementation Status (v1.5.3)
 
 ### DONE: Move API calls off UI thread
 All HTTP calls run on background threads via `threading.Thread`. Responses marshalled to main thread via `app.fireCustomEvent()` → `CustomEventHandler` → `palette.sendInfoToHTML()`.
@@ -54,18 +60,15 @@ Palette only created when button clicked. Data only fetched after bridge ready +
 ### DONE: Search matches part numbers
 `applyFilters()` searches `wo.part?.partNumber`, `wo.part?.partName`, WO number, status, partRev, and operation descriptions.
 
-### TODO: Add scopes to OAuth client
-Add `contacts:r+toolpots:r` to the OAuth client in ProShop Admin to enable customer prefix tags and machine names.
-
 ## How to Test Changes
-1. In Fusion: Shift+S → Add-Ins → toggle ProShopConnector OFF
+1. In Fusion: Shift+S → Add-Ins → toggle ProShopBridge OFF
 2. Edit files here
-3. Toggle ProShopConnector back ON
+3. Toggle ProShopBridge back ON
 4. Click PROSHOP button in Utilities tab toolbar
-5. Check Text Commands panel at bottom of Fusion for log output (lines prefixed with [ProShop])
+5. Check Text Commands panel at bottom of Fusion for log output (lines prefixed with [Bridge])
 
 ## File Locations
-- Add-in folder: %appdata%\Autodesk\Autodesk Fusion 360\API\AddIns\ProShopConnector\
+- Add-in folder: %appdata%\Autodesk\Autodesk Fusion 360\API\AddIns\ProShopBridge\ (symlink/junction back to this Dropbox folder — created by `setup_fusion_addins.bat`, run as admin per PC)
 - Credentials: C:\Users\TRAXIS\.traxis.env (local) or ~/Dropbox/MACHINE COMM Traxis/Keys/.traxis.env (shared)
 - ProShop base URL: https://traxismfg.adionsystems.com/procnc
 
@@ -75,4 +78,9 @@ Consumes: Health endpoints from 13 managed services (ports 5000-8101 + 5003), FO
 Contracts: Overseer expects each HTTP service to expose a health URL returning JSON. Validators in VALIDATORS dict must match service names in SERVICES_CONFIG. P25 services use PYTHON_EXE (not PYTHONW_EXE) with -u flag. AGENT_DIR path must match P25 folder location. **All managed Flask services expose POST /api/shutdown** — Overseer's `_stop_process` POSTs there first (2s timeout) and waits 5s for natural exit before terminate()/kill(). Paths and Python interpreter are env-driven via `TRAXIS_BASE_DIR`, `TRAXIS_PYTHON`, `TRAXIS_PYTHONW`, `TRAXIS_AIRCOMPRESSOR_PYTHONW` (defaults preserve .71's `TRAXIS` user paths). Per-service OAuth secrets (`PROSHOP_CLIENT_SECRET_BRIDGE` for MsgNotifier+COTSCribKiosk, `PROSHOP_CLIENT_SECRET_TOOLKIOSK` for ToolAssemblyKiosk) injected via env={} in SERVICES_CONFIG.
 
 ## Version
-Current: 1.4.0 — increment version in both .manifest and .py docstring on changes
+Current: 1.5.3 — increment version in both .manifest and .py docstring on changes. CHANGELOG.md gets a dated entry per release.
+
+## Next Steps
+- **Selenium written-description save-verifier false negative** — push to `ICO1-10-02003` Op 60 on 2026-05-13 reported `Save FAILED: Save not verified — marker not in response (HTTP 200, 289543 chars)`. Payload was only ~57.8KB, well below any plausible limit (also see v1.5.3 — fake 256KB limit removed). Marker `push-1778698658` injected into CKEditor content but not echoed in the 289KB response — likely either ProShop sanitization strips the JS-injected marker, or the response body is a different page view than the saved content. Save may have actually succeeded; verifier is over-strict. Investigation: load the page manually after a failed push and confirm whether the content is actually there, then either relax the verifier or pick a marker that survives sanitization (e.g., a benign HTML comment vs. an inline element).
+- **Add scopes to OAuth client** — `contacts:r+toolpots:r` not yet added to ProShop OAuth client. Would enable customer prefix tags and machine names in the WO browser. (Current `SCOPES = "parts:rwdp+workorders:rwdp+users:r"`.)
+- **Re-run `setup_fusion_addins.bat` as admin on this PC (Superuser)** to upgrade the ProShopBridge directory junction created 2026-05-13 to a real symlink, matching the other 5 Traxis add-ins.
