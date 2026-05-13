@@ -4,9 +4,9 @@
 	"id":	"proshop-bridge-traxis-v1",
 	"author":	"Traxis Manufacturing",
 	"description":	{
-		"":	"v1.5.0 — ProShop Bridge: Browse WOs, export CAM data, and push to ProShop"
+		"":	"v1.5.1 — ProShop Bridge: Browse WOs, export CAM data, and push to ProShop"
 	},
-	"version":	"1.5.0",
+	"version":	"1.5.1",
 	"runOnStartup":	true,
 	"supportedOS":	"windows",
 	"editEnabled":	true

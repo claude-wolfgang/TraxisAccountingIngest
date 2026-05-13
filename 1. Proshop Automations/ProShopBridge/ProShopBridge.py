@@ -1,6 +1,6 @@
 """
 ProShop Bridge for Fusion 360
-v1.5.0 — Traxis Manufacturing
+v1.5.1 — Traxis Manufacturing
 
 Unified add-in: WO browser + CAM export + push to ProShop.
 Replaces ProShopConnector, EXPORT TO PROSHOP, and proshop_gui.
@@ -629,13 +629,25 @@ def get_cam_product():
 # CAM Data Extraction (from EXPORT TO PROSHOP script)
 # ===========================================================================
 
+def _filter_active(operations, setup_name):
+    # isActive is False if the op itself is suppressed OR any ancestor folder/pattern/setup is.
+    active_ops = [op for op in operations if getattr(op, 'isActive', True)]
+    skipped = len(operations) - len(active_ops)
+    if skipped:
+        try:
+            log(f"Skipped {skipped} suppressed/inactive operation(s) in setup '{setup_name}'")
+        except Exception:
+            pass
+    return active_ops
+
+
 def get_all_operations(setup):
     operations = []
     try:
         if hasattr(setup, 'allOperations') and setup.allOperations:
             for i in range(setup.allOperations.count):
                 operations.append(setup.allOperations.item(i))
-            return operations
+            return _filter_active(operations, getattr(setup, 'name', '?'))
     except Exception:
         pass
     try:
@@ -655,7 +667,7 @@ def get_all_operations(setup):
                 operations.extend(_ops_from_pattern(setup.patterns.item(i)))
     except Exception:
         pass
-    return operations
+    return _filter_active(operations, getattr(setup, 'name', '?'))
 
 
 def _ops_from_folder(folder):

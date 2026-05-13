@@ -1,5 +1,31 @@
 # ProShopBridge Changelog
 
+## 2026-05-13 — v1.5.1 — Skip suppressed operations
+
+### Bug
+Push to ProShop included suppressed operations: their tools/descriptions appeared in
+sequence detail rows and in the written description HTML, even though Fusion itself
+excludes suppressed ops from posted G-code. User observed two suppressed ops landing
+in sequence detail.
+
+### Root Cause
+`get_all_operations(setup)` iterated `setup.allOperations` (with folder/pattern
+fallbacks) and returned every op with no active/suppressed filter. Both
+`generate_sequence_details()` and `generate_written_description_html()` consumed the
+unfiltered list.
+
+### Fix
+Added `_filter_active()` helper applied at both return paths of `get_all_operations()`.
+Filter checks `getattr(op, 'isActive', True)` — `isActive` is False if the op itself
+is suppressed OR any ancestor folder/pattern is suppressed, so a single check covers
+both cases. The `getattr` default of `True` is defensive for op types (e.g. manual NC)
+that may not expose the property.
+
+Side effect: setup picker `operationCount` in the UI now reflects active-only too,
+matching what'll actually be pushed.
+
+Skipped ops logged for forensics: `Skipped N suppressed/inactive operation(s) in setup '<name>'`.
+
 ## 2026-03-23 — Fix camera reset after screenshot capture
 
 ### Bug
