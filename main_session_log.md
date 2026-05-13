@@ -5,6 +5,39 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-13
+
+### Overseer recovered after 2-day silent death + LabelPrintService waitress gap closed on .242
+
+**Date:** 2026-05-13
+
+**Task:** Wolfgang: "overseer is down please investigate why and report back."
+
+**What was done:**
+
+1. **Confirmed Overseer dead on .71.** No `python`/`pythonw` process, port 8060 unbound. Log file `overseer.log` last write `2026-05-11 07:55:29` — abrupt cold stop mid-cycle, no traceback, no shutdown message. `overseer_stderr.log` empty since the 5/4 boot. PC had been up 8 days (no reboot). No WER/crash dumps, no Application or System event-log entry near 07:55, no user logoff in Security log. **Root cause undetermined** — most likely candidates: scheduled-task kill, AV action, or manual termination. Couldn't enumerate TaskScheduler/Operational over SSH due to escaping; left for next-time forensics (better answer: enable LocalDumps for pythonw.exe so the next mystery death leaves evidence).
+
+2. **First two relaunch attempts via SSH failed** — pythonw started, bound :8060, then died within seconds. Diagnosed as Windows OpenSSH job-object teardown killing children when the SSH command completes. **Third launch via `Invoke-CimMethod Win32_Process.Create`** (truly detached from SSH job) stable. Dashboard HTTP 200 from .178, all 13 services spawned.
+
+3. **Investigated LabelPrintService.** Overseer reported 624 consecutive remote-restart timeouts to `10.1.1.242:5002` before its own death. .242 pings fine (host alive) but TCP/5002 refuses — Flask daemon dead. Overseer can only *detect* this, not remote-restart, because the `/api/restart` endpoint is served by the dead process (chicken-and-egg).
+
+4. **Root cause on .242 = Phase A waitress dep never installed.** Wolfgang ran `start_print_service.bat` on .242 and it errored "no waitress." The 2026-05-09 Phase A refactor moved `print_service.py` from Flask's dev server to `waitress`, but `pip install -r requirements.txt` was never run on .242. .242 wasn't on the Phase A install path (only .71 + srv-01 got `install_waitress.bat`).
+
+5. **Created `22. Tool Assembly Management/tool-kiosk/install_print_service_deps.bat`** — one-click `python -m pip install -r requirements.txt` for the print PC. Wolfgang ran it; service came up clean. Overseer's `LabelPrintService` row flipped from `down` → `healthy`, `Brother PT-P700, uptime 30s`, restart count reset to 0.
+
+6. **Discussion: would Rust improve Overseer durability?** No — the 5/11 death wasn't a Python crash (no traceback/dump), so language choice doesn't move the needle. A Rust binary is just as killable by `TerminateProcess`. The actual durability wins are the already-planned srv-01 NSSM cutover (SCM auto-restart, session 0) and enabling Windows LocalDumps for pythonw.exe.
+
+**Files modified:**
+- `22. Tool Assembly Management/tool-kiosk/install_print_service_deps.bat` (new — one-click pip install for print PC deps)
+
+**Key decisions:**
+- Didn't dig further into the 5/11 root cause. Cheap forensic capture (LocalDumps registry key) is a better next-time investment than continuing on a 2-day-cold trail.
+- Didn't restart Overseer from .71's interactive desktop session — `Win32_Process.Create` from SSH is good enough and survives the SSH disconnect. .71 is on deprecation runway; srv-01 cutover supersedes any startup-mechanism work.
+
+**Status:** Overseer healthy on .71, dashboard at :8060, all 13 services managed. LabelPrintService healthy on .242:5002. No new blockers for the srv-01 cutover.
+
+---
+
 ## 2026-05-10
 
 ### Cross-cutting: srv-01 build-out + Phase A refactor (env-driven, waitress, leader-election strip)
