@@ -44,6 +44,7 @@ BURST_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting 
 EMAIL_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\From Email")
 DB_PATH      = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\ingest_queue.db")
 QBO_AUDIT_LOG = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\qbo_audit.log")
+CONFIRMATION_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Outgoing Customer Confirmations")
 
 GRAPH_TOKEN_URL = "https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
 GRAPH_MESSAGES_URL = "https://graph.microsoft.com/v1.0/users/{mailbox}/mailFolders/inbox/messages"
@@ -56,20 +57,28 @@ QBO_DISCOVERY_URL = "https://developer.api.intuit.com/.well-known/openid_configu
 QBO_TOKEN_URL = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"  # fallback
 QBO_REVOKE_URL = "https://developer.api.intuit.com/v2/oauth2/tokens/revoke"  # fallback
 
-DOC_TYPES = ["VENDOR_INVOICE", "PACKING_SLIP", "CUSTOMER_PO", "VENDOR_PO", "CUSTOMER_QUOTE", "PAYMENT_VOUCHER", "UNKNOWN"]
+DOC_TYPES = ["VENDOR_INVOICE", "PACKING_SLIP", "CUSTOMER_PO", "VENDOR_PO", "CUSTOMER_QUOTE", "PAYMENT_VOUCHER", "UTILITY_NOTIFICATION", "SHIPPING_LABEL", "MANUAL_HANDLING", "UNKNOWN"]
 DOC_TYPE_LABELS = {
-    "VENDOR_INVOICE":   "Vendor Invoice → QBO",
-    "PACKING_SLIP":     "Packing Slip → ProShop",
-    "CUSTOMER_PO":      "Customer PO → ProShop",
-    "VENDOR_PO":        "Vendor PO / Quote → ProShop",
-    "CUSTOMER_QUOTE":   "Customer Quote → ProShop",
-    "PAYMENT_VOUCHER":  "Payment Voucher → Dropbox",
-    "UNKNOWN":          "Unknown",
+    "VENDOR_INVOICE":       "Vendor Invoice → QBO",
+    "PACKING_SLIP":         "Packing Slip → ProShop",
+    "CUSTOMER_PO":          "Customer PO → ProShop",
+    "VENDOR_PO":            "Vendor PO / Quote → ProShop",
+    "CUSTOMER_QUOTE":       "Customer Quote → ProShop",
+    "PAYMENT_VOUCHER":      "Payment Voucher → Dropbox",
+    "UTILITY_NOTIFICATION": "Utility Usage → Filed",
+    "SHIPPING_LABEL":       "Shipping Label → VPO folder",
+    "MANUAL_HANDLING":      "Manual Handling → folder",
+    "UNKNOWN":              "Unknown",
 }
 # Doc types that go to QBO instead of ProShop
 QBO_DOC_TYPES = {"VENDOR_INVOICE"}
 # Doc types that save to a local folder instead of ProShop/QBO
-FILE_DOC_TYPES = {"PAYMENT_VOUCHER"}
+FILE_DOC_TYPES = {"PAYMENT_VOUCHER", "UTILITY_NOTIFICATION", "SHIPPING_LABEL", "MANUAL_HANDLING"}
+# Doc types that file under Certs/VPO-XXXXXX/ keyed on extracted po_number
+VPO_FILED_TYPES = {"SHIPPING_LABEL"}
+# Doc types that file to a top-level Manual Handling folder (must be human-processed)
+MANUAL_HANDLING_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\Manual Handling")
+MANUAL_HANDLING_TYPES = {"MANUAL_HANDLING"}
 FILE_SAVE_ROOT = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\Filed")
 
 EMAIL_POLL_INTERVAL = 300  # seconds
@@ -141,6 +150,98 @@ def _name_match_score(needle, hay):
             token_score = jaccard * 0.75
     seq_score = difflib.SequenceMatcher(None, n, h).ratio()
     return max(token_score, seq_score)
+
+
+def download_proshop_confirmation(proshop_url, po_id, log):
+    """Save ProShop's native customer-PO confirmation form as a PDF.
+
+    Uses headless Chrome to log in, fetch
+    `{proshop_url}?formName=confirmation&printerfriendly=yes`, and print
+    the rendered page to PDF via Chrome DevTools (Page.printToPDF).
+
+    Returns the saved Path, or None on failure.
+    """
+    try:
+        from selenium import webdriver
+        from selenium.webdriver.common.by import By
+        from selenium.common.exceptions import NoSuchElementException
+    except ImportError:
+        log(f"Confirmation download skipped: selenium not installed")
+        return None
+
+    username = ENV.get("PROSHOP_USERNAME") or ""
+    password = ENV.get("PROSHOP_PASSWORD") or ""
+    if not username or not password:
+        log("Confirmation download skipped: PROSHOP_USERNAME/PASSWORD not set")
+        return None
+    if "@" not in username:
+        username = username + "@traxismfg.com"
+
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless=new")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1200,1600")
+    driver = None
+    try:
+        driver = webdriver.Chrome(options=options)
+        driver.set_page_load_timeout(30)
+        base = proshop_url.rsplit("/procnc", 1)[0]
+
+        # Log in
+        driver.get(f"{base}/procnc/")
+        time.sleep(2)
+        def _find_first(sels):
+            for s in sels:
+                try:
+                    return driver.find_element(*s)
+                except NoSuchElementException:
+                    continue
+            return None
+        u = _find_first([(By.NAME, "mailAddress"), (By.ID, "mailAddress"),
+                         (By.NAME, "username"), (By.CSS_SELECTOR, "input[type='text']")])
+        p = _find_first([(By.NAME, "password"), (By.ID, "password"),
+                         (By.CSS_SELECTOR, "input[type='password']")])
+        if not u or not p:
+            log("Confirmation download: login form not found")
+            return None
+        u.clear(); u.send_keys(username)
+        p.clear(); p.send_keys(password)
+        submit = _find_first([(By.CSS_SELECTOR, "button[type='submit']"),
+                              (By.CSS_SELECTOR, "input[type='submit']")])
+        if not submit:
+            log("Confirmation download: submit button not found")
+            return None
+        submit.click()
+        time.sleep(3)
+
+        # Fetch confirmation page
+        confirm_url = f"{proshop_url}?formName=confirmation&printerfriendly=yes"
+        driver.get(confirm_url)
+        time.sleep(2)
+
+        # Print to PDF via CDP
+        result = driver.execute_cdp_cmd("Page.printToPDF", {
+            "printBackground": True,
+            "paperWidth": 8.5, "paperHeight": 11,
+            "marginTop": 0.4, "marginBottom": 0.4,
+            "marginLeft": 0.4, "marginRight": 0.4,
+        })
+        pdf_bytes = base64.b64decode(result["data"])
+
+        CONFIRMATION_FOLDER.mkdir(parents=True, exist_ok=True)
+        dest = CONFIRMATION_FOLDER / f"{po_id} Customer PO Confirmation.pdf"
+        dest.write_bytes(pdf_bytes)
+        log(f"Confirmation saved: {dest.name}")
+        return dest
+    except Exception as e:
+        log(f"Confirmation download failed for {po_id}: {e}")
+        return None
+    finally:
+        if driver is not None:
+            try:
+                driver.quit()
+            except Exception:
+                pass
 
 
 def _qbo_audit(event, **fields):
@@ -266,14 +367,41 @@ def make_doc_hash(extracted):
     return hashlib.sha256(raw.encode()).hexdigest()
 
 def check_local_duplicate(doc_hash):
-    """Returns (queue_id, status) of existing record with same hash, or None."""
+    """Returns (queue_id, status) of existing record with same hash, or None.
+
+    Prefers a REJECTED match (so re-ingest of content the user already dismissed
+    can be auto-rejected — "Reject means permanent"). Falls back to any other
+    matching row.
+    """
     con = db()
+    # First look for a REJECTED match — those win because the user has
+    # explicitly said "don't show me this again."
     row = con.execute(
-        "SELECT id, status FROM queue WHERE doc_hash=? AND status != 'REJECTED' ORDER BY id ASC LIMIT 1",
+        "SELECT id, status FROM queue WHERE doc_hash=? AND status='REJECTED' ORDER BY id ASC LIMIT 1",
         (doc_hash,)
     ).fetchone()
+    if row is None:
+        row = con.execute(
+            "SELECT id, status FROM queue WHERE doc_hash=? ORDER BY id ASC LIMIT 1",
+            (doc_hash,)
+        ).fetchone()
     con.close()
     return row  # (id, status) or None
+
+
+def _status_for_duplicate(existing):
+    """Given (id, status) from check_local_duplicate, return the new row's status.
+
+    REJECTED match -> new row also REJECTED (user already said no).
+    Any other match -> POSSIBLE_DUPLICATE (user will review).
+    No match       -> PENDING (caller passes None).
+    """
+    if existing is None:
+        return "PENDING", None
+    eid, est = existing
+    if est == "REJECTED":
+        return "REJECTED", eid
+    return "POSSIBLE_DUPLICATE", eid
 
 def db():
     return sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -366,12 +494,90 @@ class GraphClient:
 
 # ─── ProShop Client ───────────────────────────────────────────────────────────
 
+class _BasicAuthSession:
+    """Thread-safe ProShop basic-auth session — used surgically for
+    addCustomerPo, which the OAuth path can't write to (acceptNewRecord
+    block on the AccountingConnector client's service user). Wraps
+    /api/beginsession → token (query-param auth) → /api/endsession.
+    Token expires ~300s of inactivity; execute() retries once on 401.
+
+    Mirrors P35's `purchasing/proshop_basic_auth.py` — kept inline here
+    to avoid a cross-project Python import.
+    """
+
+    def __init__(self, base_url, username, password, scope, timeout=30):
+        self.base_url = base_url.rstrip("/")
+        self.gql_url = f"{self.base_url}/api/graphql"
+        self.begin_url = f"{self.base_url}/api/beginsession"
+        self.end_url = f"{self.base_url}/api/endsession"
+        # ProShop expects a full email; .traxis.env may store the bare local part
+        self.username = username if "@" in username else f"{username}@traxismfg.com"
+        self.password = password
+        # OAuth scope is '+'-delimited; basic auth wants spaces
+        self.scope = scope.replace("+", " ")
+        self.timeout = timeout
+        self._token = None
+        self._lock = threading.Lock()
+
+    def _refresh_locked(self):
+        r = requests.post(
+            self.begin_url,
+            headers={"Content-Type": "application/json"},
+            json={"username": self.username, "password": self.password,
+                  "scope": self.scope},
+            timeout=self.timeout,
+        )
+        r.raise_for_status()
+        token = r.json().get("authorizationResult", {}).get("token")
+        if not token:
+            raise RuntimeError(f"beginsession returned no token: {r.text[:200]}")
+        self._token = token
+
+    def execute(self, query, variables=None):
+        if self._token is None:
+            with self._lock:
+                if self._token is None:
+                    self._refresh_locked()
+        payload = {"query": query, "variables": variables or {}}
+        for attempt in range(2):
+            r = requests.post(
+                self.gql_url,
+                params={"token": self._token},
+                headers={"Content-Type": "application/json"},
+                json=payload,
+                timeout=self.timeout,
+            )
+            if r.status_code == 401 and attempt == 0:
+                with self._lock:
+                    self._refresh_locked()
+                continue
+            r.raise_for_status()
+            body = r.json()
+            if "errors" in body and not body.get("data"):
+                raise RuntimeError(
+                    "; ".join(e.get("message", str(e)) for e in body["errors"])
+                )
+            return body.get("data", {})
+        raise RuntimeError("basic-auth execute exhausted retries")
+
+    def close(self):
+        if self._token is None:
+            return
+        try:
+            requests.get(self.end_url, params={"token": self._token},
+                         timeout=self.timeout)
+        except requests.RequestException:
+            pass
+        self._token = None
+
+
 class ProShopClient:
     def __init__(self):
         self.token = None
         self.expires_at = 0
         self._contacts_cache = None
         self._contacts_cache_time = 0
+        self._basic_session = None
 
     def _get_token(self):
         if self.token and time.time() < self.expires_at - 60:
@@ -431,12 +637,35 @@ class ProShopClient:
         }"""
         return self.query(gql, {"data": data})
 
+    def _get_basic_session(self):
+        """Lazy-init the basic-auth session for mutations OAuth can't write
+        to (addCustomerPo). Other mutations stay on OAuth."""
+        if self._basic_session is None:
+            base = PROSHOP_GRAPHQL_URL.rsplit("/api/graphql", 1)[0]
+            self._basic_session = _BasicAuthSession(
+                base_url=base,
+                username=ENV.get("PROSHOP_USERNAME") or "",
+                password=ENV.get("PROSHOP_PASSWORD") or "",
+                scope=ENV.get("ACCOUNTING_SCOPE") or "",
+            )
+        return self._basic_session
+
     def add_customer_po(self, data):
+        """Create a CustomerPo via basic auth (OAuth path is gated at
+        acceptNewRecord — see 2026-05-06 session log)."""
         gql = """
         mutation AddCustomerPo($data: AddCustomerPoInput!) {
           addCustomerPo(data: $data) { poId proshopUrl }
         }"""
-        return self.query(gql, {"data": data})
+        return self._get_basic_session().execute(gql, {"data": data})
+
+    def update_customer_po(self, po_id, data):
+        """Update an existing CustomerPo. Uses basic auth — same path as add."""
+        gql = """
+        mutation UpdateCustomerPo($poId: String!, $data: UpdateCustomerPoInput!) {
+          updateCustomerPo(poId: $poId, data: $data) { poId proshopUrl }
+        }"""
+        return self._get_basic_session().execute(gql, {"poId": po_id, "data": data})
 
     def add_purchase_order(self, data):
         gql = """
@@ -790,6 +1019,20 @@ EXTRACTION_PROMPTS = {
   "confidence": 0.0-1.0
 }""",
 
+    "SHIPPING_LABEL": """Extract data from this carrier shipping label. Return JSON:
+{
+  "carrier": "UPS, FedEx, USPS, Old Dominion, etc. or null",
+  "tracking_number": "tracking/PRO number or null",
+  "po_number": "reference / PO number visible on the label (often labeled REF, PO, REFERENCE) — 6-digit Traxis VPO if present (format 26XXXX or 25XXXX) or null",
+  "ship_date": "ship date (YYYY-MM-DD) or null",
+  "ship_from": "shipper company and city or null",
+  "ship_to": "recipient company and city or null",
+  "weight": "package weight including unit (e.g. '28.244 LB') or null",
+  "service": "service level (Ground, 2-Day, etc.) or null",
+  "notes": "anything else worth keeping or null",
+  "confidence": 0.0-1.0
+}""",
+
     "PACKING_SLIP": """Extract all data from this packing slip/delivery note. Return JSON:
 {
   "vendor_name": "shipper/vendor company name",
@@ -880,6 +1123,9 @@ CUSTOMER_PO - a purchase order FROM a customer TO Traxis (the customer is BUYING
 VENDOR_PO - a purchase order FROM Traxis TO a vendor, or a vendor's quote/price list for materials/tools Traxis wants to buy
 CUSTOMER_QUOTE - a quote or estimate Traxis is providing TO a customer, or an RFQ from a customer asking Traxis to quote
 PAYMENT_VOUCHER - a payment voucher, remittance advice, or payment confirmation document
+UTILITY_NOTIFICATION - a non-billable usage/metering report from a utility provider (electric, water, gas, internet, telecom). Examples: weekly electricity usage update, monthly water consumption summary, bandwidth report. Distinct from VENDOR_INVOICE because no payment is due — these are informational only.
+SHIPPING_LABEL - a carrier shipping/freight label (UPS, FedEx, USPS, Old Dominion, etc.) showing tracking number, weight, and from/to addresses. Usually a small page with a large barcode. Distinct from PACKING_SLIP because it doesn't list parts/quantities — it's just the addressing/tracking document attached to a shipment.
+MANUAL_HANDLING - real financial documents that look like a Bill or PO but don't actually create a payable. Specifically: vendor credit memos (vendor issuing credit/refund TO Traxis), debit memos, adjustment notes, chargeback notices, return authorizations with monetary impact, statement-of-account reminders that include line-item credits. Do NOT classify these as VENDOR_INVOICE — booking a credit as a Bill creates accounting errors in the wrong direction. These get filed for manual entry in QBO.
 UNKNOWN - cannot determine
 
 KEY RULE: If the document is a Purchase Order and Traxis/Traxis Manufacturing/Traxis MFG appears as the VENDOR or SUPPLIER or SHIP-TO, it is a CUSTOMER_PO (the customer is ordering from Traxis). If Traxis appears as the BUYER, it is a VENDOR_PO.
@@ -1240,8 +1486,7 @@ class EmailPoller:
 
         doc_hash = make_doc_hash(extracted)
         existing = check_local_duplicate(doc_hash)
-        status = "POSSIBLE_DUPLICATE" if existing else "PENDING"
-        duplicate_of = existing[0] if existing else None
+        status, duplicate_of = _status_for_duplicate(existing)
 
         con.execute("""
             INSERT INTO queue (source, source_ref, doc_type, pdf_path, extracted_json, confidence,
@@ -1255,8 +1500,10 @@ class EmailPoller:
         con.commit()
         vendor = extracted.get("vendor_name", sender)
         amount = extracted.get("total_amount", "?")
-        if existing:
-            self.log(f"Possible duplicate of #{existing[0]}: {doc_type} from {vendor} (${amount})")
+        if status == "REJECTED":
+            self.log(f"Auto-rejected (dupe of REJECTED #{duplicate_of}): {doc_type} from {vendor}")
+        elif status == "POSSIBLE_DUPLICATE":
+            self.log(f"Possible duplicate of #{duplicate_of}: {doc_type} from {vendor} (${amount})")
         else:
             self.log(f"Queued (email body): {doc_type} from {vendor} — ${amount}")
         self.on_new_doc()
@@ -1267,8 +1514,7 @@ class EmailPoller:
         extracted = self.extractor.extract(pdf_path, doc_type)
         doc_hash = make_doc_hash(extracted)
         existing = check_local_duplicate(doc_hash)
-        status = "POSSIBLE_DUPLICATE" if existing else "PENDING"
-        duplicate_of = existing[0] if existing else None
+        status, duplicate_of = _status_for_duplicate(existing)
 
         con.execute("""
             INSERT INTO queue (source, source_ref, doc_type, pdf_path, extracted_json, confidence,
@@ -1280,8 +1526,10 @@ class EmailPoller:
               datetime.now(timezone.utc).isoformat(),
               sender, doc_hash, duplicate_of, status))
         con.commit()
-        if existing:
-            self.log(f"Possible duplicate of queue #{existing[0]}: {Path(pdf_path).name}")
+        if status == "REJECTED":
+            self.log(f"Auto-rejected (dupe of REJECTED #{duplicate_of}): {Path(pdf_path).name}")
+        elif status == "POSSIBLE_DUPLICATE":
+            self.log(f"Possible duplicate of #{duplicate_of}: {Path(pdf_path).name}")
         else:
             self.log(f"Queued: {doc_type} — {Path(pdf_path).name}")
         self.on_new_doc()
@@ -1321,16 +1569,25 @@ class FolderWatcher:
         """Classify, extract, and queue a single-document file."""
         doc_type = self.extractor.classify(str(f))
         extracted = self.extractor.extract(str(f), doc_type)
+        doc_hash = make_doc_hash(extracted)
+        existing = check_local_duplicate(doc_hash)
+        status, duplicate_of = _status_for_duplicate(existing)
         con = db()
         con.execute("""
-            INSERT INTO queue (source, source_ref, doc_type, pdf_path, extracted_json, confidence, created_at)
-            VALUES (?,?,?,?,?,?,?)
+            INSERT INTO queue (source, source_ref, doc_type, pdf_path, extracted_json, confidence,
+                               created_at, doc_hash, duplicate_of, status)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
         """, ("scan", f.name, doc_type, str(f),
               json.dumps(extracted),
               extracted.get("confidence", 0),
-              datetime.now(timezone.utc).isoformat()))
+              datetime.now(timezone.utc).isoformat(),
+              doc_hash, duplicate_of, status))
         con.commit()
         con.close()
+        if status == "REJECTED":
+            self.log(f"Auto-rejected (dupe of REJECTED #{duplicate_of}): {f.name}")
+        elif status == "POSSIBLE_DUPLICATE":
+            self.log(f"Possible duplicate of #{duplicate_of}: {f.name}")
         self.on_new_doc()
 
         # Tool receiving labels are printed manually via the review queue, not on auto-ingest
@@ -1769,12 +2026,24 @@ class AccountingIngestApp(tk.Tk):
         tree_frame = tk.Frame(parent, bg="#1e1e1e")
         tree_frame.pack(fill="both", expand=True, padx=0, pady=0)
 
-        cols = ("type", "source", "date", "confidence")
+        cols = ("id", "type", "source", "date", "confidence")
         self._tree = ttk.Treeview(tree_frame, columns=cols, show="headings", selectmode="extended")
-        self._tree.heading("type", text="Type")
-        self._tree.heading("source", text="Source")
-        self._tree.heading("date", text="Date")
-        self._tree.heading("confidence", text="Conf")
+        # Click-to-sort. Default order = id DESC (newest first); subsequent
+        # clicks on any column header toggle that column's direction.
+        self._sort_state = {"id": False, "type": True, "source": True,
+                            "date": True, "confidence": True}
+        # Default direction shown when first clicking a column:
+        #   id           -> DESC (newest first)
+        #   date         -> DESC (newest first)
+        #   confidence   -> DESC (highest first)
+        #   type/source  -> ASC  (alphabetical)
+        self._sort_default_reverse = {"id": True, "type": False, "source": False,
+                                      "date": True, "confidence": True}
+        for c, label in [("id", "ID"), ("type", "Type"), ("source", "Source"),
+                         ("date", "Date"), ("confidence", "Conf")]:
+            self._tree.heading(c, text=label,
+                               command=lambda cc=c: self._sort_by_column(cc))
+        self._tree.column("id", width=50, anchor="e")
         self._tree.column("type", width=130)
         self._tree.column("source", width=60)
         self._tree.column("date", width=80)
@@ -1929,6 +2198,58 @@ class AccountingIngestApp(tk.Tk):
 
     # ── Queue Management ───────────────────────────────────────────────────
 
+    def _sort_by_column(self, col):
+        """Sort the current queue rows by the clicked column. Toggles direction
+        on repeated clicks. Smart per-column key (numeric for id/confidence,
+        date-parsed for date, lowercase string for everything else)."""
+        # First click on this column uses default direction; subsequent clicks toggle.
+        if col not in self._sort_state:
+            return
+        reverse = self._sort_state.get(col)
+        if reverse is None:
+            reverse = self._sort_default_reverse.get(col, False)
+        col_index = {"id": 0, "type": 1, "source": 2, "date": 3, "confidence": 4}[col]
+
+        def key_fn(iid):
+            vals = self._tree.item(iid, "values")
+            raw = vals[col_index] if col_index < len(vals) else ""
+            if col == "id":
+                try:
+                    return (0, int(raw))
+                except (ValueError, TypeError):
+                    return (1, 0)
+            if col == "confidence":
+                m = re.match(r"-?\d+", str(raw))
+                return (0, int(m.group(0))) if m else (1, 0)
+            if col == "date":
+                s = str(raw or "").strip()
+                if not s:
+                    return (1, "")  # empties last
+                for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%Y/%m/%d"):
+                    try:
+                        return (0, datetime.strptime(s[:10] if fmt == "%Y-%m-%d" else s, fmt))
+                    except ValueError:
+                        continue
+                return (1, s)  # unparseable last
+            return (0, str(raw or "").lower())
+
+        children = list(self._tree.get_children(""))
+        children.sort(key=key_fn, reverse=reverse)
+        for idx, iid in enumerate(children):
+            self._tree.move(iid, "", idx)
+
+        # Header indicator
+        for c, label in [("id", "ID"), ("type", "Type"), ("source", "Source"),
+                         ("date", "Date"), ("confidence", "Conf")]:
+            if c == col:
+                arrow = " v" if reverse else " ^"
+                self._tree.heading(c, text=label + arrow)
+            else:
+                self._tree.heading(c, text=label)
+
+        # Toggle direction for next click
+        self._sort_state[col] = not reverse
+
     def _refresh_queue(self):
         # Preserve current selection and scroll position so a background ingest
         # doesn't yank the user out of whatever row they're reviewing.
@@ -1977,7 +2298,7 @@ class AccountingIngestApp(tk.Tk):
             label = DOC_TYPE_LABELS.get(doc_type, doc_type)
             tag = status
             self._tree.insert("", "end", iid=str(qid),
-                               values=(label, source, date_str, conf_str), tags=(tag,))
+                               values=(qid, label, source, date_str, conf_str), tags=(tag,))
             if status == "PENDING":
                 pending += 1
 
@@ -2361,9 +2682,10 @@ class AccountingIngestApp(tk.Tk):
 
                     con = db()
                     con.execute("""
-                        UPDATE queue SET status='QBO', edited_json=?, contact_name=?,
-                        proshop_id=?, proshop_url=?, reviewed_at=? WHERE id=?
-                    """, (edited_raw, vendor_display, bill_id, qbo_url,
+                        UPDATE queue SET status='QBO', doc_type=?, edited_json=?, contact_name=?,
+                        proshop_id=?, proshop_url=?, reviewed_at=?, upload_error=NULL
+                        WHERE id=?
+                    """, (doc_type, edited_raw, vendor_display, bill_id, qbo_url,
                           datetime.now(timezone.utc).isoformat(), cur_id))
                     con.commit()
                     con.close()
@@ -2389,23 +2711,64 @@ class AccountingIngestApp(tk.Tk):
             def do_file_save():
                 try:
                     con = db()
-                    row = con.execute("SELECT pdf_path FROM queue WHERE id=?", (cur_id,)).fetchone()
+                    row = con.execute("SELECT pdf_path, source, source_ref, from_addr FROM queue WHERE id=?", (cur_id,)).fetchone()
                     con.close()
-                    if not row or not row[0]:
-                        raise FileNotFoundError("No PDF path for this queue record")
-                    src = Path(row[0])
-                    if not src.exists():
-                        raise FileNotFoundError(f"PDF not found: {src}")
-                    dest_dir = FILE_SAVE_ROOT / doc_type
+                    if not row:
+                        raise FileNotFoundError("Queue row not found")
+                    pdf_path, source, source_ref, from_addr = row
+                    # SHIPPING_LABEL files into Certs/VPO-XXXXXX/ next to the matching
+                    # packing slip + certs, keyed on the extracted po_number.
+                    if doc_type in VPO_FILED_TYPES:
+                        try:
+                            data_for_vpo = json.loads(edited_raw)
+                        except Exception:
+                            data_for_vpo = {}
+                        po_num = data_for_vpo.get("po_number") or ""
+                        notes  = data_for_vpo.get("notes") or ""
+                        po_match = (re.search(r"\b(2[456]\d{4})\b", po_num)
+                                    or re.search(r"\b(2[456]\d{4})\b", notes))
+                        if not po_match:
+                            raise ValueError(
+                                "No 6-digit Traxis VPO found in po_number or notes. "
+                                "Edit the JSON to add a po_number like '263092' before approving."
+                            )
+                        vpo = po_match.group(1)
+                        dest_dir = self.CERT_FOLDER / f"VPO-{vpo}"
+                    elif doc_type in MANUAL_HANDLING_TYPES:
+                        # Visible top-level folder — gets auto-opened at session close
+                        # when non-empty so it's not forgotten.
+                        dest_dir = MANUAL_HANDLING_FOLDER
+                    else:
+                        dest_dir = FILE_SAVE_ROOT / doc_type
                     dest_dir.mkdir(parents=True, exist_ok=True)
-                    dest = dest_dir / src.name
-                    shutil.copy2(str(src), str(dest))
+                    if pdf_path and Path(pdf_path).exists():
+                        # PDF-backed doc — copy the source file
+                        src = Path(pdf_path)
+                        dest = dest_dir / src.name
+                        shutil.copy2(str(src), str(dest))
+                    else:
+                        # email_body doc — no PDF; re-fetch HTML from Graph and save as .html
+                        # plus the extracted JSON as a sidecar
+                        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        safe_from = re.sub(r"[^\w\-]", "_", (from_addr or "unknown")[:40])
+                        stem = f"{ts}_{safe_from}_qid{cur_id}"
+                        dest = dest_dir / f"{stem}.html"
+                        try:
+                            html_body, _ = self.graph.get_body(source_ref) if source_ref else ("", "")
+                        except Exception:
+                            html_body = ""
+                        if not html_body:
+                            # Fall back to a tiny stub so we don't lose the row entirely
+                            html_body = f"<html><body><p>Body could not be re-fetched.</p><pre>{edited_raw}</pre></body></html>"
+                        dest.write_text(html_body, encoding="utf-8")
+                        (dest_dir / f"{stem}.json").write_text(edited_raw, encoding="utf-8")
 
                     con = db()
                     con.execute("""
-                        UPDATE queue SET status='UPLOADED', edited_json=?,
-                        proshop_url=?, reviewed_at=? WHERE id=?
-                    """, (edited_raw, str(dest),
+                        UPDATE queue SET status='UPLOADED', doc_type=?, edited_json=?,
+                        proshop_url=?, reviewed_at=?, upload_error=NULL
+                        WHERE id=?
+                    """, (doc_type, edited_raw, str(dest),
                           datetime.now(timezone.utc).isoformat(), cur_id))
                     con.commit()
                     con.close()
@@ -2476,9 +2839,10 @@ class AccountingIngestApp(tk.Tk):
                     )
                     con = db()
                     con.execute("""
-                        UPDATE queue SET status='UPLOADED', edited_json=?, contact_name=?,
-                        proshop_id=?, proshop_url=?, reviewed_at=? WHERE id=?
-                    """, (edited_raw, contact_code, proshop_id, proshop_url,
+                        UPDATE queue SET status='UPLOADED', doc_type=?, edited_json=?, contact_name=?,
+                        proshop_id=?, proshop_url=?, reviewed_at=?, upload_error=NULL
+                        WHERE id=?
+                    """, (doc_type, edited_raw, contact_code, proshop_id, proshop_url,
                           datetime.now(timezone.utc).isoformat(), cur_id))
                     con.commit()
                     con.close()
@@ -2487,6 +2851,26 @@ class AccountingIngestApp(tk.Tk):
                     # Copy packing slip PDFs (which contain cert pages) to Certs folder by VPO
                     if doc_type == "PACKING_SLIP":
                         self._save_cert_for_vpo(cur_id, edited_raw)
+
+                    # For customer POs: pull ProShop's native confirmation form
+                    # to PDF and flip confirmationSent on the CPO record.
+                    if doc_type == "CUSTOMER_PO" and proshop_id and proshop_url:
+                        def _gen_confirmation(pid=proshop_id, purl=proshop_url):
+                            pdf_path = download_proshop_confirmation(purl, pid, self._log)
+                            if not pdf_path:
+                                return
+                            try:
+                                self.proshop.update_customer_po(pid, {
+                                    "confirmationSent": True,
+                                    "confirmationSentBy": ENV.get("PROSHOP_USERNAME", "P27"),
+                                    "confirmationNotes": f"Auto-generated via P27 -> {pdf_path}",
+                                })
+                                self._log(f"CPO {pid}: confirmationSent flag set in ProShop")
+                            except Exception as e:
+                                self._log(f"CPO {pid}: confirmation flag update failed (PDF still saved): {e}")
+                        threading.Thread(target=_gen_confirmation, daemon=True,
+                                         name=f"cpo_confirm_{proshop_id}").start()
+
                     self.after(0, self._refresh_queue)
                     self.after(0, lambda: self._load_record(cur_id))
                     self.after(0, self._advance_queue)
@@ -2796,7 +3180,31 @@ class AccountingIngestApp(tk.Tk):
     def on_close(self):
         self._email_poller.stop()
         self._folder_watcher.stop()
+        self._manual_handling_reminder()
         self.destroy()
+
+    def _manual_handling_reminder(self):
+        """If the Manual Handling folder has anything in it, show a modal
+        reminder and open the folder in Explorer so the operator sees the
+        backlog before walking away."""
+        try:
+            if not MANUAL_HANDLING_FOLDER.exists():
+                return
+            files = [f for f in MANUAL_HANDLING_FOLDER.iterdir() if f.is_file()]
+            if not files:
+                return
+            files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+            preview = "\n".join(f"  • {f.name}" for f in files[:8])
+            extra = f"\n  • ...and {len(files) - 8} more" if len(files) > 8 else ""
+            messagebox.showinfo(
+                "Manual Handling folder — odd ducks to deal with",
+                f"{len(files)} item(s) need manual handling in QBO:\n\n"
+                f"{preview}{extra}\n\n"
+                f"Folder will open in Explorer when you click OK."
+            )
+            os.startfile(str(MANUAL_HANDLING_FOLDER))
+        except Exception:
+            pass
 
 
 # ─── Entry Point ──────────────────────────────────────────────────────────────

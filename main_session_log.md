@@ -38,6 +38,60 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+### P27: end-to-end customer-PO flow — production-capable (work spans 2026-05-11 to 2026-05-13)
+
+**Task:** Wolfgang launched the GUI for production use. A cascade of issues surfaced; each was fixed as it came up. Path went from "rejects everything mysteriously" → "pushes things wrong" → "duplicates pile up" → "customer POs work end-to-end with auto-generated confirmation PDFs."
+
+**What was done:**
+
+1. **`_upload_customer_po` field fallbacks.** First production push failed `Expected a non-null value for input field data.clientPONumber`. Doc was originally classified `VENDOR_PO`, so extraction had `quote_number`/`quote_date` (not `po_number`/`po_date`); user reclassified via dropdown but the upload code only checked the CPO-shaped keys. Added fallbacks. Also stopped writing `data["ship_to"]` to the `fob` enum (yesterday's introspection caught this — was sending a free-text address into a `DESTINATION`/`ORIGIN` field). Proper `shiptoAddress` mapping deferred to the planned bundle.
+
+2. **ProShop dup-check rewrite — `_check_proshop_duplicate`.** Two silent failures: filter field was hardcoded to `referenceNumber` for every doc type (only Bills work that way — CPOs use `clientPONumber`, VPOs use `confirmationNumber`); and PO numbers were exact-matched, so an extracted `"PO115126"` missed the stored `"115126"`. Fix: per-doc-type filter map, strip leading `PO`/`P.O.`/`PO#`/`INV` then try normalized then raw, parse dates loose (ISO **or** `M/D/YYYY`), 6-month window, surface errors in GUI log.
+
+3. **Hard refuse on duplicates.** Was prompt-and-override. Wolfgang: *"can't think why I would want a second copy of an order. It ought to refuse and stop."* Detect → mark `POSSIBLE_DUPLICATE` with `proshop_url` to existing record → warn → stop. No override (JSON edit is the escape hatch if ever needed).
+
+4. **Permanent reject — `check_local_duplicate` was excluding REJECTED rows.** Rejecting let the same content re-ingest as PENDING. Wolfgang: *"I'm rejecting selections, they're back next time."* New `_status_for_duplicate(existing)` — prefers REJECTED matches (auto-rejects re-ingest), falls back to any other (POSSIBLE_DUPLICATE). Threaded through `_enqueue`, `_process_email_body`, **and** `FolderWatcher._process_one` (which had no dedup at all). Retroactive sweep: 5 rows that matched prior REJECTED hashes (4 CUSTOMER_QUOTE forwards from `tom@`, 1 Titanium VPO) moved to REJECTED.
+
+5. **Better fuzzy contact match — `_name_match_score`.** `SequenceMatcher.ratio()` favors similar-length strings — "Hadco Metal" scored 75% against "Bralco Metals" but only 56% against "Hadco Metal Trading Co., LLC". Wolfgang: *"correct vendor is not available in the list."* New scorer: substring containment (0.92+), token subset (0.78-0.88), Jaccard, sequence ratio last. Applied to both ProShop and QBO fuzzy. Now `"hadco"` → Hadco at 93%, top-of-list.
+
+6. **Packing-slip quantity parser** — `float("13.000 PC")` raised, swallowed silently, `quantity` never set, GraphQL rejected non-null. New inline `_num()` strips unit suffixes / currency before parsing.
+
+7. **Surgical basic-auth for `addCustomerPo`.** OAuth path still blocked at `acceptNewRecord` (deleted `auth_010` mapping). Added inline `_BasicAuthSession` class (mirrors P35's `purchasing/proshop_basic_auth.py` — kept inline to avoid cross-project import). `ProShopClient._get_basic_session()` lazy-inits; `add_customer_po` + `update_customer_po` route through it. Every other mutation stays on OAuth. Live-tested: customer PO `R2S1-PO115245` created cleanly. Trade-off (per Joao 2026-05-06): ProShop audit shows Wolfgang's name as creator, not service user.
+
+8. **Auto-confirmation generation for customer POs.** Wolfgang shared a ProShop confirmation PDF — bottom-of-page URL revealed `{cpo_url}?formName=confirmation&printerfriendly=yes` returns the ProShop-rendered form. New `download_proshop_confirmation()`: headless Chrome → login → navigate → `Page.printToPDF` (CDP) → save to `C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Outgoing Customer Confirmations\{poId} Customer PO Confirmation.pdf`. After addCustomerPo success, background thread fires this, then `updateCustomerPo` flips `confirmationSent=true` + `confirmationSentBy` + `confirmationNotes=<file path>`. Live-tested: R2S1-PO115245 confirmation PDF (82.6 KB) generated, CPO record updated. ProShop's own template, not a homegrown render.
+
+9. **Three new doc types — file-only paths.**
+   - `UTILITY_NOTIFICATION`: non-bill utility-usage notifications (coautilities, etc.). Files HTML body + JSON sidecar to `Filed/UTILITY_NOTIFICATION/`. Classifier prompt updated.
+   - `SHIPPING_LABEL`: carrier labels (UPS, FedEx, USPS, Old Dominion). Files to `Certs/VPO-XXXXXX/` keyed on extracted `po_number`. New extraction prompt. Distinct from packing slips (no line items).
+   - `MANUAL_HANDLING`: vendor credit memos, debit memos, adjustment notes, chargebacks. Routes to a **visible top-level** folder `Accounting Inbox/Manual Handling/` (not under `Filed/`). Classifier explicitly warns NOT to classify as VENDOR_INVOICE (booking a credit as a Bill is wrong-direction).
+
+10. **GUI on-close reminder for Manual Handling.** Wolfgang: *"send to folder and remind me when I close to deal with the folder ... auto open it."* `_manual_handling_reminder()` runs in `on_close`: non-empty folder → modal `messagebox.showinfo` listing the items ("odd ducks to deal with") → `os.startfile()` pops Explorer. Silent if empty/missing.
+
+11. **UX polish.** Added `ID` column to queue Treeview (leftmost, right-aligned) so rows can be referenced by id in conversation; click-to-sort all five columns with smart per-column keys; selection + scroll anchor preserved across `_refresh_queue` so background ingest doesn't yank operator out of current row.
+
+12. **Doc_type write-back + stale upload_error cleanup.** All three approve UPDATE paths now `SET doc_type = ?` and `upload_error = NULL`. Manual reclassification via dropdown now persists; success after a transient failure no longer leaves the old error string. Retroactive: row #472 doc_type corrected, stale auth_010 errors cleared.
+
+**Live state by close:**
+- R2S1-PO115245 customer PO created end-to-end, confirmation PDF generated and posted to `Outgoing Customer Confirmations/`, `confirmationSent` flipped via API.
+- Setcom row #417 correctly caught by dup-check as duplicate of existing `SET1-352760`. Hard refuse worked.
+- Two misclassified VPOs (`263109`, `263107`) deleted by Wolfgang; rows reset and re-pushed correctly.
+- One Hadco packing slip (`260511-02`) cleanly uploaded with proper contact.
+
+**Files modified:**
+
+- `27. Accounting Ingest/accounting_ingest.py` (~500 lines diff total over session): new helpers (`_name_match_score`, `_status_for_duplicate`, `_BasicAuthSession`, `download_proshop_confirmation`, `_manual_handling_reminder`, `_sort_by_column`, `_num` inline in `_build_ps_items`); rewritten `_check_proshop_duplicate`, `_upload_customer_po`; new `update_customer_po` mutation; new constants (`CONFIRMATION_FOLDER`, `MANUAL_HANDLING_FOLDER`, `MANUAL_HANDLING_TYPES`); 3 new doc types in registries; classifier prompt updates; new `SHIPPING_LABEL` extraction prompt; `doc_type`+`upload_error` fixes in all approve paths; hard-refuse duplicate handler; CPO confirmation background thread hook; ID column + click-to-sort wiring; scroll/selection preservation.
+- `27. Accounting Ingest/CLAUDE.md`: Manual Handling reminder section added.
+- `C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Outgoing Customer Confirmations\R2S1-PO115245 Customer PO Confirmation.pdf` (new artifact from live test).
+
+**Status:** P27 production-capable for documents it sees daily. Customer POs flow end-to-end with auto-confirmation. First QBO Bill push not yet exercised (still on Next Steps).
+
+**[NEEDS WOLFGANG]:**
+- Spot-check the three Hadco packing slips (`260511-03/04/05`) that uploaded with `contact_name=None` — likely contact-picker UX gap, may need cleanup in ProShop.
+- First QBO Bill push still pending — verify `qbo_audit.log` populates and vendor-aware categorization wins for established vendors.
+- Test the on-close Manual Handling popup once you classify your first credit memo and approve it.
+
+---
+
 ## 2026-05-10
 
 ### Cross-cutting: srv-01 build-out + Phase A refactor (env-driven, waitress, leader-election strip)
