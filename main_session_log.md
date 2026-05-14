@@ -5,6 +5,50 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-14
+
+### P30 v1.6.0 CWS resubmission — Buy button package + privacy alignment
+
+**Task:** Wolfgang: "I click buy button on a COTs page and nothing happens" → traced root cause, bundled v1.6.0 for CWS, hardened against the historical rejection pattern, submitted for review.
+
+**What was done:**
+
+1. **Root cause diagnosed — profile mismatch, not a bug.** P31 backend probed end-to-end: `/api/health` ok, `/api/queue-order` accepts payloads correctly. Database showed TOHO-171 queued from 2026-05-13 (proving the chain works). The "nothing happens" click was on Wolfgang's personal Chrome profile, which doesn't have v1.6.0 sideloaded — the Buy button he saw was ProShop's native one, not the extension's. Live confirmation: he then clicked Buy on FIL-157 from the shop profile (which DOES have v1.6.0 sideloaded), order #5 landed in the queue with vendor=AMAZON correctly scraped.
+
+2. **Bundled v1.6.0 ZIP for CWS.** `30. Material Label Extension/deployment/traxis-label-printer-v1.6.0.zip` (45 KB, 20 files, manifest at root). Audited permissions per memory `feedback_manifest_permission_audit.md`: zero `permissions` entries (clean), three `host_permissions` all in active use (`adionsystems.com` for content scripts + GraphQL, `:5002` for print service, `:5003` for queue-order), only chrome.runtime API used. Trimmed manifest `description` from 145 to 109 chars after CWS validator rejected the original for exceeding the 132-char cap.
+
+3. **Updated privacy policy in `claude-wolfgang/traxis-privacy` repo.** Live policy was misaligned with v1.6.0 manifest in three ways: missing `10.1.1.71:5003` host, vestigial `activeTab` reference (not in manifest), no mention of purchase-order queueing function. Wrote replacement `index.html` covering all three hosts and the purchase-order payload schema, pushed via `gh api PUT` (commit `64720434` on main). GitHub Pages rebuilt within 2 min.
+
+4. **CWS submission walkthrough.** Walked Wolfgang through Developer Dashboard step-by-step: Package upload, Store listing (left existing description; created `deployment/store_listing_v1.6.0.md` for future use), Privacy practices form with host-permission justification covering all three endpoints (`~470` chars in one combined field, not per-host as I'd initially assumed), Data usage form (Website content = Yes with LAN-only justification, all others = No, all three certification boxes checked). Submitted 2026-05-14.
+
+**Files modified:**
+- `30. Material Label Extension/traxis-material-label/manifest.json` — description trimmed to 109 chars
+- `30. Material Label Extension/CLAUDE.md` — Next Steps + Interfaces updated for v1.6.0 submission and `:5003` consumption
+- `35. Purchasing Automation/CLAUDE.md` — Next Steps "CWS approval cycle" item flipped from "Sideload-tested only" to "Submitted for review 2026-05-14"; Cost-scrape brittleness item now includes FIL-157 as second confirmed miss
+- `main_session_log.md` — this entry
+
+**Files created:**
+- `30. Material Label Extension/deployment/traxis-label-printer-v1.6.0.zip` — CWS submission bundle
+- `30. Material Label Extension/deployment/privacy_v1.6.0_proposed.html` — proposed privacy policy draft (mirror of what was pushed to GitHub)
+- `30. Material Label Extension/deployment/store_listing_v1.6.0.md` — Store-listing copy (Summary + long Description); not used this submission since v1.5.x's short description was accepted, kept for future bounces
+
+**External changes (not in this repo):**
+- `claude-wolfgang/traxis-privacy` on GitHub — `index.html` commit `64720434`, live at https://claude-wolfgang.github.io/traxis-privacy/
+
+**Key decisions:**
+- **Harden upfront vs. wait-and-respond to a rejection** — chose harden, given P30's historical pattern of two prior CWS rejections (per `feedback_manifest_permission_audit.md` memory). Privacy policy alignment is the single most impactful piece for a clean review; permissions audit was already clean.
+- **Skip the long Store-listing description** — Wolfgang correctly noted CWS accepted v1.5.x with minimal description. Reviewers focus on Privacy practices form / manifest / privacy-policy alignment, not marketing copy. Kept `store_listing_v1.6.0.md` for future bounces.
+- **Website content disclosure = Yes, not No** — even though the data stays on-LAN, the extension does read page DOM and POST it elsewhere, so checking No would risk a misrepresentation flag (worse rejection class than just disclosing accurately with a clear LAN-only justification).
+
+**Open items surfaced this session:**
+- 2 orders pending in P31 approval queue: TOHO-171 (2026-05-13) and FIL-157 (today). Phase 2 worker not yet wired, so approval just flips state — no automatic VPO creation. Wolfgang to triage/reject/approve via http://10.1.1.71:5003/approvals.
+- FIL-157 is the second confirmed cost-scrape miss after THI-17 — pattern is solidifying enough to be worth a DOM inspection sprint.
+
+**Memory updates worth considering** (none added this session — flagging for review):
+- The "P30 hit two CWS rejections" memory could be expanded with what specifically rejected each time, to make future hardening sharper. Skipping for now — the current memory's "audit permissions before submitting" guidance was sufficient.
+
+---
+
 ## 2026-05-13
 
 ### P1 ProShopBridge: Fusion install + skip suppressed ops + remove fake 256KB limit
