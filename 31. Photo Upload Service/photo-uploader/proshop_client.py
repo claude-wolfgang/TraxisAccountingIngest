@@ -480,9 +480,14 @@ class ProShopClient:
         if cached is not None:
             return cached
 
+        # `type` is required to build the correct detail-page URL:
+        # ProShop's COTS pages live at /ots/{cotsType}/{number}, not the
+        # bare /ots/{number} (which returns no detail form). Items whose
+        # number lacks a prefix (e.g. "223") were unreachable without this.
+        # `type` is a scalar string on cotsItems, not an object.
         result = self._execute("""
             { cotsItems(pageSize: 500) {
-                records { number description }
+                records { number description type }
             }}
         """)
         records = result.get("data", {}).get("cotsItems", {}).get("records", [])
@@ -499,11 +504,14 @@ class ProShopClient:
             desc = r.get("description") or ""
             num_digits = "".join(c for c in num if c.isdigit())
             if q in num.lower() or q in desc.lower() or (q_digits and q_digits in num_digits):
+                ctype = r.get("type") or ""
+                url = (f"{self.base_url}/ots/{ctype}/{num}"
+                       if ctype else f"{self.base_url}/ots/{num}")
                 matches.append({
                     "id": num,
                     "name": desc.split("\n")[0],
                     "detail": "",
-                    "proshop_url": f"{self.base_url}/ots/{num}",
+                    "proshop_url": url,
                 })
         return matches[:20]
 

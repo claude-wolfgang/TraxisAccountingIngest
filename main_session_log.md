@@ -130,6 +130,45 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+### P31 photo-uploader: tablet UX changes + WO-page fallback for ops with no writtenDescription
+
+**Date:** 2026-05-13
+
+**Task:** Wolfgang exercised the tablet flow and gave five functional asks: (1) photos arriving sideways regardless of tablet orientation, (2) ops with no writtenDescription form ended up uploading "to nowhere", (3) after-upload the UI jumped back to Home instead of letting the operator keep snapping for the same WO+op, (4) typing a pure-digit WO number didn't match because ProShop's format is "YY-NNNN" with a dash, (5) Fully Kiosk was behaving like a regular browser window, not locked in kiosk mode.
+
+**What was done:**
+
+1. **EXIF orientation fix** — `app.py:upload_photo` now calls `ImageOps.exif_transpose(img)` before resize/save. Pillow doesn't auto-apply the EXIF orientation tag and we strip EXIF on save, so without this the saved JPEG kept the sensor orientation regardless of how the operator held the tablet. New captures land upright; pre-fix queue entries stay as-recorded.
+
+2. **WO-page fallback for ops without writtenDescription** — extracted the navigate→checkout→insert→save sequence in `upload_worker.py` into `_try_upload_at(url, photo, file_path, is_fallback)`. The primary URL gets a 25s window to surface a CHECKOUT/SAVE button; on either (a) no button, (b) checkout failure, or (c) CKEditor not ready after 30s — all treated as "op has no writtenDescription form" — the worker retries at `{BASE}/procnc/workorders/{wo}` with the full 45s timeout. On fallback success the photo lands as `uploaded` carrying a non-error note: *"Operation had no written description — uploaded to WO main page instead."* `database.update_photo_status(id, "uploaded", message)` now preserves the message instead of clearing `error_message` (was unconditional NULL before). `queue.html` renders the note in neutral `.info-text` styling when status is `uploaded`, red `.error-text` otherwise. Verified end-to-end: photos #15 and #16 uploaded via fallback to WO 25-0378 op 31 (which had no writtenDescription).
+
+3. **Stay on capture step after upload** — `photo.js` upload success handler no longer jumps to `step-done`. Instead it clears `capturedFile` / preview / note / upload button and stays on `step-capture` with the same entity+op selected. Toast: *"Photo saved — tap Home when done"*. The "Home" back button in the step-capture header is the escape. This was also explicitly requested by an operator suggestion logged at 15:47 UTC today ("Stay on work order after taking picture").
+
+4. **WO auto-hyphen on search** — `photo.js` `input` handler runs `maybeAutoHyphen()` which, when `currentType === "workorder"` and the value matches `^\d{3,}$`, splices a dash after the 2nd character so `260120` → `26-0120` as you type. Caret pinned to end via `setSelectionRange`. Skipped for any value that contains a non-digit (i.e. part-number searches starting with letters are unaffected).
+
+5. **Fully Kiosk lockdown** — not code; gave Wolfgang the toggle sequence: Kiosk Mode ON + PIN, Start URL = `http://10.1.1.71:5003/`, Disable Address Bar, Show Top Bar OFF, Run on Device Boot ON, Enable as Device Admin + Lock Safe Mode. Configured tablet-side.
+
+6. **Worker shrink loop extended (side-effect of #2)** — first fallback test put 195KB onto the WO main page; the second photo only had 44KB budget remaining. Old shrink loop tried 4 dimensions at quality=75 only and bailed. Rewrote as nested loop over 6 dimensions × 4 qualities (1200/1000/800/600/480/360 × 75/60/45/30). Photo #16 fit at 450×600 q=45 → 28KB. After that the page hit ProShop's ~240KB CKEditor ceiling and photos #17/#13/#14 genuinely can't fit (4.5KB binary budget remaining). Architectural limit, not a code bug — discussed with Wolfgang and left for future decision (see Next Steps).
+
+**Files modified:**
+- `31. Photo Upload Service/photo-uploader/app.py` — EXIF transpose
+- `31. Photo Upload Service/photo-uploader/upload_worker.py` — `_try_upload_at` refactor, fallback wiring, broader shrink loop
+- `31. Photo Upload Service/photo-uploader/database.py` — `update_photo_status` preserves info message when status='uploaded'
+- `31. Photo Upload Service/photo-uploader/templates/queue.html` — neutral styling for `uploaded` rows with messages
+- `31. Photo Upload Service/photo-uploader/static/style.css` — `.info-text` class
+- `31. Photo Upload Service/photo-uploader/static/photo.js` — post-upload stays on capture; `maybeAutoHyphen`
+
+**Key decisions:**
+- Treated CKEditor-timeout as the same "no writtenDescription form" signal as no-CHECKOUT-button. In practice CKEditor-not-ready was the actual production failure mode — the part-page chrome always has a CHECKOUT button, so the older trigger never fired. Broadened to (no button | checkout failed | no CKEditor) → all "no_form".
+- Reused the `error_message` column for the fallback info note rather than adding a new column. Queue page switches red/grey based on `photo.status`. Avoids schema migration; only loose semantic.
+- Auto-hyphen runs on every `input` event and only fires for pure-digit input ≥3 chars without a dash — pasting "26-0120" or typing "R2S1-" is untouched. Cursor explicitly pinned to end because some browsers reset to position 0 when `value` is reassigned.
+- Stayed on `step-capture` after upload rather than `step-done` (which was unreachable after this change). Kept the dead `step-done` HTML block and `btn-another` wiring in place — small dead code, low cost to leave, and `reset()` is still bound to back buttons.
+- Did NOT add a fail-fast "page full" early-exit for the WO main page ceiling. Each over-cap attempt currently burns ~75s before bailing with a cryptic message. Wolfgang aware; decision deferred.
+
+**Status:** All five asks addressed. Service restarted on .71 multiple times via Overseer's `/api/services/PhotoUploadService/restart`. EXIF + fallback verified live on WO 25-0378 op 31. The ProShop ~240KB per-CKEditor-field ceiling is the only remaining sharp edge — bites only when 3+ photos pile onto a WO that's also missing its writtenDescription.
+
+---
+
 ## 2026-05-10
 
 ### Cross-cutting: srv-01 build-out + Phase A refactor (env-driven, waitress, leader-election strip)

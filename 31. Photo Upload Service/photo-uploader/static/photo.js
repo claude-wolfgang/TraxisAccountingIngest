@@ -146,7 +146,24 @@
         }, 300);
     });
 
+    // Auto-format pure-digit WO searches as "XX-XXXX" — ProShop's WO
+    // number format always has a dash after the 2-digit year, and typing
+    // "260120" on a tablet should resolve to "26-0120". Skipped if the
+    // user already typed a dash or any non-digit (e.g. a part number).
+    function maybeAutoHyphen() {
+        if (currentType !== "workorder") return;
+        const raw = searchInput.value;
+        if (raw.length < 3) return;
+        if (!/^\d+$/.test(raw)) return;
+        const next = raw.slice(0, 2) + "-" + raw.slice(2);
+        searchInput.value = next;
+        // Keep caret at end so the user can keep typing without
+        // landing back at position 0 (some browsers reset on .value=).
+        try { searchInput.setSelectionRange(next.length, next.length); } catch (_) {}
+    }
+
     searchInput.addEventListener("input", () => {
+        maybeAutoHyphen();
         clearTimeout(searchTimeout);
         const q = searchInput.value.trim();
         if (q.length < 2) {
@@ -433,14 +450,21 @@
             const data = await resp.json();
 
             if (resp.ok && data.success) {
-                const doneMsg = document.getElementById("done-message");
-                if (currentType === "claude") {
-                    doneMsg.textContent = "Photo saved for Claude.";
-                } else {
-                    doneMsg.textContent = "It will be uploaded to ProShop automatically.";
-                }
-                showStep("done");
-                showToast("Photo saved!");
+                // Stay on the capture step with the same entity+op selected
+                // so the operator can keep snapping photos of the same job.
+                // The "Home" back button in the header is the escape hatch.
+                capturedFile = null;
+                photoCapture.value = "";
+                photoNote.value = "";
+                previewContainer.classList.add("hidden");
+                photoPreview.src = "";
+                uploadBtn.classList.add("hidden");
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = "Upload Photo";
+                const savedFor = currentType === "claude"
+                    ? "Photo saved (Claude)"
+                    : "Photo saved — tap Home when done";
+                showToast(savedFor);
             } else {
                 showToast(data.error || "Upload failed", true);
                 uploadBtn.disabled = false;

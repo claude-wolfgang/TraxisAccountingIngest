@@ -48,7 +48,7 @@
             <td>
                 <span class="status-badge status-{{ photo.status }}">{{ photo.status }}</span>
                 {% if photo.error_message %}
-                <br><small class="error-text">{{ photo.error_message }}</small>
+                <br><small class="{% if photo.status == 'uploaded' %}info-text{% else %}error-text{% endif %}">{{ photo.error_message }}</small>
                 {% endif %}
                 {% if photo.retry_count > 0 %}
                 <br><small>Retries: {{ photo.retry_count }}</small>

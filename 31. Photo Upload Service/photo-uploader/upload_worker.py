@@ -260,6 +260,10 @@ class UploadWorker:
         log.info(f"Uploading photo #{photo_id}: {entity_type}/{entity_id} op={op_number}")
         database.update_photo_status(photo_id, "uploading")
 
+        # Resolve target URL(s). For workorder we also keep a fallback URL
+        # so if the op has no writtenDescription form we land on the WO
+        # main page instead of failing silently.
+        fallback_url = None
         if entity_type in ("workorder", "part"):
             if not op_number:
                 msg = "No operation number — cannot determine upload destination"
@@ -275,6 +279,7 @@ class UploadWorker:
                     database.update_photo_status(photo_id, "failed", msg)
                     database.increment_retry(photo_id)
                     return
+                fallback_url = f"{BASE_URL}/procnc/workorders/{entity_id}"
             else:
                 detail = self._proshop.get_part_detail(entity_id)
                 if not detail:
@@ -307,14 +312,60 @@ class UploadWorker:
             database.update_photo_status(photo_id, "failed", msg)
             return
 
-        driver = self._driver
+        # Try the primary URL. If the page lacks a CHECKOUT/SAVE button
+        # (typical for operations with no writtenDescription form), retry
+        # on the workorder's main page so the photo still lands somewhere
+        # the operator can find it.
+        outcome = self._try_upload_at(url, photo, file_path)
+        if outcome == "no_form" and fallback_url:
+            log.warning(f"Photo #{photo_id}: op writtenDescription form not usable — "
+                        f"falling back to {fallback_url}")
+            outcome = self._try_upload_at(fallback_url, photo, file_path, is_fallback=True)
+            if outcome == "ok":
+                msg = ("Operation had no written description — uploaded to "
+                       "WO main page instead.")
+                database.update_photo_status(photo_id, "uploaded", msg)
+                log.info(f"Photo #{photo_id}: uploaded to WO main page (fallback)")
+                return
+
+        if outcome == "ok":
+            database.update_photo_status(photo_id, "uploaded")
+            log.info(f"Photo #{photo_id}: successfully uploaded to ProShop")
+            return
+
+        # If primary returned 'no_form' but no fallback URL was available
+        # (e.g. part uploads), mark failed so the photo doesn't sit in
+        # 'uploading' forever.
+        if outcome == "no_form":
+            msg = "Page has no usable writtenDescription form and no fallback URL"
+            log.error(f"Photo #{photo_id}: {msg}")
+            database.update_photo_status(photo_id, "failed", msg)
+            database.increment_retry(photo_id)
+            return
+
+        # outcome == 'failed' — _try_upload_at already wrote DB status.
+
+    def _try_upload_at(self, url, photo, file_path, is_fallback=False):
+        """Navigate to `url`, checkout, insert image, save. Returns one of:
+          'ok'        — image inserted and saved
+          'no_form'   — page chrome loaded but no usable writtenDescription
+                        form (no action button, OR checkout failed, OR no
+                        CKEditor after 30s). Caller may retry on a fallback.
+          'failed'    — page loaded with editor but insert/save failed.
+                        Photo status already set to 'failed' with a message.
+
+        On the fallback URL, 'no_form' conditions are terminal and marked
+        as failed before returning.
+        """
         from selenium.webdriver.common.by import By
 
-        # Navigate to written description page
-        log.info(f"Photo #{photo_id}: navigating to {url}")
+        photo_id = photo["id"]
+        driver = self._driver
+
+        log.info(f"Photo #{photo_id}: navigating to {url}"
+                 f"{' (fallback)' if is_fallback else ''}")
         _safe_navigate(driver, url)
 
-        # Wait for page (CHECKOUT or SAVE button)
         def _page_has_action_button(drv):
             for btn in drv.find_elements(By.TAG_NAME, "button"):
                 try:
@@ -326,55 +377,50 @@ class UploadWorker:
                     pass
             return None
 
-        action_btn = _wait_for_element(driver, _page_has_action_button, timeout=45)
-        if not action_btn:
-            msg = "Written description page did not load (no CHECKOUT/SAVE)"
-            log.error(f"Photo #{photo_id}: {msg}")
-            _save_screenshot(driver, f"photo_{photo_id}_page_not_loaded")
-            database.update_photo_status(photo_id, "failed", msg)
+        def _no_form(reason, screenshot_label):
+            """Either return 'no_form' so caller tries the fallback, or, if
+            we ARE the fallback, mark the photo failed and return 'failed'."""
+            log.warning(f"Photo #{photo_id}: {reason}"
+                        f"{' (fallback also failed)' if is_fallback else ''}")
+            if not is_fallback:
+                return "no_form"
+            _save_screenshot(driver, f"photo_{photo_id}_{screenshot_label}")
+            database.update_photo_status(photo_id, "failed", reason)
             database.increment_retry(photo_id)
-            return
+            return "failed"
 
-        # Switch to editor frame if page uses framesets
+        # Shorter timeout on primary so we fail fast and try fallback;
+        # full timeout on fallback so a slow WO main page still has a chance.
+        timeout = 45 if is_fallback else 25
+        action_btn = _wait_for_element(driver, _page_has_action_button, timeout=timeout)
+        if not action_btn:
+            return _no_form("Page did not load (no CHECKOUT/SAVE)",
+                            "page_not_loaded")
+
         _switch_to_editor_frame(driver)
 
-        # Checkout page
         if not _checkout_page(driver):
-            msg = "Could not checkout written description page"
-            log.error(f"Photo #{photo_id}: {msg}")
-            _save_screenshot(driver, f"photo_{photo_id}_checkout_failed")
-            database.update_photo_status(photo_id, "failed", msg)
-            database.increment_retry(photo_id)
-            return
+            return _no_form("Could not checkout page", "checkout_failed")
 
-        # Wait for CKEditor
         if not _wait_for_ckeditor(driver, timeout=30):
-            msg = "CKEditor not ready after 30s"
-            log.error(f"Photo #{photo_id}: {msg}")
-            _save_screenshot(driver, f"photo_{photo_id}_ckeditor_timeout")
-            database.update_photo_status(photo_id, "failed", msg)
-            database.increment_retry(photo_id)
-            return
+            # This is the "op has no writtenDescription form" signal: page
+            # chrome and CHECKOUT exist (they're standard on every part-page
+            # tab) but no editor was instantiated. Fall back to the WO main
+            # page where the editor does exist.
+            return _no_form("CKEditor not ready after 30s",
+                            "ckeditor_timeout")
 
-        # ── Insert image via base64 inline ──────────────────────────────
-        # ProShop's CKEditor has no filebrowserImageUploadUrl configured,
-        # so the Upload tab's "Send it to the Server" has no server endpoint.
-        # Verified via DOM inspection: the upload form posts to the page URL
-        # which doesn't handle file uploads. Instead, we insert the image
-        # directly as a base64 data URI into the editor content.
         log.info(f"Photo #{photo_id}: inserting image via base64 inline")
         success = self._insert_image_html_fallback(driver, photo, file_path)
-
         if not success:
             msg = "Base64 image insert failed"
             log.error(f"Photo #{photo_id}: {msg}")
             _save_screenshot(driver, f"photo_{photo_id}_insert_failed")
             database.update_photo_status(photo_id, "failed", msg)
             database.increment_retry(photo_id)
-            return
+            return "failed"
 
-        database.update_photo_status(photo_id, "uploaded")
-        log.info(f"Photo #{photo_id}: successfully uploaded to ProShop")
+        return "ok"
 
     def _close_dialog(self, driver):
         """Close any open CKEditor dialog."""
@@ -431,27 +477,42 @@ class UploadWorker:
             # Target: base64 is ~33% larger than binary, so binary budget ≈ budget * 3/4
             binary_budget = int(budget * 3 / 4)
 
-            for max_dim in [1200, 1000, 800, 600]:
+            # Try progressively smaller dimensions AND lower quality until
+            # the image fits. The page may already be near-full when we're
+            # falling back to the WO main page (each prior photo eats ~150KB
+            # of the ~240KB budget), so we need to be willing to go quite
+            # low on quality before giving up.
+            img_bytes = None
+            resized = None
+            found = False
+            for max_dim in [1200, 1000, 800, 600, 480, 360]:
+                if found:
+                    break
                 w, h = img.size
                 if w > max_dim or h > max_dim:
                     if w > h:
                         new_w, new_h = max_dim, int(h * max_dim / w)
                     else:
                         new_h, new_w = max_dim, int(w * max_dim / h)
-                    resized = img.resize((new_w, new_h), Image.LANCZOS)
+                    candidate = img.resize((new_w, new_h), Image.LANCZOS)
                 else:
-                    resized = img
+                    candidate = img
 
-                buf = io.BytesIO()
-                resized.save(buf, "JPEG", quality=75)
-                img_bytes = buf.getvalue()
+                for quality in (75, 60, 45, 30):
+                    buf = io.BytesIO()
+                    candidate.save(buf, "JPEG", quality=quality)
+                    bytes_ = buf.getvalue()
+                    if len(bytes_) <= binary_budget:
+                        resized = candidate
+                        img_bytes = bytes_
+                        log.info(f"Photo #{photo_id}: fit at {resized.size} q={quality} "
+                                 f"— {len(img_bytes)} bytes (budget {binary_budget})")
+                        found = True
+                        break
 
-                if len(img_bytes) <= binary_budget:
-                    log.info(f"Photo #{photo_id}: resized to {resized.size}, "
-                             f"{len(img_bytes)} bytes (budget {binary_budget})")
-                    break
-            else:
-                log.error(f"Photo #{photo_id}: cannot shrink image enough to fit")
+            if not found:
+                log.error(f"Photo #{photo_id}: cannot shrink image enough to fit "
+                          f"(budget {binary_budget} bytes — page may be full)")
                 return False
 
             b64 = base64.b64encode(img_bytes).decode("ascii")

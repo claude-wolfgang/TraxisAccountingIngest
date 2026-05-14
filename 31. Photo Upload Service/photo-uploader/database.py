@@ -103,18 +103,27 @@ def get_recent_photos(limit=50):
     return [dict(r) for r in rows]
 
 
-def update_photo_status(photo_id, status, error_message=None):
+def update_photo_status(photo_id, status, message=None):
+    """Update photo status. `message` is interpreted as an info note when
+    status == 'uploaded' (e.g. fallback path used) and as an error
+    otherwise. The queue page renders it neutral vs red based on status."""
     now = _now()
     conn = get_connection()
     if status == "uploaded":
-        conn.execute(
-            "UPDATE photos SET status=?, uploaded_at=?, updated_at=?, error_message=NULL WHERE id=?",
-            (status, now, now, photo_id),
-        )
+        if message:
+            conn.execute(
+                "UPDATE photos SET status=?, uploaded_at=?, updated_at=?, error_message=? WHERE id=?",
+                (status, now, now, message, photo_id),
+            )
+        else:
+            conn.execute(
+                "UPDATE photos SET status=?, uploaded_at=?, updated_at=?, error_message=NULL WHERE id=?",
+                (status, now, now, photo_id),
+            )
     else:
         conn.execute(
             "UPDATE photos SET status=?, error_message=?, updated_at=? WHERE id=?",
-            (status, error_message, now, photo_id),
+            (status, message, now, photo_id),
         )
     conn.commit()
     conn.close()

@@ -14,7 +14,7 @@ from pathlib import Path
 
 import requests
 from flask import Flask, request, jsonify, render_template, send_from_directory
-from PIL import Image
+from PIL import Image, ImageOps
 
 import config
 import database
@@ -143,6 +143,11 @@ def upload_photo():
     try:
         # Read and process image
         img = Image.open(photo_file.stream)
+        # Apply EXIF orientation so saved pixels are upright regardless of
+        # how the tablet was held when the shot was taken. Pillow doesn't
+        # do this automatically and we strip EXIF on save, so without this
+        # the worker would later upload a sideways JPEG.
+        img = ImageOps.exif_transpose(img)
         img = _resize_image(img)
 
         # Ensure RGB (strip alpha from PNGs)
