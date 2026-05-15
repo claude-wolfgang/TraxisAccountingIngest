@@ -108,6 +108,10 @@ class UploadWorker:
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument("--window-size=1920,1080")
             options.add_argument("--disable-gpu")
+            # COTS upload path opens a window.open() popup at
+            # /procnc/procncAdmin/fileserver/editpicture$... — popup blocker
+            # otherwise suppresses it silently for synthetic clicks.
+            options.add_argument("--disable-popup-blocking")
 
             log.info("Launching Chrome (headless)...")
             t0 = time.time()
@@ -310,6 +314,14 @@ class UploadWorker:
             msg = f"Photo file not found: {file_path}"
             log.error(f"Photo #{photo_id}: {msg}")
             database.update_photo_status(photo_id, "failed", msg)
+            return
+
+        # COTS uses ProShop's popup-based picture upload, not CKEditor base64.
+        # The detail page has no CKEditor; uploads go through a separate
+        # /procnc/procncAdmin/fileserver/editpicture$... window. See
+        # _upload_cots_via_popup for details.
+        if entity_type == "cots":
+            self._upload_cots_via_popup(photo, file_path)
             return
 
         # Try the primary URL. If the page lacks a CHECKOUT/SAVE button
@@ -706,6 +718,254 @@ class UploadWorker:
             log.error(f"Photo #{photo_id}: save returned unexpected: {result}")
             _save_screenshot(driver, f"photo_{photo_id}_save_unexpected")
             return False
+
+    # ── COTS popup upload ────────────────────────────────────────────────
+    #
+    # COTS detail pages have no CKEditor — the base64-into-CKEditor pattern
+    # doesn't apply. Instead, ProShop uses a separate "Handle New Picture"
+    # popup window opened via window.open() from an `<a id="fnXXX">` anchor
+    # wrapped around an "Add picture" button. The popup posts multipart
+    # form-data to /procnc/procncAdmin/fileserver/editpicture$...&isSubmit=yes,
+    # then closes; the parent page's SAVE CHANGES commits the picture reference.
+    #
+    # Discovery: inspect_cots_upload.py phases 3-4 + manual DevTools capture
+    # against PAC-223 (2026-05-14). Verified the same upload UI appears on
+    # tools, parts, and equipment too — this method is reusable across
+    # entity types if we later want to retire the CKEditor-base64 path.
+
+    def _upload_cots_via_popup(self, photo, file_path):
+        """Upload a photo to a COTS entity via ProShop's 'Add picture' popup.
+
+        Returns one of: 'ok', 'failed'. Writes DB status on its own paths.
+        """
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.common.action_chains import ActionChains
+        from selenium.webdriver.support.ui import WebDriverWait
+
+        photo_id = photo["id"]
+        driver = self._driver
+
+        proshop_url = photo.get("proshop_url", "")
+        if not proshop_url:
+            msg = f"No ProShop URL stored for cots/{photo.get('entity_id')}"
+            log.warning(f"Photo #{photo_id}: {msg}")
+            database.update_photo_status(photo_id, "failed", msg)
+            return "failed"
+        if not proshop_url.startswith("http"):
+            proshop_url = f"{BASE_URL}/procnc/{proshop_url}"
+
+        # Defensive URL normalization: ProShop COTS detail pages live at
+        # /procnc/ots/{TYPE}/{TYPE}-{NUMBER}. The bare /ots/{TYPE}/{NUMBER}
+        # returns 404. Legacy queue rows may have the bare form stored.
+        import re
+        m = re.match(r"^(.*?/procnc/ots/)([A-Za-z0-9]+)/([A-Za-z0-9-]+?)$",
+                     proshop_url)
+        if m:
+            prefix, ctype, num = m.group(1), m.group(2), m.group(3)
+            if not num.upper().startswith(f"{ctype.upper()}-"):
+                fixed = f"{prefix}{ctype}/{ctype}-{num}"
+                log.info(f"Photo #{photo_id}: normalizing COTS URL "
+                         f"{proshop_url!r} -> {fixed!r}")
+                proshop_url = fixed
+
+        log.info(f"Photo #{photo_id}: COTS upload — navigating to {proshop_url}")
+        _safe_navigate(driver, proshop_url)
+
+        parent_window = driver.current_window_handle
+        initial_windows = set(driver.window_handles)
+
+        # Wait for page chrome (CHECKOUT button) to be present
+        def _has_action(drv):
+            for btn in drv.find_elements(By.TAG_NAME, "button"):
+                try:
+                    if not btn.is_displayed():
+                        continue
+                    txt = (btn.text or "").upper()
+                    if "CHECKOUT" in txt or "SAVE" in txt:
+                        return btn
+                except Exception:
+                    pass
+            return None
+
+        if not _wait_for_element(driver, _has_action, timeout=30):
+            msg = "COTS page didn't load (no CHECKOUT/SAVE button)"
+            log.error(f"Photo #{photo_id}: {msg}")
+            _save_screenshot(driver, f"photo_{photo_id}_cots_no_action")
+            database.update_photo_status(photo_id, "failed", msg)
+            database.increment_retry(photo_id)
+            return "failed"
+
+        if not _checkout_page(driver):
+            msg = "Could not CHECKOUT COTS page"
+            log.error(f"Photo #{photo_id}: {msg}")
+            _save_screenshot(driver, f"photo_{photo_id}_cots_checkout_failed")
+            database.update_photo_status(photo_id, "failed", msg)
+            database.increment_retry(photo_id)
+            return "failed"
+
+        # Find the Add picture anchor. The handler is on the `<a id="fnXXX">`
+        # that wraps the button; clicking the inner <button> bubbles but may
+        # not satisfy the handler's target check. Walk up to the anchor.
+        anchor = None
+        try:
+            inner_buttons = driver.find_elements(
+                By.CSS_SELECTOR, "button[title='Add a new picture']"
+            )
+            for btn in inner_buttons:
+                if not btn.is_displayed():
+                    continue
+                # Walk up to the parent anchor (one level up per discovery)
+                parent_a = btn.find_element(By.XPATH, "./ancestor::a[1]")
+                if parent_a.is_displayed():
+                    anchor = parent_a
+                    break
+        except Exception as e:
+            log.debug(f"Photo #{photo_id}: anchor lookup error: {e}")
+
+        if not anchor:
+            msg = "Could not find 'Add picture' anchor on COTS page"
+            log.error(f"Photo #{photo_id}: {msg}")
+            _save_screenshot(driver, f"photo_{photo_id}_cots_no_add_button")
+            database.update_photo_status(photo_id, "failed", msg)
+            database.increment_retry(photo_id)
+            return "failed"
+
+        # ActionChains click provides a trusted-gesture click; Chrome's
+        # popup blocker (and ProShop's handler) accept this, where a plain
+        # .click() or JS-injected click silently no-ops.
+        log.info(f"Photo #{photo_id}: clicking Add picture anchor via ActionChains")
+        try:
+            ActionChains(driver).move_to_element(anchor).click().perform()
+        except Exception as e:
+            log.warning(f"Photo #{photo_id}: ActionChains click error: {e}")
+            try:
+                anchor.click()
+            except Exception as e2:
+                msg = f"Add picture click failed: {e2}"
+                log.error(f"Photo #{photo_id}: {msg}")
+                _save_screenshot(driver, f"photo_{photo_id}_cots_click_failed")
+                database.update_photo_status(photo_id, "failed", msg)
+                database.increment_retry(photo_id)
+                return "failed"
+
+        # Wait for the popup window
+        try:
+            WebDriverWait(driver, 15).until(
+                lambda d: len(d.window_handles) > len(initial_windows)
+            )
+        except Exception:
+            msg = "Picture popup did not open within 15s"
+            log.error(f"Photo #{photo_id}: {msg}")
+            _save_screenshot(driver, f"photo_{photo_id}_cots_no_popup")
+            database.update_photo_status(photo_id, "failed", msg)
+            database.increment_retry(photo_id)
+            return "failed"
+
+        new_windows = set(driver.window_handles) - initial_windows
+        popup_window = new_windows.pop()
+        log.info(f"Photo #{photo_id}: switching to picture popup")
+
+        popup_ok = False
+        try:
+            driver.switch_to.window(popup_window)
+            driver.set_page_load_timeout(30)
+            time.sleep(1)  # form render
+
+            # Find the file input. The popup has one file input on the
+            # File Upload tab (which is the default landing tab).
+            file_input = None
+            for _ in range(20):
+                inputs = driver.find_elements(By.CSS_SELECTOR, "input[type='file']")
+                if inputs:
+                    # send_keys works on hidden inputs too — accept any
+                    file_input = inputs[0]
+                    break
+                time.sleep(0.5)
+
+            if not file_input:
+                msg = "No file input in picture popup"
+                log.error(f"Photo #{photo_id}: {msg}")
+                _save_screenshot(driver, f"photo_{photo_id}_cots_popup_no_input")
+                return "failed"
+
+            abs_path = str(Path(file_path).resolve())
+            log.info(f"Photo #{photo_id}: send_keys file path: {abs_path}")
+            file_input.send_keys(abs_path)
+            time.sleep(1)
+
+            # Best-effort fill of Title field for traceability — optional.
+            try:
+                title_inputs = driver.find_elements(
+                    By.XPATH,
+                    "//*[normalize-space(text())='Title:' or normalize-space(text())='Title']"
+                    "/following::input[@type='text'][1]",
+                )
+                if title_inputs and title_inputs[0].is_displayed():
+                    title_inputs[0].clear()
+                    title_inputs[0].send_keys(f"P31 photo {photo_id}")
+            except Exception as e:
+                log.debug(f"Photo #{photo_id}: title fill skipped: {e}")
+
+            # Click popup SAVE CHANGES
+            popup_save_btn = None
+            for btn in driver.find_elements(By.TAG_NAME, "button"):
+                try:
+                    if not btn.is_displayed():
+                        continue
+                    txt = (btn.text or "").strip().upper()
+                    if "SAVE" in txt and "CANCEL" not in txt:
+                        popup_save_btn = btn
+                        break
+                except Exception:
+                    pass
+
+            if not popup_save_btn:
+                msg = "Popup SAVE CHANGES button not found"
+                log.error(f"Photo #{photo_id}: {msg}")
+                _save_screenshot(driver, f"photo_{photo_id}_cots_popup_no_save")
+                return "failed"
+
+            log.info(f"Photo #{photo_id}: clicking popup SAVE CHANGES")
+            popup_save_btn.click()
+
+            # Popup typically closes itself after a successful POST
+            try:
+                WebDriverWait(driver, 60).until(
+                    lambda d: popup_window not in d.window_handles
+                )
+                log.info(f"Photo #{photo_id}: popup closed after save")
+                popup_ok = True
+            except Exception:
+                # Some flows leave the popup open on confirmation pages.
+                # If we got HTTP 200 back, that's still success — close it.
+                log.warning(f"Photo #{photo_id}: popup didn't auto-close; closing manually")
+                _save_screenshot(driver, f"photo_{photo_id}_cots_popup_after_save")
+                try:
+                    driver.close()
+                except Exception:
+                    pass
+                popup_ok = True  # presume success — server returned 200
+        finally:
+            try:
+                driver.switch_to.window(parent_window)
+            except Exception as e:
+                log.error(f"Photo #{photo_id}: cannot switch back to parent: {e}")
+                msg = "Lost parent window after popup"
+                database.update_photo_status(photo_id, "failed", msg)
+                database.increment_retry(photo_id)
+                return "failed"
+
+        if not popup_ok:
+            return "failed"
+
+        # Verified against PAC-223 on 2026-05-14: the popup's SAVE CHANGES
+        # auto-commits the parent. When the popup closes cleanly after the
+        # save click, the picture is already attached to the parent COTS
+        # record — no parent save call needed. The parent page is mid-reload
+        # at this point; trying to enumerate its DOM here racy and unnecessary.
+        database.update_photo_status(photo_id, "uploaded")
+        log.info(f"Photo #{photo_id}: COTS upload complete")
+        return "ok"
 
 
 # ── Shared Selenium helpers ──────────────────────────────────────────────

@@ -411,6 +411,32 @@ class ProShopClient:
             return []
         return detail["ops"]
 
+    def get_work_orders_for_part(self, part_number):
+        """Return WOs (active or historical) that reference this part, newest-first.
+
+        Matches on linked part.partNumber and on partPlainText so WOs whose
+        part link is missing still surface as long as the plain-text matches.
+        """
+        target = (part_number or "").strip().lower()
+        if not target:
+            return []
+        records = self._fetch_work_orders()
+        matches = []
+        for r in records:
+            part_ref = r.get("part") or {}
+            pn = (part_ref.get("partNumber") or "").lower()
+            plain = (r.get("partPlainText") or "").lower()
+            if pn == target or plain == target:
+                wo_num = r.get("workOrderNumber") or ""
+                matches.append({
+                    "id": wo_num,
+                    "name": part_ref.get("partName") or plain or "",
+                    "detail": f"Qty: {r.get('quantityOrdered', '?')} | {r.get('status', '')}",
+                    "proshop_url": f"{self.base_url}/workorders/{wo_num}",
+                })
+        matches.sort(key=lambda m: m["id"], reverse=True)
+        return matches
+
     def _fetch_fixtures(self):
         cached = self._get_cached("fixtures")
         if cached is not None:
@@ -505,8 +531,15 @@ class ProShopClient:
             num_digits = "".join(c for c in num if c.isdigit())
             if q in num.lower() or q in desc.lower() or (q_digits and q_digits in num_digits):
                 ctype = r.get("type") or ""
-                url = (f"{self.base_url}/ots/{ctype}/{num}"
-                       if ctype else f"{self.base_url}/ots/{num}")
+                # ProShop COTS detail pages live at /ots/{TYPE}/{TYPE}-{NUMBER}.
+                # The bare /ots/{TYPE}/{NUMBER} returns 404 — confirmed against
+                # PAC-223 on 2026-05-14 (P31 COTS photo upload investigation).
+                if ctype:
+                    full_id = (num if str(num).upper().startswith(f"{ctype.upper()}-")
+                               else f"{ctype}-{num}")
+                    url = f"{self.base_url}/ots/{ctype}/{full_id}"
+                else:
+                    url = f"{self.base_url}/ots/{num}"
                 matches.append({
                     "id": num,
                     "name": desc.split("\n")[0],

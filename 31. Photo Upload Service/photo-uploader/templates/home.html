@@ -82,6 +82,23 @@
     <div id="qr-status" class="help-text"></div>
 </section>
 
+<!-- Step 2b-pre: Select work order (parts only) -->
+<section id="step-wos" class="step">
+    <div class="step-header">
+        <button class="back-btn" data-target="step-type">&larr; Home</button>
+        <h2>Select Work Order</h2>
+    </div>
+    <div id="wos-entity-info" class="entity-card">
+        <div class="entity-id"></div>
+        <div class="entity-name"></div>
+    </div>
+    <div id="wos-spinner" class="spinner-center hidden">
+        <div class="spinner"></div>
+        <span>Loading work orders...</span>
+    </div>
+    <div id="wos-list" class="results-list"></div>
+</section>
+
 <!-- Step 2c: Select operation (work orders only) -->
 <section id="step-ops" class="step">
     <div class="step-header">

@@ -257,6 +257,20 @@ def get_operations():
         return jsonify({"ops": [], "error": str(e)}), 500
 
 
+@app.route("/api/part-workorders")
+def get_part_workorders():
+    """Fetch work orders (current and past) for a part number."""
+    part_number = request.args.get("part", "").strip()
+    if not part_number:
+        return jsonify({"workorders": []})
+    try:
+        wos = proshop.get_work_orders_for_part(part_number)
+        return jsonify({"workorders": wos})
+    except Exception as e:
+        log.error(f"Part work-order fetch failed: {e}", exc_info=True)
+        return jsonify({"workorders": [], "error": str(e)}), 500
+
+
 # ── API: QR Decode ──────────────────────────────────────────────────────
 
 @app.route("/api/qr-decode", methods=["POST"])

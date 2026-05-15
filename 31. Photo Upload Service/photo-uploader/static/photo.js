@@ -37,6 +37,7 @@
         type: document.getElementById("step-type"),
         search: document.getElementById("step-search"),
         qr: document.getElementById("step-qr"),
+        wos: document.getElementById("step-wos"),
         ops: document.getElementById("step-ops"),
         capture: document.getElementById("step-capture"),
         suggest: document.getElementById("step-suggest"),
@@ -47,6 +48,11 @@
     const searchSpinner = document.getElementById("search-spinner");
     const searchResults = document.getElementById("search-results");
     const searchTypeLabel = document.getElementById("search-type-label");
+
+    const wosEntityId = document.querySelector("#wos-entity-info .entity-id");
+    const wosEntityName = document.querySelector("#wos-entity-info .entity-name");
+    const wosSpinner = document.getElementById("wos-spinner");
+    const wosList = document.getElementById("wos-list");
 
     const opsEntityId = document.querySelector("#ops-entity-info .entity-id");
     const opsEntityName = document.querySelector("#ops-entity-info .entity-name");
@@ -79,6 +85,7 @@
         capturedFile = null;
         searchInput.value = "";
         searchResults.innerHTML = "";
+        wosList.innerHTML = "";
         opsList.innerHTML = "";
         photoNote.value = "";
         previewContainer.classList.add("hidden");
@@ -230,12 +237,73 @@
                 };
                 selectedEntity = entity;
 
-                // Work orders and parts go to operation selection first
-                if (currentType === "workorder" || currentType === "part") {
+                // Parts go to work-order selection first; the chosen WO then
+                // leads to its operations. Work orders skip straight to ops.
+                if (currentType === "part") {
+                    showWosForPart(entity);
+                } else if (currentType === "workorder") {
                     showOpsStep(entity);
                 } else {
                     goToCapture(entity);
                 }
+            });
+        });
+    }
+
+    // ── Step 2b-pre: Work-order selection (parts only) ──────────────────
+
+    async function showWosForPart(partEntity) {
+        wosEntityId.textContent = partEntity.id;
+        wosEntityName.textContent = partEntity.name || "";
+        wosList.innerHTML = "";
+        wosSpinner.classList.remove("hidden");
+        showStep("wos");
+
+        try {
+            const resp = await fetch(
+                `/api/part-workorders?part=${encodeURIComponent(partEntity.id)}`
+            );
+            const data = await resp.json();
+            renderWos(data.workorders || [], partEntity);
+        } catch (err) {
+            console.error("Part WO fetch error:", err);
+            wosList.innerHTML =
+                '<div class="help-text">Failed to load work orders.</div>';
+        } finally {
+            wosSpinner.classList.add("hidden");
+        }
+    }
+
+    function renderWos(wos, partEntity) {
+        if (wos.length === 0) {
+            wosList.innerHTML =
+                '<div class="help-text">No work orders found for this part.</div>';
+            return;
+        }
+        wosList.innerHTML = wos
+            .map(
+                (w) => `
+            <div class="result-item wo-item" data-id="${esc(w.id)}"
+                 data-name="${esc(w.name)}" data-url="${esc(w.proshop_url || "")}">
+                <span class="result-id">${esc(w.id)}</span>
+                <span class="result-name">${esc(w.name)}</span>
+                ${w.detail ? `<span class="result-detail">${esc(w.detail)}</span>` : ""}
+            </div>
+        `
+            )
+            .join("");
+
+        wosList.querySelectorAll(".wo-item").forEach((el) => {
+            el.addEventListener("click", () => {
+                // Switch context to the chosen WO. The part was only a way
+                // to find it; the upload (and op list) is now WO-driven.
+                currentType = "workorder";
+                selectedEntity = {
+                    id: el.dataset.id,
+                    name: el.dataset.name,
+                    proshop_url: el.dataset.url,
+                };
+                showOpsStep(selectedEntity);
             });
         });
     }
