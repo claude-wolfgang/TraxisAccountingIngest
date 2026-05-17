@@ -5,7 +5,67 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
-## 2026-05-17
+## 2026-05-17 (session 3)
+
+### P31: Equipment upload fix + claude-folder backup on failure
+
+**Task:** Wolfgang: "Using the photo uploader, when it fails to upload, send the photo to the claude folder as a backup. Check the equipment upload mechanism, it doesn't seem to work."
+
+**What was done:**
+
+1. **Fixed equipment upload routing — was using the wrong upload method.** `upload_worker.py` line 323 only routed `cots` to the popup-based upload. Equipment, tool, and fixture photos fell through to the CKEditor-base64 path — but those pages have no CKEditor. They all use the same "Add picture" popup as COTS. Changed routing: `if entity_type in ("cots", "equipment", "tool", "fixture")` → `_upload_via_popup()`. Renamed method from `_upload_cots_via_popup` to `_upload_via_popup`, generalized error messages and screenshot labels.
+
+2. **Fixed equipment URL construction.** `proshop_client.search_equipment()` was building `/procnc/equipment/{num}` (e.g., `/procnc/equipment/152`) — but ProShop's URL pattern is `/procnc/equipment/{TYPE}/{TYPE}{NUMBER}` (e.g., `/procnc/equipment/CA/CA152`). Fixed to `f"{self.base_url}/equipment/{etype}/{etype}{num}"`. Also fixed the same bug in `_equipment_label_data()` (added `type` field to the GraphQL query).
+
+3. **Added automatic claude-folder backup on max retries.** New `_increment_retry_with_backup(photo)` helper wraps `database.increment_retry()` — when `retry_count` reaches `MAX_RETRIES` (3), the photo file is copied to `data/photos/claude/failed_backup/{entity_type}_{entity_id}/`. Since the claude folder is Dropbox-synced, no photo is ever permanently lost to upload failures.
+
+4. **Added "Send to Claude Folder" button on `/photo/<id>` edit page.** Operator escape hatch: tap a failed photo in the queue → yellow "Send to Claude Folder" button → copies to claude backup folder, marks `local_only` so worker stops retrying. New API endpoint: `POST /api/photos/<id>/send-to-claude`. Added `.btn-warning` CSS class (gold/amber).
+
+**Files modified:**
+- `31. Photo Upload Service/photo-uploader/upload_worker.py` — routing fix, method rename, backup helper
+- `31. Photo Upload Service/photo-uploader/proshop_client.py` — equipment URL fix
+- `31. Photo Upload Service/photo-uploader/app.py` — new send-to-claude endpoint
+- `31. Photo Upload Service/photo-uploader/templates/photo_edit.html` — claude button
+- `31. Photo Upload Service/photo-uploader/static/photo_edit.js` — claude button handler
+- `31. Photo Upload Service/photo-uploader/static/style.css` — .btn-warning style
+
+**Key decisions:**
+- Backup copies the file (doesn't move it) — original stays in place for potential manual retry.
+- Backup path is `claude/failed_backup/` subdirectory to distinguish from operator-taken claude photos.
+- All four non-CKEditor entity types (cots, equipment, tool, fixture) now share one upload path.
+
+**Status:** Service restarted on .71 and healthy. 7 previously-failed photos in queue from the old broken equipment path — operator can retry them now or send to claude folder.
+
+---
+
+## 2026-05-17 (session 2)
+
+### P1 Overseer: Telegram alerting for service outages
+
+**Task:** Wolfgang: "investigate why the air compressor service and the tool kiosk service aren't working. Let's learn lessons to make these services more durable."
+
+**What was done:**
+
+1. **Root cause identified: .71 was off.** All 13 Overseer-managed services run exclusively on .71. srv-01 is staged but deliberately stopped (`SERVICE_DEMAND_START`). When .71 went offline, every service went with it — air compressor monitor, COTS kiosk, everything. The compressor's PLC timer kept it running independently, but there was zero monitoring, zero alerting, zero remote control.
+
+2. **Added Telegram alerting to Overseer (`overseer.py`).** Reads `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` env vars (already set on .71 for P25). When a service goes "down" (unreachable — connection refused, process dead), Overseer sends one Telegram message via the Telegram Bot API. When the service recovers, it sends a recovery message. One alert per outage — `alerted` flag on `ServiceState` prevents spam, resets on healthy recovery.
+
+3. **Tested end-to-end.** Restarted Overseer, confirmed 3 alerts fired: FocasMonitor (was stopped, auto-restarted), LabelPrintService (.242 off), AgentScheduler (audit subprocess failing). Wolfgang confirmed receipt on Telegram.
+
+4. **Fixed degraded-state spam.** Initial implementation also alerted on "degraded" state. TimeTrackerDashboard was flapping degraded→restart→healthy→degraded every ~11 minutes (data stale on a Saturday with nobody clocked in), generating 2 messages per cycle. Removed degraded alerting — Telegram alerts now fire only for "down" (service unreachable). Overseer's auto-restart handles degraded flapping silently.
+
+**Files modified:** `1. Proshop Automations/Overseer/overseer.py` (41 lines added — Telegram env vars, `alerted` flag, `_send_telegram_alert()` method, recovery notification, wired into `_check_http_service` and `_apply_health_result`)
+
+**Key decisions:**
+- Alert on "down" only, not "degraded." Degraded is expected for services with stale data during off-hours (TimeTracker) or with non-fatal dependency issues (AgentScheduler audit). Down means the service is genuinely unreachable.
+- One alert per outage, reset on recovery. No cooldown timers or per-service config — simple boolean flag.
+- Direct Telegram API POST (same pattern as `alerter.py`), not routed through the Telegram bot service. Avoids circular dependency if the bot itself is down.
+
+**Status:** Deployed and running on .71. All services healthy except AgentScheduler (degraded — audit subprocess exit 1, pre-existing) and TimeTrackerDashboard (flapping degraded on weekends, harmless).
+
+---
+
+## 2026-05-17 (session 1)
 
 ### srv-01: video output dead, SSH locked out — diagnostic + hardware ordered to unblock
 

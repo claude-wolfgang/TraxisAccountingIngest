@@ -130,6 +130,10 @@ BUSINESS_HOURS_START = (5, 15)   # (hour, minute) — 5:15 AM
 BUSINESS_HOURS_END = (18, 0)     # (hour, minute) — 6:00 PM
 BUSINESS_DAYS = range(0, 5)
 
+# Telegram alerting. One alert per outage; resets when service recovers.
+_TELEGRAM_BOT_TOKEN = _env("TELEGRAM_BOT_TOKEN", "")
+_TELEGRAM_CHAT_ID = _env("TELEGRAM_CHAT_ID", "")
+
 # ---- Service Definitions ---------------------------------------------------
 #
 # service_type:  "process" — managed via subprocess (Python scripts, etc.)
@@ -636,6 +640,7 @@ class ServiceState:
         self.last_healthy = None
         self.started_at = None
         self.restart_count = 0
+        self.alerted = False          # single alert per outage
 
     def to_dict(self):
         uptime = None
@@ -687,6 +692,26 @@ class ServiceManager:
         with self.lock:
             self.events.appendleft(entry)
         log.info("[%s] %s: %s", service_name, event_type, message)
+
+    # ---- Telegram alerting -------------------------------------------------
+
+    def _send_telegram_alert(self, name, message):
+        """Send one Telegram alert per outage. No-ops if already alerted."""
+        state = self.services[name]
+        if state.alerted or not _TELEGRAM_BOT_TOKEN or not _TELEGRAM_CHAT_ID:
+            return
+        state.alerted = True
+        display = state.config.get("display_name", name)
+        text = f"[Overseer] {display}: {message}"
+        try:
+            http_requests.post(
+                f"https://api.telegram.org/bot{_TELEGRAM_BOT_TOKEN}/sendMessage",
+                json={"chat_id": _TELEGRAM_CHAT_ID, "text": text},
+                timeout=10,
+            )
+            log.info("[%s] Telegram alert sent", name)
+        except Exception as e:
+            log.warning("[%s] Telegram alert failed: %s", name, e)
 
     # ---- Process helpers ---------------------------------------------------
 
@@ -959,6 +984,7 @@ class ServiceManager:
             else:
                 self._event(name, "down",
                             f"Unreachable ({state.consecutive_failures}/{cfg['max_failures']})")
+            self._send_telegram_alert(name, state.message)
             return
         except Exception as e:
             state.consecutive_failures += 1
@@ -968,6 +994,7 @@ class ServiceManager:
             if state.consecutive_failures >= cfg["max_failures"]:
                 self._event(name, "down", f"Check error, auto-restarting: {e}")
                 self.restart_service(name)
+            self._send_telegram_alert(name, state.message)
             return
 
         validator = VALIDATORS.get(name)
@@ -1006,6 +1033,19 @@ class ServiceManager:
             state.consecutive_degraded = 0
             if was_unhealthy:
                 self._event(name, "healthy", msg)
+                if state.alerted and _TELEGRAM_BOT_TOKEN and _TELEGRAM_CHAT_ID:
+                    display = state.config.get("display_name", name)
+                    try:
+                        http_requests.post(
+                            f"https://api.telegram.org/bot{_TELEGRAM_BOT_TOKEN}/sendMessage",
+                            json={"chat_id": _TELEGRAM_CHAT_ID,
+                                  "text": f"[Overseer] {display}: Recovered — {msg}"},
+                            timeout=10,
+                        )
+                        log.info("[%s] Telegram recovery sent", name)
+                    except Exception as e:
+                        log.warning("[%s] Telegram recovery failed: %s", name, e)
+            state.alerted = False
 
         elif health == "degraded":
             state.consecutive_degraded += 1
@@ -1028,6 +1068,7 @@ class ServiceManager:
                 self.restart_service(name)
             elif state.consecutive_failures == 1:
                 self._event(name, "down", msg)
+            self._send_telegram_alert(name, msg)
 
     def check_service(self, name):
         state = self.services[name]
