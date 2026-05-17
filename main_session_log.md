@@ -5,6 +5,53 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-17
+
+### srv-01: video output dead, SSH locked out — diagnostic + hardware ordered to unblock
+
+**Task:** Wolfgang: "Something we did in making SRV-01 has at the very least made its graphics stop working, possibly the whole machine. Please see what was done to this machine and what might make it unable to render a display." Triggered when he hooked monitor + keyboard + mouse to srv-01 (presumably preparing for the cutover) and got no display signal on three different monitors with multiple DP-to-HDMI cables.
+
+**What was done:**
+
+1. **Established srv-01 is fully alive at OS level, not a hardware-dead box.** ICMP ping from .178 failed (Windows firewall blocks it by default) but `Test-NetConnection -ComputerName 10.1.1.161 -Port 22` returned `TcpTestSucceeded: True`. sshd is listening, network is up, Windows is booted. ARP table on .178 still has srv-01's MAC `e4-54-e8-67-c8-0b` from prior traffic. mDNS still resolves `traxis-srv-01.local`. The display problem is post-boot Windows display output, or BIOS-level video output, NOT a system-wide failure.
+
+2. **SSH key rejected — separate issue.** Verbose SSH attempt: key offered, server replied "publickey,password,keyboard-interactive" available but our pubkey rejected. Host key SHA256 still matches known_hosts so it's the same srv-01, not a reinstall. Something on srv-01 invalidated `C:\ProgramData\ssh\administrators_authorized_keys` — most likely the ACLs got reset, or the file content changed during whatever happened between the original install and now. Couldn't be diagnosed further without either visual access or external drive mount.
+
+3. **No video at any stage — confirmed with multiple monitors and cables.** Wolfgang tested three different monitors and multiple DP-to-HDMI cables on both DP ports (this 7060 Micro has 2× DP, no HDMI module installed). Dell POST logo never appears. F2/F12 at boot have no visible effect. Combined with TCP/22 being open, this means Windows boots and runs while video output is dead at *every* layer including BIOS POST — not a Windows display config bug.
+
+4. **CMOS clear attempted — no change.** Wolfgang pulled the coin cell battery, waited 60s, reseated. Power cycled. Still no video output at power-on. Rules out BIOS-setting issues (Primary Display, video enablement). Hypothesis remaining: either (a) both iGPU DisplayPort outputs are dead at the silicon/PCB level, or (b) the DP-to-HDMI cable conversion path is failing in a way that's consistent across the cables Wolfgang has — passive DP++ vs single-mode DP, or HDMI sink EDID rejection. Can't distinguish until we test DP-to-DP end-to-end, which requires a monitor with native DP input.
+
+5. **Drive-swap attempt to gain visual access — aborted, recovered cleanly.** Plan was to install srv-01's M.2 NVMe into Wolfgang's second 7060 Micro (same form factor, same hardware platform) so srv-01's Windows could boot on hardware with working video output. First attempt: add srv-01's M.2 alongside the other Micro's existing SATA boot drive, planning to F12-pick the SATA. Result: **POST hung at the Dell logo for several minutes** with both drives present — likely BIOS NVMe enumeration getting confused with an unfamiliar drive. Force-powered off, recovered the other Micro by pulling srv-01's M.2 entirely. Other Micro then booted normally to its baseline. No damage either way; just a dead-end approach without proper drive-mounting tooling.
+
+6. **Tools ordered to unblock both problems.** Wolfgang placed two Amazon orders (PO# server parts), totals $97.41 + $51.55:
+   - **Arriving Monday 10am–3pm:** UGREEN M.2 NVMe USB enclosure ($17.98) — for offline edit of srv-01's drive to restore Claude's pubkey; Amazon Basics wired keyboard ($11.70); articulating wall mount ($17.94) — for permanent monitor install upstairs.
+   - **Arriving Tuesday:** SANSUI 27" IPS monitor with native DisplayPort input ($89.99) — for DP-to-DP path that avoids the failing DP-to-HDMI cable theory, plus permanent console at the server's location.
+   - **Gaps Wolfgang still needs to source:** DP-to-DP cable (~$10, most monitors don't ship one), wired USB mouse (Logitech B100 ~$7 or use a spare).
+
+**Plan for Monday (when enclosure arrives):**
+1. Wolfgang pops srv-01's M.2 (currently in his hand, removed during the drive-swap attempt) into the UGREEN enclosure, plugs USB into .178.
+2. The drive mounts as a drive letter on .178; Claude edits `<letter>:\ProgramData\ssh\administrators_authorized_keys` to re-add the pubkey and `icacls`-fix the ACLs.
+3. Drive goes back into srv-01, srv-01 boots, Claude SSHes in from .178 on 10.1.1.161 to confirm.
+
+**Plan for Tuesday (when monitor arrives, assuming DP-to-DP cable is also on hand):**
+1. Mount SANSUI on the new wall mount upstairs near srv-01.
+2. Run DP-to-DP from srv-01's DP1 to the monitor's DP input.
+3. Power on. Two outcomes:
+   - **Video appears:** the original failure was the DP-to-HDMI cable path. Mystery solved, srv-01 has a permanent console going forward, cutover can proceed.
+   - **Still no video:** DP ports themselves or board-level fault. Decision point: swap srv-01's chassis (the second 7060 Micro can become srv-01), or accept fully headless operation.
+
+**Files modified this session:** None — pure diagnostic and ops planning.
+
+**Key decisions:**
+- **Rejected: forcing a fix tonight via blind console typing or invasive drive-swap retries.** The cost of error (corrupting srv-01's Windows install or the other Micro's) is higher than the cost of waiting 24 hours for proper tooling. Production unaffected — .71 stays primary, services healthy.
+- **Rejected: accepting permanent headless operation without trying DP-to-DP first.** If a $7 cable purchase is what stands between "permanently headless" and "fully working video," that's the cheapest possible diagnostic to run before giving up.
+- **Bought the SANSUI for permanent installation upstairs, not just diagnostic use.** Once mounted, future srv-01 weirdness (BIOS access, Windows-recovery scenarios) becomes a walk-upstairs problem instead of a "haul the box down" problem.
+- **Initial RAM-dislodged hypothesis was wrong.** Early in the session I suggested that pulling the 2.5" SATA drive cage could have unseated a SODIMM. Wrong floor plan — on the 7060 Micro, RAM is on the *bottom* of the motherboard, not under the drive cage. Corrected mid-session.
+
+**Status:** srv-01 sitting unpowered upstairs with its M.2 NVMe pulled and in Wolfgang's possession. .71 still primary in production, healthy. All recovery hardware ordered for Monday/Tuesday delivery. Cutover deferred until SSH access is restored and the video-output question is settled.
+
+---
+
 ## 2026-05-15
 
 ### P31: COTS photo upload now lives — popup-window path implemented
