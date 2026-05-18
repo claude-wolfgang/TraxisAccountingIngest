@@ -5,9 +5,42 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
-## 2026-05-18
+## 2026-05-18 (session 2)
 
-### P23: Timer watchdog + controller RTC clock display
+### P27: CPO field-shape bundle, dropdown reclassify fix, ProShop writes audit, accuracy crisis surfaced
+
+**Task:** Help Wolfgang upload customer POs. Started as a "review the mechanism and improve coverage" pass; turned into a doc-type dropdown bug fix mid-session; ended with Wolfgang reporting every ProShop push from the ingest has been "universally wrong" and requesting a full audit of writes.
+
+**What was done:**
+
+1. **`addCustomerPo` field-shape bundle landed** — `_upload_customer_po` now writes `shiptoAddress` (was disabled — `fob` enum misuse), `paymentTermsDiscount` / `paymentTermsDiscountDays` / `currency`, and `partsOrdered` (mapped from `line_items[]` to `UpdateCustomerPoPartOrderedDataInput` — `clientPartNumber`, `quantityOrdered`, `pricePer`, `dueDate`, `partRev`, `drawingRev`, `firstArticleRequired`, description folded into `lineItemNotes` since the input type has no description field). Added `_build_cpo_items` helper and module-level `_to_int` / `_to_float`. Extended `CUSTOMER_PO` extraction prompt with the new optional fields. `part` (Traxis internal part#) intentionally not set — needs customer→Traxis-part lookup, separate pass.
+
+2. **Schema introspection harness** — wrote `probe_addcpo_api.py`, twin of P35's `probe_addpo_api.py`. Read-only basic-auth probe of `AddCustomerPoInput` + `UpdateCustomerPoPartOrderedDataInput`. Confirmed schema: 25 input fields, `partsOrdered` is `[UpdateCustomerPoPartOrderedDataInput!]`, `shiptoAddress` is just `String` (not structured), QBO fields all present. Enum *values* (`CustomerPOTaxStatus`, `CustomerPOPaymentTerms`, `CustomerPOFOB`) come back null on introspection — locked at our scope. Customer PO read also locked (`customerPOs(pageSize:N)` returns 0 records). Live writes still work via basic auth.
+
+3. **Doc-type dropdown reclassify bug fixed** — Wolfgang: "I select CPO on the type pull down, start typing the customer, and it reverts, rudely, to whatever it thinks." Diagnosed: the `ttk.Combobox` for `_type_var` had no listener, so `_current_doc_type` stayed at the original classification. When the doc was first auto-classified as VENDOR_INVOICE (a QBO type), changing the dropdown to "Customer PO → ProShop" didn't flip `_do_contact_search` away from `qbo.fuzzy_match_vendor` — every keystroke kept producing QBO-vendor matches with auto-select at >0.8. Added `<<ComboboxSelected>>` binding + new `_on_type_change` method on App: updates `_current_doc_type`, flips the contact panel header (QBO Vendor vs Customer/Vendor (ProShop)), cancels any pending debounced search, and re-runs `_do_contact_search()` against the right source. Reclassification persists at approve-time (approve paths already read `_type_var.get()`).
+
+4. **ProShop writes audit MD created** — Wolfgang surfaced an accuracy crisis: "The ingest pushes to proshop were universally, without exception, wrong. Nothing it sent to proshop that I am aware of was useful. The accuracy of this tool is approaching zero." Pulled the full list from `ingest_queue.db`: 15 real ProShop writes + 3 failed attempts + 2 mis-statused (UPLOADED but path is a local Dropbox folder — PAYMENT_VOUCHER mis-routed as VENDOR_INVOICE in two rows). Saved to `27. Accounting Ingest/PROSHOP_WRITES_AUDIT.md` grouped by doc type with ID, push date, ProShop URL, contact code, key identifier, customer/vendor, total, line-item count, confidence, source PDF.
+
+5. **Architectural pivot — planning only, no build.** Wolfgang: "QBO has a flawless document ai. I think we ought to route bills and invoices to a queue for QBO with a de-dup check. The ProShop stuff, we'll have to slog through trying to make an uploader that works. I'm starting to sort emails myself to folders in outlook. The ingest probably ought to review the orders folder and the scans picture folder." Two Explore agents researched: (a) current bill flow end-to-end, (b) QBO intake mechanisms — email-forward to `@qbodocs.com` recommended. Confirmed source folder: tom@/Orders. Wolfgang said "planning comment, don't start" — design carried as a deferred next-step.
+
+6. **Lightweight CPO drop-in tool — deferred.** Wolfgang asked for an alternate "drop in PDFs, verify customer, push" version with no email skimming. Answered three scope questions (all ProShop doc types + both drag-drop and watched folder, confirmation-PDF question unanswered) before he pivoted the conversation to the accuracy audit. Build deferred until the audit reveals whether accuracy is fixable.
+
+**Files modified:**
+- `27. Accounting Ingest/accounting_ingest.py` — `_upload_customer_po` rewired, new `_build_cpo_items` helper, module-level `_to_int`/`_to_float`, extended CUSTOMER_PO extraction prompt, new `_on_type_change` method + `<<ComboboxSelected>>` binding
+- `27. Accounting Ingest/probe_addcpo_api.py` — new, read-only schema introspection harness
+- `27. Accounting Ingest/PROSHOP_WRITES_AUDIT.md` — new, full audit of every ProShop write through the ingest
+
+**Key decisions:**
+- ProShop enum *values* unavailable to our scope — `paymentTerms`/`taxStatus`/`fob` stay pass-through; mismatches silently dropped server-side. Acceptable for this pass.
+- `part` (Traxis internal part#) not wired on CPO line items — only `clientPartNumber` is set. The customer→Traxis-part mapping pass is a separate effort.
+- Confirmation-PDF auto-generation question for the lightweight tool left open — Wolfgang pivoted before answering.
+- Ultraplan session was kicked off for the dropdown-fix plan but timed out after 90 min with no approval; the in-band local approval came through the harness and that's what authorized the edit. Noted on the trail.
+
+**Status:** Dropdown fix is live (compiled OK; Wolfgang restarting GUI to pick up). CPO field-shape bundle is live but unverified — and now under suspicion given the accuracy crisis. **The ProShop writes audit MD is the critical artifact of this session** — every push since 2026-04-10 is listed for triage. Until Wolfgang walks through it and we understand the failure pattern, no more pushes should happen.
+
+---
+
+
 
 **Task:** Wolfgang arrived Monday morning to find the compressor OFF despite the schedule saying Monday 05:00-20:00 was enabled. Had to start it from the physical panel. Requested automatic recovery and a controller clock display on the dashboard.
 
