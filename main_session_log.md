@@ -5,6 +5,48 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-18 (session 5)
+
+### P27: WO Shipped→Invoiced forward mechanism built + scheduled+Telegram deploy to .71
+
+**Task:** Pick up the queued Next Step from session 3 — build `flip_wo_invoiced_from_qbo.py` (the forward mechanism for the documented one-way Web Connector gap), and (per Wolfgang) deploy it as a scheduled job with Telegram alerting so the gap closes itself going forward.
+
+**What was done:**
+
+1. **Built `flip_wo_invoiced_from_qbo.py`.** Algorithm: pull WOs with `status=Shipped`, scan all PackingSlips to build `{workOrderNumber → set(invoicePlainText)}` map (uses `workorders:rwdp` scope added in s3), pull QBO `DocNumber` set within a 365-day window, then for each stuck WO check whether its slip's invoice number landed in QBO. Flip only on confirmed match. Dry-run by default; `--apply` to mutate; `--customer XXX` filter; `--qbo-window-days` override. Audit log to `logs/proshop_wo_flip.log` (event type `WO_STATUS_FLIP_AUTO` with the matched QBO inv numbers per row).
+
+2. **Closed yesterday's manual-rollback debt.** Dry-run identified the same 4 WOs I rolled back in s3 (R2S1 25-0200/25-0375/26-0081, ICO1 26-0142) — but this time with definitive ProShop-side invoice linkage proving they ARE invoiced in QBO (inv 260515003 / 260417001 / 260505005 / 260505014). Ran `--apply`, all 4 flipped cleanly. **All 12 originally-stuck WOs are now correctly on "Invoiced"** — the morning's chase is fully resolved.
+
+3. **Forward-mechanism design beat the line-description matching approach.** The morning's QBO-line-text matching false-positived because R2Sonic re-orders the same parts year over year (matched old 2020-2021 invoices, not the recent shipments). New chain (WO → PackingSlip → `invoicePlainText` → QBO `DocNumber`) is bulletproof because it uses ProShop's own data linkage; QBO is only consulted for existence confirmation, not fuzzy matching.
+
+4. **Added Telegram alerting.** Reads `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` from env (same convention as P1 Overseer). Fires only when an `--apply` run flips ≥1 WO. Silent on dry-runs and zero-flip applies — so the channel only chirps when there's news. Added `--test-telegram` flag for ongoing channel verification without needing real work to flip.
+
+5. **Host-portability fix.** Original `ENV_PATH = Path(r"C:\Users\Superuser\...")` was hardcoded to .178; failed on .71 (Dropbox lives on `D:\`). Refactored to derive from `__file__.resolve().parent.parent / "1. Proshop Automations" / ".traxis.env"` — works on any host where Dropbox is synced, including srv-01 future.
+
+6. **Built `setup_scheduled_flip.ps1` and deployed to .71.** Windows Task Scheduler registration matching the P34 CWS Ops Watcher pattern (RunAs `TRAXIS` Interactive, default `pythonw.exe` via WindowsApps proxy). Idempotent — re-running removes-and-recreates. Pre-flight checks for Telegram env vars at User OR Machine scope. SSH-deployed via key auth (per `reference_ssh_71` memory), end-to-end verified: task registered, manual trigger ran with `LastTaskResult=0`, `--test-telegram` delivered a message from `DESKTOP-NU8H1LI` (.71's hostname) to Wolfgang's Telegram. Next scheduled run: tonight 18:00.
+
+7. **Architectural decision: scheduled + Telegram beats browser button.** Wolfgang originally floated a Chrome extension button on QBO pages. Pointed out that a button still requires remembering to click; the forgetting problem is solved by automation, not visibility. Picked daily scheduled run with silent-unless-news Telegram — matches P1/P25 alerting cadence, hardware-free.
+
+**Files modified:**
+- `27. Accounting Ingest/flip_wo_invoiced_from_qbo.py` — new (committed d4f9733)
+- `27. Accounting Ingest/setup_scheduled_flip.ps1` — new (committed d4f9733)
+
+**Live production actions:**
+- 4 WOs flipped Shipped→Invoiced on production ProShop (25-0200, 25-0375, 26-0081, 26-0142). Net for the day: 12 of 12 originally-stuck WOs corrected.
+- Windows Scheduled Task `Traxis - Flip WO Invoiced` registered on .71 (RunAs TRAXIS, daily 18:00)
+- Test Telegram message delivered from .71
+
+**Key decisions:**
+- Scheduled (daily 18:00) over browser button — solves the "I'll forget" problem actually, not just makes manual invocation easier.
+- TRAXIS Interactive principal over SYSTEM — matches the proven P34 model on .71, and Telegram env vars are at User scope on .71 (Machine scope is empty), so SYSTEM wouldn't see them.
+- Pythonw.exe (WindowsApps proxy → user Python314) — matches P34. Trades visibility-of-failure for no-console-flash. Errors still surface via LastTaskResult exit code.
+- ENV_PATH derived from `__file__` — first script in P27 to be truly host-portable; older scripts (read_proshop_invoices.py etc.) still have the .178 hardcode but it doesn't matter because they only run on Wolfgang's dev box.
+- Match key for WO→invoice is `PackingSlip.invoicePlainText` from the WO's own slips, NOT QBO line-description text. The morning's rollback proved why.
+
+**Status:** Forward mechanism live and deployed. Next sweep tonight 18:00 on .71. If it flips any WO, you'll get a Telegram ping. If not (likely — we just cleared them all), silent. Re-deploy on srv-01 post-cutover is queued in Next Steps.
+
+---
+
 ## 2026-05-18 (session 4)
 
 ### P27: Triage of ProShop writes audit + provenance tag on every push
