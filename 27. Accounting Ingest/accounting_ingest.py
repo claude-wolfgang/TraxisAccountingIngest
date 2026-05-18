@@ -43,6 +43,9 @@ SCAN_FOLDER  = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting 
 BURST_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\Scanned\burst")
 EMAIL_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\From Email")
 DB_PATH      = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\ingest_queue.db")
+# QBO_AUDIT_LOG is set below after QBO_ENVIRONMENT is resolved so sandbox
+# test runs land in a separate file (qbo_audit_sandbox.log) and don't
+# pollute the production audit trail.
 QBO_AUDIT_LOG = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Accounting Inbox\qbo_audit.log")
 CONFIRMATION_FOLDER = Path(r"C:\Users\Superuser\Dropbox\MACHINE COMM Traxis\Outgoing Customer Confirmations")
 
@@ -111,6 +114,8 @@ QBO_BASE_URLS = {
     "production": "https://quickbooks.api.intuit.com/v3/company/{realm_id}",
 }
 QBO_BASE_URL = QBO_BASE_URLS[QBO_ENVIRONMENT]
+if QBO_ENVIRONMENT == "sandbox":
+    QBO_AUDIT_LOG = QBO_AUDIT_LOG.with_name("qbo_audit_sandbox.log")
 QBO_APP_URLS = {
     "sandbox":    "https://app.sandbox.qbo.intuit.com/app/bill?txnId={bill_id}",
     "production": "https://app.qbo.intuit.com/app/bill?txnId={bill_id}",
@@ -684,6 +689,16 @@ class ProShopClient:
 
 # ─── QuickBooks Online Client ─────────────────────────────────────────────────
 
+def _qbo_creds_keys():
+    """Return (refresh_token_env_key, realm_id_env_key) for the current
+    QBO_ENVIRONMENT. Sandbox uses QBO_SANDBOX_* so production keys are
+    never touched during testing."""
+    env_str = ENV.get("QBO_ENVIRONMENT", "sandbox")
+    if env_str == "sandbox":
+        return "QBO_SANDBOX_REFRESH_TOKEN", "QBO_SANDBOX_REALM_ID"
+    return "QBO_REFRESH_TOKEN", "QBO_REALM_ID"
+
+
 class QBOClient:
     """QuickBooks Online API client — OAuth2 refresh-token flow."""
 
@@ -711,6 +726,7 @@ class QBOClient:
 
     def revoke_token(self):
         """Revoke the current refresh token (used on disconnect)."""
+        rt_key, _ = _qbo_creds_keys()
         creds = base64.b64encode(
             f"{ENV['QBO_CLIENT_ID']}:{ENV['QBO_CLIENT_SECRET']}".encode()
         ).decode()
@@ -718,11 +734,12 @@ class QBOClient:
             "Authorization": f"Basic {creds}",
             "Content-Type": "application/json",
             "Accept": "application/json",
-        }, json={"token": ENV.get("QBO_REFRESH_TOKEN", "")})
+        }, json={"token": ENV.get(rt_key, "")})
 
     def _refresh(self):
         if self.access_token and time.time() < self.expires_at - 60:
             return self.access_token
+        rt_key, _ = _qbo_creds_keys()
         creds = base64.b64encode(
             f"{ENV['QBO_CLIENT_ID']}:{ENV['QBO_CLIENT_SECRET']}".encode()
         ).decode()
@@ -732,7 +749,7 @@ class QBOClient:
             "Accept": "application/json",
         }, data={
             "grant_type": "refresh_token",
-            "refresh_token": ENV["QBO_REFRESH_TOKEN"],
+            "refresh_token": ENV[rt_key],
         })
         if not r.ok:
             try:
@@ -740,22 +757,24 @@ class QBOClient:
             except Exception:
                 err = ""
             if err == "invalid_grant":
+                script = ("qbo_auth_sandbox.py"
+                          if QBO_ENVIRONMENT == "sandbox" else "qbo_auth.py")
                 raise RuntimeError(
-                    "QBO refresh token expired or revoked. "
-                    "Run qbo_auth.py to re-authorize."
+                    f"QBO refresh token expired or revoked. Run {script} to re-authorize."
                 )
             self._raise_qbo_error(r)
         data = r.json()
         self.access_token = data["access_token"]
         self.expires_at = time.time() + data.get("expires_in", 3600)
         new_refresh = data.get("refresh_token")
-        if new_refresh and new_refresh != ENV.get("QBO_REFRESH_TOKEN"):
-            ENV["QBO_REFRESH_TOKEN"] = new_refresh
-            _update_env_value("QBO_REFRESH_TOKEN", new_refresh)
+        if new_refresh and new_refresh != ENV.get(rt_key):
+            ENV[rt_key] = new_refresh
+            _update_env_value(rt_key, new_refresh)
         return self.access_token
 
     def _url(self, path):
-        return QBO_BASE_URL.format(realm_id=ENV["QBO_REALM_ID"]) + "/" + path
+        _, realm_key = _qbo_creds_keys()
+        return QBO_BASE_URL.format(realm_id=ENV[realm_key]) + "/" + path
 
     def _headers(self):
         return {
@@ -890,6 +909,53 @@ class QBOClient:
                 },
             })
 
+        # Reconciliation gate: trust the bill's labeled total over our
+        # sum-of-extracted-lines. If extraction missed rows on a multi-line
+        # bill, add a balancing line so QBO ends up with the correct TotalAmt
+        # instead of a quietly understated bill (see P27_BILL_EXTRACTION_BUG.md).
+        line_sum = round(sum(ln.get("Amount", 0) for ln in lines), 2)
+        try:
+            stated_total = float(
+                str(extracted.get("total_amount") or 0)
+                .replace(",", "").replace("$", "").strip()
+            )
+        except (ValueError, TypeError):
+            stated_total = 0.0
+        delta = round(stated_total - line_sum, 2)
+        if stated_total > 0 and delta > 0.50:
+            lines.append({
+                "DetailType": "AccountBasedExpenseLineDetail",
+                "Amount": delta,
+                "Description": (
+                    f"Unitemized balance - extraction captured ${line_sum:.2f} "
+                    f"of ${stated_total:.2f} stated total. Review PDF before paying."
+                ),
+                "AccountBasedExpenseLineDetail": {
+                    "AccountRef": account_ref,
+                    "BillableStatus": "NotBillable",
+                },
+            })
+            _qbo_audit(
+                "BILL_RECONCILED",
+                vendor=f"{vendor_display} (id={vendor_id})",
+                doc_number=extracted.get("invoice_number", ""),
+                stated_total=f"${stated_total:.2f}",
+                line_sum=f"${line_sum:.2f}",
+                delta=f"${delta:.2f}",
+                total_match_claim=(extracted.get("total_match") or "").lower(),
+                extracted_lines=len(extracted.get("line_items", [])),
+            )
+        elif stated_total > 0 and delta < -0.50:
+            _qbo_audit(
+                "BILL_OVER_TOTAL",
+                vendor=f"{vendor_display} (id={vendor_id})",
+                doc_number=extracted.get("invoice_number", ""),
+                stated_total=f"${stated_total:.2f}",
+                line_sum=f"${line_sum:.2f}",
+                delta=f"${delta:.2f}",
+                extracted_lines=len(extracted.get("line_items", [])),
+            )
+
         bill = {
             "Line": lines,
             "VendorRef": {"value": vendor_id, "name": vendor_display},
@@ -980,15 +1046,27 @@ class QBOClient:
             )
             raise
 
-    def check_duplicate_bill(self, doc_number):
-        """Return QBO URL if a Bill with this DocNumber already exists, else None."""
+    def check_duplicate_bill(self, doc_number, vendor_id=None):
+        """Return QBO URL if a Bill with this DocNumber already exists, else None.
+
+        If `vendor_id` is provided, scope the match to that vendor — avoids
+        false positives when two vendors happen to share a short invoice
+        number (e.g. "1234"). Passing None preserves the older vendor-agnostic
+        behavior for callers that don't have vendor context.
+        """
         if not doc_number:
             return None
         try:
             safe = doc_number.replace("'", "\\'")
-            data = self.qbo_query(
-                f"SELECT * FROM Bill WHERE DocNumber = '{safe}' MAXRESULTS 1"
-            )
+            if vendor_id:
+                safe_v = str(vendor_id).replace("'", "\\'")
+                sql = (
+                    f"SELECT * FROM Bill WHERE DocNumber = '{safe}' "
+                    f"AND VendorRef = '{safe_v}' MAXRESULTS 1"
+                )
+            else:
+                sql = f"SELECT * FROM Bill WHERE DocNumber = '{safe}' MAXRESULTS 1"
+            data = self.qbo_query(sql)
             bills = data.get("QueryResponse", {}).get("Bill", [])
             if bills:
                 bid = bills[0].get("Id", "")
@@ -1056,13 +1134,16 @@ EXTRACTION_PROMPTS = {
   "po_date": "date of PO (YYYY-MM-DD) (REQUIRED)",
   "buyer_name": "buyer contact name or null",
   "buyer_email": "buyer email or null",
-  "ship_to": "shipping address or null",
+  "ship_to": "shipping address as free text — addressee, street, city/state/zip, country or null",
   "bill_to": "billing address or null",
   "payment_terms": "e.g. Net 30 or null",
+  "payment_terms_discount_percent": "early-pay discount percent as integer (e.g. 2 for '2/10 net 30') or null",
+  "payment_terms_discount_days": "days to qualify for early-pay discount (e.g. 10 for '2/10 net 30') or null",
+  "currency": "ISO currency code (USD, EUR, etc.) or null",
   "required_date": "delivery required by date (YYYY-MM-DD) or null",
   "total_amount": "total PO value or null",
   "line_items": [
-    {"line_number": "...", "part_number": "...", "description": "...", "quantity": "...", "unit_price": "...", "extended_price": "...", "required_date": "..."}
+    {"line_number": "...", "part_number": "buyer's part number as shown on the PO", "description": "...", "quantity": "...", "unit_price": "...", "extended_price": "...", "required_date": "...", "part_rev": "revision letter/number or null", "drawing_rev": "drawing revision or null", "first_article_required": false}
   ],
   "notes": "any special instructions or null",
   "confidence": 0.0-1.0
@@ -1294,7 +1375,9 @@ Example for 7 pages: packing slip (p1-2) + mill cert (p3) = one package, shippin
 
     def extract(self, pdf_path, doc_type):
         """Full extraction — returns dict."""
-        images = self.pdf_to_images(pdf_path, max_pages=4)
+        # max_pages: Hadco consolidated bills can run 5-10 pages.
+        # max_tokens: a 9-line bill with full field extraction can exceed 2000.
+        images = self.pdf_to_images(pdf_path, max_pages=12)
         if not images:
             return {"error": "Could not render PDF", "confidence": 0}
 
@@ -1306,7 +1389,7 @@ Example for 7 pages: packing slip (p1-2) + mill cert (p3) = one package, shippin
 
         msg = self.client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=2000,
+            max_tokens=8000,
             messages=[{"role": "user", "content": content}]
         )
         raw = msg.content[0].text.strip()
@@ -1654,6 +1737,46 @@ class FolderWatcher:
 
 # ─── ProShop Uploader ─────────────────────────────────────────────────────────
 
+def _to_float(value):
+    """Parse a numeric value that may carry a unit suffix or currency.
+    "13.000 PC" -> 13.0, "$25.00" -> 25.0, "20,000.5 EA" -> 20000.5
+    Returns None if no leading number found."""
+    if value is None:
+        return None
+    s = str(value).strip().replace(",", "").replace("$", "").replace("€", "").replace("£", "")
+    m = re.match(r"^-?\d+(?:\.\d+)?", s)
+    if not m:
+        return None
+    try:
+        return float(m.group(0))
+    except ValueError:
+        return None
+
+
+def _to_int(value):
+    """Like _to_float but truncates to int; None if not parseable."""
+    f = _to_float(value)
+    return int(f) if f is not None else None
+
+
+def _ingest_tag(queue_id):
+    """Provenance marker prepended to the notes/remarks field of every record
+    this ingest pushes to ProShop. Lets Wolfgang tell at-a-glance which records
+    came from P27 vs. manual entry, and the queue-id makes each record traceable
+    back to the exact row in `ingest_queue.db` (source PDF, extracted JSON,
+    contact match, confidence). Easy to filter in the ProShop UI by searching
+    notes containing 'P27 ingest', and easy to strip if a record is reworked."""
+    return f"[P27 ingest q#{queue_id}]"
+
+
+def _with_tag(queue_id, existing):
+    """Prepend the ingest tag to an existing notes/remarks string."""
+    tag = _ingest_tag(queue_id)
+    if existing:
+        return f"{tag}\n\n{existing}"
+    return tag
+
+
 class ProShopUploader:
     def __init__(self, proshop, log):
         self.proshop = proshop
@@ -1664,34 +1787,34 @@ class ProShopUploader:
         data = json.loads(edited_json)
 
         if doc_type == "VENDOR_INVOICE":
-            result = self._upload_bill(data, contact_name)
+            result = self._upload_bill(data, contact_name, queue_id)
             rec = result.get("addBill", {})
             return rec.get("billId"), rec.get("proshopUrl")
 
         elif doc_type == "PACKING_SLIP":
-            result = self._upload_packing_slip(data, contact_name)
+            result = self._upload_packing_slip(data, contact_name, queue_id)
             rec = result.get("addPackingSlip", {})
             return rec.get("id"), rec.get("proshopUrl")
 
         elif doc_type == "CUSTOMER_PO":
-            result = self._upload_customer_po(data, contact_name)
+            result = self._upload_customer_po(data, contact_name, queue_id)
             rec = result.get("addCustomerPo", {})
             return rec.get("poId"), rec.get("proshopUrl")
 
         elif doc_type == "VENDOR_PO":
-            result = self._upload_purchase_order(data, contact_name)
+            result = self._upload_purchase_order(data, contact_name, queue_id)
             rec = result.get("addPurchaseOrder", {})
             return rec.get("id"), rec.get("proshopUrl")
 
         elif doc_type == "CUSTOMER_QUOTE":
-            result = self._upload_quote(data, contact_name)
+            result = self._upload_quote(data, contact_name, queue_id)
             rec = result.get("addQuote", {})
             return rec.get("quoteId"), rec.get("proshopUrl")
 
         else:
             raise ValueError(f"Unknown doc type: {doc_type}")
 
-    def _upload_bill(self, data, contact_name):
+    def _upload_bill(self, data, contact_name, queue_id):
         payload = {}
         if contact_name:
             payload["supplier"] = contact_name
@@ -1701,8 +1824,7 @@ class ProShopUploader:
             payload["dateIssued"] = data["invoice_date"]
         if data.get("due_date"):
             payload["dueDate"] = data["due_date"]
-        if data.get("notes"):
-            payload["note"] = data["notes"]
+        payload["note"] = _with_tag(queue_id, data.get("notes"))
         # Line items
         items = self._build_bill_items(data.get("line_items", []))
         if items:
@@ -1735,7 +1857,7 @@ class ProShopUploader:
                 items.append(item)
         return items
 
-    def _upload_packing_slip(self, data, contact_name):
+    def _upload_packing_slip(self, data, contact_name, queue_id):
         payload = {}
         if contact_name:
             payload["soldTo"] = contact_name
@@ -1747,8 +1869,7 @@ class ProShopUploader:
             payload["salesOrder"] = data["packing_slip_number"]
         if data.get("tracking_number"):
             payload["specialInstructionRowOne"] = f"Tracking: {data['tracking_number']}"
-        if data.get("notes"):
-            payload["specialInstructions"] = data["notes"]
+        payload["specialInstructions"] = _with_tag(queue_id, data.get("notes"))
         # Line items
         items = self._build_ps_items(data.get("line_items", []))
         if items:
@@ -1794,7 +1915,7 @@ class ProShopUploader:
                 items.append(item)
         return items
 
-    def _upload_customer_po(self, data, contact_name):
+    def _upload_customer_po(self, data, contact_name, queue_id):
         # When a doc was first classified as VENDOR_PO and the user manually
         # reclassifies to CUSTOMER_PO, the extraction left quote_* fields
         # rather than po_*. Fall back to keep clientPONumber non-null.
@@ -1811,15 +1932,62 @@ class ProShopUploader:
             payload["buyer"] = data["buyer_name"]
         if data.get("payment_terms"):
             payload["paymentTerms"] = data["payment_terms"]
-        if data.get("notes"):
-            payload["notes"] = data["notes"]
-        # NOTE: ship_to was previously written to `fob`, but `fob` is an enum
-        # (DESTINATION/ORIGIN), not a free-text address. Disabled until the
-        # planned addCustomerPo field-shape bundle wires shiptoAddress correctly.
+        payload["notes"] = _with_tag(queue_id, data.get("notes"))
+        if data.get("ship_to"):
+            payload["shiptoAddress"] = data["ship_to"]
+        # QBO/policy fields — all optional, only set when extraction returned them.
+        discount_pct = _to_int(data.get("payment_terms_discount_percent"))
+        if discount_pct is not None:
+            payload["paymentTermsDiscount"] = discount_pct
+        discount_days = _to_int(data.get("payment_terms_discount_days"))
+        if discount_days is not None:
+            payload["paymentTermsDiscountDays"] = discount_days
+        if data.get("currency"):
+            payload["currency"] = data["currency"]
+        items = self._build_cpo_items(
+            data.get("line_items", []),
+            default_due_date=data.get("required_date"),
+        )
+        if items:
+            payload["partsOrdered"] = items
         payload["year"] = po_date[:4] or str(datetime.now().year)
         return self.proshop.add_customer_po(payload)
 
-    def _upload_purchase_order(self, data, contact_name):
+    def _build_cpo_items(self, line_items, default_due_date=None):
+        """Convert extracted CPO line items to partsOrdered (UpdateCustomerPoPartOrderedDataInput).
+        UpdateCustomerPoPartOrderedDataInput has no description/partDescription field;
+        line description is folded into lineItemNotes so it isn't lost.
+        `part` (Traxis internal part#) is not set — extraction sees the customer's
+        part number, which maps to clientPartNumber. Mapping to our internal part#
+        would require a separate lookup pass.
+        """
+        items = []
+        for li in line_items:
+            item = {}
+            if li.get("part_number"):
+                item["clientPartNumber"] = str(li["part_number"])
+            if li.get("description"):
+                item["lineItemNotes"] = str(li["description"])
+            qty = _to_int(li.get("quantity"))
+            if qty is not None:
+                item["quantityOrdered"] = qty
+            price = _to_float(li.get("unit_price"))
+            if price is not None:
+                item["pricePer"] = price
+            due = li.get("required_date") or default_due_date
+            if due:
+                item["dueDate"] = str(due)
+            if li.get("part_rev"):
+                item["partRev"] = str(li["part_rev"])
+            if li.get("drawing_rev"):
+                item["drawingRev"] = str(li["drawing_rev"])
+            if li.get("first_article_required") is True:
+                item["firstArticleRequired"] = True
+            if item:
+                items.append(item)
+        return items
+
+    def _upload_purchase_order(self, data, contact_name, queue_id):
         """Upload vendor quote/PO to ProShop as a Purchase Order."""
         payload = {"poType": "Standard"}
         # Supplier: prefer matched contact, fall back to name from extracted data
@@ -1832,8 +2000,8 @@ class ProShopUploader:
         ref_val = data.get("quote_number") or data.get("po_number") or ""
         if ref_val:
             payload["confirmationNumber"] = ref_val
-        # Build remarks from lead time + notes
-        remarks_parts = []
+        # Build remarks from lead time + notes (ingest tag goes first)
+        remarks_parts = [_ingest_tag(queue_id)]
         if data.get("lead_time"):
             remarks_parts.append(f"Lead time: {data['lead_time']}")
         if data.get("payment_terms"):
@@ -1842,8 +2010,7 @@ class ProShopUploader:
             remarks_parts.append(f"Total: ${data['total_amount']}")
         if data.get("notes"):
             remarks_parts.append(data["notes"])
-        if remarks_parts:
-            payload["remarks"] = "\n".join(remarks_parts)
+        payload["remarks"] = "\n".join(remarks_parts)
         if data.get("payment_terms"):
             payload["specialInstructions"] = data["payment_terms"]
         # Line items
@@ -1887,7 +2054,7 @@ class ProShopUploader:
                 items.append(item)
         return items
 
-    def _upload_quote(self, data, contact_name):
+    def _upload_quote(self, data, contact_name, queue_id):
         payload = {}
         if contact_name:
             payload["client"] = contact_name
@@ -1897,8 +2064,7 @@ class ProShopUploader:
             payload["dueDate"] = data["valid_until"]
         if data.get("contact_name"):
             payload["contact"] = data["contact_name"]
-        if data.get("notes"):
-            payload["notes"] = data["notes"]
+        payload["notes"] = _with_tag(queue_id, data.get("notes"))
         payload["year"] = (data.get("quote_date") or "")[:4] or str(datetime.now().year)
         return self.proshop.add_quote(payload)
 
@@ -2127,6 +2293,7 @@ class AccountingIngestApp(tk.Tk):
                                values=[DOC_TYPE_LABELS[t] for t in DOC_TYPES],
                                state="readonly", width=28)
         type_cb.pack(side="left", padx=4)
+        type_cb.bind("<<ComboboxSelected>>", self._on_type_change)
 
         # Contact match
         self._contact_frame = ttk.LabelFrame(parent, text="Customer / Vendor")
@@ -2545,6 +2712,29 @@ class AccountingIngestApp(tk.Tk):
         self._pdf_page = min(len(self._pdf_images) - 1, self._pdf_page + 1)
         self._show_pdf_page()
 
+    # ── Doc Type Reclassification ──────────────────────────────────────────
+
+    def _on_type_change(self, *_):
+        """Operator picked a new doc type from the dropdown. Realign the
+        contact panel + listbox to the matching source (ProShop vs QBO)
+        so typing a name searches the correct directory. Reclassification
+        persists when the row is approved (approve paths read _type_var
+        at submit time)."""
+        label = self._type_var.get()
+        new_type = next((t for t, lbl in DOC_TYPE_LABELS.items() if lbl == label), None)
+        if not new_type or new_type == self._current_doc_type:
+            return
+        self._current_doc_type = new_type
+        if new_type in QBO_DOC_TYPES:
+            self._contact_frame.config(text="QBO Vendor")
+        else:
+            self._contact_frame.config(text="Customer / Vendor (ProShop)")
+        if hasattr(self, "_search_after_id") and self._search_after_id:
+            self.after_cancel(self._search_after_id)
+            self._search_after_id = None
+        self._contact_listbox.delete(0, "end")
+        self._do_contact_search()
+
     # ── Contact Search ─────────────────────────────────────────────────────
 
     def _on_contact_search(self, *_):
@@ -2658,7 +2848,7 @@ class AccountingIngestApp(tk.Tk):
                     # Check for duplicate in QBO
                     inv_num = data.get("invoice_number")
                     if inv_num:
-                        dup_url = self.qbo.check_duplicate_bill(inv_num)
+                        dup_url = self.qbo.check_duplicate_bill(inv_num, vendor_id=vendor_id)
                         if dup_url:
                             proceed = messagebox.askyesno(
                                 "Possible Duplicate in QBO",

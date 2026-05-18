@@ -5,6 +5,46 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-18 (session 4)
+
+### P27: Triage of ProShop writes audit + provenance tag on every push
+
+**Task:** Walk the `PROSHOP_WRITES_AUDIT.md` from session 2 — for each of the 15 records that landed in ProShop, determine current state (still there? deleted by Wolfgang?), identify the failure mode, and recommend keep/rework/delete. Then make future pushes traceable.
+
+**What was done:**
+
+1. **Triaged all 15 records via basic-auth queries against ProShop.** OAuth `ACCOUNTING_CLIENT_ID` is dead (returns 403 on token endpoint — `auth_010` fallout). Switched to the `_BasicAuthSession` path. Found:
+   - **11 records already deleted by Wolfgang** (both CPOs, 3 VPOs, all 5 packing slips, 1 quote). No action.
+   - **4 still live in ProShop**: bill `260410001` (LP Machine — header OK, line items null), VPO `263085` (Water Cut aluminum — supplier null), VPO `263104` (R2Sonic CPO mis-pushed as VPO — wrong supplier=TRA1), VPO `263089` (Bayou Metal aluminum — actually fine).
+   - Wrote findings + per-record recommendations into the audit MD's new "Triage Findings (2026-05-18)" section.
+
+2. **Identified the four root causes** (documented in the audit MD): (a) customer/vendor confusion in extraction prompt — Traxis gets identified as the wrong-side party when it appears on a doc, (b) doc-type-change-without-upload-route-change — fixed in s2 by the Combobox binding, (c) field-shape mismatches on `addBill` items silently produced null bodies, (d) contact picker accepts "no match" so 7/15 records pushed with `contact_name=None`.
+
+3. **Bill 260410001 recommendation flipped from REWORK to DELETE** after Wolfgang surfaced "we don't use proshops bills module." Vendor invoices go to QBO only; the ProShop record is clutter in an unused module.
+
+4. **Saved new project memory** `project_proshop_bills_module_unused.md` codifying the rule; added the index line in `MEMORY.md`. Per the `feedback_minimal_human_input` memory: domain rules go into prompts/code/memory immediately so they don't stay tribal knowledge.
+
+5. **Added `[P27 ingest q#<id>]` provenance tag to every ProShop write.** New module-level helpers `_ingest_tag(queue_id)` and `_with_tag(queue_id, existing)`. Plumbed `queue_id` through `ProShopUploader.upload()` → all 5 per-type methods (`_upload_bill`, `_upload_packing_slip`, `_upload_customer_po`, `_upload_purchase_order`, `_upload_quote`). Tag prepends to the user-visible notes field per doc type: `note` (bill), `specialInstructions` (PS), `notes` (CPO/Quote), `remarks` (VPO). Queue ID gives direct lookup back into `ingest_queue.db` for source PDF / extracted JSON / contact match / confidence.
+
+6. **Queued the bills-removal code change** in P27 Next Steps near the top. Actual deletion of `_upload_bill` + `_build_bill_items` + `ProShopClient.add_bill` + the `VENDOR_INVOICE → addBill` dispatch branch is the planned follow-up.
+
+**Files modified:**
+- `27. Accounting Ingest/accounting_ingest.py` — `_ingest_tag` + `_with_tag` helpers; `queue_id` plumbed through all 5 upload paths; tag now prepends each notes-field write
+- `27. Accounting Ingest/PROSHOP_WRITES_AUDIT.md` — added Triage Findings section
+- `27. Accounting Ingest/CLAUDE.md` — added "Remove ProShop bills push path" to Next Steps near the top
+- `.claude/...memory/project_proshop_bills_module_unused.md` — new (user-scope memory, not in repo)
+- `.claude/...memory/MEMORY.md` — index entry (user-scope, not in repo)
+
+**Key decisions:**
+- Tag uses `q#<queue_id>` rather than a date or hash — the queue ID is the most useful traceback handle (one click into the ingest DB).
+- Tag prepends, doesn't append — most visible at top of the field.
+- ProShop's `createdByPlainText` field exists but requires Users-module read scope our basic-auth session doesn't have. ProShop UI shows the creator though, so for OAuth-path writes (which pre-date today) Wolfgang can verify "auth_010" in the audit sidebar.
+- Bills-module-unused rule saved as memory rather than acted on inline; code change queued per Wolfgang's "queue it" instruction.
+
+**Status:** Tag wiring is live (`py_compile` OK). Audit MD has full triage. The 4 still-live records remain for Wolfgang's manual cleanup in ProShop UI. Code change to fully remove ProShop bills push is queued in Next Steps.
+
+---
+
 ## 2026-05-18 (session 3)
 
 ### P27: Bookkeeping reconciliation toolkit (3 stages), OPmobility sync fix, WO Shipped→Invoiced back-feed (8 flipped + 4 rolled back)
