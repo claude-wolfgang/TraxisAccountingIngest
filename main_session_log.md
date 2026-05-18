@@ -5,9 +5,105 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
-## 2026-05-18
+## 2026-05-18 (session 3)
 
-### P23: Timer watchdog + controller RTC clock display
+### P27: Bookkeeping reconciliation toolkit (3 stages), OPmobility sync fix, WO Shipped→Invoiced back-feed (8 flipped + 4 rolled back)
+
+**Task:** Started as "can we read invoice numbers from QBO?" — expanded into a full ProShop↔QBO bookkeeping reconciliation toolkit, surfaced and fixed a live customer sync error in production, then probed the WorkOrder status back-feed (the real fix for the documented `proshop_qbo_sync_problem.md`).
+
+**What was done:**
+
+1. **Stage 2 reconcile — `read_proshop_invoices.py`** (180-day initial; settled at 30-day window). Matches ProShop invoices ↔ QBO invoices by `invoiceId`↔`DocNumber` + total. Discovered after two iterations that **`Invoice.invoiceId` is the human-readable number** (not `legacyId`, and `invoicePlainText` doesn't exist on Invoice — that field is on PackingSlip referencing parent). No native date filter on ProShop — fetch all + client-side; QBO uses `WHERE TxnDate >= 'YYYY-MM-DD'` server-side.
+
+2. **Stage 1 — `read_proshop_unbilled_shipments.py`**. Shipped PackingSlips with blank `invoicePlainText`. 3 in 30-day window (OPM1, R2S1 x2). `pricePer` is null on un-invoiced slips (price set at invoice creation, not on the slip), so $ totals were dropped from output — was misleadingly $0.00 across the board.
+
+3. **Stage 3 — `read_payment_reconcile.py`** (180-day window). Cross-references QBO `Invoice.Balance` against ProShop `Invoice.status`. **Found 111 ProShop invoices marked "Outstanding" that QBO shows as paid — $344,605.29 in stale collections.** Mostly R2Sonic (47, $215K), ICON Tech (9, $46K), Setcom (34, $17K). Zero false positives (no ProShop-paid with QBO-balance-owed).
+
+4. **OPMobility "Bill Sync Error" fixed end-to-end.** Stage 2 reconcile flagged invoice 260514001 as ProShop-only. Wolfgang screenshot showed the ProShop UI banner: "No value has been added to this Contact's Accounting Client GUID field." Found `accountingGuid` field on Contact schema. Looked up OPMobility in QBO (Customer Id 1478, DisplayName "OPMobility"). Wolfgang confirmed the field takes **DisplayName, not Id**, despite "GUID" label. He pasted `OPMobility`, ProShop's Web Connector pushed 260514001 to QBO within minutes — Stage 2 re-run confirmed matched count went 20→21.
+
+5. **Discovered ProShop→QBO Web Connector is create-only.** Wolfgang edited 260514001 from $2,725 to $1,800 in ProShop after sync; QBO stayed at $2,725 (Stage 2 re-run flagged the mismatch). Manually fixed QBO too, Stage 2 cleared.
+
+6. **WorkOrder.status is the real "Invoiced" field** (not Invoice.status). `Invoice.status` is binary Outstanding/Booked and effectively unused — 2 "Booked" out of 1378 invoices across 5 years. WO.status has full lifecycle: Active, Manufacturing Complete, Shipped, Invoiced, Complete, Canceled. Added `workorders:rwdp` to `ACCOUNTING_SCOPE` env var. Of 2366 WOs: **1966 Invoiced (83%), 13 stuck on Shipped** — connector mostly works but leaks ~1/month.
+
+7. **Probed `updateWorkOrder` mutation** on OPM1 26-0155 under basic auth: works cleanly (Shipped → Invoiced, returns updated record). Then batch-flipped the remaining 11 stuck WOs. **Cross-verified after the fact and rolled back 4** (R2S1 25-0200/25-0375/26-0081, ICO1 26-0142) — couldn't confirm those had matching QBO invoices (parts recur across years; the "matches" found were old re-orders, not the recent WOs). **Net: 8 WOs correctly flipped, 4 rolled back pending manual review.**
+
+8. **QBO production OAuth re-authorized.** Production refresh token had gone stale (env was in sandbox mode for weeks, prod token wasn't being rotated). Wolfgang did the browser auth flow, pasted the redirect URL back into chat; built `_complete_qbo_auth.py` as a one-shot helper that takes the redirect URL on argv and writes the fresh refresh token + realm to `.traxis.env`.
+
+9. **`/reconcile` slash command** at `.claude/commands/reconcile.md` — runs Stage 1 + Stage 2 in parallel, formats output as a punch list, references saved memories for SET1 pattern + customer code map.
+
+10. **Forward-mechanism design (not built).** Wolfgang's ask: "When an invoice is created for a WO in QBO, the invoiced line on the WO should be marked complete." Designed algorithm: WO → PackingSlip → `invoicePlainText` → QBO `DocNumber` match. Validates the QBO side (catches Web Connector failures), separate script with dry-run/--apply/--customer gating, separate `/flip-wo-invoiced` slash command. Build queued.
+
+**Files created:**
+- `27. Accounting Ingest/read_proshop_invoices.py`
+- `27. Accounting Ingest/read_proshop_unbilled_shipments.py`
+- `27. Accounting Ingest/read_payment_reconcile.py`
+- `27. Accounting Ingest/_complete_qbo_auth.py` (one-shot helper, kept for next ~100-day token expiration)
+- `27. Accounting Ingest/logs/proshop_qbo_invoice_reconcile_30d.json`
+- `27. Accounting Ingest/logs/proshop_unbilled_shipments_30d.json`
+- `27. Accounting Ingest/logs/payment_reconcile_180d.json`
+- `27. Accounting Ingest/logs/proshop_wo_flip.log` (tab-delimited audit of all WO mutations + rollbacks)
+- `.claude/commands/reconcile.md`
+
+**Files modified:**
+- `1. Proshop Automations/.traxis.env` — `QBO_REFRESH_TOKEN` rotated (production); `ACCOUNTING_SCOPE` gained `workorders:rwdp`
+
+**Live production actions:**
+- OPmobility Contact `accountingGuid` set to "OPMobility" (the customer's first invoice ever to sync to QBO via this path)
+- 12 WorkOrders mutated Shipped→Invoiced, 4 immediately rolled back to Shipped (audit log captures both events)
+- QBO invoice 260514001 edit ($2,725→$1,800, by Wolfgang in the QBO UI)
+
+**Memories saved:**
+- `project_proshop_invoice_schema_gotchas.md` (expanded with PackingSlip section)
+- `project_proshop_qbo_zero_dollar_set1.md`
+- `project_customer_code_mapping.md` (OPM1=OPMobility, R2S1=R2Sonic LLC, SET1=Setcom; takes QBO DisplayName not Id)
+- `project_proshop_qbo_sync_create_only.md`
+
+**Key decisions:**
+- Stage 3 default window is 180 days (not 30) — the value is in finding OLD paid-but-not-flipped invoices; Net 30 means 30-60 day lag is normal so 30 days would miss the gap.
+- `$ totals` dropped from Stage 1 console output — `pricePer` is null on un-invoiced slips; showing $0 across the board is worse than no column.
+- WO back-feed algorithm goes through ProShop's own `PackingSlip → invoicePlainText` chain THEN cross-checks QBO `DocNumber`, rather than QBO line-description text matching (which proved unreliable — same parts recur across years).
+- Customer matching during the WO flip used QBO line descriptions; this was the false-positive source for the 4 rolled-back WOs. Forward mechanism design avoids this entirely.
+
+**Status:** All three reconcile scripts live and proven. `/reconcile` slash command active. WO back-feed mechanism designed but not built — pending in Next Steps. 4 rolled-back WOs await manual review by Wolfgang (may be legitimately uninvoiced or just had non-obvious QBO line descriptions).
+
+---
+
+## 2026-05-18 (session 2)
+
+### P27: CPO field-shape bundle, dropdown reclassify fix, ProShop writes audit, accuracy crisis surfaced
+
+**Task:** Help Wolfgang upload customer POs. Started as a "review the mechanism and improve coverage" pass; turned into a doc-type dropdown bug fix mid-session; ended with Wolfgang reporting every ProShop push from the ingest has been "universally wrong" and requesting a full audit of writes.
+
+**What was done:**
+
+1. **`addCustomerPo` field-shape bundle landed** — `_upload_customer_po` now writes `shiptoAddress` (was disabled — `fob` enum misuse), `paymentTermsDiscount` / `paymentTermsDiscountDays` / `currency`, and `partsOrdered` (mapped from `line_items[]` to `UpdateCustomerPoPartOrderedDataInput` — `clientPartNumber`, `quantityOrdered`, `pricePer`, `dueDate`, `partRev`, `drawingRev`, `firstArticleRequired`, description folded into `lineItemNotes` since the input type has no description field). Added `_build_cpo_items` helper and module-level `_to_int` / `_to_float`. Extended `CUSTOMER_PO` extraction prompt with the new optional fields. `part` (Traxis internal part#) intentionally not set — needs customer→Traxis-part lookup, separate pass.
+
+2. **Schema introspection harness** — wrote `probe_addcpo_api.py`, twin of P35's `probe_addpo_api.py`. Read-only basic-auth probe of `AddCustomerPoInput` + `UpdateCustomerPoPartOrderedDataInput`. Confirmed schema: 25 input fields, `partsOrdered` is `[UpdateCustomerPoPartOrderedDataInput!]`, `shiptoAddress` is just `String` (not structured), QBO fields all present. Enum *values* (`CustomerPOTaxStatus`, `CustomerPOPaymentTerms`, `CustomerPOFOB`) come back null on introspection — locked at our scope. Customer PO read also locked (`customerPOs(pageSize:N)` returns 0 records). Live writes still work via basic auth.
+
+3. **Doc-type dropdown reclassify bug fixed** — Wolfgang: "I select CPO on the type pull down, start typing the customer, and it reverts, rudely, to whatever it thinks." Diagnosed: the `ttk.Combobox` for `_type_var` had no listener, so `_current_doc_type` stayed at the original classification. When the doc was first auto-classified as VENDOR_INVOICE (a QBO type), changing the dropdown to "Customer PO → ProShop" didn't flip `_do_contact_search` away from `qbo.fuzzy_match_vendor` — every keystroke kept producing QBO-vendor matches with auto-select at >0.8. Added `<<ComboboxSelected>>` binding + new `_on_type_change` method on App: updates `_current_doc_type`, flips the contact panel header (QBO Vendor vs Customer/Vendor (ProShop)), cancels any pending debounced search, and re-runs `_do_contact_search()` against the right source. Reclassification persists at approve-time (approve paths already read `_type_var.get()`).
+
+4. **ProShop writes audit MD created** — Wolfgang surfaced an accuracy crisis: "The ingest pushes to proshop were universally, without exception, wrong. Nothing it sent to proshop that I am aware of was useful. The accuracy of this tool is approaching zero." Pulled the full list from `ingest_queue.db`: 15 real ProShop writes + 3 failed attempts + 2 mis-statused (UPLOADED but path is a local Dropbox folder — PAYMENT_VOUCHER mis-routed as VENDOR_INVOICE in two rows). Saved to `27. Accounting Ingest/PROSHOP_WRITES_AUDIT.md` grouped by doc type with ID, push date, ProShop URL, contact code, key identifier, customer/vendor, total, line-item count, confidence, source PDF.
+
+5. **Architectural pivot — planning only, no build.** Wolfgang: "QBO has a flawless document ai. I think we ought to route bills and invoices to a queue for QBO with a de-dup check. The ProShop stuff, we'll have to slog through trying to make an uploader that works. I'm starting to sort emails myself to folders in outlook. The ingest probably ought to review the orders folder and the scans picture folder." Two Explore agents researched: (a) current bill flow end-to-end, (b) QBO intake mechanisms — email-forward to `@qbodocs.com` recommended. Confirmed source folder: tom@/Orders. Wolfgang said "planning comment, don't start" — design carried as a deferred next-step.
+
+6. **Lightweight CPO drop-in tool — deferred.** Wolfgang asked for an alternate "drop in PDFs, verify customer, push" version with no email skimming. Answered three scope questions (all ProShop doc types + both drag-drop and watched folder, confirmation-PDF question unanswered) before he pivoted the conversation to the accuracy audit. Build deferred until the audit reveals whether accuracy is fixable.
+
+**Files modified:**
+- `27. Accounting Ingest/accounting_ingest.py` — `_upload_customer_po` rewired, new `_build_cpo_items` helper, module-level `_to_int`/`_to_float`, extended CUSTOMER_PO extraction prompt, new `_on_type_change` method + `<<ComboboxSelected>>` binding
+- `27. Accounting Ingest/probe_addcpo_api.py` — new, read-only schema introspection harness
+- `27. Accounting Ingest/PROSHOP_WRITES_AUDIT.md` — new, full audit of every ProShop write through the ingest
+
+**Key decisions:**
+- ProShop enum *values* unavailable to our scope — `paymentTerms`/`taxStatus`/`fob` stay pass-through; mismatches silently dropped server-side. Acceptable for this pass.
+- `part` (Traxis internal part#) not wired on CPO line items — only `clientPartNumber` is set. The customer→Traxis-part mapping pass is a separate effort.
+- Confirmation-PDF auto-generation question for the lightweight tool left open — Wolfgang pivoted before answering.
+- Ultraplan session was kicked off for the dropdown-fix plan but timed out after 90 min with no approval; the in-band local approval came through the harness and that's what authorized the edit. Noted on the trail.
+
+**Status:** Dropdown fix is live (compiled OK; Wolfgang restarting GUI to pick up). CPO field-shape bundle is live but unverified — and now under suspicion given the accuracy crisis. **The ProShop writes audit MD is the critical artifact of this session** — every push since 2026-04-10 is listed for triage. Until Wolfgang walks through it and we understand the failure pattern, no more pushes should happen.
+
+---
+
+
 
 **Task:** Wolfgang arrived Monday morning to find the compressor OFF despite the schedule saying Monday 05:00-20:00 was enabled. Had to start it from the physical panel. Requested automatic recovery and a controller clock display on the dashboard.
 
