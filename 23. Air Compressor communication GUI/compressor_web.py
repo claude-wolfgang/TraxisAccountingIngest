@@ -41,6 +41,9 @@ REG_AUX_PRESSURE = 1031       # 0x0407  bar * 10
 REG_STATUS_FLAGS = 1034       # 0x040A  bitmapped status indicators
 REG_FIELDBUS_CMD = 1036       # 0x040C  WRITE-ONLY command register
 
+# --- Group 8: System Time (0x0800) ---
+REG_SYSTEM_TIME = 2048            # 0x0800  byte[8]: sec,min,hr,DOW(1=Mon),day,month,year(0=2000)
+
 # --- Fieldbus command bits for HR 1036 ---
 CMD_START = 0x0001
 CMD_STOP = 0x0002
@@ -159,6 +162,14 @@ FILTER_LABELS = {
     'brg': 'Bearing Lubricate (C-BL)',
 }
 
+# Alarm codes safe for watchdog to auto-reset (non-critical / informational)
+SAFE_AUTO_RESET_ALARMS = {
+    18,  # BLACK OUT — power failure recovery
+    43,  # DST ADJUSTED — daylight saving informational
+    48,  # RESTART MANUAL — informational
+    49,  # RESTART AUTO — informational
+}
+
 
 # =============================================================================
 # HELPER FUNCTIONS
@@ -235,6 +246,43 @@ def decode_schedule_block(regs, base, count=7):
     return schedule
 
 
+def decode_rtc(regs):
+    """Decode HR 2048-2051 system time registers.
+    Byte order: hi-byte first per register (Modbus big-endian).
+    Returns dict with sec, min, hr, dow (1=Mon..7=Sun), day, month, year."""
+    if len(regs) < 4:
+        return None
+    sec = (regs[0] >> 8) & 0xFF
+    mn = regs[0] & 0xFF
+    hr = (regs[1] >> 8) & 0xFF
+    dow = regs[1] & 0xFF
+    day = (regs[2] >> 8) & 0xFF
+    month = regs[2] & 0xFF
+    year = ((regs[3] >> 8) & 0xFF) + 2000
+    if not (1 <= dow <= 7 and 1 <= day <= 31 and 1 <= month <= 12):
+        return None
+    return {'sec': sec, 'min': mn, 'hr': hr, 'dow': dow,
+            'day': day, 'month': month, 'year': year}
+
+
+def is_in_scheduled_window(clock, schedule):
+    """Check if controller clock is within a scheduled ON window.
+    clock: dict from decode_rtc. schedule: list of 7 day entries.
+    Returns True if compressor should be ON per schedule."""
+    if not clock or not schedule or len(schedule) < 7:
+        return False
+    day_idx = clock['dow'] - 1  # 0=Mon .. 6=Sun
+    entry = schedule[day_idx]
+    if not entry.get('enabled') or not entry.get('on') or not entry.get('off'):
+        return False
+    on_parts = entry['on'].split(':')
+    off_parts = entry['off'].split(':')
+    on_minutes = int(on_parts[0]) * 60 + int(on_parts[1])
+    off_minutes = int(off_parts[0]) * 60 + int(off_parts[1])
+    now_minutes = clock['hr'] * 60 + clock['min']
+    return on_minutes <= now_minutes < off_minutes
+
+
 # === CABINET FILTER (manual tracking - not in PLC) ===
 def load_cabinet_filter():
     if os.path.exists(CABINET_FILE):
@@ -300,6 +348,20 @@ current_data = {
     'last_update': '',
     'status': 'UNKNOWN',
     'schedule': [],
+    # Controller RTC clock
+    'controller_clock': None,
+    # Timer watchdog status
+    'watchdog_status': 'idle',
+    'watchdog_last_action': '',
+    'watchdog_interventions': 0,
+}
+
+# Timer watchdog state (managed by poll thread only)
+_watchdog = {
+    'last_action_time': 0,
+    'cooldown': 60,           # seconds between interventions
+    'alarm_clear_pending': False,  # True = alarm cleared, send START next cycle
+    'total_interventions': 0,
 }
 
 
@@ -323,6 +385,80 @@ def write_cmd(client, register, value):
         return not result.isError()
     except Exception:
         return False
+
+
+# =============================================================================
+# TIMER WATCHDOG
+# =============================================================================
+
+def _run_watchdog(client, clock, schedule, display_state,
+                  blocking_alarm, timer_bypassed, active_alarms):
+    """Auto-recover from missed scheduled starts, blocked alarms, and timer bypass.
+
+    Safe alarms (A18-BLACK OUT, A43-DST, A48/A49-RESTART) are auto-cleared.
+    Critical alarms (temp, pressure, motor faults) always require manual intervention.
+    """
+    now = time.time()
+    ws = _watchdog
+
+    # Cooldown — don't spam commands
+    if now - ws['last_action_time'] < ws['cooldown']:
+        return
+
+    in_window = is_in_scheduled_window(clock, schedule)
+    action = None
+    reason = ''
+
+    # Priority 1: Alarm was cleared last cycle — now send START
+    if ws['alarm_clear_pending']:
+        ws['alarm_clear_pending'] = False
+        if display_state not in (9, 10, 11):  # not already starting/running
+            action = 'start'
+            reason = 'Starting compressor after auto-clearing alarm'
+
+    # Priority 2: Blocked by a safe alarm during scheduled ON window
+    elif in_window and display_state == 13 and blocking_alarm in SAFE_AUTO_RESET_ALARMS:
+        alarm_name = ALARM_CODES.get(blocking_alarm, f'#{blocking_alarm}')
+        action = 'clear_alarm'
+        reason = f'Auto-clearing safe alarm A{blocking_alarm}-{alarm_name}'
+
+    # Priority 3: Timer bypassed (panel override) — re-engage schedule
+    elif timer_bypassed:
+        action = 'resume_schedule'
+        reason = 'Re-engaging timer schedule (was bypassed by panel)'
+
+    # Priority 4: Compressor OFF during scheduled ON window, no blocking alarm
+    elif in_window and display_state in (0, 3) and blocking_alarm == 0:
+        state_name = DISPLAY_STATES.get(display_state, f'state {display_state}')
+        action = 'start'
+        reason = f'Compressor {state_name} during scheduled ON window — auto-starting'
+
+    if action is None:
+        return
+
+    # Execute
+    success = False
+    if action == 'clear_alarm':
+        success = write_cmd(client, REG_FIELDBUS_CMD, CMD_ACK_RESET_ALL)
+        if success:
+            ws['alarm_clear_pending'] = True  # start on next cycle
+    elif action == 'start':
+        success = write_cmd(client, REG_FIELDBUS_CMD, CMD_START)
+    elif action == 'resume_schedule':
+        success = write_cmd(client, REG_FIELDBUS_CMD, CMD_STOP_BYPASS_TIMER)
+
+    if success:
+        ws['last_action_time'] = now
+        ws['total_interventions'] += 1
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        action_msg = f'{timestamp}: {reason}'
+        print(f'WATCHDOG: {reason} (action={action})', flush=True)
+        with data_lock:
+            current_data['watchdog_status'] = reason
+            current_data['watchdog_last_action'] = action_msg
+            current_data['watchdog_interventions'] = ws['total_interventions']
+    else:
+        print(f'WATCHDOG: FAILED to execute {action} — Modbus write error', flush=True)
 
 
 # =============================================================================
@@ -373,6 +509,10 @@ def poll_compressor():
             # --- Read timer schedule (keep existing working approach) ---
             t1_regs = read_regs(client, TIMER1_BASE, 30)
             t2_regs = read_regs(client, TIMER2_BASE, 42)
+            time.sleep(0.03)
+
+            # --- Read Group 8: System time (HR 2048-2051, 4 regs) ---
+            rtc_regs = read_regs(client, REG_SYSTEM_TIME, 4)
             sched1 = decode_schedule_block(t1_regs, TIMER1_BASE, count=5) if t1_regs else []
             sched2 = decode_schedule_block(t2_regs, TIMER2_BASE) if t2_regs else []
 
@@ -519,6 +659,13 @@ def poll_compressor():
                 current_data['status'] = display_text
                 current_data['last_update'] = datetime.datetime.now().strftime('%H:%M:%S')
                 current_data['schedule'] = schedule
+                # Controller RTC
+                clock = decode_rtc(rtc_regs) if rtc_regs else None
+                current_data['controller_clock'] = clock
+
+            # === Timer Watchdog (runs outside data_lock) ===
+            _run_watchdog(client, clock, schedule, display_state,
+                          blocking_alarm, timer_bypassed, active_alarm_nums)
 
         except Exception as e:
             with data_lock:
@@ -673,6 +820,14 @@ HTML = r"""<!DOCTYPE html>
 <div class="alarm-banner" id="alarm-banner">
   <span class="alarm-list" id="alarm-text">No alarms</span>
   <button class="btn btn-warn" onclick="confirmAlarmReset()">RESET ALARMS</button>
+</div>
+
+<!-- CONTROLLER CLOCK & WATCHDOG -->
+<div class="status-bar" style="font-size:12px;">
+  <div>Controller Clock: <strong id="ctrl-clock">---</strong></div>
+  <div>Watchdog: <span id="wd-status" style="color:#4ecca3;">idle</span></div>
+  <div id="wd-last" style="color:#888;"></div>
+  <div>Interventions: <strong id="wd-count">0</strong></div>
 </div>
 
 <div class="grid">
@@ -1117,6 +1272,27 @@ function update() {
         fHtml += '<span class="flag-item '+(on?'flag-on':'flag-off')+'">'+f[1]+'</span>';
       });
       document.getElementById('status-flags-row').innerHTML = fHtml;
+
+      // Controller clock
+      if (d.controller_clock) {
+        const c = d.controller_clock;
+        const dows = {1:'Mon',2:'Tue',3:'Wed',4:'Thu',5:'Fri',6:'Sat',7:'Sun'};
+        const dow = dows[c.dow] || '?';
+        const clock = dow + ' ' + c.year + '-' +
+          String(c.month).padStart(2,'0') + '-' + String(c.day).padStart(2,'0') + ' ' +
+          String(c.hr).padStart(2,'0') + ':' + String(c.min).padStart(2,'0') + ':' +
+          String(c.sec).padStart(2,'0');
+        document.getElementById('ctrl-clock').textContent = clock;
+      }
+
+      // Watchdog status
+      const wdStatus = d.watchdog_status || 'idle';
+      const wdEl = document.getElementById('wd-status');
+      wdEl.textContent = wdStatus;
+      wdEl.style.color = wdStatus === 'idle' ? '#4ecca3' : '#fdd835';
+      document.getElementById('wd-count').textContent = d.watchdog_interventions || 0;
+      const wdLast = d.watchdog_last_action || '';
+      document.getElementById('wd-last').textContent = wdLast ? wdLast : '';
     })
     .catch(e => {
       document.getElementById('conn-dot').className = 'status-dot dot-red';
@@ -1178,6 +1354,24 @@ def api_data():
     else:
         result['cabinet_remain'] = 0
 
+    return jsonify(result)
+
+
+@app.route('/api/clock')
+def api_clock():
+    """Return controller RTC clock and watchdog status."""
+    with data_lock:
+        clock = current_data.get('controller_clock')
+        wd_status = current_data.get('watchdog_status', 'idle')
+        wd_last = current_data.get('watchdog_last_action', '')
+        wd_count = current_data.get('watchdog_interventions', 0)
+    result = {'controller_clock': clock, 'watchdog_status': wd_status,
+              'watchdog_last_action': wd_last, 'watchdog_interventions': wd_count}
+    if clock:
+        dow_names = {1:'Mon',2:'Tue',3:'Wed',4:'Thu',5:'Fri',6:'Sat',7:'Sun'}
+        result['formatted'] = (f"{dow_names.get(clock['dow'],'?')} "
+                               f"{clock['year']}-{clock['month']:02d}-{clock['day']:02d} "
+                               f"{clock['hr']:02d}:{clock['min']:02d}:{clock['sec']:02d}")
     return jsonify(result)
 
 

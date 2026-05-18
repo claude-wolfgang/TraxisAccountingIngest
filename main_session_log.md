@@ -5,6 +5,39 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-18
+
+### P23: Timer watchdog + controller RTC clock display
+
+**Task:** Wolfgang arrived Monday morning to find the compressor OFF despite the schedule saying Monday 05:00-20:00 was enabled. Had to start it from the physical panel. Requested automatic recovery and a controller clock display on the dashboard.
+
+**Root cause:** A18-BLACK OUT alarm in the controller's alarm history. After a power interruption, the Logik 26-S won't auto-start from its weekly timer until the alarm is manually acknowledged on the panel. The schedule was correct, the RTC clock was correct (confirmed: Mon 2026-05-18, DOW=1), but the unacknowledged alarm blocked the timer start.
+
+**What was done:**
+
+1. **Added controller RTC reading** — reads HR 2048-2051 (system time: sec, min, hr, DOW, day, month, year) every 3-second poll cycle. Decoded with Modbus big-endian byte order. Added `controller_clock` dict to `/api/data` response and new `/api/clock` endpoint.
+
+2. **Added timer watchdog** — `_run_watchdog()` function runs after each poll cycle (outside data_lock). Four priority-ordered checks:
+   - **Priority 1:** Alarm was auto-cleared last cycle — send START
+   - **Priority 2:** Blocked by safe alarm (A18-BLACK OUT, A43-DST, A48/A49-RESTART) during scheduled ON window — send ACK_RESET_ALL, then START on next cycle
+   - **Priority 3:** Timer bypassed (panel override) — send CMD_STOP_BYPASS_TIMER to re-engage schedule
+   - **Priority 4:** Compressor OFF or STOP BY TIMER during scheduled ON window with no blocking alarm — send CMD_START
+   - 60-second cooldown between interventions. Critical alarms (high temp, motor fault, emergency) are never auto-cleared.
+
+3. **Added clock + watchdog display on dashboard** — new status bar row showing controller date/time/DOW, watchdog status, last action, and intervention count.
+
+**Files modified:**
+- `23. Air Compressor communication GUI/compressor_web.py` — RTC register constant, safe alarm set, decode_rtc/is_in_scheduled_window helpers, _run_watchdog function, /api/clock endpoint, HTML clock+watchdog row, JS update for clock/watchdog display
+
+**Key decisions:**
+- Only auto-reset alarms in `SAFE_AUTO_RESET_ALARMS` set (18, 43, 48, 49). All hardware/safety alarms require manual panel intervention.
+- Watchdog uses controller's RTC (not server clock) for schedule comparison — more robust if clocks drift.
+- Two-cycle alarm recovery: clear alarm on cycle N, send START on cycle N+1 (gives controller time to process the reset).
+
+**Status:** Live and verified. Controller clock reading confirmed correct. Watchdog idle (no intervention needed — compressor already running from Wolfgang's manual panel start, timer re-asserted control since within scheduled window).
+
+---
+
 ## 2026-05-17 (session 3)
 
 ### P31: Equipment upload fix + claude-folder backup on failure
