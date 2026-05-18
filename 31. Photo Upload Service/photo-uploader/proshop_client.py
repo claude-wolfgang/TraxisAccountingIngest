@@ -493,11 +493,13 @@ class ProShopClient:
             etype = r.get("type") or ""
             searchable = f"{num} {desc} {loc} {etype}".lower()
             if q in searchable or q_digits == num:
+                # ProShop URL pattern: /equipment/{TYPE}/{TYPE}{NUMBER}
+                tool_num = f"{etype}{num}" if etype else num
                 matches.append({
                     "id": num,
                     "name": desc.split("\n")[0],
                     "detail": f"{loc} | {etype}" if loc else etype,
-                    "proshop_url": f"{self.base_url}/equipment/{num}",
+                    "proshop_url": f"{self.base_url}/equipment/{etype}/{tool_num}",
                 })
         return matches[:20]
 
@@ -685,13 +687,13 @@ class ProShopClient:
             """query ($num: String!) {
                 equipments(query: { equipmentNumber: { exactly: $num } }) {
                     records {
-                        equipmentNumber description serialNumber
+                        equipmentNumber description serialNumber type
                     }
                 }
             }""",
             """query ($num: String!) {
                 equipments(query: { equipmentNumber: { exactly: $num } }) {
-                    records { equipmentNumber description }
+                    records { equipmentNumber description type }
                 }
             }""",
         ):
@@ -700,11 +702,14 @@ class ProShopClient:
                 records = (result.get("data") or {}).get("equipments", {}).get("records", [])
                 if records:
                     eq = records[0]
+                    etype = eq.get("type") or ""
+                    num = str(eq.get("equipmentNumber") or equipment_number)
+                    tool_num = f"{etype}{num}" if etype else num
                     return {
-                        "equipment_number": str(eq.get("equipmentNumber") or equipment_number),
+                        "equipment_number": num,
                         "tool_name": (eq.get("description") or "").split("\n")[0],
                         "serial_number": eq.get("serialNumber") or "",
-                        "url": f"{self.base_url}/equipment/{equipment_number}",
+                        "url": f"{self.base_url}/equipment/{etype}/{tool_num}",
                     }
             except GraphQLError:
                 continue

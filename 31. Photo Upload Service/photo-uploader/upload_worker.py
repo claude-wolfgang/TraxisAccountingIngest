@@ -236,7 +236,7 @@ class UploadWorker:
             except Exception as e:
                 log.error(f"Photo #{photo['id']} upload error: {e}", exc_info=True)
                 database.update_photo_status(photo["id"], "failed", str(e))
-                database.increment_retry(photo["id"])
+                _increment_retry_with_backup(photo)
                 if self._driver:
                     _save_screenshot(self._driver, f"photo_{photo['id']}_error")
 
@@ -281,7 +281,7 @@ class UploadWorker:
                     msg = f"Work order {entity_id} not found via API"
                     log.error(f"Photo #{photo_id}: {msg}")
                     database.update_photo_status(photo_id, "failed", msg)
-                    database.increment_retry(photo_id)
+                    _increment_retry_with_backup(photo)
                     return
                 fallback_url = f"{BASE_URL}/procnc/workorders/{entity_id}"
             else:
@@ -290,7 +290,7 @@ class UploadWorker:
                     msg = f"Part {entity_id} not found via API"
                     log.error(f"Photo #{photo_id}: {msg}")
                     database.update_photo_status(photo_id, "failed", msg)
-                    database.increment_retry(photo_id)
+                    _increment_retry_with_backup(photo)
                     return
 
             part_number = detail["partNumber"]
@@ -316,12 +316,13 @@ class UploadWorker:
             database.update_photo_status(photo_id, "failed", msg)
             return
 
-        # COTS uses ProShop's popup-based picture upload, not CKEditor base64.
-        # The detail page has no CKEditor; uploads go through a separate
+        # COTS, equipment, tools, and fixtures use ProShop's popup-based
+        # picture upload, not CKEditor base64. Their detail pages have no
+        # CKEditor; uploads go through a separate
         # /procnc/procncAdmin/fileserver/editpicture$... window. See
-        # _upload_cots_via_popup for details.
-        if entity_type == "cots":
-            self._upload_cots_via_popup(photo, file_path)
+        # _upload_via_popup for details.
+        if entity_type in ("cots", "equipment", "tool", "fixture"):
+            self._upload_via_popup(photo, file_path)
             return
 
         # Try the primary URL. If the page lacks a CHECKOUT/SAVE button
@@ -352,7 +353,7 @@ class UploadWorker:
             msg = "Page has no usable writtenDescription form and no fallback URL"
             log.error(f"Photo #{photo_id}: {msg}")
             database.update_photo_status(photo_id, "failed", msg)
-            database.increment_retry(photo_id)
+            _increment_retry_with_backup(photo)
             return
 
         # outcome == 'failed' — _try_upload_at already wrote DB status.
@@ -398,7 +399,7 @@ class UploadWorker:
                 return "no_form"
             _save_screenshot(driver, f"photo_{photo_id}_{screenshot_label}")
             database.update_photo_status(photo_id, "failed", reason)
-            database.increment_retry(photo_id)
+            _increment_retry_with_backup(photo)
             return "failed"
 
         # Shorter timeout on primary so we fail fast and try fallback;
@@ -429,7 +430,7 @@ class UploadWorker:
             log.error(f"Photo #{photo_id}: {msg}")
             _save_screenshot(driver, f"photo_{photo_id}_insert_failed")
             database.update_photo_status(photo_id, "failed", msg)
-            database.increment_retry(photo_id)
+            _increment_retry_with_backup(photo)
             return "failed"
 
         return "ok"
@@ -719,23 +720,24 @@ class UploadWorker:
             _save_screenshot(driver, f"photo_{photo_id}_save_unexpected")
             return False
 
-    # ── COTS popup upload ────────────────────────────────────────────────
+    # ── Popup-based picture upload ────────────────────────────────────────
     #
-    # COTS detail pages have no CKEditor — the base64-into-CKEditor pattern
-    # doesn't apply. Instead, ProShop uses a separate "Handle New Picture"
-    # popup window opened via window.open() from an `<a id="fnXXX">` anchor
-    # wrapped around an "Add picture" button. The popup posts multipart
-    # form-data to /procnc/procncAdmin/fileserver/editpicture$...&isSubmit=yes,
-    # then closes; the parent page's SAVE CHANGES commits the picture reference.
+    # COTS, equipment, tool, and fixture detail pages have no CKEditor —
+    # the base64-into-CKEditor pattern doesn't apply. Instead, ProShop uses
+    # a separate "Handle New Picture" popup window opened via window.open()
+    # from an `<a id="fnXXX">` anchor wrapped around an "Add picture" button.
+    # The popup posts multipart form-data to
+    # /procnc/procncAdmin/fileserver/editpicture$...&isSubmit=yes, then
+    # closes; the parent page's SAVE CHANGES commits the picture reference.
     #
     # Discovery: inspect_cots_upload.py phases 3-4 + manual DevTools capture
     # against PAC-223 (2026-05-14). Verified the same upload UI appears on
-    # tools, parts, and equipment too — this method is reusable across
-    # entity types if we later want to retire the CKEditor-base64 path.
+    # tools, parts, and equipment too.
 
-    def _upload_cots_via_popup(self, photo, file_path):
-        """Upload a photo to a COTS entity via ProShop's 'Add picture' popup.
+    def _upload_via_popup(self, photo, file_path):
+        """Upload a photo via ProShop's 'Add picture' popup.
 
+        Works for COTS, equipment, tools, and fixtures.
         Returns one of: 'ok', 'failed'. Writes DB status on its own paths.
         """
         from selenium.webdriver.common.by import By
@@ -745,9 +747,10 @@ class UploadWorker:
         photo_id = photo["id"]
         driver = self._driver
 
+        entity_type = photo.get("entity_type", "unknown")
         proshop_url = photo.get("proshop_url", "")
         if not proshop_url:
-            msg = f"No ProShop URL stored for cots/{photo.get('entity_id')}"
+            msg = f"No ProShop URL stored for {entity_type}/{photo.get('entity_id')}"
             log.warning(f"Photo #{photo_id}: {msg}")
             database.update_photo_status(photo_id, "failed", msg)
             return "failed"
@@ -768,7 +771,7 @@ class UploadWorker:
                          f"{proshop_url!r} -> {fixed!r}")
                 proshop_url = fixed
 
-        log.info(f"Photo #{photo_id}: COTS upload — navigating to {proshop_url}")
+        log.info(f"Photo #{photo_id}: popup upload ({entity_type}) — navigating to {proshop_url}")
         _safe_navigate(driver, proshop_url)
 
         parent_window = driver.current_window_handle
@@ -788,19 +791,19 @@ class UploadWorker:
             return None
 
         if not _wait_for_element(driver, _has_action, timeout=30):
-            msg = "COTS page didn't load (no CHECKOUT/SAVE button)"
+            msg = f"{entity_type} page didn't load (no CHECKOUT/SAVE button)"
             log.error(f"Photo #{photo_id}: {msg}")
-            _save_screenshot(driver, f"photo_{photo_id}_cots_no_action")
+            _save_screenshot(driver, f"photo_{photo_id}_popup_no_action")
             database.update_photo_status(photo_id, "failed", msg)
-            database.increment_retry(photo_id)
+            _increment_retry_with_backup(photo)
             return "failed"
 
         if not _checkout_page(driver):
-            msg = "Could not CHECKOUT COTS page"
+            msg = f"Could not CHECKOUT {entity_type} page"
             log.error(f"Photo #{photo_id}: {msg}")
-            _save_screenshot(driver, f"photo_{photo_id}_cots_checkout_failed")
+            _save_screenshot(driver, f"photo_{photo_id}_popup_checkout_failed")
             database.update_photo_status(photo_id, "failed", msg)
-            database.increment_retry(photo_id)
+            _increment_retry_with_backup(photo)
             return "failed"
 
         # Find the Add picture anchor. The handler is on the `<a id="fnXXX">`
@@ -823,11 +826,11 @@ class UploadWorker:
             log.debug(f"Photo #{photo_id}: anchor lookup error: {e}")
 
         if not anchor:
-            msg = "Could not find 'Add picture' anchor on COTS page"
+            msg = f"Could not find 'Add picture' anchor on {entity_type} page"
             log.error(f"Photo #{photo_id}: {msg}")
-            _save_screenshot(driver, f"photo_{photo_id}_cots_no_add_button")
+            _save_screenshot(driver, f"photo_{photo_id}_popup_no_add_button")
             database.update_photo_status(photo_id, "failed", msg)
-            database.increment_retry(photo_id)
+            _increment_retry_with_backup(photo)
             return "failed"
 
         # ActionChains click provides a trusted-gesture click; Chrome's
@@ -843,9 +846,9 @@ class UploadWorker:
             except Exception as e2:
                 msg = f"Add picture click failed: {e2}"
                 log.error(f"Photo #{photo_id}: {msg}")
-                _save_screenshot(driver, f"photo_{photo_id}_cots_click_failed")
+                _save_screenshot(driver, f"photo_{photo_id}_popup_click_failed")
                 database.update_photo_status(photo_id, "failed", msg)
-                database.increment_retry(photo_id)
+                _increment_retry_with_backup(photo)
                 return "failed"
 
         # Wait for the popup window
@@ -856,9 +859,9 @@ class UploadWorker:
         except Exception:
             msg = "Picture popup did not open within 15s"
             log.error(f"Photo #{photo_id}: {msg}")
-            _save_screenshot(driver, f"photo_{photo_id}_cots_no_popup")
+            _save_screenshot(driver, f"photo_{photo_id}_popup_no_popup")
             database.update_photo_status(photo_id, "failed", msg)
-            database.increment_retry(photo_id)
+            _increment_retry_with_backup(photo)
             return "failed"
 
         new_windows = set(driver.window_handles) - initial_windows
@@ -885,7 +888,7 @@ class UploadWorker:
             if not file_input:
                 msg = "No file input in picture popup"
                 log.error(f"Photo #{photo_id}: {msg}")
-                _save_screenshot(driver, f"photo_{photo_id}_cots_popup_no_input")
+                _save_screenshot(driver, f"photo_{photo_id}_popup_no_input")
                 return "failed"
 
             abs_path = str(Path(file_path).resolve())
@@ -922,7 +925,7 @@ class UploadWorker:
             if not popup_save_btn:
                 msg = "Popup SAVE CHANGES button not found"
                 log.error(f"Photo #{photo_id}: {msg}")
-                _save_screenshot(driver, f"photo_{photo_id}_cots_popup_no_save")
+                _save_screenshot(driver, f"photo_{photo_id}_popup_no_save")
                 return "failed"
 
             log.info(f"Photo #{photo_id}: clicking popup SAVE CHANGES")
@@ -939,7 +942,7 @@ class UploadWorker:
                 # Some flows leave the popup open on confirmation pages.
                 # If we got HTTP 200 back, that's still success — close it.
                 log.warning(f"Photo #{photo_id}: popup didn't auto-close; closing manually")
-                _save_screenshot(driver, f"photo_{photo_id}_cots_popup_after_save")
+                _save_screenshot(driver, f"photo_{photo_id}_popup_after_save")
                 try:
                     driver.close()
                 except Exception:
@@ -952,7 +955,7 @@ class UploadWorker:
                 log.error(f"Photo #{photo_id}: cannot switch back to parent: {e}")
                 msg = "Lost parent window after popup"
                 database.update_photo_status(photo_id, "failed", msg)
-                database.increment_retry(photo_id)
+                _increment_retry_with_backup(photo)
                 return "failed"
 
         if not popup_ok:
@@ -964,8 +967,51 @@ class UploadWorker:
         # record — no parent save call needed. The parent page is mid-reload
         # at this point; trying to enumerate its DOM here racy and unnecessary.
         database.update_photo_status(photo_id, "uploaded")
-        log.info(f"Photo #{photo_id}: COTS upload complete")
+        log.info(f"Photo #{photo_id}: popup upload ({entity_type}) complete")
         return "ok"
+
+
+# ── Failure backup ────────────────────────────────────────────────────────
+
+
+def _backup_to_claude_folder(photo):
+    """Copy photo to the claude folder as a backup when upload has exhausted retries.
+
+    The claude folder is Dropbox-synced, so photos are never lost even if
+    ProShop upload permanently fails.
+    """
+    import shutil
+    from datetime import datetime, timezone
+
+    file_path = Path(config.DATA_DIR) / photo["file_path"]
+    if not file_path.exists():
+        log.warning(f"Photo #{photo['id']}: cannot backup — file missing: {file_path}")
+        return
+
+    # Create backup subfolder: data/photos/claude/failed_backup/{entity_type}_{entity_id}/
+    entity_type = photo.get("entity_type", "unknown")
+    entity_id = photo.get("entity_id", "unknown")
+    safe_id = "".join(c if c.isalnum() or c in "-_" else "_" for c in str(entity_id))
+    backup_dir = config.PHOTOS_DIR / "claude" / "failed_backup" / f"{entity_type}_{safe_id}"
+    backup_dir.mkdir(parents=True, exist_ok=True)
+
+    dest = backup_dir / file_path.name
+    try:
+        shutil.copy2(str(file_path), str(dest))
+        log.info(f"Photo #{photo['id']}: backed up to claude folder: {dest}")
+    except Exception as e:
+        log.error(f"Photo #{photo['id']}: backup copy failed: {e}")
+
+
+def _increment_retry_with_backup(photo):
+    """Increment retry count and back up to claude folder if max retries reached."""
+    photo_id = photo["id"]
+    database.increment_retry(photo_id)
+    new_count = photo.get("retry_count", 0) + 1
+    if new_count >= config.MAX_RETRIES:
+        log.warning(f"Photo #{photo_id}: max retries ({config.MAX_RETRIES}) reached — "
+                    f"backing up to claude folder")
+        _backup_to_claude_folder(photo)
 
 
 # ── Shared Selenium helpers ──────────────────────────────────────────────

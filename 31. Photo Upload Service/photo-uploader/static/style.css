@@ -462,7 +462,7 @@ h2 { margin-bottom: 20px; font-size: 1.3rem; }
     display: flex; gap: 12px; flex-wrap: wrap;
     margin: 20px 0;
 }
-.btn-primary, .btn-secondary, .btn-danger {
+.btn-primary, .btn-secondary, .btn-danger, .btn-warning {
     padding: 14px 22px;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -475,6 +475,7 @@ h2 { margin-bottom: 20px; font-size: 1.3rem; }
 }
 .btn-primary { background: var(--green); border-color: var(--green); color: #fff; }
 .btn-secondary { background: var(--surface); }
+.btn-warning { background: #e6a817; border-color: #d49b15; color: #fff; }
 .btn-danger { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 @media (max-width: 600px) {

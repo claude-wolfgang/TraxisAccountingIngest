@@ -89,6 +89,32 @@ def update_photo(photo_id):
     return jsonify({"success": True})
 
 
+@app.route("/api/photos/<int:photo_id>/send-to-claude", methods=["POST"])
+def send_to_claude(photo_id):
+    """Copy photo to claude folder and mark local_only — operator escape hatch."""
+    import shutil
+
+    photo = database.get_photo(photo_id)
+    if not photo:
+        return jsonify({"error": "photo not found"}), 404
+
+    file_path = config.DATA_DIR / photo["file_path"]
+    if not file_path.exists():
+        return jsonify({"error": "photo file missing from disk"}), 404
+
+    entity_type = photo.get("entity_type", "unknown")
+    entity_id = photo.get("entity_id", "unknown")
+    safe_id = "".join(c if c.isalnum() or c in "-_" else "_" for c in str(entity_id))
+    backup_dir = config.PHOTOS_DIR / "claude" / "failed_backup" / f"{entity_type}_{safe_id}"
+    backup_dir.mkdir(parents=True, exist_ok=True)
+
+    dest = backup_dir / file_path.name
+    shutil.copy2(str(file_path), str(dest))
+    database.update_photo_status(photo_id, "local_only")
+    log.info(f"Photo #{photo_id}: sent to claude folder by operator → {dest}")
+    return jsonify({"success": True, "dest": str(dest)})
+
+
 @app.route("/api/photos/<int:photo_id>/delete", methods=["POST"])
 def delete_photo(photo_id):
     rel_path = database.delete_photo(photo_id)

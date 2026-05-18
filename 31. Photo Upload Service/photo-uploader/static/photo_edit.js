@@ -61,6 +61,22 @@
         });
     }
 
+    const claudeBtn = document.getElementById('claude-btn');
+    if (claudeBtn) {
+        claudeBtn.addEventListener('click', async () => {
+            if (!confirm('Send this photo to the Claude folder? Upload attempts will stop.')) return;
+            const photoId = claudeBtn.dataset.photoId;
+            const r = await fetch(`/api/photos/${photoId}/send-to-claude`, {method: 'POST'});
+            if (r.ok) {
+                window.location = '/queue';
+            } else {
+                let msg = 'HTTP ' + r.status;
+                try { msg = (await r.json()).error || msg; } catch (_) {}
+                alert('Failed: ' + msg);
+            }
+        });
+    }
+
     if (delBtn) {
         delBtn.addEventListener('click', async () => {
             if (!confirm('Delete this photo? This cannot be undone.')) return;
