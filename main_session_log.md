@@ -5,6 +5,84 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-18 (session 8)
+
+### Project 31: BLE Proximity — MOKOSmart B2 badges unboxed, partial discovery
+
+**Task:** Unbox the 10x MOKOSmart B2 Smart Badges (Order #3765) and read factory defaults before configuration.
+
+**What was done:**
+
+1. **Unboxed badges.** No instructions or insert in the package — typical direct-from-China shipment.
+
+2. **Confirmed MQTT/gateway infrastructure alive.** Wrote `mqtt_pulse.py` to subscribe to all topics for 15s — broker at 10.1.1.108:1883 responded with 111 retained config messages. All three ESP32 gateways (M1, M2, M8) HTTP-reachable on port 80, but room status topics showed retained `offline` LWT messages — likely stale, since `proximity.db` got fresh Feasycom readings later in the session.
+
+3. **Built passive-capture tooling.** Wrote `b2_unbox_tail.py` to subscribe to `espresense/devices/#`, lock an 8-second baseline of already-broadcasting devices, then flag any new device that appears. First version had a bug (baseline lock fired on first message, so empty broker = never locked); fixed with a timer-based lock thread.
+
+4. **Threat model + tamper-defense plan.** Identified protection layers for B2 badges: (a) change default BLE config password from `Moko4321` during provisioning, (b) check Moko app for button-disable / button-lock setting, (c) accept long-button-hold factory-reset combo as a residual physical-access risk, covered by server-side anomaly detection in the future assignment engine.
+
+5. **Attempted activation.** Wolfgang pressed button on one badge — red LED flashed repeatedly. He released before the flash sequence ended; badge never appeared on MQTT. Likely shipping-mode activation requires a longer hold. Could not retry via Moko app — phone was at home.
+
+6. **Local BLE scan from .178 ruled out.** No working Bluetooth adapter on this PC (only a "Generic Bluetooth Adapter" in unknown state, no USB dongle plugged in). Asus dongle on .71 was discussed as a fallback but deferred.
+
+**Files created:**
+- `31. BLE Proximity Worker Tracking/b2_unbox_tail.py` — passive MQTT watcher for new devices, ready for reuse next session
+- `31. BLE Proximity Worker Tracking/mqtt_pulse.py` — broker pulse-check helper
+
+**Key decisions:**
+- **Deferred per-badge cataloging to next session.** Requires Wolfgang's phone + MokoBeaconX app for full config readout. Walking a badge to a gateway today would have only confirmed broadcast, not given us the deep config we need.
+
+**Status:** Badges received, infrastructure ready, no per-badge data captured yet. Blocked until Wolfgang brings phone in.
+
+---
+
+## 2026-05-18 (session 7)
+
+### Project 35 / 31 / 30: Purchasing Automation — VPO field mapping validation + two-track plan
+**Task:** Get the Buy button working end-to-end for COTS items and tools. Validate VPO API field mapping, plan Amazon Business integration.
+
+**What was done:**
+
+1. **Full system audit.** Traced the Buy button flow across P30 (Chrome extension), P31 (Flask backend/queue/approvals), and P35 (VPO creation modules). Identified the gap: approved orders sit in `purchasing.db` with nothing acting on them.
+
+2. **ProShop VPO field mapping validated via live test VPOs.**
+   - Dry-run FIL-157 → no prior VPO (confirmed Amazon-only item).
+   - Dry-run LUB-116 → found prior VPO 253247 from DIX1, full blind-copy payload.
+   - Dry-run TOHO-171 → no prior VPO (first-time tool order path).
+   - Live test VPO 263116 created (LUB-116). Wolfgang inspected in ProShop UI — supplier Dixie Tool Crib linked correctly, COTS item linked, orderNumber/description/cost all populated. **Two issues found:** poType was "Standard" (should be "General"), orderStatus was blank (should be "Outstanding").
+
+3. **Fixed VPO creation in `proshop_vpo.py`.**
+   - Introspected ProShop enums: `PurchaseOrderType` (GENERAL, MATERIAL, OUTSIDE_PROCESSING, TOOLING), `PurchaseOrderOrderStatus` (13 values including OUTSTANDING).
+   - Fixed `poType` from `"Standard"` to `"General"`.
+   - Discovered `orderStatus` cannot be set via `addPurchaseOrder` or `updatePurchaseOrder` (both return internal error). **Workaround:** `overwritePurchaseOrder` accepts it with `year` + `poType` required. Implemented two-step create: add → overwrite for Outstanding status.
+   - Added error surfacing in `create_vpo()` (was silently returning `{}` on failure).
+   - Live test VPO 263119 created with correct poType=General + orderStatus=Outstanding.
+
+4. **Planned four-phase implementation** (plan file at `.claude/plans/staged-dancing-dragonfly.md`):
+   - Phase A: VPO introspection (mostly done this session)
+   - Phase B: VPO worker thread (`purchasing/worker.py`)
+   - Phase C: Amazon routing + `method_history` table + cart-add URL
+   - Phase D: Admin UI for ASIN entry on `/approvals` page
+
+5. **Researched Amazon Business integration.** Traxis recently got an Amazon Business account. Three tiers: cart-add URL (no API needed, v1), Ordering API (dev registration, future), Punchout catalog (overkill). Cart-add URL chosen for v1: `amazon.com/gp/aws/cart/add.html?ASIN.1=...&Quantity.1=...`.
+
+6. **Introspected PO line-item schema.** 44 fields available on `UpdatePurchaseOrderPoItemsDataInput`. Found `extraChargeType` enum includes `SHIPPING` — but reference VPO 263114's freight line uses a plain line with `description: "freight"` (no extraChargeType set). Freight lines deferred to v2.
+
+**Files modified:**
+- `31. Photo Upload Service/photo-uploader/purchasing/proshop_vpo.py` — poType fixed to "General", two-step create flow (add + overwrite for Outstanding status), error handling for silent GraphQL failures
+
+**Key decisions:**
+- **Two-track purchasing:** VPO track (traditional vendors) + Amazon track (cart-add URL). Routing based on `method_history` table keyed by entity_id.
+- **Amazon Business cart-add URL for v1.** No API credentials needed; operator must be logged into Business account in Chrome. Future: Amazon Business Ordering API.
+- **ASINs entered one-by-one** as items come up for reorder (no bulk import). Admin UI on `/approvals` page.
+- **`overwritePurchaseOrder` for status.** ProShop's `addPurchaseOrder` and `updatePurchaseOrder` both reject orderStatus changes with internal error. `overwritePurchaseOrder` works but requires year + poType alongside the status.
+- **Freight lines deferred.** Reference VPOs often have a second "freight" line ($135 on 263114). For v1, VPOs are single-line; freight added manually in ProShop.
+- **FIL-157 classified as Amazon item** (no VPO history). Will be first `method_history` entry.
+
+**Status:** Phase A nearly complete — VPO field mapping validated, `proshop_vpo.py` fixed and tested. Test VPO 263119 awaiting Wolfgang's inspection + deletion. Phases B–D planned but not yet built. Next session: inspect 263119, then build worker thread + Amazon routing.
+
+---
+
 ## 2026-05-18 (session 6)
 
 ### srv-01 SSH access recovery via M.2 USB enclosure + migration recon

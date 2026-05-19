@@ -49,10 +49,12 @@ Expect MOKOSmart B2 badges to provide better signal for zone detection.
 `proximity_logger.py` runs as background service via `start_logger.bat`, logging to `proximity.db`.
 
 Remaining:
-1. Re-test zone thresholds with steel machine backdrop (current thresholds are open-air)
-2. MOKOSmart B2 badges ordered (10x, Order #3765) — configure as iBeacon when they arrive
-3. Build assignment engine (strongest-gateway-wins per worker)
-4. Re-run walk test with MOKOSmart badges for better RSSI contrast
+1. [NEEDS WOLFGANG] Bring phone in next session — MokoBeaconX app needed to scan/connect to B2 badges and read full factory defaults (UUID, major, minor, TX power, adv interval, NFC, button mode, password).
+2. Per-badge cataloging — power on each B2 one at a time near a gateway, record default UUID/major/minor via `b2_unbox_tail.py`. Note any variation across the 10 units. Test long button hold (~15s) to activate from shipping mode if short press doesn't broadcast.
+3. Tamper-defense provisioning — sacrifice one badge to document factory-reset button combo; change default `Moko4321` password on all 10 units; check Moko app for button-disable / button-lock setting; if NFC tag is used, lock payload read-only after writing.
+4. Re-test zone thresholds with steel machine backdrop (current thresholds are open-air).
+5. Build assignment engine (strongest-gateway-wins per worker) + server-side anomaly detection (impossible majors, off-hours appearances, MAC inconsistency) as tamper backstop.
+6. Re-run walk test with MOKOSmart badges for better RSSI contrast.
 
 ## Interfaces
 Produces: proximity.db (SQLite, readings table), worker-machine proximity events via MQTT
