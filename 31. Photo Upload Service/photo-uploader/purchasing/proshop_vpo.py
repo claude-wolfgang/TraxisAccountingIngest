@@ -113,7 +113,7 @@ def build_payload(queue_row, prior_line=None):
                 and cost/orderNumber/description fallbacks. May be None.
     """
     payload = {
-        "poType": "Standard",
+        "poType": "General",
         "year": _now_year(),
         "date": _today(),
         "remarks": "P35 auto-generated (Buy-button approval).",
@@ -160,7 +160,12 @@ def build_payload(queue_row, prior_line=None):
 
 
 def create_vpo(session, queue_row, prior_line=None):
-    """Run the mutation and return {id, proshopUrl}."""
+    """Create a VPO and set its status to Outstanding.
+
+    Two-step: addPurchaseOrder (status can't be set on create) then
+    overwritePurchaseOrder to flip orderStatus to Outstanding.
+    Returns {id, proshopUrl}.
+    """
     payload = build_payload(queue_row, prior_line)
     mutation = """
     mutation AddVPO($data: AddPurchaseOrderInput!) {
@@ -168,7 +173,31 @@ def create_vpo(session, queue_row, prior_line=None):
     }
     """
     body = session.execute(mutation, {"data": payload})
-    return ((body.get("data") or {}).get("addPurchaseOrder") or {})
+    errors = body.get("errors")
+    result = ((body.get("data") or {}).get("addPurchaseOrder") or {})
+    if not result.get("id") and errors:
+        from .proshop_basic_auth import GraphQLError
+        raise GraphQLError(errors)
+
+    # Set orderStatus — addPurchaseOrder ignores it, but overwrite works.
+    vpo_id = result.get("id")
+    if vpo_id:
+        status_mutation = """
+        mutation SetStatus($id: ID!, $data: OverwritePurchaseOrderInput!) {
+            overwritePurchaseOrder(id: $id, data: $data) { id orderStatus }
+        }
+        """
+        status_data = {
+            "year": payload.get("year", _now_year()),
+            "poType": payload.get("poType", "General"),
+            "orderStatus": "Outstanding",
+        }
+        try:
+            session.execute(status_mutation, {"id": vpo_id, "data": status_data})
+        except Exception:
+            pass  # VPO exists; status is cosmetic — don't fail the whole flow
+
+    return result
 
 
 # ── CLI test harness ─────────────────────────────────────────────────────────
