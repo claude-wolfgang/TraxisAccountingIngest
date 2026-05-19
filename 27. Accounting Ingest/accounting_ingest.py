@@ -1130,7 +1130,7 @@ EXTRACTION_PROMPTS = {
     "CUSTOMER_PO": """Extract all data from this customer purchase order. Return JSON:
 {
   "customer_name": "customer company name",
-  "po_number": "purchase order number (REQUIRED)",
+  "po_number": "purchase order identifier EXACTLY as printed — include any letter prefix (e.g. 'PO115245' not '115245'; '230620.03' if no prefix is shown) (REQUIRED)",
   "po_date": "date of PO (YYYY-MM-DD) (REQUIRED)",
   "buyer_name": "buyer contact name or null",
   "buyer_email": "buyer email or null",
@@ -1143,7 +1143,7 @@ EXTRACTION_PROMPTS = {
   "required_date": "delivery required by date (YYYY-MM-DD) or null",
   "total_amount": "total PO value or null",
   "line_items": [
-    {"line_number": "...", "part_number": "buyer's part number as shown on the PO", "description": "...", "quantity": "...", "unit_price": "...", "extended_price": "...", "required_date": "...", "part_rev": "revision letter/number or null", "drawing_rev": "drawing revision or null", "first_article_required": false}
+    {"line_number": "...", "part_number": "buyer's part number as shown on the PO", "description": "...", "quantity": "...", "unit_price": "...", "extended_price": "...", "required_date": "...", "part_rev": "ONLY when a column specifically labeled 'Part Rev' is present and distinct from the drawing revision, else null", "drawing_rev": "drawing revision — this is the value in the single 'Rev' column that sits under Drawing#/Part#; when only one Rev column exists on the PO, ALWAYS put it here", "first_article_required": false}
   ],
   "notes": "any special instructions or null",
   "confidence": 0.0-1.0
@@ -1759,6 +1759,25 @@ def _to_int(value):
     return int(f) if f is not None else None
 
 
+def _normalize_iso_date(value):
+    """Normalize a date string from extraction to canonical YYYY-MM-DD.
+
+    Accepts: '2026-05-08', '5/8/2026', '08-May-2026', '8 May 2026'.
+    Returns the normalized string, or None if unparseable. ProShop accepts
+    both ISO and US forms — we standardize on ISO so `payload[\"year\"] = s[:4]`
+    is always correct and so locale-ambiguous inputs (e.g. '5/8/2026') can't be
+    interpreted as DD/MM/YYYY by any consumer."""
+    if not value:
+        return None
+    s = str(value).strip()
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%d-%b-%Y", "%d %b %Y", "%B %d, %Y"):
+        try:
+            return datetime.strptime(s, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    return None
+
+
 def _ingest_tag(queue_id):
     """Provenance marker prepended to the notes/remarks field of every record
     this ingest pushes to ProShop. Lets Wolfgang tell at-a-glance which records
@@ -1920,7 +1939,10 @@ class ProShopUploader:
         # reclassifies to CUSTOMER_PO, the extraction left quote_* fields
         # rather than po_*. Fall back to keep clientPONumber non-null.
         po_number = data.get("po_number") or data.get("quote_number") or ""
-        po_date   = data.get("po_date")   or data.get("quote_date")   or ""
+        raw_date  = data.get("po_date")   or data.get("quote_date")   or ""
+        po_date   = _normalize_iso_date(raw_date) or ""
+        if raw_date and not po_date:
+            self.log(f"CPO push: dateEntered unparseable ({raw_date!r}); sending blank")
         payload = {}
         if contact_name:
             payload["client"] = contact_name
@@ -1977,10 +1999,15 @@ class ProShopUploader:
             due = li.get("required_date") or default_due_date
             if due:
                 item["dueDate"] = str(due)
-            if li.get("part_rev"):
-                item["partRev"] = str(li["part_rev"])
-            if li.get("drawing_rev"):
-                item["drawingRev"] = str(li["drawing_rev"])
+            # On customer POs the visible "Rev" column sits under the Drawing#
+            # and refers to the drawing revision the customer wants manufactured
+            # against. Some POs split part_rev vs drawing_rev; most surface a
+            # single Rev. Mirror to both fields so downstream consumers see a
+            # rev regardless of which one they read.
+            rev = li.get("drawing_rev") or li.get("part_rev")
+            if rev:
+                item["drawingRev"] = str(rev)
+                item["partRev"]    = str(rev)
             if li.get("first_article_required") is True:
                 item["firstArticleRequired"] = True
             if item:
