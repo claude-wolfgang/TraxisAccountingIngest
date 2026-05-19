@@ -5,6 +5,45 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-18 (session 6)
+
+### srv-01 SSH access recovery via M.2 USB enclosure + migration recon
+
+**Task:** Recover SSH access to srv-01 (10.1.1.161) using the UGREEN M.2 NVMe USB enclosure, then assess readiness for service migration from .71.
+
+**What was done:**
+
+1. **Mounted srv-01's Kioxia 256G NVMe** via UGREEN enclosure on .71 (appeared as E:). Confirmed healthy NTFS Windows system drive.
+
+2. **Diagnosed the original SSH failure.** The `administrators_authorized_keys` file contained an ed25519 key for `Superuser@.178-claude-remote-control` — not .71's key. That's why pubkey auth was rejected when connecting from .71.
+
+3. **First fix attempt (partial success).** Wrote .71's RSA pubkey (`traxis@DESKTOP-NU8H1LI`) to the file, fixed ACLs to `SYSTEM:(F)` + `BUILTIN\Administrators:(F)` with inheritance stripped, removed UTF-8 BOM left by PowerShell's `Set-Content`. Reinstalled drive — SSH connected but key was still rejected. Root cause: file **owner** was set to .71's admin context during the write; OpenSSH strict mode rejected it.
+
+4. **Second fix attempt (success).** Re-mounted drive, ran `takeown /F ... /A` to set owner to `BUILTIN\Administrators`, re-verified ACLs and encoding. Also discovered the Windows account is `traxi` (not `TRAXIS` or `Superuser`), so wrote a second copy of the pubkey to `E:\Users\traxi\.ssh\authorized_keys` as a fallback path. Reinstalled drive — **SSH working**: `ssh traxi@10.1.1.161` authenticates via pubkey.
+
+5. **Explored srv-01 readiness for service migration.** Via SSH, discovered srv-01 is further along than documented:
+   - NSSM installed, `TraxisOverseer` service registered (stopped, manual start)
+   - Python 3.14.0 with all 35+ deps installed
+   - `T:\traxis\services\` fully populated with 22+ project directories
+   - `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` already set at machine scope
+   - `.traxis.env` in place
+   - **Missing:** state databases (`T:\traxis\data\` is empty), `TRAXIS_FOCAS_DB` env var, FocasMonitor C# service
+
+6. **Video output still dead.** Monitor shows nothing (no Dell POST). Tuesday plan with SANSUI DP monitor unchanged.
+
+7. **Migration decision:** Full cutover deferred to Monday. FocasMonitor deferred separately.
+
+**Files modified:** None (infrastructure session — all changes were on srv-01's NVMe via USB mount, plus temp scripts in `C:\temp\`).
+
+**Key decisions:**
+- Account on srv-01 is `traxi`, not `TRAXIS` — all future SSH commands use `traxi@10.1.1.161`
+- Service migration tomorrow (Monday), not Sunday evening — safer to monitor during business hours
+- FocasMonitor stays on .71 for now — migrate Python/Flask services first
+
+**Status:** SSH access recovered. srv-01 ready for state DB copy + service start. Migration planned for Monday.
+
+---
+
 ## 2026-05-18 (session 5)
 
 ### P27: WO Shipped→Invoiced forward mechanism built + scheduled+Telegram deploy to .71
