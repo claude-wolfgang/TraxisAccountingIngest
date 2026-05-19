@@ -672,6 +672,53 @@ class ProShopClient:
         }"""
         return self._get_basic_session().execute(gql, {"poId": po_id, "data": data})
 
+    def lookup_part(self, customer_code, identifier):
+        """Resolve a customer-side identifier to a canonical Traxis partNumber.
+
+        Customer POs print one of two things in their part column: a drawing
+        number (R2S1 case — Drawing# is '10709' → Traxis 'R2S1-10709') or the
+        customer's part number minus the prefix (3DS1 case — PN is '76-0363'
+        → Traxis '3DS1-76-0363'). Either way the lookup key is
+        `{customer_code}-{identifier}`. ProShop's `parts(filter:{partNumber})`
+        does loose matching, so '10709' resolves to 'R2S1-10709 BACKHOUSING…'
+        — we want the canonical stored form back so addCustomerPo attaches
+        the right record.
+
+        Match is conservative: accepts exact prefix or prefix-then-space (the
+        canonical-with-description form). Rejects 'R2S1-10709A' when querying
+        'R2S1-10709' so variant/rev suffixes don't silently mis-attach.
+
+        Returns the canonical partNumber string, or None on miss/error."""
+        if not customer_code or not identifier:
+            return None
+        prefix = f"{customer_code}-{identifier}"
+        gql = """
+        query LookupPart($q: String!) {
+          parts(filter: {partNumber: $q}, pageSize: 5) {
+            records { partNumber }
+          }
+        }"""
+        try:
+            data = self._get_basic_session().execute(gql, {"q": prefix})
+        except Exception:
+            return None
+        recs = (data.get("parts") or {}).get("records") or []
+        pl = prefix.lower()
+        matches = []
+        for r in recs:
+            pn = (r.get("partNumber") or "")
+            cl = pn.lower()
+            if cl == pl or cl.startswith(pl + " "):
+                matches.append(pn)
+        if not matches:
+            return None
+        # Prefer exact; otherwise shortest canonical form.
+        exact = next((m for m in matches if m.lower() == pl), None)
+        if exact:
+            return exact
+        matches.sort(key=len)
+        return matches[0]
+
     def add_purchase_order(self, data):
         gql = """
         mutation AddPurchaseOrder($data: AddPurchaseOrderInput!) {
@@ -1143,7 +1190,7 @@ EXTRACTION_PROMPTS = {
   "required_date": "delivery required by date (YYYY-MM-DD) or null",
   "total_amount": "total PO value or null",
   "line_items": [
-    {"line_number": "...", "part_number": "buyer's part number as shown on the PO", "description": "...", "quantity": "...", "unit_price": "...", "extended_price": "...", "required_date": "...", "part_rev": "ONLY when a column specifically labeled 'Part Rev' is present and distinct from the drawing revision, else null", "drawing_rev": "drawing revision — this is the value in the single 'Rev' column that sits under Drawing#/Part#; when only one Rev column exists on the PO, ALWAYS put it here", "first_article_required": false}
+    {"line_number": "...", "part_number": "buyer's part number as shown in the PN / Part Number / Item column — this is what the customer calls the line (may be a free-text label like 'LABOR, ENGRAVING' when there is a separate Drawing# column)", "drawing_number": "value in the Drawing# / Drawing No. / Dwg# column when it is SEPARATE from the part-number column; strip any parenthetical variant suffix (e.g. '10709 (2024v)' → '10709'); null if there is no separate drawing column or it is blank for this line", "description": "...", "quantity": "...", "unit_price": "...", "extended_price": "...", "required_date": "...", "part_rev": "ONLY when a column specifically labeled 'Part Rev' is present and distinct from the drawing revision, else null", "drawing_rev": "drawing revision — this is the value in the single 'Rev' column that sits under Drawing#/Part#; when only one Rev column exists on the PO, ALWAYS put it here", "first_article_required": false}
   ],
   "notes": "any special instructions or null",
   "confidence": 0.0-1.0
@@ -1759,6 +1806,28 @@ def _to_int(value):
     return int(f) if f is not None else None
 
 
+def _clean_drawing_number(value):
+    """Strip a parenthetical variant suffix and surrounding whitespace.
+    '10709 (2024v)' → '10709', '  10715  ' → '10715', None → ''. Used to
+    build the parts-table lookup key from a customer PO's Drawing# column."""
+    if not value:
+        return ""
+    return re.sub(r"\s*\([^)]*\)\s*", "", str(value)).strip()
+
+
+def _looks_like_part_id(value):
+    """True if a string plausibly identifies a part rather than describes one.
+    '76-0363' / '10715' / 'AD0208-300-007' → True.
+    'LABOR, ENGRAVING, 2022v/2024v' / 'CONFORMANCE CERTIFICATE' → False.
+    Heuristic: must contain a digit, must not contain spaces or commas."""
+    if not value:
+        return False
+    s = str(value).strip()
+    if not re.search(r"\d", s):
+        return False
+    return " " not in s and "," not in s
+
+
 def _normalize_iso_date(value):
     """Normalize a date string from extraction to canonical YYYY-MM-DD.
 
@@ -1969,25 +2038,32 @@ class ProShopUploader:
         items = self._build_cpo_items(
             data.get("line_items", []),
             default_due_date=data.get("required_date"),
+            client_code=contact_name,
         )
         if items:
             payload["partsOrdered"] = items
         payload["year"] = po_date[:4] or str(datetime.now().year)
         return self.proshop.add_customer_po(payload)
 
-    def _build_cpo_items(self, line_items, default_due_date=None):
+    def _build_cpo_items(self, line_items, default_due_date=None, client_code=None):
         """Convert extracted CPO line items to partsOrdered (UpdateCustomerPoPartOrderedDataInput).
         UpdateCustomerPoPartOrderedDataInput has no description/partDescription field;
         line description is folded into lineItemNotes so it isn't lost.
-        `part` (Traxis internal part#) is not set — extraction sees the customer's
-        part number, which maps to clientPartNumber. Mapping to our internal part#
-        would require a separate lookup pass.
+
+        When `client_code` is provided, attempts to resolve `part` (Traxis
+        internal partNumber) by looking up `{client_code}-{drawing_number}`
+        (preferred — Drawing# column is the actual part identifier on R2S1-
+        style POs) or `{client_code}-{part_number}` (3DS1-style POs where the
+        customer's PN column IS the unprefixed part body). Free-text labels
+        like 'LABOR, ENGRAVING' fail the part-id heuristic and leave `part`
+        empty — those lines need manual attachment in ProShop.
         """
         items = []
-        for li in line_items:
+        for idx, li in enumerate(line_items, 1):
             item = {}
-            if li.get("part_number"):
-                item["clientPartNumber"] = str(li["part_number"])
+            pn_field = (li.get("part_number") or "").strip()
+            if pn_field:
+                item["clientPartNumber"] = pn_field
             if li.get("description"):
                 item["lineItemNotes"] = str(li["description"])
             qty = _to_int(li.get("quantity"))
@@ -2010,6 +2086,19 @@ class ProShopUploader:
                 item["partRev"]    = str(rev)
             if li.get("first_article_required") is True:
                 item["firstArticleRequired"] = True
+            # Resolve internal `part`: prefer Drawing# column, fall back to the
+            # PN column when it looks like a part identifier.
+            if client_code:
+                lookup_key = _clean_drawing_number(li.get("drawing_number"))
+                if not lookup_key and _looks_like_part_id(pn_field):
+                    lookup_key = pn_field
+                if lookup_key:
+                    canonical = self.proshop.lookup_part(client_code, lookup_key)
+                    if canonical:
+                        item["part"] = canonical
+                    else:
+                        self.log(f"CPO line {idx}: no Traxis part found for "
+                                 f"{client_code}-{lookup_key} - 'part' left empty")
             if item:
                 items.append(item)
         return items
