@@ -25,6 +25,7 @@ from purchasing import queue as purchasing_queue
 from purchasing import rules as purchasing_rules
 from purchasing import vendors as purchasing_vendors
 from purchasing import email_draft as purchasing_email
+from purchasing.worker import PurchasingWorker
 
 QUOTE_REQUEST_DAILY_CAP = 3  # max drafts per vendor per day
 
@@ -49,6 +50,11 @@ app.config["MAX_CONTENT_LENGTH"] = config.MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
 proshop = ProShopClient()
 worker = UploadWorker()
+purchasing_worker = PurchasingWorker(
+    base_url=config.PROSHOP_GRAPHQL_URL.rsplit("/api/graphql", 1)[0],
+    username=config.PROSHOP_USERNAME or "",
+    password=config.PROSHOP_PASSWORD or "",
+)
 
 
 # ── Pages ─────────────────────────────────────────────────────────────────
@@ -651,6 +657,7 @@ def health():
         "status": "ok",
         "queue": stats,
         "worker_alive": worker.is_alive(),
+        "purchasing_worker_alive": purchasing_worker.is_alive(),
         "proshop_api": api_health,
     })
 
@@ -718,5 +725,10 @@ if __name__ == "__main__":
     log.info(f"Database: {config.DB_PATH}")
 
     worker.start()
+
+    if config.PROSHOP_USERNAME and config.PROSHOP_PASSWORD:
+        purchasing_worker.start()
+    else:
+        log.warning("PROSHOP_USERNAME/PASSWORD not set — purchasing worker disabled")
 
     _serve_with_shutdown(app, config.HOST, config.PORT)

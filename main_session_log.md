@@ -5,6 +5,35 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-18 (session 9)
+
+### Project 35/31: P35 Phase B — VPO worker thread built; test VPO 263119 blank in UI
+
+**Task:** Build the PurchasingWorker background thread (Phase B) that auto-creates VPOs for approved orders. Also noted that test VPO 263119 (created last session) appears almost completely blank in ProShop UI despite the API reporting correct fields.
+
+**What was done:**
+
+1. **Built `purchasing/worker.py`** — new `PurchasingWorker` class mirroring `upload_worker.py` daemon-thread pattern. Polls every 30s for `status='approved'` orders, runs `find_last_vpo_line()` → `create_vpo()` → `mark_vpo_created()`. Single `BasicAuthSession` per lifecycle with auto-refresh on 401, 10-min idle close. Batch of 5 per cycle.
+
+2. **Added queue functions to `purchasing/queue.py`** — `get_approved()`, `mark_vpo_created()`, `mark_failed()` for the worker's state transitions.
+
+3. **Wired into `app.py`** — PurchasingWorker instantiated with credentials from config, starts alongside upload worker (guarded on USERNAME/PASSWORD presence), `purchasing_worker_alive` added to `/api/health`.
+
+4. **VPO 263119 blank finding** — Wolfgang reported test VPO 263119 is "almost completely blank" in ProShop UI. The API two-step create (addPurchaseOrder + overwritePurchaseOrder) returns success and correct fields, but the UI shows empty. Field mapping needs debugging before the worker can go live. Worker code is complete but should NOT be deployed until the blank-VPO issue is resolved.
+
+**Files modified:**
+- `31. Photo Upload Service/photo-uploader/purchasing/worker.py` (new)
+- `31. Photo Upload Service/photo-uploader/purchasing/queue.py` (3 functions added)
+- `31. Photo Upload Service/photo-uploader/app.py` (worker import, instantiation, start, health check)
+
+**Key decisions:**
+- Worker is built and ready but **blocked on VPO field mapping fix** — do NOT deploy to production until blank-VPO issue is debugged
+- Worker guarded with credential check so app.py still starts cleanly without basic-auth creds
+
+**Status:** Phase B code complete. Blocked on VPO blank-field debugging before deploy.
+
+---
+
 ## 2026-05-18 (session 8)
 
 ### Project 31: BLE Proximity — MOKOSmart B2 badges unboxed, partial discovery

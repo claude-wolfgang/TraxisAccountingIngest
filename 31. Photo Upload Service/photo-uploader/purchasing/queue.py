@@ -151,3 +151,37 @@ def attach_draft(order_id, draft_id):
             "UPDATE orders SET email_draft_id = ? WHERE id = ?",
             (draft_id, order_id),
         )
+
+
+def get_approved(limit=10):
+    """Fetch orders ready for VPO creation (status='approved'), oldest first."""
+    with _conn() as c:
+        rows = c.execute(
+            "SELECT * FROM orders WHERE status = 'approved' "
+            "ORDER BY created_at ASC LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def mark_vpo_created(order_id, vpo_number, proshop_url=None):
+    """Flip approved → vpo_created with VPO number and completion timestamp."""
+    with _lock, _conn() as c:
+        cur = c.execute(
+            """UPDATE orders SET status = 'vpo_created', vpo_number = ?,
+                                 completed_at = ?, error = NULL
+               WHERE id = ? AND status = 'approved'""",
+            (vpo_number, _now(), order_id),
+        )
+        return cur.rowcount > 0
+
+
+def mark_failed(order_id, error_msg):
+    """Flip to 'failed' with error detail."""
+    with _lock, _conn() as c:
+        cur = c.execute(
+            """UPDATE orders SET status = 'failed', error = ?,
+                                 completed_at = ?
+               WHERE id = ?""",
+            (error_msg, _now(), order_id),
+        )
+        return cur.rowcount > 0

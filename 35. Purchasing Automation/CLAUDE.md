@@ -9,7 +9,7 @@ One-tap reordering of COTS / Tools / Parts items from any browser on the LAN. Op
 - **Phase 0** (done): vendor-map bootstrap from M365 — scanned tom@'s Sent Items + rene@'s 7.7GB archived Inbox mbox; 37-vendor `vendor_map.json` produced.
 - **Phase 1** (done): SQLite queue + `/approvals` web UI + P30 extension "Buy" button on COTS/Tools/Parts pages. Without unit_cost, falls through to manual review.
 - **Phase 1.5** (done): auto quote-request email drafted via Microsoft Graph when unit_cost is missing on the page; capped at 3 drafts per vendor per day; lands in tom@traxismfg.com's "Purchasing - To Review" Outlook folder for human Send.
-- **Phase 2** (in progress): API-driven VPO creation via `addPurchaseOrder` + `overwritePurchaseOrder` under basic auth. Field mapping validated 2026-05-18 (test VPOs 263116, 263119). poType=General, two-step for Outstanding status. Pending: worker thread + queue integration.
+- **Phase 2** (in progress): API-driven VPO creation via `addPurchaseOrder` + `overwritePurchaseOrder` under basic auth. Worker thread + queue functions built 2026-05-18. **Blocked:** test VPO 263119 is almost completely blank in ProShop UI despite API returning correct fields — field mapping needs debugging before deploy.
 - **Phase 2b** (planned): Amazon Business cart-add URL routing for Amazon-sourced items. `method_history` table + extension tab-open.
 - **Phase 3** (planned): Microsoft Graph email-draft for the actual VPO PDF (extends Phase 1.5's drafter).
 - **Phase 4** (planned): polish — Overseer dashboard badge, batch-approve, sort/filter, optional rule-edit UI, method_history admin UI on `/approvals`.
@@ -29,13 +29,10 @@ The Flask code, queue DB, rules, vendor lookup, and email-draft helper all live 
 
 ## Next Steps
 
-- **[NEEDS WOLFGANG] Delete test VPOs 263106 + 263119** from ProShop UI. 263106: created 2026-05-06, `remarks = "API-PROBE-2026-05-06 — DELETE ME"`. 263119: created 2026-05-18 with correct poType=General + orderStatus=Outstanding. Wolfgang already deleted 263116.
-- **[NEEDS WOLFGANG] Inspect test VPO 263119** — `https://traxismfg.adionsystems.com/procnc/purchaseorders/2026/263119`. Should show poType=General, orderStatus=Outstanding, supplier=Dixie Tool Crib, LUB-116 linked, remarks="P35 auto-generated". Confirm it matches manually-created VPOs, then delete.
+- **[BLOCKER] VPO 263119 blank in UI — debug field mapping** — test VPO 263119 created via API (addPurchaseOrder + overwritePurchaseOrder) shows almost completely blank in ProShop UI despite API returning correct poType=General + orderStatus=Outstanding. The worker code is built but must NOT be deployed until this is resolved. Likely causes: (a) supplier field needs the vendor *ID* not the plaintext code, (b) poItems line fields aren't persisting through the add mutation, (c) overwritePurchaseOrder is wiping fields. Next step: create a new test VPO, then immediately query it back via API to see what actually persisted vs what was silently dropped.
+- **[NEEDS WOLFGANG] Delete test VPOs 263106 + 263119** from ProShop UI. 263106: created 2026-05-06, `remarks = "API-PROBE-2026-05-06 — DELETE ME"`. 263119: created 2026-05-18, blank in UI. Wolfgang already deleted 263116.
 - **[NEEDS WOLFGANG] Service-restart fragility** — see P31 Next Steps. Until the dev-server zombie-socket pattern is fixed, deploys that require a Flask restart can wedge port 5003 and force a reboot of .71. Scoped to P31 because all P35 runtime lives there.
-- **Phase 2 VPO worker (next build step)** — field mapping validated 2026-05-18. Remaining:
-  1. **Build `purchasing/worker.py`** — PurchasingWorker background thread polling `orders.db` for `status='approved'` → `find_last_vpo_line` → `create_vpo` → `mark_vpo_created`.
-  2. **Add `get_approved()`, `mark_vpo_created()`, `mark_failed()` to `purchasing/queue.py`.**
-  3. **Wire worker startup into `app.py`** alongside existing `upload_worker`.
+- **Phase 2 VPO worker (code complete, blocked on field mapping)** — `purchasing/worker.py` built, `queue.py` functions added, wired into `app.py`. Do NOT deploy until blank-VPO blocker above is resolved.
 - **Phase 2b: Amazon Business cart-add routing** — Traxis has an Amazon Business account. Plan:
   1. Add `method_history` table to `purchasing.db` (entity_id → method/asin_or_url).
   2. In `/api/queue-order`, check method_history: if amazon + ASIN → build `amazon.com/gp/aws/cart/add.html?ASIN.1=...&Quantity.1=...` URL, return `{action: "open_url"}`.
@@ -54,6 +51,8 @@ The Flask code, queue DB, rules, vendor lookup, and email-draft helper all live 
 **Done 2026-05-04:** AJ Rod auto-routing; MFG+EDP+description enrichment in tool quote-request emails.
 
 **Done 2026-05-06:** API probe of `addPurchaseOrder` under basic auth; live mutation confirmed (test VPO 263106); Phase 2 reframed from Selenium → API; foundation modules built and dry-run-validated.
+
+**Done 2026-05-18 (s9):** Phase B worker code complete — `purchasing/worker.py` (PurchasingWorker daemon thread), `queue.py` additions (`get_approved`, `mark_vpo_created`, `mark_failed`), wired into `app.py` with health check. Blocked on deploy: VPO 263119 almost completely blank in ProShop UI.
 
 **Done 2026-05-18:** VPO field mapping validated via live test VPOs (263116, 263119). Fixed `proshop_vpo.py`: poType="General" (was "Standard"), two-step create flow for Outstanding status (add + overwritePurchaseOrder), error handling for silent GraphQL failures. Introspected all PO enums + 44 line-item fields. Planned two-track purchasing (VPO + Amazon Business cart-add URL). FIL-157 classified as Amazon item.
 
