@@ -77,6 +77,17 @@ db.init_db(config.TOOLING_DB_PATH)
 
 _start_time = time.time()
 
+# Heartbeat state is persisted across Flask restarts so that an Overseer-
+# triggered restart of this service doesn't wipe the "kiosk has been seen"
+# signal — which is exactly when we want Overseer to keep reporting degraded.
+_HEARTBEAT_STATE_PATH = Path(__file__).parent / "data" / "kiosk_heartbeat.txt"
+def _load_persisted_heartbeat():
+    try:
+        return float(_HEARTBEAT_STATE_PATH.read_text().strip())
+    except Exception:
+        return 0.0
+_last_kiosk_heartbeat = _load_persisted_heartbeat()
+
 # Cached user list
 _users_cache = {"data": None, "fetched_at": 0}
 USER_CACHE_TTL = 3600
@@ -1033,7 +1044,24 @@ def api_health():
         health["active_assignments"] = assignments
     except Exception:
         pass
+    if _last_kiosk_heartbeat > 0:
+        health["kiosk_heartbeat_age_seconds"] = int(time.time() - _last_kiosk_heartbeat)
+    else:
+        health["kiosk_heartbeat_age_seconds"] = None
     return jsonify(health)
+
+
+@app.route("/api/kiosk-heartbeat", methods=["POST"])
+def api_kiosk_heartbeat():
+    """Touchscreen launcher beats here so Overseer can detect a dark kiosk
+    even while this Flask backend stays healthy."""
+    global _last_kiosk_heartbeat
+    _last_kiosk_heartbeat = time.time()
+    try:
+        _HEARTBEAT_STATE_PATH.write_text(f"{_last_kiosk_heartbeat:.0f}")
+    except Exception as e:
+        log.warning("Could not persist heartbeat: %s", e)
+    return jsonify({"ok": True, "received_at": int(_last_kiosk_heartbeat)})
 
 
 # ── API: Print Proxy ─────────────────────────────────────────────────────────

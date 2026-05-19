@@ -5,6 +5,60 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-19 (session 1)
+
+### Project 22: Tool kiosk dark — root cause + durability rework
+
+**Task:** Reporter said the Tool Assembly Kiosk service was "running" but the kiosk itself was not. Investigate (not repair). Investigation expanded to a rework once root cause was understood; on-site fix-up bundled with srv-01 migration weekend.
+
+**What was done:**
+
+1. **Triaged the split signal.** Overseer reports `ToolAssemblyKiosk` healthy on .71:5001 with 39hr uptime. Network probe: docs say kiosk PC is .142, but it's actually .141 (.142 has no L2 presence). .141 is on the LAN (.71 ARP cache holds MAC `90:de:80:fe:37:87`), but all inbound ports closed (firewall Public profile). Zero established TCP connections to .71:5001 — the touchscreen wasn't talking to the backend at all. Wolfgang reported the screen showed plain Windows desktop, confirming the launcher process itself was stopped.
+
+2. **Found the architectural rot.** `kiosk_launcher.py` on .141 had been crash-looping since 2026-03-16 (per `kiosk_launcher.log` last write 2026-05-18 13:46). Launcher tried to start its *own* local Flask, which failed within 2s every cycle ("Flask died exit code 1"). Then it pointed Chrome at `localhost:5001` — a broken local Flask. Meanwhile the real Flask backend was running fine on .71 under Overseer, but the kiosk Chrome never saw it. Two months of "healthy service, dark kiosk" because Overseer had no way to detect the touchscreen state.
+
+3. **Reworked `kiosk_launcher.py`** for the corrected architecture:
+   - Reads `TOOLKIOSK_BACKEND_URL` from `.traxis.env` (default `http://10.1.1.71:5001`).
+   - Skips `start_flask()` entirely when the URL is remote. The kiosk PC's job is now just Chrome + heartbeat.
+   - **Touchscreen detection** via Win32 `GetPointerDevices` (ctypes binding) — finds the monitor whose digitizer is `POINTER_DEVICE_TYPE_TOUCH`, reads its rect from `GetMonitorInfoW`, pins Chrome `--window-position/--window-size` to those bounds. Falls back to primary `(0,0,1920,1080)` if no touchscreen detected (logged warning). Robust across primary/secondary swaps.
+   - Heartbeat thread POSTs `/api/kiosk-heartbeat` every 60s.
+
+4. **Backend liveness signal** added to `app.py`: new `POST /api/kiosk-heartbeat` updates an in-memory timestamp **and persists it to `data/kiosk_heartbeat.txt`** so an Overseer-triggered Flask restart doesn't wipe the "kiosk has been seen" state. `/api/health` now returns `kiosk_heartbeat_age_seconds` (integer or `null`).
+
+5. **Overseer validator update** in `overseer.py` (`validate_tool_assembly_kiosk`): only flags degraded once a heartbeat has been seen and then goes stale beyond 5 min. Fresh-install state (no beat ever) returns healthy — avoids flapping during rollout. Tradeoff documented: Flask restarting would lose the signal, hence the disk persistence above.
+
+6. **Autostart scaffolding** — two new .bat files in `tool-kiosk/`:
+   - `run_kiosk_silent.bat` — pythonw wrapper, no console.
+   - `install_autostart.bat` — idempotent Task Scheduler installer registering `TraxisToolKiosk` at logon. Single double-click on .141 enables boot-survival.
+
+7. **Live verification.** Restarted Flask backend on .71 via Overseer's `/api/services/ToolAssemblyKiosk/restart`. Confirmed: new `/api/health` exposes the new field; `POST /api/kiosk-heartbeat` round-trips and reflects in the health response. Test artifact cleared from `data/kiosk_heartbeat.txt`. Overseer itself **not restarted** — deferred to weekend to avoid old test state triggering false-degraded against the new validator.
+
+8. **Doc fixes:**
+   - Root `CLAUDE.md`: kiosk PC `10.1.1.142` → `10.1.1.141`; srv-01 migration step (5) rewritten to use the new `TOOLKIOSK_BACKEND_URL` env var.
+   - P22 `CLAUDE.md`: header rewritten to reflect the .71/.141 split; `Key Files` expanded for the new files; `Interfaces` updated (heartbeat endpoint, new env var, persistence file); `Contracts` updated for the validator's "only-after-first-beat" rule.
+
+9. **Bundled remaining work with srv-01 migration weekend.** Added a `[NEEDS WOLFGANG]` entry to root Next Steps listing the keyboard-on-.141 steps: set `TOOLKIOSK_BACKEND_URL=http://10.1.1.161:5001`, touch calibration, run `install_autostart.bat`, verify heartbeat from any host, bounce Flask to clear lingering test state, restart Overseer.
+
+**Files modified:**
+- `22. Tool Assembly Management/tool-kiosk/kiosk_launcher.py` (major rework — Pointer Device API detection, env-driven URL, conditional local-Flask, heartbeat thread)
+- `22. Tool Assembly Management/tool-kiosk/app.py` (heartbeat endpoint + persistence)
+- `22. Tool Assembly Management/tool-kiosk/run_kiosk_silent.bat` (new)
+- `22. Tool Assembly Management/tool-kiosk/install_autostart.bat` (new)
+- `22. Tool Assembly Management/CLAUDE.md` (header + Key Files + Interfaces + Contracts)
+- `1. Proshop Automations/Overseer/overseer.py` (`validate_tool_assembly_kiosk` rewrite)
+- `CLAUDE.md` (kiosk PC IP fix, srv-01 step 5 rewrite, weekend bundle Next Step)
+
+**Key decisions:**
+- **Detection over convention** — picking the touchscreen via Pointer Device API rather than "non-primary monitor" heuristic. Survives Wolfgang ever swapping primary, swapping cables, or making the touchscreen primary.
+- **Heartbeat persists to disk** — without this, an auto-restart-after-degraded would silently re-enter "healthy never-seen" state, hiding the very signal we just added.
+- **Validator is conservative** — "only after first beat" rather than "required after 3 min uptime". Avoids restart-cooldown thrash during rollout where Flask is up but launcher isn't.
+- **Defer Overseer restart to weekend** — restarting it now would activate the new validator against stale test-heartbeat state and Overseer's `max_degraded: 5` would churn-restart Flask every ~10 min until a real kiosk came online. Stale value is bounded; old validator ignores it; no harm in waiting.
+- **Bundle on-site work with srv-01 migration** — one trip to .141, and the env var lands on the post-migration value `.161` directly, so no second visit.
+
+**Status:** All code deployed via Dropbox; backend Flask restarted and heartbeat round-trip verified. Overseer still running old validator (deferred). .141 still dark (kiosk launcher not running); shop can use the emergency Chrome one-liner if needed before the weekend. Awaiting weekend bundle: env var set on .141, touch calibration, `install_autostart.bat`, Flask bounce to clear test state, Overseer restart.
+
+---
+
 ## 2026-05-18 (session 9)
 
 ### Project 35/31: P35 Phase B — VPO worker thread built; test VPO 263119 blank in UI

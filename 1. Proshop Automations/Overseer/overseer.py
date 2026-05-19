@@ -482,6 +482,16 @@ def validate_tool_assembly_kiosk(data):
     holders = data.get("active_holders", 0)
     assignments = data.get("active_assignments", 0)
     uptime = data.get("uptime_seconds", 0)
+    # Touchscreen launcher posts a heartbeat to /api/kiosk-heartbeat every
+    # 60s. If we've ever seen one, treat its absence beyond 5 min as
+    # degraded. If we've never seen one (None), stay quiet — the kiosk may
+    # be a freshly-rebooted PC that hasn't started its launcher yet.
+    # Restarting Flask wouldn't fix a dark touchscreen anyway; this signal
+    # is for operator visibility, not auto-remediation.
+    heartbeat_age = data.get("kiosk_heartbeat_age_seconds")
+    KIOSK_BEAT_STALE_SECONDS = 300
+    if heartbeat_age is not None and heartbeat_age > KIOSK_BEAT_STALE_SECONDS:
+        return "degraded", f"Touchscreen silent for {heartbeat_age}s"
     return "healthy", f"{holders} holders, {assignments} assigned, uptime {uptime}s"
 
 
