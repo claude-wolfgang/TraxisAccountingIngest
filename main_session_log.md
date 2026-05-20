@@ -5,6 +5,33 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-20 (session 3)
+
+### Project 31: Buy-button tool quote-request brand bug — API is now authoritative
+
+**Task:** Wolfgang reported the Buy button on tool pages drafts quote emails to AJ Rodco with the wrong subject — e.g. B23 produced "Pricing request: AJ Rod 43584TF" instead of "YG-1 43584TF". AJ Rodco carries many brands, so the manufacturer (Brand) needs to be in the subject; just the EDP is ambiguous.
+
+**What was done:**
+
+1. **Root-caused via live API + DB probes.** Added two temporary `/api/_debug/*` endpoints to P31, restarted, and inspected: ProShop's `tools.approvedBrands` GraphQL connection correctly returns `approvedBrand="YG-1"`, `vendorPlainText="AJR1"`, `vendorToolId="43584TF"` for B23 — the API has it right. But the stored order row #6 (created 17:54Z, pre-fix) had `brand="Aj Rod"`, meaning that wrong value came in via the payload from `buy-content.js`. ProShop tool detail pages render their Purchasing table **inside an iframe**; `buy-content.js`'s `scrapeBrand()` / `scrapeVendor()` only query the top-level DOM, so on tool pages the scrape is unreliable and occasionally leaks the Vendor column value into the brand slot. The server then preferred the payload value over the API enrichment (`app.py:546-547` was guarded behind `if not brand:`).
+
+2. **First fix attempt (reverted).** Added a fuzzy-match guard in `app.py` that dropped a payload `brand` matching the recipient `vendor`. Imported `_norm_org_name` from `proshop_client`. After the DB probe revealed the payload had `vendor=null` and `brand="Aj Rod"` — the guard never triggered because both sides need values — switched to a cleaner fix.
+
+3. **Final fix.** For `entity_type == "tool"`, the ProShop tool library is now treated as authoritative for brand/edp. `app.py:539-550` calls `proshop.get_purchasing_info(...)` and unconditionally overwrites `brand` and `edp` with `info.brand` / `info.edp`. Page-scraped values from `buy-content.js` are discarded for tools. Reverted the `_norm_org_name` import. Existing `_pick_brand_record(skip_vendor=...)` heuristic in `proshop_client.py` stays as defense-in-depth in case legacy tool records have AJ-Rodco-named approvedBrand entries. Vendor default for tools is unchanged (AJ Rodco). Removed the two debug endpoints after probing was done.
+
+4. **Restarted P31 via Overseer** three times across the iteration (`curl -X POST http://10.1.1.71:8060/api/services/PhotoUploadService/restart`); final state healthy. Existing pending draft #6 (`AJ Rod 43584TF` to jaime.gomez@ajrodco.com) was handled by Wolfgang.
+
+5. **Memory.** Saved `project_proshop_tool_brand_vs_vendor.md` documenting the `ToolApprovedBrand` schema field semantics: `approvedBrand` = MFG, `vendorPlainText` = distributor, `vendorToolId` = EDP — these are easily confused and the iframe-scrape pitfall is non-obvious. Linked from `MEMORY.md`.
+
+**Files modified:**
+- `31. Photo Upload Service/photo-uploader/app.py` — `queue_order()` route: tool entities now overwrite payload brand/edp with API values; reverted the fuzzy-match guard and `_norm_org_name` import added mid-session
+- `~/.claude/projects/.../memory/project_proshop_tool_brand_vs_vendor.md` (new)
+- `~/.claude/projects/.../memory/MEMORY.md` — index entry added
+
+**Status:** Fixed. Next Buy click on any tool page will produce `{MFG} {EDP}` (e.g. `YG-1 43584TF`) in the quote-request subject and body. No version bump on P30 (server-side change only).
+
+---
+
 ## 2026-05-20 (session 2)
 
 ### Project 27: CPO confirmation send-from-Wolfgang + qty/date Adion bugs surfaced

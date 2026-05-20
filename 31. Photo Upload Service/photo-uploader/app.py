@@ -537,16 +537,17 @@ def queue_order():
     # brand + part number to look up the item.
     description = ""
     if entity_type == "tool":
-        # Skip approvedBrands entries that are actually the recipient vendor —
-        # tool records sometimes have AJ Rodco stored as approvedBrand which
-        # produces "Aj Rod 314965" emails to AJ Rodco; we want the actual
-        # manufacturer (e.g. "Iscar 314965") or fall through to description.
+        # ProShop tool library is authoritative for brand/edp. The
+        # buy-content.js page scrape is unreliable on tool pages because
+        # the Purchasing table lives inside an iframe (and the top-level
+        # DOM sometimes leaks a vendor-column value into the brand slot,
+        # producing "Aj Rod 43584TF" subjects to AJ Rodco instead of the
+        # actual manufacturer + EDP "YG-1 43584TF"). Overwrite any
+        # scraped brand/edp with the API values.
         info = proshop.get_purchasing_info(entity_type, entity_id, skip_vendor=vendor)
         description = info.get("description") or ""
-        if not brand:
-            brand = info.get("brand")
-        if not edp:
-            edp = info.get("edp")
+        brand = info.get("brand")
+        edp = info.get("edp")
 
     auto, reason = purchasing_rules.should_auto_approve(entity_id, qty, unit_cost)
     status = "approved" if auto else "pending"
