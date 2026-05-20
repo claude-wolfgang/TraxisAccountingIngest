@@ -5,6 +5,53 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-20 (session 1)
+
+### Project 27: Customer PO Pusher — lightweight drop-in tool + bulk-insert ordering rabbit hole
+
+**Task:** Build a simpler tool for handling customer POs. Wolfgang is collecting them in `tom@/Orders` and wants a manual "drop PDF, verify, push" workflow — no queue DB, no email polling daemon, no QBO side. CPO only. Replaces the deferred backlog item "Lightweight CPO drop-in tool" from 2026-05-18.
+
+**What was done:**
+
+1. **Built `cpo_pusher.py`** (~530 lines) — Tk window with: Sweep button (lists tom@/Orders messages with PDF attachments, last 30d, dedup'd via JSON sidecar); Add PDF… button; drag-drop anywhere on the window via `tkinterdnd2`; per-row Extract (cheap by default — no Claude calls until requested); Push to ProShop with `[P27 CPO drop-in]` provenance tag; auto-spawns the ProShop confirmation PDF + flips `confirmationSent`. Imports `ProShopClient`, `AIExtractor`, `download_proshop_confirmation`, and the helper functions from `accounting_ingest.py` as a library — its `__main__` guard means import doesn't start its Tk app, and today's accuracy fixes (Drawing#, Traxis part resolution, ISO date, Rev mirroring, PO prefix from yesterday's commits) flow automatically.
+
+2. **OAuth path discovered fully dead from .178.** Token endpoint returns 403 `invalid_scope` — `ACCOUNTING_SCOPE` in `.traxis.env` includes `workorders:rwdp` (added 2026-05-18 for the WO back-feed), but the OAuth client at Adion doesn't allow that scope. This affects every `proshop.query()` call — meaning production `accounting_ingest.py`'s read paths (dup-check, `get_contacts`, packing-slip lookups) are silently broken. Routed `cpo_pusher`'s dup-check and contact fuzzy-match through the basic-auth session instead, since basic auth accepts the expanded scope just fine.
+
+3. **Wired dup-check.** Specialized for CUSTOMER_PO: 6-month `clientPONumber` window with PO/P.O./PO#/INV prefix normalization (PO115245 ↔ 115245). On match: modal with Open existing / Skip (mark processed) / Cancel / Override-and-push actions. Override sets `override_dup=True` on the candidate so a retry skips the gate.
+
+4. **Hit ProShop's bulk-insert reordering bug.** First symptom: Wolfgang showed a CPO with scrambled Item# column values (`6, 7, 11, 12, 13, 14, 15, 4, 7, 14, 17`). First fix attempt: set `itemNumber = str(idx)` in `_build_cpo_items`. Read-back of R2S1-PO115245 showed `itemNumber=[1,2,3,4]` — looked correct — but Wolfgang reported every fresh push kept producing scrambled lines on bigger POs. His tribal-knowledge prompt: "we experienced this with the sequence detail uploader." Grep of ProShopBridge surfaced `PROSHOP_BRIDGE_REFERENCE.md` and `ProShopBridge.py:1525` with the exact same finding: *"Push one tool at a time so ProShop creates rows in sequential order."*
+
+5. **Refactored cpo_pusher to serial-update.** `addCustomerPo` with header only (no `partsOrdered`), then loop `updateCustomerPo(poId, {partsOrdered: [{data: line}]})` once per line. Each transaction commits before the next, so `originalSortPosition` is monotonic in our call order. Cost: N+1 round-trips instead of 1.
+
+6. **Empirically characterized the scatter.** Wrote `bulk_order_scatter_test.py`: 5 consecutive bulk-add pushes of 20-line CPOs against client 3DS1. Result: scatter is **fully deterministic** (5/5 identical signatures), and `originalSortPosition` is monotonic `0..19` — no gaps, no duplicates. Display order is `01, 10, 11, 12, …, 19, 02, 20, 03, 04, …` — natural-sort-with-leading-zero-strip on a numeric-tailed field. Re-ran with zero-padded `itemNumber` (`"01"`…`"20"`) — **identical scatter**, confirming `itemNumber` is NOT the sort key. Sort key is one of `clientPartNumber` / `lineItemNotes` (both had numeric position content). Since both are customer-defined fields, fully characterizing the sort doesn't give us a usable override — serial-update is the only reliable path. Production code reverted to serial-update.
+
+7. **Probed `deleteCustomerPo` via schema introspection** — was undocumented. Shape: `deleteCustomerPo(poId: String!): Boolean`. Used it to clean up the 10 scatter-test CPOs after Wolfgang screenshot-confirmed which to delete.
+
+8. **Drafted email to Joao at Adion** (`support@adionsystems.com`) — short, informational. Flags the bulk-insert ordering finding + our workaround, asks for either preserve-input-order in the bulk resolver or writable `originalSortPosition` on `UpdateCustomerPoPartOrderedDataInput`. Sitting as draft in `tom@/Purchasing - To Review` for Wolfgang's review-and-send. Earlier longer draft with the wrong "non-deterministic commit order" hypothesis was deleted after the scatter test corrected the diagnosis.
+
+9. **Memory saved** — `project_proshop_bulk_insert_reorders.md` — applies to `addCustomerPo`, `addPurchaseOrder`, `updatePart` with tools array.
+
+**Files created:**
+- `27. Accounting Ingest/cpo_pusher.py` (~530 lines — drag-drop UI + sweep + extract + dup-check + serial-update push + confirmation thread)
+- `27. Accounting Ingest/bulk_order_scatter_test.py` (~140 lines — `--pad` flag toggles itemNumber zero-padding, `deleteCustomerPo` shape recorded in cleanup note)
+
+**Dependencies added:**
+- `tkinterdnd2` (pip-installed, system Python) — drag-drop for `cpo_pusher.py`. Falls back to file-dialog-only if absent (`HAS_DND` check).
+
+**Live ProShop state:**
+- R2S1-PO115245 pushed live during validation (4 lines, clean order).
+- 10 `BULK-ORDER-TEST-…` CPOs under client 3DS1 created + deleted via `deleteCustomerPo` after scatter analysis.
+
+**Key decisions:**
+- **Standalone tool, library-import production code.** `cpo_pusher.py` imports `accounting_ingest` as a library rather than extracting a shared module — the `__main__` guard makes it safe, today's accuracy fixes flow automatically, and the production file stays unchanged. Provenance tag `[P27 CPO drop-in]` distinguishes new tool's records from queue-pushed `[P27 ingest q#XX]`.
+- **Serial-update over fighting the sort.** Even with full characterization of ProShop's natural-sort behavior, the sort key is customer-defined data we can't reorder. Bridge's prior art confirms this is the right answer.
+- **Short Joao email, no urgency.** Workaround works; framing the API ask as "for the backlog" rather than blocking.
+- **Skipped FW: vs original dedup in v1.** Both copies show in the sweep table; operator picks one; ProShop's `clientPONumber` 6-month dup-check is the safety net.
+
+**Status:** `cpo_pusher.py` working end-to-end. First live push (R2S1-PO115245) succeeded with clean 4-line order. Production `accounting_ingest.py` has (a) the same bulk-insert ordering bug on its CPO push path and (b) OAuth read paths broken by the `workorders:rwdp` scope mismatch — both flagged in Next Steps. New Joao draft awaits Wolfgang's review-and-send.
+
+---
+
 ## 2026-05-19 (session 1)
 
 ### Project 22: Tool kiosk dark — root cause + durability rework
