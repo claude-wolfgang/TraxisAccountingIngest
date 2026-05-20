@@ -5,6 +5,65 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-20 (session 2)
+
+### Project 27: CPO confirmation send-from-Wolfgang + qty/date Adion bugs surfaced
+
+**Task:** Add automatic customer confirmation emails to cpo_pusher (post-CPO-push, after operator review). Side-quests: diagnose two production blockers Wolfgang surfaced — CPO Create-WO button rejected by qty `.0` display, WO `mustLeaveBy` not auto-populating on API-created CPOs.
+
+**What was done:**
+
+1. **Confirmation send pipeline.** After admin grants landed (see below), cpo_pusher now sends the confirmation directly via Graph `sendMail` instead of dropping an Outlook draft. New per-row workflow: Push → background generates PDF + flips `confirmationSent` flag → row reaches **PUSHED** → operator clicks **Open in ProShop** to review CPO → clicks **Send Confirmation** → modal shows To (prefilled from extracted `buyer_email`, editable), subject preview, PDF name → click Send → row reaches **CONFIRMED**. Replaces the auto-draft path entirely.
+
+2. **M365 admin grants** (Wolfgang completed in browser). Added `Mail.Send` Application permission to the `AccountingIngest` Graph app (client ID `47f0d422-c0d8-45ea-bbb4-eb4f24fed07e`, SP ObjectId `7af57e20-c63a-48fc-b9d8-9292a8dba368`) in Entra ID → API permissions, granted admin consent. Skipped the Exchange Send-As mailbox grant — that GUI doesn't list service principals, and turned out unnecessary: Mail.Send alone lets the app post to `/users/tom@/sendMail`, and Exchange treats `wolfgang@` as a valid alias of the mailbox we're sending from.
+
+3. **Clarified "no tom@ send" rule.** Test send revealed Exchange silently rewrites our `from: wolfgang@` override back to `tom@traxismfg.com` at the SMTP layer (re-verified the existing `[[reference_wolfgang_alias]]` finding). Wolfgang clarified: the earlier hard rule was really about brand-display impression, not the underlying SMTP address. The display name on tom@'s mailbox is **"Traxis Manufacturing LLC"** — customers see the org brand in their inbox, not Tom's name. Acceptable. The body signature must be **"Wolfgang"** (one word, no company line under it — brand is in the From display). Updated [[feedback_no_tom_send]] memory with the clarified rule. The `ALLOWED_SEND_FROM = wolfgang@traxismfg.com` guard in `cpo_pusher.send_confirmation_email` remains as a no-op safety belt that documents intent.
+
+4. **Full Wolfgang signature with inline logo.** Captured Wolfgang's real Outlook signature by having him send a one-line test to accounting@; pulled the HTML body + inline PNG from Graph; replaced "Tom Buerkle" with "Wolfgang"; saved as `wolfgang_signature.html` + `wolfgang_signature_logo.png` (Traxis MFG gear/wordmark, 5206 bytes). Wired into both `send_confirmation_email` and the fallback `draft_confirmation_email`: signature loads at runtime, logo attaches inline via `cid:traxis-logo` content-id. Full pipeline test — push regenerated R2S1-PO115267 confirmation PDF and sent to accounting@ — visual review passed.
+
+5. **`tom@/Confirmations - Outgoing` folder** created via Graph for any fallback drafts. Empty by default once Send Confirmation is the live path.
+
+6. **Diagnosed `qty .0` Create-WO blocker.** Symptom: Create WO button greyed/refused on every line of R2S1-PO115267. Wolfgang manually retyped one cell `20.0` → `20` and Create WO worked on line 1. Investigated by probing storage + display layers: our wire format sends pure JSON int (`{"quantityOrdered": 20}`), Graph readback returns pure Python int, but ProShop's UI displays API-created lines as `20.0` and UI-created lines as `20` — same int value, different rendering. Confirmed it propagates downstream: WO 26-0162 (from our CPO) shows `20.0` in the UI, older WOs (from UI-created CPOs) show `20`. Tested int/string/float input variants — all stored as int 20 — none change the display. **Adion bug.** Drafted second Joao email for the backlog (`tom@/Purchasing - To Review`, To: support@adionsystems.com); first draft from session 1 already sent before this session.
+
+7. **Diagnosed `WorkOrder.mustLeaveBy` not auto-populating** on WO 26-0162 (the WO Wolfgang did manage to create). Compared older WOs (which had mustLeaveBy populated as `dueDate - 1 day`) vs ours (None). Key difference: older WOs had `dueDate` in US `M/D/YYYY` format; ours had ISO `2026-08-07` because of last week's commit `b52d346` that normalized dates to ISO. **Empirical test:** patched WO 26-0162's dueDate from ISO → US via API and watched mustLeaveBy auto-populate within 2s as `8/6/2026`. ProShop's downstream calculators only parse US format, even though storage accepts both. Added `_normalize_proshop_date()` helper to `accounting_ingest.py` (M/D/YYYY, no leading zeros) and switched cpo_pusher to use it for both `dateEntered` and per-line `dueDate`. Patched the live R2S1-PO115267 header + 16 lines from ISO to US format so remaining Create WO clicks will auto-populate mustLeaveBy.
+
+8. **Rev-aware part lookup** added earlier in the day from a separate Wolfgang report on line 11 (clientPN `55500072`, no part link). ProShop catalog has `R2S1-10418A` and `R2S1-10418B` as distinct ordered parts; conservative `lookup_part` from yesterday's commit rejected both for safety. Added `rev` parameter to `ProShopClient.lookup_part` in `accounting_ingest.py`: tries `{base}{rev}` → `{base}-{rev}` → bare `{base}`. cpo_pusher's `_build_cpo_items` now passes the extracted rev. Verified `R2S1-10418, rev=B` → `R2S1-10418B`. Live-patched line 11 of R2S1-PO115267 via `updateCustomerPo`.
+
+9. **S/MIME advisory (no code change).** Wolfgang asked whether the auto-confirmation flow is S/MIME-compatible (it isn't — `sendMail` produces unsigned messages) and how to enable S/MIME for Traxis humans. Laid out three-step roadmap: Sectigo / DigiCert personal cert per user (~$20-90/yr), Outlook desktop import + Trust Center config, optional MS-managed S/MIME via Intune if on E3/E5. Confirmed automated tool sends should stay unsigned even if humans enable S/MIME (separate-cert anti-pattern). Pure planning; no work item yet.
+
+10. **OS config:** bumped Windows `HKCU\Control Panel\Mouse\DoubleClickSpeed` from 500ms → 900ms on .178 per Wolfgang's request. Effective immediately for new processes.
+
+**Files modified:**
+- `27. Accounting Ingest/cpo_pusher.py` — Send Confirmation button + modal + worker, `_confirmation_worker` no longer auto-creates drafts, `_load_signature`/`_logo_inline_attachment`/`ALLOWED_SEND_FROM` helpers, US date format throughout, banner reworded
+- `27. Accounting Ingest/accounting_ingest.py` — `lookup_part(..., rev=None)` rev-aware param, `_normalize_proshop_date()` US-format helper alongside existing `_normalize_iso_date`
+- `27. Accounting Ingest/wolfgang_signature.html` (new) — signature template with `cid:traxis-logo` reference, Wolfgang's name + Traxis MFG LLC + address + phone + website + survey link
+- `27. Accounting Ingest/wolfgang_signature_logo.png` (new) — Traxis MFG gear/wordmark, 5206 bytes
+
+**Memory updates** (outside repo):
+- `feedback_no_tom_send.md` — rewritten with clarified rule (SMTP `from=tom@` acceptable, brand display + body signature carry identity; never sign as Tom)
+- `reference_wolfgang_alias.md` — added 2026-05-20 sendMail 403 re-verification + post-Mail.Send-grant behavior
+
+**Live ProShop state:**
+- R2S1-PO115267 line 11 patched to `R2S1-10418B`
+- R2S1-PO115267 header `dateEntered` + all 16 line `dueDate` values converted ISO → US format
+- WO 26-0162 dueDate converted ISO → US, `mustLeaveBy` auto-populated to `8/6/2026`
+
+**Live email state:**
+- `tom@/Confirmations - Outgoing` folder created via Graph
+- Real Wolfgang signature captured + saved
+- End-to-end test send (confirmation PDF + signature + logo, From=wolfgang@ → accounting@) succeeded
+- New Joao draft (qty `.0` Adion bug) in `tom@/Purchasing - To Review` awaiting Wolfgang's review-and-send
+
+**Key decisions:**
+- **Send-after-review, not auto-send post-push.** Per Wolfgang's stated workflow: he reviews the CPO in ProShop UI first, then clicks Send Confirmation in cpo_pusher. Modal confirms To + subject before send — operator can correct extracted `buyer_email` typos.
+- **`from=wolfgang@` is no-op but kept as documentation.** Exchange silently overrides, but the constant + guard in code make the tool's intent explicit and would activate if Adion ever supported alias-based send-as for service principals.
+- **US date format for everything written to ProShop.** Even though storage accepts ISO, downstream calculators (mustLeaveBy, possibly others) require US. New `_normalize_proshop_date()` is the canonical formatter for any date going into a ProShop-side record. Old `_normalize_iso_date` kept for non-ProShop callers if any.
+- **Qty `.0` not worth working around in code.** All three input variants (int/str/float) produce the same wire-level int 20 on storage. The UI/validator divergence is purely Adion-side; manual UI retype is the workaround until they fix it.
+
+**Status:** Send-confirmation flow live and tested end-to-end. R2S1-PO115267 ready for remaining Create-WO clicks once Wolfgang manually re-types each qty cell (one-shot workaround for the Adion display bug). Two Adion items in flight: bulk-insert ordering (session-1 draft already sent) and qty `.0` display (new draft pending Wolfgang's review-and-send). mustLeaveBy fixed at both data and code level for future pushes.
+
+---
+
 ## 2026-05-20 (session 1)
 
 ### Project 27: Customer PO Pusher — lightweight drop-in tool + bulk-insert ordering rabbit hole

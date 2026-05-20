@@ -672,7 +672,7 @@ class ProShopClient:
         }"""
         return self._get_basic_session().execute(gql, {"poId": po_id, "data": data})
 
-    def lookup_part(self, customer_code, identifier):
+    def lookup_part(self, customer_code, identifier, rev=None):
         """Resolve a customer-side identifier to a canonical Traxis partNumber.
 
         Customer POs print one of two things in their part column: a drawing
@@ -686,38 +686,58 @@ class ProShopClient:
 
         Match is conservative: accepts exact prefix or prefix-then-space (the
         canonical-with-description form). Rejects 'R2S1-10709A' when querying
-        'R2S1-10709' so variant/rev suffixes don't silently mis-attach.
+        'R2S1-10709' so variant/rev suffixes don't silently mis-attach — those
+        come in via the explicit `rev` arg below.
+
+        Rev-aware: when `rev` is supplied (extracted from the customer PO's Rev
+        column), ProShop's R2Sonic-style catalog tracks revs as distinct
+        partNumbers — `R2S1-10418A` and `R2S1-10418B` are separate parts that
+        can be ordered separately. Try the rev-appended variants before the
+        bare prefix, so a line with Rev=B routes to '-10418B' instead of
+        landing unattached. Attempts in order:
+          1. `{cust}-{id}{rev}`   (no separator — matches the A/B style)
+          2. `{cust}-{id}-{rev}`  (dash separator)
+          3. `{cust}-{id}`        (bare; preserves existing behavior when no rev)
 
         Returns the canonical partNumber string, or None on miss/error."""
         if not customer_code or not identifier:
             return None
-        prefix = f"{customer_code}-{identifier}"
+        candidates = []
+        if rev:
+            rev_clean = str(rev).strip()
+            if rev_clean:
+                candidates.append(f"{customer_code}-{identifier}{rev_clean}")
+                candidates.append(f"{customer_code}-{identifier}-{rev_clean}")
+        candidates.append(f"{customer_code}-{identifier}")
+
         gql = """
         query LookupPart($q: String!) {
           parts(filter: {partNumber: $q}, pageSize: 5) {
             records { partNumber }
           }
         }"""
-        try:
-            data = self._get_basic_session().execute(gql, {"q": prefix})
-        except Exception:
-            return None
-        recs = (data.get("parts") or {}).get("records") or []
-        pl = prefix.lower()
-        matches = []
-        for r in recs:
-            pn = (r.get("partNumber") or "")
-            cl = pn.lower()
-            if cl == pl or cl.startswith(pl + " "):
-                matches.append(pn)
-        if not matches:
-            return None
-        # Prefer exact; otherwise shortest canonical form.
-        exact = next((m for m in matches if m.lower() == pl), None)
-        if exact:
-            return exact
-        matches.sort(key=len)
-        return matches[0]
+        session = self._get_basic_session()
+        for cand in candidates:
+            try:
+                data = session.execute(gql, {"q": cand})
+            except Exception:
+                continue
+            recs = (data.get("parts") or {}).get("records") or []
+            pl = cand.lower()
+            matches = []
+            for r in recs:
+                pn = (r.get("partNumber") or "")
+                cl = pn.lower()
+                if cl == pl or cl.startswith(pl + " "):
+                    matches.append(pn)
+            if not matches:
+                continue
+            exact = next((m for m in matches if m.lower() == pl), None)
+            if exact:
+                return exact
+            matches.sort(key=len)
+            return matches[0]
+        return None
 
     def add_purchase_order(self, data):
         gql = """
@@ -1842,6 +1862,28 @@ def _normalize_iso_date(value):
     for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%d-%b-%Y", "%d %b %Y", "%B %d, %Y"):
         try:
             return datetime.strptime(s, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    return None
+
+
+def _normalize_proshop_date(value):
+    """Normalize a date string to ProShop's preferred M/D/YYYY format
+    (no leading zeros). ProShop accepts both ISO and US forms for storage,
+    but downstream calculators — notably `WorkOrder.mustLeaveBy` — only parse
+    M/D/YYYY. Confirmed empirically 2026-05-20: a CPO line with an ISO-
+    formatted dueDate yielded `mustLeaveBy=None` on the resulting WO; flipping
+    the same WO's dueDate to US format made mustLeaveBy auto-populate.
+    Use this normalizer for any date written to a CPO line, WO, or other
+    ProShop-side record. Accepts the same input formats as
+    `_normalize_iso_date`; returns None on unparseable input."""
+    if not value:
+        return None
+    s = str(value).strip()
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%d-%b-%Y", "%d %b %Y", "%B %d, %Y"):
+        try:
+            dt = datetime.strptime(s, fmt)
+            return f"{dt.month}/{dt.day}/{dt.year}"
         except ValueError:
             continue
     return None

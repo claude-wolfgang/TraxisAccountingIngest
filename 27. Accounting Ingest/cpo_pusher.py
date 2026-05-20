@@ -48,13 +48,51 @@ except ImportError:
 
 MAILBOX = "tom@traxismfg.com"
 FOLDER_NAME = "Orders"
+CONFIRMATION_FOLDER_NAME = "Confirmations - Outgoing"
 LOOKBACK_DAYS = 30
 DROPIN_TAG = "[P27 CPO drop-in]"
+# Hard guard: the cpo_pusher tool is only authorized to send AS this address.
+# Even though Send-As permission is granted on tom@'s mailbox (which technically
+# enables sending as any alias on that mailbox including tom@ itself), this
+# code-side guard makes the tool's legitimate intent explicit and refuses to
+# stamp anything else as From. See [[reference_wolfgang_alias]] for the
+# architecture context (wolfgang@ is an SMTP alias on tom@'s mailbox).
+ALLOWED_SEND_FROM = "wolfgang@traxismfg.com"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 STATE_PATH = SCRIPT_DIR / "cpo_pusher_state.json"
 WORK_DIR = SCRIPT_DIR / "cpo_pusher_pdfs"
 LOG_PATH = SCRIPT_DIR / "cpo_pusher.log"
+SIGNATURE_HTML_PATH = SCRIPT_DIR / "wolfgang_signature.html"
+SIGNATURE_LOGO_PATH = SCRIPT_DIR / "wolfgang_signature_logo.png"
+LOGO_CONTENT_ID = "traxis-logo"  # referenced as cid:traxis-logo in wolfgang_signature.html
+
+
+def _load_signature() -> str:
+    """Read the Wolfgang signature template. Returns the inner HTML, or an
+    empty string if the file is missing (caller falls back to plain text)."""
+    try:
+        return SIGNATURE_HTML_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return ""
+
+
+def _logo_inline_attachment() -> dict | None:
+    """Build the Graph inline-image attachment for the signature logo, or None
+    if the logo file is missing. The contentId matches `cid:` references in
+    wolfgang_signature.html so the image renders inline in the recipient's
+    client."""
+    import base64 as _b64
+    if not SIGNATURE_LOGO_PATH.exists():
+        return None
+    return {
+        "@odata.type": "#microsoft.graph.fileAttachment",
+        "name": "traxis-logo.png",
+        "contentBytes": _b64.b64encode(SIGNATURE_LOGO_PATH.read_bytes()).decode(),
+        "contentType": "image/png",
+        "isInline": True,
+        "contentId": LOGO_CONTENT_ID,
+    }
 
 
 def _load_state() -> dict:
@@ -76,6 +114,207 @@ def _find_orders_folder() -> str:
         if f["displayName"].lower() == FOLDER_NAME.lower():
             return f["id"]
     raise RuntimeError(f"{FOLDER_NAME!r} folder not found in {MAILBOX}")
+
+
+_CONFIRMATION_FOLDER_ID: str | None = None
+
+
+def _find_confirmation_folder() -> str:
+    global _CONFIRMATION_FOLDER_ID
+    if _CONFIRMATION_FOLDER_ID:
+        return _CONFIRMATION_FOLDER_ID
+    folders = rf.list_all_folders(MAILBOX)
+    for f in folders:
+        if f["displayName"].lower() == CONFIRMATION_FOLDER_NAME.lower():
+            _CONFIRMATION_FOLDER_ID = f["id"]
+            return _CONFIRMATION_FOLDER_ID
+    raise RuntimeError(
+        f"{CONFIRMATION_FOLDER_NAME!r} folder not found in {MAILBOX} — "
+        "create it once via Outlook or via Graph (folder creation moved to "
+        "session 2026-05-20 setup)."
+    )
+
+
+def send_confirmation_email(extracted: dict, po_id: str, client_po_number: str,
+                             pdf_path: Path, log, from_address: str = ALLOWED_SEND_FROM,
+                             to_override: str | None = None) -> bool:
+    """Send the CPO confirmation email directly via Graph sendMail (no draft).
+
+    Hard guard: from_address MUST equal ALLOWED_SEND_FROM (wolfgang@traxismfg.com).
+    Refuses to send anything else even though Send-As on tom@'s mailbox is the
+    underlying capability — keeps the tool's intent explicit and auditable.
+
+    Requires the Graph app to have Mail.Send permission AND Send-As granted on
+    tom@'s mailbox (see [[reference_wolfgang_alias]] for the admin steps).
+    Until those land, this returns False with a 403-shaped log; caller can
+    fall back to the draft path.
+
+    Returns True on send success (HTTP 202), False otherwise.
+    """
+    import base64 as _b64
+    import requests as _requests
+
+    if from_address != ALLOWED_SEND_FROM:
+        log(f"send_confirmation_email REFUSED: from={from_address!r} "
+            f"violates the from-guard (only {ALLOWED_SEND_FROM!r} is permitted)")
+        return False
+
+    buyer_email = (to_override
+                   or (extracted.get("buyer_email") or "").strip())
+    if not buyer_email:
+        log("send_confirmation_email skipped: no buyer_email (and no override) — "
+            "use the draft path instead")
+        return False
+
+    buyer_name = (extracted.get("buyer_name") or "").strip()
+    customer_name = (extracted.get("customer_name") or "").strip()
+    salutation = buyer_name.split()[0] if buyer_name else "there"
+
+    import re as _re
+    has_po_prefix = bool(_re.match(r'^\s*p\s*[/\.]?\s*o\s*[#:\-]?\s*',
+                                    client_po_number, _re.I))
+    subject = (f"Traxis MFG — Order Confirmation for {client_po_number}"
+               if has_po_prefix
+               else f"Traxis MFG — Order Confirmation for PO {client_po_number}")
+    body_html = (
+        f"<p>Hi {salutation},</p>"
+        f"<p>Thank you for your purchase order <b>{client_po_number}</b>"
+        + (f" for {customer_name}" if customer_name else "")
+        + ". Our order confirmation is attached for your reference.</p>"
+        "<p>Please let us know if any details need adjustment.</p>"
+        "<p>Thanks,</p>"
+        + _load_signature()
+    )
+
+    attachments = []
+    if pdf_path and pdf_path.exists():
+        attachments.append({
+            "@odata.type": "#microsoft.graph.fileAttachment",
+            "name": pdf_path.name,
+            "contentBytes": _b64.b64encode(pdf_path.read_bytes()).decode(),
+            "contentType": "application/pdf",
+        })
+    logo_att = _logo_inline_attachment()
+    if logo_att:
+        attachments.append(logo_att)
+
+    payload = {
+        "message": {
+            "subject": subject,
+            "body": {"contentType": "HTML", "content": body_html},
+            "from": {"emailAddress": {"address": from_address, "name": "Wolfgang"}},
+            "sender": {"emailAddress": {"address": from_address, "name": "Wolfgang"}},
+            "toRecipients": [{"emailAddress": {"address": buyer_email}}],
+            "attachments": attachments,
+        },
+        "saveToSentItems": True,
+    }
+    url = f"https://graph.microsoft.com/v1.0/users/{MAILBOX}/sendMail"
+    r = _requests.post(url, headers={
+        "Authorization": f"Bearer {rf.graph_token()}",
+        "Content-Type": "application/json",
+    }, json=payload, timeout=60)
+    if r.status_code == 202:
+        log(f"Confirmation email SENT from {from_address} to {buyer_email} "
+            f"(subject: {subject!r})")
+        return True
+    log(f"Confirmation email send FAILED ({r.status_code}): {r.text[:300]}")
+    return False
+
+
+def draft_confirmation_email(extracted: dict, po_id: str, client_po_number: str,
+                              pdf_path: Path, log) -> None:
+    """Drop a draft email into tom@/Confirmations - Outgoing with the
+    ProShop-generated CPO confirmation PDF attached. Operator reviews and
+    sends (with From=wolfgang@ — Graph can't override From per memory
+    [[reference_wolfgang_alias]]).
+
+    To: extracted buyer_email if present, else blank (operator fills in).
+    Subject: 'Traxis MFG — Order Confirmation for PO {clientPONumber}'.
+    Body: short greeting + reference + ask-for-feedback line.
+    """
+    import base64 as _b64
+    import requests
+
+    try:
+        folder_id = _find_confirmation_folder()
+    except Exception as e:
+        log(f"Confirmation email draft skipped: {e}")
+        return
+
+    buyer_email = (extracted.get("buyer_email") or "").strip()
+    buyer_name = (extracted.get("buyer_name") or "").strip()
+    customer_name = (extracted.get("customer_name") or "").strip()
+    salutation = buyer_name.split()[0] if buyer_name else "there"
+
+    # If clientPONumber already starts with "PO"/"P.O."/"PO#"/etc., don't prepend
+    # another "PO" — "PO PO115245" reads badly. Match a leading PO token with
+    # optional separators (matches the same patterns the dup-check normalizer
+    # strips).
+    import re as _re
+    has_po_prefix = bool(_re.match(r'^\s*p\s*[/\.]?\s*o\s*[#:\-]?\s*', client_po_number, _re.I))
+    subject = (f"Traxis MFG — Order Confirmation for {client_po_number}"
+               if has_po_prefix
+               else f"Traxis MFG — Order Confirmation for PO {client_po_number}")
+    # Banner reminding the operator this is a draft that needs review before
+    # Send. Per the clarified 2026-05-20 policy ([[feedback_no_tom_send]]):
+    # the customer-visible display name is "Traxis Manufacturing LLC" so the
+    # underlying tom@ address is acceptable; just make sure the body signature
+    # is "Wolfgang" and never edited to "Tom". This draft path is now the
+    # fallback for ad-hoc cases — the normal flow uses send_confirmation_email.
+    banner_html = (
+        '<p style="background:#fff4cc;border:2px solid #cc8800;'
+        'padding:8px;font-weight:bold;color:#553300;">'
+        '⚠️ REVIEW BEFORE SENDING — verify body signature reads "Wolfgang" '
+        '(not "Tom"). Delete this banner before clicking Send.'
+        '</p>'
+    )
+    body_html = banner_html + (
+        f"<p>Hi {salutation},</p>"
+        f"<p>Thank you for your purchase order <b>{client_po_number}</b>"
+        + (f" for {customer_name}" if customer_name else "")
+        + ". Our order confirmation is attached for your reference.</p>"
+        "<p>Please let us know if any details need adjustment.</p>"
+        "<p>Thanks,</p>"
+        + _load_signature()
+    )
+
+    msg: dict = {
+        "subject": subject,
+        "body": {"contentType": "HTML", "content": body_html},
+        "isDraft": True,
+    }
+    if buyer_email:
+        msg["toRecipients"] = [{"emailAddress": {"address": buyer_email}}]
+
+    attachments = []
+    if pdf_path and pdf_path.exists():
+        try:
+            content_b64 = _b64.b64encode(pdf_path.read_bytes()).decode()
+            attachments.append({
+                "@odata.type": "#microsoft.graph.fileAttachment",
+                "name": pdf_path.name,
+                "contentBytes": content_b64,
+                "contentType": "application/pdf",
+            })
+        except Exception as e:
+            log(f"Confirmation email: PDF attach failed ({e}); creating draft without PDF")
+    logo_att = _logo_inline_attachment()
+    if logo_att:
+        attachments.append(logo_att)
+    if attachments:
+        msg["attachments"] = attachments
+
+    url = f"https://graph.microsoft.com/v1.0/users/{MAILBOX}/mailFolders/{folder_id}/messages"
+    r = requests.post(url, headers={
+        "Authorization": f"Bearer {rf.graph_token()}",
+        "Content-Type": "application/json",
+    }, json=msg, timeout=60)
+    if r.status_code >= 400:
+        log(f"Confirmation email draft FAILED ({r.status_code}): {r.text[:200]}")
+        return
+    log(f"Confirmation email drafted in {CONFIRMATION_FOLDER_NAME} "
+        f"(to={buyer_email or '(blank)'}, subject={subject!r})")
 
 
 def _fetch_pdf_attachments(msg_id: str) -> list[Path]:
@@ -215,7 +454,12 @@ def _build_cpo_payload(extracted: dict, contact_name: str, proshop: ai.ProShopCl
     production path."""
     po_number = extracted.get("po_number") or extracted.get("quote_number") or ""
     raw_date = extracted.get("po_date") or extracted.get("quote_date") or ""
-    po_date = ai._normalize_iso_date(raw_date) or ""
+    # Use US M/D/YYYY format — ProShop's downstream calculators (mustLeaveBy
+    # on WOs created from this CPO) only parse US format, even though the
+    # storage layer accepts ISO too. See [[reference]] in accounting_ingest.
+    po_date = ai._normalize_proshop_date(raw_date) or ""
+    # Year derived from ISO parse so the slice doesn't depend on date format.
+    iso_for_year = ai._normalize_iso_date(raw_date) or ""
     if raw_date and not po_date:
         log(f"dateEntered unparseable ({raw_date!r}); sending blank")
 
@@ -254,7 +498,8 @@ def _build_cpo_payload(extracted: dict, contact_name: str, proshop: ai.ProShopCl
     # updateCustomerPo so each line's transaction commits before the next,
     # giving monotonic originalSortPosition that matches input order. Same
     # mechanism as ProShopBridge.push_sequence_details (line 1525).
-    payload["year"] = po_date[:4] or str(datetime.now().year)
+    # Year from the ISO form (since US format month/day order makes [:4] wrong).
+    payload["year"] = iso_for_year[:4] or str(datetime.now().year)
     return payload
 
 
@@ -287,7 +532,9 @@ def _build_cpo_items(line_items, default_due_date, client_code, proshop, log) ->
             item["pricePer"] = price
         due = li.get("required_date") or default_due_date
         if due:
-            item["dueDate"] = str(due)
+            # US M/D/YYYY so the resulting WO's mustLeaveBy auto-populates
+            # (verified 2026-05-20 — ISO dates suppress the calculator).
+            item["dueDate"] = ai._normalize_proshop_date(due) or str(due)
         rev = li.get("drawing_rev") or li.get("part_rev")
         if rev:
             item["drawingRev"] = str(rev)
@@ -295,17 +542,21 @@ def _build_cpo_items(line_items, default_due_date, client_code, proshop, log) ->
         if li.get("first_article_required") is True:
             item["firstArticleRequired"] = True
         # Resolve internal Traxis part: prefer Drawing#, fall back to PN if it
-        # looks like a part identifier.
+        # looks like a part identifier. Pass `rev` so customers' Rev-letter
+        # columns (R2Sonic case: '10418' Rev B → 'R2S1-10418B') route to the
+        # right variant. lookup_part tries rev-appended forms first, falls
+        # back to bare prefix if no rev variant exists.
         if client_code:
             lookup_key = ai._clean_drawing_number(li.get("drawing_number"))
             if not lookup_key and ai._looks_like_part_id(pn_field):
                 lookup_key = pn_field
             if lookup_key:
-                canonical = proshop.lookup_part(client_code, lookup_key)
+                canonical = proshop.lookup_part(client_code, lookup_key, rev=rev)
                 if canonical:
                     item["part"] = canonical
                 else:
-                    log(f"line {idx}: no Traxis part for {client_code}-{lookup_key}")
+                    rev_note = f" (rev={rev!r})" if rev else ""
+                    log(f"line {idx}: no Traxis part for {client_code}-{lookup_key}{rev_note}")
         if item:
             out.append(item)
     return out
@@ -345,6 +596,8 @@ class Candidate:
         self.error: str = ""
         self.proshop_url: str = ""
         self.override_dup: bool = False  # set True if operator chooses to push past a dup match
+        self.confirmation_pdf_path: Path | None = None  # set by _confirmation_worker after PDF gen
+        self.po_id: str = ""             # ProShop poId, set after addCustomerPo succeeds
 
 
 _BaseTk = TkinterDnD.Tk if HAS_DND else tk.Tk
@@ -425,6 +678,12 @@ class CPOPusherApp(_BaseTk):
         self.push_btn = ttk.Button(actions, text="Push to ProShop",
                                    command=self._on_push_selected, state="disabled")
         self.push_btn.pack(side="left")
+        self.send_confirm_btn = ttk.Button(actions, text="Send Confirmation",
+                                            command=self._on_send_confirmation, state="disabled")
+        self.send_confirm_btn.pack(side="left", padx=(8, 0))
+        self.open_proshop_btn = ttk.Button(actions, text="Open in ProShop",
+                                            command=self._on_open_proshop, state="disabled")
+        self.open_proshop_btn.pack(side="left", padx=(8, 0))
         self.skip_btn = ttk.Button(actions, text="Skip (mark processed)",
                                    command=self._on_skip_selected, state="disabled")
         self.skip_btn.pack(side="left", padx=(8, 0))
@@ -636,12 +895,99 @@ class CPOPusherApp(_BaseTk):
         self.extract_btn.configure(state="normal" if cand.status in ("NEW", "FAILED") else "disabled")
         self.skip_btn.configure(state="normal" if cand.status in ("NEW", "READY", "FAILED", "SKIPPED", "DUPLICATE") else "disabled")
         self.open_btn.configure(state="normal" if cand.pdf_paths else "disabled")
+        # Send Confirmation: enabled when the row is PUSHED and the confirmation
+        # PDF has been generated by the background worker. Disabled after CONFIRMED
+        # so the operator can't accidentally double-send.
+        can_send = (cand.status == "PUSHED" and cand.confirmation_pdf_path is not None)
+        self.send_confirm_btn.configure(state="normal" if can_send else "disabled")
+        self.open_proshop_btn.configure(state="normal" if cand.proshop_url else "disabled")
 
     def _on_open_pdf(self):
         cand = self._selected()
         if cand and cand.pdf_paths:
             import os
             os.startfile(str(cand.pdf_paths[0]))
+
+    def _on_open_proshop(self):
+        cand = self._selected()
+        if cand and cand.proshop_url:
+            import webbrowser
+            webbrowser.open(cand.proshop_url)
+
+    # ── Send Confirmation actions ───────────────────────────────────────────
+
+    def _on_send_confirmation(self):
+        cand = self._selected()
+        if not cand or cand.status != "PUSHED" or not cand.confirmation_pdf_path:
+            return
+        extracted = cand.extracted or {}
+        prefilled_to = (extracted.get("buyer_email") or "").strip()
+        customer_name = (extracted.get("customer_name") or "").strip()
+        client_po_number = (extracted.get("po_number")
+                            or extracted.get("quote_number") or "")
+        import re as _re
+        has_po = bool(_re.match(r'^\s*p\s*[/\.]?\s*o\s*[#:\-]?\s*', client_po_number, _re.I))
+        subject_preview = (f"Traxis MFG — Order Confirmation for {client_po_number}"
+                           if has_po
+                           else f"Traxis MFG — Order Confirmation for PO {client_po_number}")
+
+        win = tk.Toplevel(self)
+        win.title("Send confirmation")
+        win.transient(self)
+        win.grab_set()
+        frm = ttk.Frame(win, padding=12)
+        frm.pack(fill="both", expand=True)
+        ttk.Label(frm, text=f"Send confirmation for {customer_name or '(unknown customer)'}",
+                  font=("Segoe UI", 11, "bold")).pack(anchor="w")
+        ttk.Label(frm, text=f"Subject:  {subject_preview}",
+                  foreground="#444").pack(anchor="w", pady=(6, 0))
+        ttk.Label(frm, text=f"PDF: {cand.confirmation_pdf_path.name}",
+                  foreground="#444").pack(anchor="w")
+        ttk.Label(frm, text="(Signature block + Traxis logo appended automatically)",
+                  foreground="#888").pack(anchor="w", pady=(0, 8))
+        ttk.Label(frm, text="To:").pack(anchor="w")
+        to_var = tk.StringVar(value=prefilled_to)
+        ttk.Entry(frm, textvariable=to_var, width=60).pack(fill="x")
+        if not prefilled_to:
+            ttk.Label(frm, text="(buyer_email not extracted — fill in manually)",
+                      foreground="#a00").pack(anchor="w")
+
+        btns = ttk.Frame(frm)
+        btns.pack(fill="x", pady=(12, 0))
+
+        def _go():
+            to_addr = to_var.get().strip()
+            if not to_addr or "@" not in to_addr:
+                messagebox.showwarning("Missing recipient",
+                                       "Enter a valid email address before sending.")
+                return
+            win.destroy()
+            threading.Thread(target=self._send_confirmation_worker,
+                             args=(cand, to_addr), daemon=True).start()
+
+        ttk.Button(btns, text="Send", command=_go).pack(side="right")
+        ttk.Button(btns, text="Cancel", command=win.destroy).pack(side="right", padx=(0, 8))
+
+    def _send_confirmation_worker(self, cand: Candidate, to_addr: str):
+        extracted = cand.extracted or {}
+        client_po_number = (extracted.get("po_number")
+                            or extracted.get("quote_number") or "")
+        try:
+            ok = send_confirmation_email(
+                extracted, cand.po_id, client_po_number,
+                cand.confirmation_pdf_path, self._log,
+                to_override=to_addr,
+            )
+            if ok:
+                cand.status = "CONFIRMED"
+            else:
+                self._log(f"CPO {cand.po_id}: send_confirmation_email returned False — "
+                          "row stays in PUSHED state, button remains active for retry")
+        except Exception as e:
+            self._log(f"CPO {cand.po_id}: confirmation send raised: {e}")
+        finally:
+            self.after(0, lambda c=cand: self._refresh_row(c))
+            self.after(0, self._on_select)
 
     # ── Push actions ────────────────────────────────────────────────────────
 
@@ -696,7 +1042,21 @@ class CPOPusherApp(_BaseTk):
             if not po_id:
                 raise RuntimeError(f"addCustomerPo returned no poId: {result}")
             cand.proshop_url = proshop_url
+            cand.po_id = po_id
             self._log(f"Created header: poId={po_id}  url={proshop_url}")
+            # ProShop auto-creates a default empty placeholder line (itemNumber='1',
+            # originalSortPosition=0) whenever addCustomerPo is called without
+            # partsOrdered. Delete it before pushing our real lines, otherwise
+            # the CPO renders with a blank line 1 above our actual data.
+            try:
+                self.proshop.update_customer_po(po_id, {
+                    "partsOrdered": [{
+                        "selector": {"field": "itemNumber", "value": "1"},
+                        "delete": True,
+                    }],
+                })
+            except Exception as e:
+                self._log(f"  (placeholder removal failed, continuing: {e})")
             # Push each line individually so each transaction commits before the
             # next starts, giving monotonic originalSortPosition matching input
             # order. Bulk-add gets sorted by ProShop on insert (see scatter test).
@@ -780,16 +1140,27 @@ class CPOPusherApp(_BaseTk):
                    command=_override).pack(side="right", padx=(0, 8))
 
     def _confirmation_worker(self, cand: Candidate, po_id: str, proshop_url: str):
+        """Generate the ProShop confirmation PDF and stash the path on the
+        candidate so the Send Confirmation button can use it. Does NOT send
+        the email — that's manual after operator review of the CPO in ProShop.
+
+        Also flips ProShop's confirmationSent flag, since the PDF being on
+        disk constitutes "we've prepared the confirmation"; the email-out
+        step happens via send_confirmation_email when the operator clicks Send."""
         try:
             pdf_path = ai.download_proshop_confirmation(proshop_url, po_id, self._log)
             if not pdf_path:
                 return
+            cand.confirmation_pdf_path = pdf_path
             self.proshop.update_customer_po(po_id, {
                 "confirmationSent": True,
                 "confirmationSentBy": ai.ENV.get("PROSHOP_USERNAME", "P27"),
                 "confirmationNotes": f"Auto-generated via P27 CPO Pusher -> {pdf_path}",
             })
-            self._log(f"CPO {po_id}: confirmationSent flag set in ProShop")
+            self._log(f"CPO {po_id}: PDF ready, confirmationSent flag set. "
+                      f"Review CPO in ProShop then click Send Confirmation.")
+            self.after(0, lambda c=cand: self._refresh_row(c))
+            self.after(0, self._on_select)
         except Exception as e:
             self._log(f"CPO {po_id}: confirmation step failed (PDF may still be saved): {e}")
 
