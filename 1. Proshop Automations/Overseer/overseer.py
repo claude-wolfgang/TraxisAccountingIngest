@@ -339,13 +339,19 @@ def validate_time_tracker(data):
     if error:
         return "degraded", f"API error: {error}"
 
+    # TimeTracker polls ProShop every 15 min (POLL_INTERVAL=900s in
+    # time_status_display). Stale threshold must exceed one full poll cycle
+    # plus API jitter, else the dashboard is "stale" for 2/3 of every cycle
+    # and Overseer restart-loops it. Off-hours: no active users → last_update
+    # never refreshes, so we relax further (a restart wouldn't help anyway).
+    stale_threshold = 1200 if is_business_hours() else 7200
     if last_update_str:
         try:
             last_update = datetime.fromisoformat(last_update_str)
             if last_update.tzinfo is None:
                 last_update = last_update.replace(tzinfo=timezone.utc)
             age = (datetime.now(timezone.utc) - last_update).total_seconds()
-            if age > 300:
+            if age > stale_threshold:
                 return "degraded", f"Data stale ({int(age)}s old)"
         except Exception:
             pass
