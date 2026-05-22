@@ -34,27 +34,9 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-# ── Configuration ────────────────────────────────────────────────────────────
-
-KIOSK_URL = os.environ.get("TOOLKIOSK_BACKEND_URL", "http://10.1.1.71:5001")
-HEALTH_URL = KIOSK_URL.rstrip("/") + "/api/health"
-HEARTBEAT_URL = KIOSK_URL.rstrip("/") + "/api/kiosk-heartbeat"
-HEARTBEAT_INTERVAL = 60
-HEALTH_TIMEOUT = 30
-WATCHDOG_INTERVAL = 2
-FLASK_RESTART_DELAY = 3
-CHROME_RESTART_DELAY = 1
-CRASH_LOOP_THRESHOLD = 5      # consecutive crashes before backoff
-CRASH_LOOP_BACKOFF = 10       # seconds to wait during crash-loop backoff
-
-_backend_host = urllib.parse.urlparse(KIOSK_URL).hostname or ""
-IS_LOCAL_BACKEND = _backend_host in ("localhost", "127.0.0.1", "::1", "")
-
-# Touchscreen monitor coordinates are detected at runtime via the Win32
-# Pointer Device API. Fallback when no touchscreen is found:
-FALLBACK_MONITOR_RECT = (0, 0, 1920, 1080)  # x, y, w, h
-
 # ── Load .traxis.env credentials ─────────────────────────────────────────────
+# MUST happen before KIOSK_URL is read so TOOLKIOSK_BACKEND_URL from the env
+# file overrides the hardcoded default below.
 _home = str(Path.home())
 # Relative to this script: tool-kiosk is inside "Proshop Automation and Claude Projects"
 _script_dir = Path(__file__).parent.resolve()
@@ -85,6 +67,26 @@ if os.environ.get("TOOLKIOSK_CLIENT_SECRET"):
     os.environ["PROSHOP_CLIENT_ID"] = os.environ["TOOLKIOSK_CLIENT_ID"]
     os.environ["PROSHOP_CLIENT_SECRET"] = os.environ["TOOLKIOSK_CLIENT_SECRET"]
     os.environ["PROSHOP_SCOPE"] = os.environ["TOOLKIOSK_SCOPE"]
+
+# ── Configuration ────────────────────────────────────────────────────────────
+
+KIOSK_URL = os.environ.get("TOOLKIOSK_BACKEND_URL", "http://10.1.1.71:5001")
+HEALTH_URL = KIOSK_URL.rstrip("/") + "/api/health"
+HEARTBEAT_URL = KIOSK_URL.rstrip("/") + "/api/kiosk-heartbeat"
+HEARTBEAT_INTERVAL = 60
+HEALTH_TIMEOUT = 30
+WATCHDOG_INTERVAL = 2
+FLASK_RESTART_DELAY = 3
+CHROME_RESTART_DELAY = 1
+CRASH_LOOP_THRESHOLD = 5      # consecutive crashes before backoff
+CRASH_LOOP_BACKOFF = 10       # seconds to wait during crash-loop backoff
+
+_backend_host = urllib.parse.urlparse(KIOSK_URL).hostname or ""
+IS_LOCAL_BACKEND = _backend_host in ("localhost", "127.0.0.1", "::1", "")
+
+# Touchscreen monitor coordinates are detected at runtime via the Win32
+# Pointer Device API. Fallback when no touchscreen is found:
+FALLBACK_MONITOR_RECT = (0, 0, 1920, 1080)  # x, y, w, h
 
 PROSHOP_CLIENT_SECRET = os.environ.get("PROSHOP_CLIENT_SECRET", "")
 
