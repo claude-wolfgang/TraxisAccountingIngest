@@ -5,6 +5,72 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-22
+
+### srv-01 cutover: production host migration .71 → .161 + kiosk repoint
+
+**Task:** Wolfgang surfaced the long-standing reliability question via two symptoms — (a) the P23 Air Compressor dashboard showing all-zero data while the controller's physical panel showed 123 PSI / 186.9°F running, and (b) a WinError 10054 on schedule writes. The compressor diagnosis turned into a survey of .71's reliability problems, which Wolfgang framed bluntly: **"SRV-01 is the server of the future. .71 cannot be relied on to run services."** Cutover executed same-session.
+
+**Diagnosis chain on P23 Air Compressor (the trigger):**
+1. Dashboard claimed 0 PSI / 32°F / OFF / blank schedule; panel showed real operation. WinError 10054 RST'd schedule writes.
+2. Multi-step diagnostic via `probe_live.py` + new `probe_targeted.py` proved the controller WAS returning real Modbus data (HR 1029 temp 88.8°C → 92.0°C matched panel; HR 1030 pressure 9.2 bar matched panel; counters incrementing).
+3. Root cause: **duplicate `compressor_web.py` processes** on .71 (PIDs 21088 + 12108) competing for the Modbus connection. Same pattern earlier found in Overseer itself (PIDs 1424 + 9640). Sweep filter missed orphans because their CommandLine was relative (`app.py`, not full project path).
+4. Concept work in chat — not yet implemented — for a state machine in `compressor_web.py` to (a) detect "controller alive but Modbus dead" via RTC+serial sentinel reads + value-jitter checks, (b) classify into HEALTHY/SLAVE_SILENT/GATEWAY_UNREACHABLE/PANEL_BYPASS/SCHEDULE_EMPTY, (c) render actionable banners in the UI, (d) persist schedule to disk and auto-restore after panel-induced wipes. Filed as new Next Steps item.
+
+**srv-01 cutover (the main event):**
+1. **TCP/8193 pre-flight from srv-01 to all 5 CNCs (T2 .82, M2 .159, M3 .118, M6 .106, M8 .202) → all REACHABLE.** Discovered through running base64-encoded PowerShell via the two-hop SSH chain (`.178 → .71 → .161`) since triple-shell quoting was unrecoverable.
+2. **`git pull --ff-only` on srv-01** to catch up `T:\traxis\services` from `ed57dae` (5/10) to current main. After the pull I noticed today's TimeTracker fix wasn't on srv-01 — I had committed it locally on .178 but never pushed. Pushed `be771b2`, re-pulled, picked up.
+3. **`pip install -r requirements.txt`** across all 11 managed services. All deps already satisfied (no new packages needed since 5/10 prep).
+4. **Killed .71's TraxisOverseer** (PID 9208) → `nssm` had not been used there, just pythonw under a manual launch.
+5. **Stopped + disabled FocasMonitor on .71** so it doesn't auto-resurrect on reboot (`Set-Service -StartupType Disabled`).
+6. **SCP'd state from .71 → srv-01** via a single PowerShell script (`scp_migrate.ps1` pushed to .71 via .178's SCP, then SCP'd to srv-01 from .71 since srv-01 only trusts .71's pubkey): `C:\FASData\monitoring.db` (151MB), `C:\FocasMonitor\` tree, `scheduler.db`, `tooling.db`, `audit.db` (91MB), `proximity.db` (52MB), `cws_events.db`, `photo-uploader/data/` tree. All sizes verified.
+7. **NSSM-installed FocasMonitor on srv-01** (`nssm install FocasMonitor`, set AppDirectory + stdout/stderr log paths, SERVICE_AUTO_START, start). First poll completed in 3.8s; M2/M3/M6/M8 program-capture confirmed in stdout; T2 not in program-capture lines but later confirmed as "5/5 machines reporting" once Overseer came up.
+8. **Set `TRAXIS_FOCAS_DB` env var at Machine + User scope** on srv-01 via a pushed PS script (registry write was rejected by `setx /M` quoting through triple SSH; script file approach worked).
+9. **`nssm start TraxisOverseer`** → all 13 services launched; 11/13 healthy on first check, 2 degraded.
+10. **Opened Windows Firewall on srv-01** for 11 service ports (8060, 8050, 8070, 5050, 5000, 5001, 5003, 8085, 5080, 8100, 8101). Pushed `open_fw_ports.ps1` to do this in bulk.
+
+**Cutover-induced degradations and fixes:**
+- **AgentScheduler degraded "audit failing (exit 1)"** on srv-01 even though I knew the rc-tolerance was in code. Investigation revealed the fix was an UNCOMMITTED local change on .178 — same shape as the Overseer fix earlier in the session. Committed (`8d1fbac`), pushed, pulled on srv-01, restarted via `/api/services/AgentScheduler/restart`. Healthy.
+- **TimeTrackerDashboard degraded "Failed to load users from ProShop"** — its `load_env_file` searched only `C:\Users\TRAXIS\.traxis.env` (a .71-user-hardcoded path) and didn't know srv-01's `C:\Users\traxi\.traxis.env`. First attempted fix: set `PROSHOP_CLIENT_ID` + `PROSHOP_CLIENT_SECRET` at Machine scope. **That broke COTSCribKiosk and ToolAssemblyKiosk** because they share the `PROSHOP_CLIENT_ID` env var but their hardcoded fallbacks expect a different (bridge) client_id paired with the bridge secret Overseer injects. Reverted the Machine env vars and added srv-01's path to TimeTracker's search list (`3ab4df0`). Restart-everything → 13/13 healthy.
+
+**End state: 13/13 services healthy on srv-01.** AirCompressor showed "125 PSI, IDLE RUNNING" — proving the duplicate-process diagnosis was correct because srv-01 has exactly one compressor_web instance.
+
+**Kiosk .141 cutover (the long tail):**
+1. **`06_flip_kiosk_to_srv01.bat`** written + run on .141. Updated `~/.traxis.env` with `TOOLKIOSK_BACKEND_URL=http://10.1.1.161:5001`, prompted reboot.
+2. After reboot heartbeats still not arriving on srv-01. Diagnostic .bat (`07_check_kiosk_python.bat`) revealed `run_kiosk_silent.bat` checked four Python paths none of which existed on .141; the user's actual Python was at `C:\Users\traxi\AppData\Local\Python\bin\python.exe` (same path .71's compressor service used). Final fallback `pythonw` on PATH hit the Windows Store stub. Added the missing path (`538b384`).
+3. After that fix the launcher started, but its log showed `Backend: http://10.1.1.71:5001` — the hardcoded default. Bug: `KIOSK_URL = os.environ.get("TOOLKIOSK_BACKEND_URL", ...)` was at module-top BEFORE the `.traxis.env` loader ran (Python executes top-to-bottom; env file populated `os.environ` after KIOSK_URL was already frozen). Reordered to load env file first (`2c665b7`).
+4. After that fix, `12_reset_and_relaunch.bat` killed 9 stuck Chrome processes from the previous crash loop and relaunched. Log showed `Backend: http://10.1.1.161:5001 (local=False)` then `Backend is ready at http://10.1.1.161:5001/api/health`.
+5. **`08_start_kiosk_now.bat`** fired the scheduled task. Heartbeat arrived: `kiosk_heartbeat_age_seconds: 10`. Touchscreen watchdog now has live data.
+
+**Sweep that caught more orphans:** during kiosk debugging I noticed `.71:5001` was STILL responding with `uptime_seconds: 156572` (~43h), meaning my earlier "kill all project Python on .71" missed it. The orphan ToolAssemblyKiosk plus 20 others were running with relative CommandLine (`app.py`) so my `*Proshop Automation and Claude Projects*` filter didn't match. Re-swept with `Get-Process -Name pythonw` (no filter) and killed all 21 cleanly.
+
+**Files modified (in commit order):**
+- `1. Proshop Automations/Overseer/overseer.py` — TimeTracker stale threshold 300s→1200s biz hours / 7200s off-hours (commit `be771b2`)
+- `25. Agent Exploration/agent_scheduler.py` — `_audit_ok = ok and rc in (0, 1)` (commit `8d1fbac`)
+- `1. Proshop Automations/TimeTrackerDashboard/time_status_display_v1.0.py` — added `C:\Users\traxi\.traxis.env` to load path (commit `3ab4df0`)
+- `22. Tool Assembly Management/tool-kiosk/run_kiosk_silent.bat` — added `%LOCALAPPDATA%\Python\bin\pythonw.exe` to PYTHONW fallback chain (commit `538b384`)
+- `1. Proshop Automations/srv-01-setup/06_flip_kiosk_to_srv01.bat` (new) — kiosk URL flip + optional RDP enable
+- `1. Proshop Automations/srv-01-setup/07_check_kiosk_python.bat` (new) — Python availability diagnostic
+- `1. Proshop Automations/srv-01-setup/08_start_kiosk_now.bat` (new) — `schtasks /Run` wrapper
+- `1. Proshop Automations/srv-01-setup/09_check_kiosk_task_status.bat` (new) — task-status capture
+- `1. Proshop Automations/srv-01-setup/10_fire_kiosk_and_capture.bat` (new) — fire-and-capture diag
+- `1. Proshop Automations/srv-01-setup/11_debug_kiosk_launch.bat` (new) — direct python launch with stdout capture
+- `1. Proshop Automations/srv-01-setup/12_reset_and_relaunch.bat` (new) — kill + verify + relaunch
+- `22. Tool Assembly Management/tool-kiosk/kiosk_launcher.py` — reorder .traxis.env loader to run BEFORE KIOSK_URL assignment (commit `2c665b7`)
+- `23. Air Compressor communication GUI/probe_targeted.py` (new) — targeted register probe used in diagnosis
+
+**Key decisions:**
+- **srv-01 is now the production host.** .71's FocasMonitor disabled, Overseer dead, all 21 child Python services killed. .71 keeps its disabled-service shell and the FocasMonitor binaries (still at `C:\FocasMonitor\` on .71 for rollback) but plays no operational role.
+- **Match-paths-don't-consolidate for srv-01 install.** Kept `C:\FASData\` and `C:\FocasMonitor\` rather than moving under `T:\traxis\` to minimize FocasMonitor config changes (machines.json has absolute paths).
+- **Migrate FocasMonitor, don't UNC-share.** Considered leaving FocasMonitor on .71 with srv-01 reading `\\10.1.1.71\FASData\monitoring.db`, rejected because .71 unreliability is the reason for migration.
+- **Heartbeat persists across Flask restarts.** ToolAssemblyKiosk now writes `data/kiosk_heartbeat.txt` so the touchscreen-silent validator survives backend restarts.
+- **Compressor state-machine is a designed-but-not-built feature.** Today's compressor symptom was actually the duplicate-process bug, not the controller-comm bug we initially diagnosed. The state-machine concept (banner-based honest UI for SLAVE_SILENT / PANEL_BYPASS / etc.) is filed as a new Next Step.
+- **PROSHOP_CLIENT_ID stays out of Machine env.** Different services use different (client_id, secret) pairs; setting CLIENT_ID machine-wide contaminates services that need their hardcoded bridge/toolkiosk defaults.
+
+**Status:** Production cutover complete. 13/13 services healthy on srv-01 (`http://10.1.1.161:8060/api/status`). Kiosk on .141 connected to srv-01 with live heartbeat. .71 fully decommissioned. Six commits landed today.
+
+---
+
 ## 2026-05-20 (session 3)
 
 ### Project 31: Buy-button tool quote-request brand bug — API is now authoritative

@@ -1,6 +1,6 @@
 # Project 22: Tool Assembly Management
 
-Touch-screen kiosk for tool assembly management with ProShop inventory sync and label printing. Flask backend runs Overseer-managed on MainPC (10.1.1.71, will move to srv-01 / 10.1.1.161). Chrome `--kiosk` touchscreen client runs on the kiosk PC (10.1.1.141) and points at the backend via `TOOLKIOSK_BACKEND_URL` (default `http://10.1.1.71:5001`). Print service runs on 10.1.1.242.
+Touch-screen kiosk for tool assembly management with ProShop inventory sync and label printing. Flask backend runs Overseer-managed on srv-01 (10.1.1.161, migrated from .71 on 2026-05-22). Chrome `--kiosk` touchscreen client runs on the kiosk PC (10.1.1.141) and points at the backend via `TOOLKIOSK_BACKEND_URL` (default `http://10.1.1.71:5001` in code; .141's `~/.traxis.env` overrides to `http://10.1.1.161:5001`). Print service runs on 10.1.1.242.
 
 ## Key Files
 
