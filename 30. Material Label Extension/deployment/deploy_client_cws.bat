@@ -5,15 +5,9 @@ REM
 REM After publishing, paste the Chrome Web Store extension ID below:
 setlocal enabledelayedexpansion
 
-set CWS_EXT_ID=PASTE_EXTENSION_ID_HERE
+REM CWS extension ID for Traxis Label Printer (v1.6.0 approved 2026-05-22)
+set CWS_EXT_ID=kepfeakajdfklilmpaidipmloclichjp
 set CWS_UPDATE=https://clients2.google.com/service/update2/crx
-
-if "%CWS_EXT_ID%"=="PASTE_EXTENSION_ID_HERE" (
-    echo ERROR: Edit this file and replace PASTE_EXTENSION_ID_HERE
-    echo with the extension ID from Chrome Web Store.
-    pause
-    exit /b 1
-)
 
 set REG_PATH=HKLM\SOFTWARE\Policies\Google\Chrome\ExtensionInstallForcelist
 set VALUE=%CWS_EXT_ID%;%CWS_UPDATE%

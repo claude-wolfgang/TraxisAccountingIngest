@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Traxis Label Printer",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Print material, COTS, equipment, box, user, and tool labels and queue purchase orders from ProShop ERP pages.",
   "icons": {
     "16": "assets/icons/icon16.png",
@@ -11,7 +11,7 @@
   "host_permissions": [
     "https://traxismfg.adionsystems.com/*",
     "http://10.1.1.242:5002/*",
-    "http://10.1.1.71:5003/*"
+    "http://10.1.1.161:5003/*"
   ],
   "background": {
     "service_worker": "background/service-worker.js"

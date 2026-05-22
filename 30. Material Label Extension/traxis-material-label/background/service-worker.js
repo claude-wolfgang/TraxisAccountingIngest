@@ -5,7 +5,7 @@
  */
 
 const PRINT_SERVICE = 'http://10.1.1.242:5002';
-const PHOTO_SERVICE = 'http://10.1.1.71:5003';
+const PHOTO_SERVICE = 'http://10.1.1.161:5003';
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.action === 'PRINT_LABEL') {
