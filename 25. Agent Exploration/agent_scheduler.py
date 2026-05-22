@@ -188,7 +188,9 @@ def scheduler_loop():
             if _should_run_audit():
                 ok, rc = _run_task("run_audit.py", timeout_s=300)
                 _last_audit_run = datetime.now().isoformat(timespec="seconds")
-                _audit_ok = ok and rc == 0
+                # run_audit.py exits 1 when it finds data-quality issues —
+                # that's a normal audit outcome, not a script failure.
+                _audit_ok = ok and rc in (0, 1)
                 _audit_exit_code = rc
 
             if _should_run_scanner():
@@ -218,7 +220,7 @@ def run_once():
 
     ok, rc = _run_task("run_audit.py", timeout_s=300)
     _last_audit_run = datetime.now().isoformat(timespec="seconds")
-    _audit_ok = ok and rc == 0
+    _audit_ok = ok and rc in (0, 1)
     _audit_exit_code = rc
 
     ok, rc = _run_task("scan_projects.py", timeout_s=600)
