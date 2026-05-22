@@ -47,6 +47,7 @@ def load_env_file():
         Path(__file__).parent / ".env",
         Path(__file__).parent / "traxis.env",
         Path(r"C:\Users\TRAXIS\.traxis.env"),
+        Path(r"C:\Users\traxi\.traxis.env"),
         Path(__file__).parent.parent / ".env",
         Path(__file__).parent.parent / "traxis.env",
         Path(r"D:\Dropbox\MACHINE COMM Traxis\Proshop Automation and Claude Projects\4. Inspection Print and Proshop Automation\Dimension Extraction Automation\dist\dist\.env"),
