@@ -101,8 +101,8 @@ After the DR302 is powered and connected to the network:
 
 ### Step 2: Access the Web Configuration
 
-- Open a browser and go to the gateway's IP address (e.g., http://192.168.0.7).
-- Default login is usually admin / admin (check manual).
+- Open a browser and go to the gateway's IP address — production: **http://10.1.1.180**
+- Credentials: **`admin` / `admin`** (HTTP Basic auth, realm `USR-DR302`) — factory default, never rotated (confirmed 2026-05-23).
 
 ### Step 3: Configure for Modbus Gateway Mode
 

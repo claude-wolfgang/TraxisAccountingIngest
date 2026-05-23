@@ -10,6 +10,9 @@ import time
 import datetime
 import json
 import os
+import base64
+import urllib.request
+import urllib.error
 
 # === CONFIG ===
 GATEWAY_IP = '10.1.1.180'
@@ -19,6 +22,11 @@ POLL_INTERVAL = 3  # seconds
 WEB_PORT = 8085
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 CABINET_FILE = os.path.join(DATA_DIR, 'cabinet_filter.json')
+
+# DR302 web admin (factory default — see 23.../CLAUDE.md "Gateway Recovery")
+GATEWAY_ADMIN_USER = 'admin'
+GATEWAY_ADMIN_PASS = 'admin'
+GATEWAY_REBOOT_COOLDOWN_S = 60
 
 # =============================================================================
 # REGISTER ADDRESSES — Official LOGIK26S MODBUS PROCEDURE document
@@ -305,6 +313,11 @@ def save_cabinet_filter(data):
 # =============================================================================
 data_lock = threading.Lock()
 modbus_client_lock = threading.Lock()
+
+# Cooldown for DR302 reboot button — guards against double-clicks dropping
+# the gateway twice in a row. Monotonic seconds; 0 = never rebooted this run.
+_last_gateway_reboot_ts = 0.0
+_gateway_reboot_lock = threading.Lock()
 modbus_client = None
 
 current_data = {
@@ -828,6 +841,13 @@ HTML = r"""<!DOCTYPE html>
   <div>Watchdog: <span id="wd-status" style="color:#4ecca3;">idle</span></div>
   <div id="wd-last" style="color:#888;"></div>
   <div>Interventions: <strong id="wd-count">0</strong></div>
+  <div>
+    <button id="btn-reboot-gw" onclick="confirmRebootGateway()"
+      title="Soft-reboot the DR302 Modbus gateway. Use when clock shows '---' and writes fail."
+      style="background:#3a2a0a; color:#ffb74d; border:1px solid #ffb74d; padding:3px 10px; font-size:11px; cursor:pointer; border-radius:3px;">
+      &#8635; Reboot Gateway
+    </button>
+  </div>
 </div>
 
 <div class="grid">
@@ -991,6 +1011,29 @@ function confirmAlarmReset() {
     fetch('/api/compressor/alarm_reset', {method:'POST', headers:{'Content-Type':'application/json'}})
     .then(r => r.json()).then(d => { if (d.error) alert('Error: '+d.error); })
     .catch(e => alert('Failed: '+e));
+  };
+}
+
+function confirmRebootGateway() {
+  document.getElementById('modal-title').textContent = 'Reboot DR302 Gateway';
+  document.getElementById('modal-msg').textContent =
+    'Soft-reboot the Modbus gateway? Connection will drop for ~15 seconds. ' +
+    'The compressor itself is NOT affected — its panel keeps running.';
+  document.getElementById('modal').classList.add('active');
+  document.getElementById('modal-confirm').onclick = function() {
+    closeModal();
+    const btn = document.getElementById('btn-reboot-gw');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Rebooting...';
+    fetch('/api/gateway/reboot', {method:'POST', headers:{'Content-Type':'application/json'}})
+    .then(r => r.json()).then(d => {
+      if (d.error) alert('Error: '+d.error);
+    })
+    .catch(e => alert('Failed: '+e))
+    .finally(() => {
+      setTimeout(() => { btn.disabled = false; btn.innerHTML = orig; }, 20000);
+    });
   };
 }
 
@@ -1441,6 +1484,47 @@ def compressor_alarm_reset():
         return jsonify({'error': f'Write error: {e}'}), 500
 
     return jsonify({'message': 'Alarm reset command sent (HR 1036, bit 0x0020).'})
+
+
+@app.route('/api/gateway/reboot', methods=['POST'])
+def gateway_reboot():
+    """Soft-reboot the DR302 Modbus gateway via its web admin.
+
+    Recovers SLAVE_SILENT (TCP up, Modbus reads return zeros, writes RST).
+    The gateway kills its own TCP socket mid-restart, so a
+    ConnectionResetError / IncompleteRead during the HTTP call is the
+    success signal — not a failure.
+    """
+    global _last_gateway_reboot_ts
+
+    now = time.monotonic()
+    with _gateway_reboot_lock:
+        elapsed = now - _last_gateway_reboot_ts
+        if elapsed < GATEWAY_REBOOT_COOLDOWN_S:
+            wait = int(GATEWAY_REBOOT_COOLDOWN_S - elapsed)
+            return jsonify({'error': f'Cooldown active — wait {wait}s before next reboot.'}), 429
+        _last_gateway_reboot_ts = now
+
+    creds = base64.b64encode(
+        f'{GATEWAY_ADMIN_USER}:{GATEWAY_ADMIN_PASS}'.encode('ascii')).decode('ascii')
+    url = f'http://{GATEWAY_IP}/login.cgi'
+    req = urllib.request.Request(url, headers={
+        'Authorization': f'Basic {creds}',
+        'Referer': f'http://{GATEWAY_IP}/manage.shtml',
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=5) as r:
+            r.read()
+        return jsonify({'message': 'Reboot command sent. Gateway back in ~15s.'})
+    except urllib.error.HTTPError as e:
+        # HTTPError is a URLError subclass — catch it first so auth failures
+        # aren't silently misreported as "gateway dropped connection".
+        if e.code == 401:
+            return jsonify({'error': 'DR302 rejected admin/admin — credentials may have been rotated.'}), 502
+        return jsonify({'error': f'DR302 returned HTTP {e.code}.'}), 502
+    except (urllib.error.URLError, ConnectionResetError, TimeoutError) as e:
+        # Gateway dropped the socket — this is the expected reboot signal.
+        return jsonify({'message': f'Reboot command sent (gateway dropped connection: {type(e).__name__}). Back in ~15s.'})
 
 
 @app.route('/api/reset_filter', methods=['POST'])

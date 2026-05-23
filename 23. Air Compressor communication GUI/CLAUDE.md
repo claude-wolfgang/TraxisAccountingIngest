@@ -27,6 +27,27 @@ The watchdog runs every poll cycle (3s) and checks four conditions in priority o
 
 Safe alarm set: `{18, 43, 48, 49}`. 60-second cooldown between actions.
 
+## Gateway Recovery (SLAVE_SILENT)
+
+**Symptom:** GUI shows "Connected" green dot BUT `Controller Clock: ---`, temperature stuck at `32°F` (raw 0°C), pressure `0 PSI`, all weekdays show `OFF`, and writes (START / schedule edits) fail with **"connection forcibly closed"** (WSAECONNRESET / 10054). This is the DR302 gateway in a hung half-state — TCP socket alive, Modbus-RTU passthrough to the Logik 26-S dead. Reads return zeros; writes get RST'd. Watchdog cannot recover from this because its own writes fail too (look for a climbing `Interventions:` count with no effect).
+
+**Fix, easiest first:**
+
+1. **Click "↻ Reboot Gateway" in the compressor GUI** (fixes ~90% of cases, no compressor disruption). The button lives in the second status bar (next to `Interventions:`). Triggers `POST /api/gateway/reboot` which calls the DR302 web admin on the user's behalf — no need to remember the URL or credentials. 60-second cooldown to prevent double-clicks. Gateway is back in ~10-15s; next poll cycle (3s) repopulates the GUI.
+
+2. **Manual reboot via the DR302 web UI** (fallback if the button is broken or you're debugging it):
+   - URL: **http://10.1.1.180**
+   - Credentials: **`admin` / `admin`** (HTTP Basic, realm `USR-DR302` — factory default, never rotated, confirmed 2026-05-23)
+   - Manage page → **Restart Module** button
+   - **Diagnostic while you're in there:** on the Serial/Port page, if Send count is climbing but Recv count is frozen, the RS-485 link or the controller is the problem, not the gateway.
+
+3. **Main-power-cycle the compressor** (cycles controller + gateway together since DR302 draws from controller's +15Vdc rail — see `PROJECT-PLAN.md:53`):
+   - Panel OFF → throw main disconnect → wait ~30s → power back on → controller boots in ~10-20s
+
+4. **DO NOT open the cabinet to pull the gateway V+ wire** — 208/230V 3-phase terminals are inches away. Options 1-3 do the same thing without the risk.
+
+**Implementation note for option 1:** the `POST /api/gateway/reboot` handler issues `GET http://{GATEWAY_IP}/login.cgi` with Basic auth and `Referer: /manage.shtml` — that's what the DR302's `manage.shtml` form does when "Restart Module" is clicked. If a future firmware breaks this, the documented fallback in the device's JS is `GET /misc.cgi?restart`. Mid-call `ConnectionResetError` / `URLError` is treated as success (the gateway kills its own socket while restarting).
+
 ## Next Steps
 
 - **Monitor watchdog effectiveness** — first real test will be the next power blip or Monday morning after a weekend. Check `watchdog_interventions` counter and `/api/clock` endpoint.
