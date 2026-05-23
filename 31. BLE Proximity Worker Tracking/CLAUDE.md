@@ -34,29 +34,70 @@ ESPresense settings are stored in SPIFFS. Configuration via HTTP `/wifi` endpoin
 read, POST to write). POST must include ALL parameters or omitted ones get cleared (including
 WiFi credentials). The `/wifi` GET response masks the password as `***###***`.
 
-MQTT broker: 10.1.1.108:1883 (Mosquitto on this PC, config `mosquitto_clean.conf`)
+MQTT broker: **10.1.1.178:1883** (Mosquitto on this PC). The previous "broker is on 10.1.1.108"
+note was always wrong — that IP is unrelated. All 3 gateways re-pointed to .178 on 2026-05-23
+via `/wifi` POST. Mosquitto runs as a user process (`mosquitto.exe -c mosquitto_clean.conf`);
+service-mode start needs admin. **Promote to a Windows service** so it survives reboot — see
+Next Steps. Long-term home is srv-01 (10.1.1.161) once the SSH regression is fixed.
+
+## B2 Badge Configuration
+
+The B2 is part of MOKO's **MK BUTTON** product line (hardware `MKBN Series`, firmware `V2.0.3`,
+software `BXP-B-D`), not the older H3-style BeaconX Pro Nordic line that the spec PDF
+suggests. Configuration app is **BeaconX Pro** (iOS + Android) — *not* MokoBeaconX, which is
+for a different beacon family. In BeaconX Pro's startup picker, choose **MK BUTTON**.
+
+Connect password: `Moko4321` (factory default; not yet rotated — see Next Steps).
+
+Per-badge UI is organized by alarm-trigger slot (Single press / Double press / Long press /
+Abnormal inactivity), each with a Frame Type selector (`Alarm info` MOKO-proprietary,
+`UID` Eddystone, or `iBeacon`). The B2 ships with iBeacon UUID/Major/Minor **blank** — we
+assign per-badge.
+
+### Traxis B2 batch identity
+
+All 10 badges share one UUID; Major identifies the cohort; Minor is per-badge sequential.
+
+- **iBeacon UUID:** `23FD6BBB-8A96-4C0E-8AB4-0158E9A3D1EF` (hex-only for the app's `0x` field:
+  `23FD6BBB8A964C0E8AB40158E9A3D1EF`). Generated 2026-05-23; gateway code should filter on
+  this UUID to ignore non-Traxis beacons.
+- **Major:** `1` — differentiates from Feasycom (10065/35540/39475/40604/60285) and ESP32
+  self-discovery (72/116/252).
+- **Minor:** `1` through `10` matching the physical `B2-NN` Sharpie label.
+
+We configure the Single Press slot as iBeacon since it's ON by default. Other 3 slots stay at
+factory defaults — they remain available for SOS button programming later.
+
+Per-badge cataloging tracked in `badge_inventory.md`.
 
 ## Status
-All three ESP32 gateways online and reporting via MQTT (2026-04-30). Band steering was not
-an issue — ESP32s connect to Traxis-MFG on 2.4GHz channel 6 without needing a separate SSID.
-Default MQTT server in ESPresense firmware is `mqtt.z13.org` — must be changed to `10.1.1.108`
-on each board via the `/wifi` POST endpoint or captive portal.
+3 ESP32 gateways online + publishing to broker on `10.1.1.178:1883` (2026-05-23). 10 MOKOSmart
+B2 badges in hand; 1/10 (B2-01, MAC `F7:4E:DB:34:D8:E4`) configured with iBeacon, **save not
+yet verified end-to-end** — walk test returned zero hits, likely because the BeaconX Pro
+connection was still active during the walk and BLE peripherals suppress advertisements while
+connected. Next session: disconnect from BeaconX Pro fully (or close app / cycle Bluetooth),
+re-walk, then proceed with B2-02..B2-10 if confirmed working.
 
 Walk test (2026-04-30): M2→M1→M8 path, 30s at each machine. Feasycom tags at 2.5dB TX power
 show only 3-5 dB RSSI contrast between adjacent gateways (~6ft apart) — everything reads FAR.
-Expect MOKOSmart B2 badges to provide better signal for zone detection.
+Expect MOKOSmart B2 badges to provide better signal for zone detection (untested as of
+2026-05-23 close).
 
 `proximity_logger.py` runs as background service via `start_logger.bat`, logging to `proximity.db`.
 
-Remaining:
-1. [NEEDS WOLFGANG] Bring phone in next session — MokoBeaconX app needed to scan/connect to B2 badges and read full factory defaults (UUID, major, minor, TX power, adv interval, NFC, button mode, password).
-2. Per-badge cataloging — power on each B2 one at a time near a gateway, record default UUID/major/minor via `b2_unbox_tail.py`. Note any variation across the 10 units. Test long button hold (~15s) to activate from shipping mode if short press doesn't broadcast.
-3. Tamper-defense provisioning — sacrifice one badge to document factory-reset button combo; change default `Moko4321` password on all 10 units; check Moko app for button-disable / button-lock setting; if NFC tag is used, lock payload read-only after writing.
-4. Re-test zone thresholds with steel machine backdrop (current thresholds are open-air).
-5. Build assignment engine (strongest-gateway-wins per worker) + server-side anomaly detection (impossible majors, off-hours appearances, MAC inconsistency) as tamper backstop.
-6. Re-run walk test with MOKOSmart badges for better RSSI contrast.
+## Next Steps
+
+1. **[NEEDS WOLFGANG] Verify B2-01 iBeacon broadcast end-to-end before scaling.** Disconnect from BeaconX Pro (back arrow, close app, or toggle Bluetooth), then run `python b2_watch.py 1` and confirm the badge appears across one or more gateways. If still nothing, reconnect to B2-01 and confirm Single Press slot still shows Frame=iBeacon and UUID/Major/Minor=`23FD6BBB...` / `1` / `1` (the save may not have persisted).
+2. Configure B2-02 through B2-10 once #1 is verified. Same workflow per `badge_inventory.md`: long-press wake → connect → ALARM tab → Single press mode → Frame=iBeacon → UUID `23FD6BBB8A964C0E8AB40158E9A3D1EF` / Major `1` / Minor `N` → save → **disconnect** → power off → label `B2-NN`.
+3. Re-walk with all 10 badges and capture the RSSI dynamic range across M1/M2/M8 — that's the apples-to-apples comparison vs the open-air Feasycom 3-5 dB result that drove the badge purchase.
+4. **Mosquitto on .178 should be a Windows service**, not a user process. Currently dies on reboot. Either `Start-Service mosquitto` from an admin PowerShell (the service is installed but Stopped/Automatic), or migrate to srv-01 once SSH there is recovered.
+5. **Tamper-defense provisioning per badge.** Sacrifice one badge to document the factory-reset button gesture (the H3 spec mentions >10s long-press resets but it's untested on the MK BUTTON line). Change all 10 passwords from `Moko4321` to a per-batch password (BeaconX Pro → SETTING tab has the password field). Confirm whether the SETTING tab exposes a button-disable / button-lock toggle to prevent operators from triggering SOS alarms accidentally.
+6. **Re-test zone thresholds** in `CLAUDE.md`'s "Zone thresholds" block with steel machine backdrop — current thresholds are open-air from the Feasycom era and may need adjustment for the B2's different antenna/TX-power profile.
+7. **Build assignment engine** (strongest-gateway-wins per worker minor → machine) + server-side anomaly detection (impossible majors, off-hours appearances, MAC inconsistency) as tamper backstop.
+8. **Revisit accelerometer config** once the basic proximity loop works. The MK BUTTON ALARM tab exposes "Abnormal inactivity mode" (built-in dead-man check) and the SETTING tab has 3-axis accelerometer params. Potential uses: worn-vs-locker detection, wake-on-motion adv-rate boost (battery savings), tamper signal (accelerometer activity inconsistent with worker history).
+9. **MOKOSmart support email reply** — sent to `lora@mokosmart.com` 2026-05-23 (wrong inbox; LoRa team, not BLE). They may forward, or not. If we need an authoritative answer on any remaining MK BUTTON question, the correct address is `Support_BLE@mokotechnology.com` (per H3 user manual page 6).
 
 ## Interfaces
-Produces: proximity.db (SQLite, readings table), worker-machine proximity events via MQTT
-Consumes: ESPresense MQTT topics (espresense/devices/#), ProShop employee list, machine inventory
-Contracts: none yet — project is in initial testing phase
+Produces: `proximity.db` (SQLite, readings table), worker-machine proximity events via MQTT, Outlook drafts in `tom@traxismfg.com / Purchasing - To Review` (via `draft_mokosmart_email.py` reusing P31 Photo Upload Service's `email_draft.create_draft`)
+Consumes: ESPresense MQTT topics `espresense/devices/#` and `espresense/rooms/+/#` on broker `10.1.1.178:1883`, ProShop employee list (planned, not yet integrated), machine inventory, P31 Photo Upload Service's `purchasing/email_draft.py` (Graph API helper, requires `tom@`'s Graph creds in `.traxis.env`)
+Contracts: **MQTT broker must run on 10.1.1.178:1883.** All 3 ESP32 gateways (m1/.225, m2/.23, m8/.38) are SPIFFS-configured to publish there as of 2026-05-23 — moving the broker without re-POSTing each gateway's `/wifi` endpoint silently breaks the whole pipeline. POST must include all params (WiFi credentials get cleared otherwise) so the Traxis-MFG WiFi password is part of the contract. **Traxis B2 batch UUID is `23FD6BBB-8A96-4C0E-8AB4-0158E9A3D1EF`** — gateway-side filters and downstream identity mappings depend on this constant. Mosquitto config: `mosquitto_clean.conf` (listener 1883 + allow_anonymous true).

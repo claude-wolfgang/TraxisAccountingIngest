@@ -7,6 +7,60 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-23
 
+### P31 BLE Proximity: B2 badge cataloging + MQTT broker restoration + first iBeacon save
+
+**Task:** Wolfgang had the 10x MOKOSmart B2 Smart Badges (Order #3765, received 2026-04-29) and a phone, wanted to start configuring them. Project state at start was the "remaining" list from P31 BLE CLAUDE.md — phone-side cataloging, MQTT broker restore, walk-test re-run.
+
+**What was done:**
+1. **Diagnosed the MQTT side first.** `b2_unbox_tail.py` pointed at `10.1.1.108:1883` but that broker was dead — `.108` was always a misconfig (this PC has been `.178` per `main_session_log.md:2753`). All 3 ESP32 gateways (m1/.225, m2/.23, m8/.38) were online but pointed at the dead `.108`. Established baseline: phone-only cataloging can proceed without MQTT; gateway-side verification needs broker.
+2. **Burned ~30 min trying MokoBeaconX (the wrong app).** Wolfgang found long-press wakes the badge (red LED 3s flash) but every Connect attempt failed even when timed immediately after wake. Manuals.plus + mokosmart.com WebFetches all 403'd. FCC user manual exhibit (downloaded from fccid.io 2AO94-B2) turned out to be the same 4-page marketing brochure as the public manual — no protocol details.
+3. **Drafted vendor support email and dropped 4 progressively-corrected versions** into `tom@traxismfg.com / Purchasing - To Review` Outlook folder via P31 Photo Upload Service's `email_draft.create_draft` (imported via `importlib` to avoid `sys.path` shadowing of stdlib `queue` by the local `purchasing/queue.py`). Final draft sent to `lora@mokosmart.com` with shipping-label refs from Wolfgang's box photo (SO `2695673481`, waybill `2049985207371173888`, carton `PC7260328`) plus a Chinese opener. Address turned out to be wrong (LoRa team) — H3 manual found later confirms BLE support is `Support_BLE@mokotechnology.com`.
+4. **Cracked the wake-protocol mystery by side-channeling the H3 sibling.** H3/H5/B2 share the same firmware spec doc (`H3H5B2-Smart-Badge-Series-Products-Specification_V2.0_20240530.pdf` on robu.in — Cloudflare-blocked, but Bing had indexed it; also downloaded `H3_user_manual.pdf` from usermanual.wiki). Found two showstoppers we had missed: **(a) the B2 uses BeaconX Pro app, not MokoBeaconX** — different apps for different beacon families, with no cross-compatibility; **(b) the B2 has two BLE modes** — Advertising (non-connectable, default) and Configuration (connectable) — though the H3 spec says factory-default is Connectable. Connect-fail was 100% an app-mismatch problem.
+5. **Wolfgang installed BeaconX Pro and walked the firmware-family picker.** First guess (BXP Nordic from the H3 docs) was wrong; the B2 is actually under **MK BUTTON** (MOKO's newer 2024 button-badge product line, hardware `MKBN Series`, firmware `V2.0.3`, software `BXP-B-D`). Surprising: the BeaconX Pro UI for MK BUTTON is organized around alarm modes (Single press, Double press, Long press, Abnormal inactivity), not BLE slots — and iBeacon is one of three frame-type options per slot (alongside Alarm-info and Eddystone UID).
+6. **Cataloged B2-01.** MAC `F7:4E:DB:34:D8:E4`, battery 98%, manufactured 2024.12.01. Discovered another surprise: **B2 badges ship with NO iBeacon identity** (UUID/Major/Minor all blank). Designed a per-batch scheme: generated UUID `23FD6BBB-8A96-4C0E-8AB4-0158E9A3D1EF` for the whole batch, Major=1 (to differentiate from Feasycom majors 10065/35540/39475/40604/60285 and from ESP32 self-discovery majors 72/116/252), Minor=1..10 per badge. Configured B2-01's Single Press slot as iBeacon with these values; save reported success.
+7. **Restored MQTT broker on .178** by starting Mosquitto as a user process (`mosquitto.exe -c mosquitto_clean.conf` — service-mode start needs admin which would have UAC-prompted). Verified port 1883 reachable.
+8. **Repointed all 3 ESP32 gateways from `.108` → `.178`** via batched POSTs to each gateway's `/wifi` endpoint with all params preserved (Wolfgang provided Traxis-MFG WiFi password inline). All 3 returned 200, all 3 confirmed `mqtt_host=10.1.1.178` on re-GET. Mosquitto smoke-test (`mqtt_smoke.py`) showed all 3 gateways alive and publishing both telemetry (`espresense/rooms/m1|m2|m8/*`) and detected devices (Feasycom tags, Apple `findmy`/`1005`, ESP32 self-discovery iBeacons).
+9. **Walk test inconclusive.** Built `b2_watch.py` (focused UUID filter, per-gateway RSSI streaming). Wolfgang walked B2-01 between machines but zero readings for our UUID arrived. Most likely cause: **phone (BeaconX Pro) was still connected to the badge during the walk**, suppressing the badge's advertisements (standard BLE central/peripheral behavior). Closed session before confirming — fix is to disconnect/close BeaconX Pro and re-walk.
+
+**Files modified:**
+- `31. BLE Proximity Worker Tracking/b2_unbox_tail.py` — `BROKER` constant `.108` → `.178`
+- `31. BLE Proximity Worker Tracking/CLAUDE.md` — Status + Remaining + Interfaces rewritten to reflect BeaconX Pro / MK BUTTON / .178 broker / Traxis batch UUID
+- `TRAXIS_ECOSYSTEM.md` — stale "P31 (Photo Upload Service) — Obtain phone with Moko app..." line replaced with current B2 state
+
+**Files added:**
+- `31. BLE Proximity Worker Tracking/badge_inventory.md` — 10-row template, factory defaults block, Traxis batch identity scheme, B2-01 row populated
+- `31. BLE Proximity Worker Tracking/draft_mokosmart_email.py` — one-shot script that reuses P31 Photo Upload Service's `email_draft.create_draft` helper to drop a draft into tom@'s `Purchasing - To Review` folder
+- `31. BLE Proximity Worker Tracking/B2_FCC_user_manual.pdf` — FCC 2AO94-B2 Users-Manual exhibit (turned out to be the marketing brochure, kept as reference)
+- `31. BLE Proximity Worker Tracking/H3_user_manual.pdf` — the H3 sibling manual that cracked the wake/connect mystery (saved as the primary B2 protocol reference until MOKO sends the actual H3H5B2 spec)
+- `31. BLE Proximity Worker Tracking/mqtt_smoke.py` — 15s broad MQTT scan, dumps every topic on `espresense/#`
+- `31. BLE Proximity Worker Tracking/b2_watch.py` — focused listener for our Traxis UUID, per-gateway RSSI streaming
+- `31. BLE Proximity Worker Tracking/IMG_3617.JPG` — Wolfgang's photo of the shipping label (used to extract carrier waybill / SO / carton ID for the support email)
+- `31. BLE Proximity Worker Tracking/Screenshot 2026-05-23 at *.png` — 5 BeaconX Pro screenshots (firmware picker, ALARM tab, DEVICE info, SETTING tab, Single press mode w/ iBeacon)
+
+**External writes (outside repo):**
+- One vendor-support email sent from `wolfgang@traxismfg.com` to `lora@mokosmart.com` (wrong inbox — correct address per H3 manual is `Support_BLE@mokotechnology.com`; reply may forward, may not)
+- 4 Outlook drafts in `tom@traxismfg.com / Purchasing - To Review` folder (3 obsolete from iterative refinement, 1 sent then archived by Wolfgang)
+- ESP32 gateway configs rewritten: all 3 now point at `10.1.1.178:1883` for MQTT (previously `.108`, which was always wrong)
+- Mosquitto running on `.178:1883` as a user process (PID 18776) — survives Wolfgang's session but NOT a reboot
+
+**Memory added:**
+- `project_moko_b2_config.md` — B2 uses BeaconX Pro / MK BUTTON, default password Moko4321, ships with blank iBeacon identity
+- `reference_moko_ble_support.md` — `Support_BLE@mokotechnology.com` is the correct address; `lora@mokosmart.com` is LoRa-only
+- `reference_ssh_srv01.md` — srv-01 account is `traxi` (not TRAXIS, not Superuser); pubkey at `administrators_authorized_keys`; SSH from .178 currently regressed
+- Existing memory unchanged but referenced: `reference_ssh_71.md`
+
+**Key decisions:**
+- **Phone-only cataloging chosen over fixing broker first** when srv-01 SSH regression blocked the originally-preferred srv-01 broker home. Phone scan doesn't need MQTT, so this kept the session moving while infra was deferred.
+- **Generated a Traxis-specific batch UUID** rather than using a vendor default. B2s ship with blank UUIDs anyway, and a Traxis-namespace ID lets future gateway code filter `iBeacon:23FD6BBB-...` to ignore neighboring buildings' beacons.
+- **Single UUID + cohort Major + sequential Minor scheme** (vs unique-UUID-per-badge) — keeps gateway-side filter rules simple and lets us reuse the existing Feasycom-tag-style identification logic. Major=1 chosen deliberately to not collide with the Feasycom or ESP32-self-discovery major numbers already documented in P31 CLAUDE.md.
+- **Mosquitto on .178 instead of srv-01** — temporary forced by srv-01 SSH regression. Should be moved to srv-01 once SSH is fixed, but for now the gateways are pointed at .178 and the broker lives there.
+- **Did NOT verify B2-01 save end-to-end before closing.** Walk test produced zero hits; most likely the phone's still-active BLE connection to the badge was suppressing advertisements. Wolfgang needs to disconnect from BeaconX Pro and re-test in the next session before configuring the other 9.
+- **Email-draft script reuses P31 Photo Upload Service's helper via `importlib` direct-load** instead of `sys.path.insert` — the helper's directory contains a local `queue.py` (P35 order queue) that would shadow stdlib `queue` and break urllib3 in a confusing way. Importlib pattern noted in case the helper gets reused from other projects.
+
+**Status:** B2-01 configured (saved, not verified). Mosquitto on `.178` + 3 gateways repointed and confirmed publishing. 9 more B2 badges unconfigured. Walk-test failure pending phone-disconnect re-test. Vendor-support email in flight to wrong inbox; correct inbox identified for the next round if needed. srv-01 SSH still regressed.
+
+---
+
 ### P23 Air Compressor: SLAVE_SILENT diagnosis + in-UI Reboot Gateway button
 
 **Task:** Wolfgang reported the compressor GUI symptom from yesterday's `Next Steps` bullet was back — "schedule doesn't show, writes fail with 'connection forcibly closed'". Screenshot showed the textbook SLAVE_SILENT signature: green "Connected" dot, `Controller Clock: ---`, temp pinned at `32°F` (raw 0°C), pressure `0 PSI`, all weekdays `OFF`, watchdog at 15 interventions. Not the duplicate-process bug from 5/22 (that's resolved on srv-01); this was the gateway-side failure mode that bullet anticipated.

@@ -243,6 +243,6 @@ Cross-project contracts — breaking these silently breaks a downstream project.
 - **P26 (SMT Post Processor Development):** Add images to CA153, fill install dates on CA152/CA153, survey floor for other AW-A units
 - **P27 (Accounting Ingest):** Approve QBO production credentials and configure live environment access
 - **P29 (Rollo Printer App):** Run PyInstaller to rebuild executable and smoke-test with real UPS PDF
-- **P31 (Photo Upload Service):** Obtain phone with Moko app to complete B2 badge configuration and factory-reset testing; verify Bluetooth adapter on .71 for local BLE scanning
+- **P31 (BLE Proximity Worker Tracking):** Verify B2-01's iBeacon broadcast end-to-end (disconnect BeaconX Pro first — phone-connection suppresses adverts), then configure B2-02..B2-10 with the Traxis batch UUID `23FD6BBB-...` / Major `1` / Minor `2`..`10`. Re-walk to capture RSSI dynamic range across M1/M2/M8 vs the Feasycom open-air baseline. Promote Mosquitto on `.178` from user-process to Windows service so it survives reboot. Rotate the default `Moko4321` password across all 10 badges.
 - **P32 (Breakeven Dashboard):** Verify FASData monitoring.db path and machine_samples table schema; confirm machines.json availability
 - **P35 (Purchasing Automation):** Wolfgang: delete test VPOs 263106 and 263119 from ProShop UI.

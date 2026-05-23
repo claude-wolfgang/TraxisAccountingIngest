@@ -18,7 +18,7 @@ from datetime import datetime
 
 import paho.mqtt.client as mqtt
 
-BROKER = "10.1.1.108"
+BROKER = "10.1.1.178"
 PORT = 1883
 BASELINE_SECONDS = 8  # observe existing traffic first, then flag anything new
 
