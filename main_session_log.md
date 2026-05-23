@@ -5,6 +5,51 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-23
+
+### P23 Air Compressor: SLAVE_SILENT diagnosis + in-UI Reboot Gateway button
+
+**Task:** Wolfgang reported the compressor GUI symptom from yesterday's `Next Steps` bullet was back — "schedule doesn't show, writes fail with 'connection forcibly closed'". Screenshot showed the textbook SLAVE_SILENT signature: green "Connected" dot, `Controller Clock: ---`, temp pinned at `32°F` (raw 0°C), pressure `0 PSI`, all weekdays `OFF`, watchdog at 15 interventions. Not the duplicate-process bug from 5/22 (that's resolved on srv-01); this was the gateway-side failure mode that bullet anticipated.
+
+**What was done:**
+1. **Diagnosed from screenshot + TCP probe to `10.1.1.180:502`** (port alive from .178). All-zeros reads + RST on write = DR302 in hung half-state, TCP layer fine but Modbus-RTU passthrough dead.
+2. **Wolfgang manually rebooted the gateway via the device's web UI** while we were investigating. Symptom cleared.
+3. **Looked up DR302 admin creds** — no record in project; checked manual + probed device. `admin`/`admin`, factory default, never rotated. Verified by hitting `http://10.1.1.180` with Basic auth (HTTP 200, realm `USR-DR302`).
+4. **Documented credentials + recovery procedure** in `23.../CLAUDE.md` ("Gateway Recovery (SLAVE_SILENT)" section) and `PROJECT-PLAN.md` (replaced "check manual" with confirmed creds). Saved reference memory `reference_dr302_gateway_admin.md`.
+5. **Wolfgang asked for a Reboot Gateway button in the GUI** so the next incident is one click, no creds lookup. Built it:
+   - **Endpoint**: probed DR302's `manage.shtml` form — submits as `GET /login.cgi` with `Referer: /manage.shtml`. Documented JS fallback path `GET /misc.cgi?restart` in case future firmware breaks the primary.
+   - **Backend** (`compressor_web.py`): `POST /api/gateway/reboot` using stdlib `urllib` (no new dep). 60s cooldown lock. Treats mid-call `ConnectionResetError` / `URLError` as success (gateway kills its own socket while restarting). Discriminates HTTPError 401 from URLError before the generic catch (caught a subclass-ordering bug on the first edit).
+   - **UI**: amber "↻ Reboot Gateway" button in the gateway-health status bar (next to `Interventions:`), visually separated from compressor START/STOP. Modal confirm with explicit "compressor itself is NOT affected" copy. Button disables for 20s after click.
+6. **Committed** `a8b6cdb` (P23 changes only — left the unrelated dirty files alone) and pushed to origin/main.
+7. **Deployment to srv-01:** my SSH key (`Superuser@.178-claude-remote-control`) is in `administrators_authorized_keys` per `01_install_ssh.ps1` but actual SSH from .178 → .161 returns "Permission denied (publickey)" for every user — `Administrator` even gets a server-side connection reset mid-auth. WinRM (5985/5986), SMB (445), RPC (135/139) all closed by firewall. Wolfgang had console access, so wrote `pull_and_restart_aircompressor.bat` + `.ps1` to `1. Proshop Automations/srv-01-setup/` for Dropbox-sync delivery: git pull (with auto-stash for dirty trees), file-marker verification, Overseer restart, endpoint+UI verification.
+8. **First-run feedback:** Wolfgang ran the .bat → "resolve dirty files first". Updated the script to auto-stash → pull → pop (reversible; conflicts surface in `git stash list`). Second run → "PID unchanged restart may have failed", but verification from .178 proved the deploy was actually live: PID 4860 (different from both 10084 pre-cutover and 28432 from first manual restart), `GET /api/gateway/reboot` returns 405 (route registered, POST-only), button HTML + JS handler both present in served page. The PID-changed check was firing too eagerly — Overseer's restart is async and 4s wasn't enough.
+
+**Files modified (in commit `a8b6cdb`):**
+- `23. Air Compressor communication GUI/compressor_web.py` — `/api/gateway/reboot` endpoint, Reboot Gateway button, modal handler, urllib + base64 imports, cooldown lock + constants
+- `23. Air Compressor communication GUI/CLAUDE.md` — new "Gateway Recovery (SLAVE_SILENT)" section as primary recovery path
+- `23. Air Compressor communication GUI/PROJECT-PLAN.md` — credentials confirmed (admin/admin)
+
+**Files modified (uncommitted, this session):**
+- `1. Proshop Automations/srv-01-setup/pull_and_restart_aircompressor.ps1` (new) — deploy helper with auto-stash + verification
+- `1. Proshop Automations/srv-01-setup/pull_and_restart_aircompressor.bat` (new) — wrapper for double-click run on srv-01
+- `main_session_log.md` — this entry
+- `TRAXIS_ECOSYSTEM.md` — P23 Produces row updated with `/api/gateway/reboot`
+
+**Memory:**
+- Added `reference_dr302_gateway_admin.md` — DR302 web admin URL + creds + use case + recovery playbook pointer. Indexed in MEMORY.md.
+
+**Key decisions:**
+- **stdlib urllib over adding `requests`** to keep the compressor service dependency-light (it's a single-file Flask app).
+- **Mid-call `ConnectionResetError` = success, not failure.** The gateway kills its own TCP socket during restart, so a clean response is unusual; treating the reset as the success signal is what makes the endpoint reliable.
+- **Button in the gateway-health status bar, not next to START/STOP.** Visually classifies "reboot the gateway" as a diagnostic action separate from compressor control. Amber outline reinforces the distinction.
+- **Auto-stash on dirty deploy tree** rather than bailing. State files (logs, databases) on srv-01 generate working-tree noise; forcing the user to hand-resolve every time is friction. Stash is fully reversible.
+- **Didn't fix the script's PID-changed false alarm this session.** Verification via `/api/gateway/reboot` returning 405 is the load-bearing check; the PID compare is decoration. Filed as P23 backlog.
+- **Didn't test the new endpoint live.** Gateway had just been rebooted manually; didn't want to drop it again 20 seconds later. First real test will be the next SLAVE_SILENT incident.
+
+**Status:** Reboot Gateway button live on srv-01 (verified from .178: endpoint 405, button + JS present). Future SLAVE_SILENT incidents are now one click instead of credentials lookup. State-machine UI + persisted schedule from yesterday's `Next Steps` bullet remain unbuilt — today's work addresses the *recovery action*, not the *classification + banner* surface that bullet specified.
+
+---
+
 ## 2026-05-22
 
 ### P30 Label Extension: deploy prep for v1.6.0 → patched and shipped v1.6.1 after srv-01 cutover discovery

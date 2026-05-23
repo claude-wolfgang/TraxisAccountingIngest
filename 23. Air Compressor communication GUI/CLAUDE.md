@@ -50,14 +50,16 @@ Safe alarm set: `{18, 43, 48, 49}`. 60-second cooldown between actions.
 
 ## Next Steps
 
+- **First real-world test of the Reboot Gateway button** — next SLAVE_SILENT incident will be the proof. Implementation is verified-deployed (PID changed, endpoint returns 405, button in DOM as of 2026-05-23) but the actual reboot path (`POST /api/gateway/reboot` → `GET /login.cgi` w/ Referer → gateway restart) wasn't exercised live because the gateway had just been hand-rebooted. If the first click fails to reboot the device, swap `'/login.cgi'` for `'/misc.cgi?restart'` in `gateway_reboot()` — one-line change, documented fallback.
+- **Fix the flaky PID-changed check in `srv-01-setup/pull_and_restart_aircompressor.ps1`** — 4s sleep is too short for Overseer's async restart; on 2026-05-23 deploy the script reported "PID unchanged restart may have failed" when the restart had in fact succeeded (verified by `/api/gateway/reboot` returning 405 from .178). Better signal: have the script verify the new endpoint shape directly (configurable marker URL + expected status code) instead of, or in addition to, the PID compare.
 - **Monitor watchdog effectiveness** — first real test will be the next power blip or Monday morning after a weekend. Check `watchdog_interventions` counter and `/api/clock` endpoint.
 - **[Optional] Add clock-sync feature** — if the controller's RTC drifts, add a `/api/clock/set` endpoint that writes correct time to HR 2048-2051. Not urgent since clock was accurate this session.
 - **[Optional] Add alarm history endpoint** — decode HR 768-818 alarm records (20 entries, 5 bytes each: 4B timestamp + 1B alarm code) and expose via `/api/alarm_history`. Would help diagnose why the compressor didn't start without SSH access.
 
 ## Interfaces
 
-Produces: Web GUI on port 8085 (`/`, `/api/status`, `/api/data`, `/api/clock`); Modbus TCP commands to Logik 26-S controller (fieldbus start/stop/alarm-reset/schedule-write/timer-resume via HR 1036); timer watchdog auto-recovery actions (logged to stdout, visible in Overseer).
+Produces: Web GUI on port 8085 (`/`, `/api/status`, `/api/data`, `/api/clock`, `/api/gateway/reboot`); Modbus TCP commands to Logik 26-S controller (fieldbus start/stop/alarm-reset/schedule-write/timer-resume via HR 1036); HTTP soft-reboot of DR302 gateway via `GET http://10.1.1.180/login.cgi` with Basic auth (admin/admin); timer watchdog auto-recovery actions (logged to stdout, visible in Overseer).
 
-Consumes: EMAX compressor Logik 26-S via DR302 Modbus TCP gateway at `10.1.1.180:502` (Slave ID 1); Overseer health monitoring on port 8085 (`/api/status`).
+Consumes: EMAX compressor Logik 26-S via DR302 Modbus TCP gateway at `10.1.1.180:502` (Slave ID 1); DR302 web admin at `http://10.1.1.180` (Basic auth, admin/admin) for soft-reboot; Overseer health monitoring on port 8085 (`/api/status`).
 
-Contracts: Modbus register addresses per `REGISTER_MAP.md` — Group 4 live data at HR 1024-1037, Group 6 counters at HR 1536-1553, Group 7 timers at HR 1800/1920 (empirical, not official HR 1792), Group 8 system time at HR 2048-2051. Timer watchdog only auto-resets alarms in `SAFE_AUTO_RESET_ALARMS = {18, 43, 48, 49}` — all other alarms require manual panel intervention.
+Contracts: Modbus register addresses per `REGISTER_MAP.md` — Group 4 live data at HR 1024-1037, Group 6 counters at HR 1536-1553, Group 7 timers at HR 1800/1920 (empirical, not official HR 1792), Group 8 system time at HR 2048-2051. Timer watchdog only auto-resets alarms in `SAFE_AUTO_RESET_ALARMS = {18, 43, 48, 49}` — all other alarms require manual panel intervention. **DR302 reboot endpoint** (`POST /api/gateway/reboot`) has a 60s server-side cooldown; mid-call `ConnectionResetError` from the gateway is treated as the success signal (gateway kills its own socket while restarting). If PUSR ships a firmware that breaks `/login.cgi`, the documented fallback URL is `/misc.cgi?restart`.
