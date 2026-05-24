@@ -7,6 +7,35 @@ Synced via Dropbox so both machines stay in sync.
 
 ## 2026-05-23
 
+### P15 ProShop Replacement Research: handoff summary for web-Claude interconnections investigation
+
+**Task:** Wolfgang is starting an investigation of ProShop interconnections in a separate web-Claude conversation, pursuing a strangler-fig migration policy. Needed a thorough single-file summary of P15's accumulated findings so web Claude doesn't re-discover ground P15 already covered (Feb 22 – Apr 7 2026, 12 night-by-night logs + 8 API testing sessions).
+
+**What was done:**
+1. **Surveyed the P15 working tree** — `CLAUDE.md`, `discoveries.md` (1,376 lines, the cumulative investigation log), `01_api_discovery/scope_permission_map.md`, `23_integrations/data_bridge_architecture.md`, `proshop_api_change_requests.md`. Confirmed the seam between Night 1's "85% of modules locked" estimate and Session 5's actual scope-to-query map (24 of ~28 modules accessible with full CRUD, ~17,100 records, 34 add / 42 update / 35 delete mutations).
+2. **Wrote `P15_SUMMARY_FOR_WEB_CLAUDE.md` at the project root** (13 sections, ~9 KB). Structure: headline finding (ProShop's "no API" claim is false), strangler-fig phase plan, API capabilities + hard limits, authoritative scope→query table, entity ID conventions + schema gotchas (`partStockStatuses.records[]` for material, `customerPONumber` is an object, Invoice has no primary ID), the 5 formal change requests sent to ProShop, downstream Traxis projects that already speak ProShop (P1, P3, P11, P14/18/30, P22, P25, P27, P31), inferred ProShop weaknesses to address in the replacement schema, open questions, "what to read first" pointer list, and Section 13 "what's worth probing next" backlog (FK graph extraction from introspection, change-detection without `modifiedTime`, mutation idempotency, file-upload Selenium hardening, retesting the read-only-scope-writes bug).
+3. **Surfaced the critical correction explicitly:** Night 1's coverage estimate was wrong. Once Session 5 properly mapped scopes (including the support-confirmed `cots→ots` and `tasks→taskstable` name corrections), the real picture is that almost everything is accessible — earlier "locked" verdicts reflected missing scopes on our token, not architectural locks. Web Claude needs to use the scope map, not Night 1's numbers, as the authoritative coverage view.
+
+**Files modified:** none in the P15 source tree — strictly a derivative summary doc.
+
+**Files added:**
+- `P15_SUMMARY_FOR_WEB_CLAUDE.md` (project root, not inside P15/) — single-file handoff for the web-Claude investigation thread
+
+**External writes:** none
+
+**Memory added:** none — all source content is already in P15's source files and project memory; the summary is itself the "memory" for the external conversation.
+
+**Key decisions:**
+- **Placed the summary at the project root, not inside `15. Proshop Replacement Research and Architecture/`** — it's a one-shot derivative document for an external conversation, not part of P15's authoritative source. Putting it inside P15 would muddy what counts as "P15's findings" vs. "a summary of P15 for outsiders."
+- **Used `discoveries.md` as the spine, but did NOT propagate Night 1's "85% locked" framing.** That estimate became obsolete on 2026-03-05 when Session 5 mapped scopes correctly. Web Claude getting the old framing would mislead its investigation.
+- **Included Section 13 ("what's worth probing next")** so web Claude has a concrete backlog rather than a passive read. The strangler-fig premise is that interconnections need to be mapped before peeling; Section 13 is that map's next quadrant.
+
+**Status:** Handoff doc ready at project root. P15 source tree untouched. Web-Claude investigation can begin against the summary + the three priority files it points at (`data_bridge_architecture.md`, `scope_permission_map.md`, `proshop_api_change_requests.md`).
+
+**Mid-close update:** Wolfgang confirmed web Claude is actively producing the FK graph write-up (top item of the proposed P15 Next Steps). That item is marked IN FLIGHT in P15 CLAUDE.md to prevent duplicate work in future sessions; integrate the deliverable into the P15 tree when it lands.
+
+---
+
 ### P31 BLE Proximity: B2 badge cataloging + MQTT broker restoration + first iBeacon save
 
 **Task:** Wolfgang had the 10x MOKOSmart B2 Smart Badges (Order #3765, received 2026-04-29) and a phone, wanted to start configuring them. Project state at start was the "remaining" list from P31 BLE CLAUDE.md — phone-side cataloging, MQTT broker restore, walk-test re-run.
@@ -101,6 +130,59 @@ Synced via Dropbox so both machines stay in sync.
 - **Didn't test the new endpoint live.** Gateway had just been rebooted manually; didn't want to drop it again 20 seconds later. First real test will be the next SLAVE_SILENT incident.
 
 **Status:** Reboot Gateway button live on srv-01 (verified from .178: endpoint 405, button + JS present). Future SLAVE_SILENT incidents are now one click instead of credentials lookup. State-machine UI + persisted schedule from yesterday's `Next Steps` bullet remain unbuilt — today's work addresses the *recovery action*, not the *classification + banner* surface that bullet specified.
+
+---
+
+### Working-tree hygiene: ignore runtime state, ship P23 step-05 + P27 toolkit
+
+**Task:** Wolfgang asked why `git status` was showing 21 dirty files described as "pre-existing in-flight work from other projects, untouched by this session" — then asked to process them responsibly without leaving untended files.
+
+**What was done:**
+1. **Categorized the 21 files** via timestamp + content inspection: 6 auto-generated runtime state files that should be gitignored but weren't (`.gitignore` had `service_heartbeat.json` but not `heartbeat.json`; P25 covered `audit.db` + `last_digest.json` but not `project_index.json`; P12 generated reports + P27 `cpo_pusher_state.json` uncovered); 1 stale deletion record (`timer_state.json` deleted on disk during May 8 migration prep but never `git rm`'d); 11 P27 bill-extraction-bug investigation files (May 13-20); 3 P1 srv-01-setup strays.
+2. **Extended `.gitignore`** with the 6 missing patterns. `cpo_pusher_state.json` matched immediately; the other 5 needed `git rm --cached` because they were already in the index.
+3. **Researched each P27 untracked file** against P27 CLAUDE.md to determine intent before deciding fate: `qbo_auth_sandbox.py` is the sandbox twin of tracked `qbo_auth.py`; `reextract_*` is the bug-doc verification harness; `reconcile_*` are siblings to the tracked `read_proshop_*.py` family; all real tooling.
+4. **Caught a wrong initial read** on the P23 srv-01-setup `05_deploy_p23_compressor.bat`/`.ps1`. Originally assumed they were superseded by today's `pull_and_restart_aircompressor.*` commit — actually they're the missing step in a numbered 01→12 bootstrap chain (initial deployment), whereas pull/restart is the runtime update mechanism. Different roles; both belong.
+5. **Edit-then-move on reconcile JSON outputs.** `reconcile_folders.py` and `reconcile_check.py` hardcoded `Path(__file__).parent / "*.json"` — moving the May-15 snapshots to `logs/` without script changes would have recreated the problem on next run. Updated both scripts to write into `logs/` (which is gitignored under `logs/`), then moved the snapshots. Added a Next Steps entry in P27 CLAUDE.md noting the artifacts + disposal expectation.
+6. **Deleted two transient files** after content inspection: `IMG_3615.JPG` (3.3 MB phone photo of yesterday's PowerShell terminal output) and `wolfgang_test_signature_body.html` (body literally "test" + Tom signature; production sig template is `wolfgang_signature.html`). No blanket `*.JPG` ignore rule — 26 JPGs are intentionally tracked across P17/P23/P31.
+7. **Committed as `83c1a12`** (18 files changed, 1832 insertions / 2136 deletions) and pushed to `origin/main`. Result: 21 dirty → 0 dirty.
+
+**Files modified:**
+- `.gitignore` — added `heartbeat.json` to service-state section; added rules for P25 `project_index.json`, P12 FASData generated reports, P27 `cpo_pusher_state.json`
+- `27. Accounting Ingest/CLAUDE.md` — Next Steps entry for `logs/reconcile_*.json` disposal
+- `27. Accounting Ingest/reconcile_folders.py` — output JSON now writes to `logs/`; mkdir defensive
+- `27. Accounting Ingest/reconcile_check.py` — reads Phase 1 from `logs/`; writes Phase 2 results to `logs/`
+
+**Files added (now tracked):**
+- `1. Proshop Automations/srv-01-setup/05_deploy_p23_compressor.bat` / `.ps1` — missing step in numbered bootstrap chain
+- `27. Accounting Ingest/P27_BILL_EXTRACTION_BUG.md` — open bug doc
+- `27. Accounting Ingest/reextract_bill.py` / `reextract_batch.py` — dry-run verification harness
+- `27. Accounting Ingest/qbo_auth_sandbox.py` / `qbo_sandbox_test.py` — sandbox-side QBO tooling
+- `27. Accounting Ingest/reconcile_folders.py` / `reconcile_check.py` — Phase 1/2 Outlook↔ProShop/QBO cross-check
+- `27. Accounting Ingest/drop_po_into_p27.py` — push tom@/Orders PDFs into SCAN_FOLDER
+
+**Files untracked-but-kept-on-disk (via `git rm --cached`):**
+- `18. ProShop Message Notifier/heartbeat.json`
+- `25. Agent Exploration/project_index.json`
+- `12. FASData Implementation/dashboard.html`
+- `12. FASData Implementation/utilization_report.html`
+- `12. FASData Implementation/report_assets/report_data.json`
+
+**Files moved:**
+- `27. Accounting Ingest/reconcile_check_results.json` → `27. Accounting Ingest/logs/`
+- `27. Accounting Ingest/reconcile_folders_phase1.json` → `27. Accounting Ingest/logs/`
+
+**Files deleted:**
+- `1. Proshop Automations/srv-01-setup/IMG_3615.JPG`
+- `27. Accounting Ingest/wolfgang_test_signature_body.html`
+- `1. Proshop Automations/ProgrammingTimer/timer_state.json` (was stale-indexed; already gone on disk)
+
+**Key decisions:**
+- **Researched intent before deleting anything.** Initial guess on P23 step-05 was wrong; the numbered-chain check (01..04 + 06..12 all tracked → 05 obviously belongs) caught it. Without that pause, would have committed deletion of legitimate setup tooling.
+- **Edit-then-move, not move-alone.** The hardcoded write paths in `reconcile_*.py` would have re-polluted the project root on next run. Durable fix requires updating the scripts before relocating their outputs.
+- **Added a Next Steps breadcrumb instead of relying on docstrings alone.** Wolfgang sees Next Steps during triage; docstrings live inside files that may not get opened. The reconcile snapshots are 43 KB + 19 KB tied to a specific mailbox state — disposal is a judgment call for whoever picks reconcile work back up.
+- **No blanket `*.JPG` rule** despite the IMG_3615 stray. 26 JPGs are intentionally tracked across P17/P23/P31 (receiving photos, hardware photos, BLE beacon photos). Targeted delete of the stray; gitignore stays conservative.
+
+**Status:** Working tree clean. `git status` is now signal-only — runtime state files keep writing/reading locally on srv-01 + .178 but don't pollute the repo. Future P27 reconcile runs deposit outputs in `logs/` automatically.
 
 ---
 
