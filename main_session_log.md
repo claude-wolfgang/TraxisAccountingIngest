@@ -5,6 +5,44 @@ Synced via Dropbox so both machines stay in sync.
 
 ---
 
+## 2026-05-25
+
+### P16 Fusion Tool Library: investigate how Toolpath (toolpath.com) reads Fusion tool libraries
+
+**Task:** Wolfgang wants to build "the perfect Fusion library" for the third-party **Toolpath** (toolpath.com) SaaS to read. Investigate how Toolpath ingests Fusion tool libraries.
+
+**What was done:**
+1. **Read the full P16 project** (CLAUDE.md, README, FUSION_TOOL_AUDITOR_CC.md, ExportToolLibrary.py, FusionToolAuditor.py) and a real exported library (`Backup_premodified_tool_libraries/Traxis Steels (CLoud).json`) to nail the Fusion tool-library JSON schema: `{"data":[...tools...],"version":N}`; each tool carries both normalized top-level keys (`description`, `product-id`, `vendor`, `type`, `BMC`, `guid`, nested `geometry`/`post-process`/`holder`/`start-values`) AND a parallel single-quoted `expressions` block. Geometry uses coded keys (`DC`=dia, `NOF`=flutes, `LCF`=flute len, `LB`=body, `OAL`, `RE`=corner rad, `SFDM`=shaft dia); `post-process.number` = tool number; per-operation feeds/speeds live in `start-values.presets[]`.
+2. **Web-researched Toolpath.** Confirmed it's a real product (support.toolpath.com). Two ingest paths: (a) **static upload** — Fusion → Export library as `.json`/`.tools` → drag into Toolpath, which applies "Magic Presets"; (b) **cloud sync** — connect Autodesk account → Enable Fusion Sync → Toolpath creates a "Toolpath Managed Libraries" cloud folder; two-way sync of tool name/geometry/feeds-speeds. Docs are vague on exact field mapping.
+3. **Flagged a `product-id` collision, then walked it back under Wolfgang's challenge.** Initial concern: P16 overwrites `product-id` with the ProShop tool # (A15), but Toolpath might match its catalog on `product-id`/vendor. On reflection (and Wolfgang's pushback), evidence leans the *other* way: Toolpath's per-operation Magic Presets are **generated from geometry + material**, not catalog-looked-up, so `product-id` is probably cosmetic to it. Certainty is LOW — the docs don't say.
+
+**What was NOT done:** No empirical verification (no Toolpath account; WebFetch can't reach authenticated pages). Proposed test: upload a library, change one tool's `product-id` leaving geometry identical, re-upload — if recipes are unchanged, product-id is cosmetic and P16/Toolpath don't conflict. Or cloud-sync round-trip and diff the re-exported library (whatever Toolpath writes back is canonical).
+
+**Files modified:** P16 CLAUDE.md — added `## Interfaces` + `## Next Steps` sections (were absent).
+
+**External writes:** none.
+
+### P27 Accounting Ingest: Hillary Machinery consolidated-vs-split bill reconciliation (READ-ONLY this session)
+
+**Task:** Wolfgang: "the main consolidated bill doesn't match the individual bills. We should pay the consolidated amount with tax and ignore separate bills." Provided `E:\Downloads\RE_ Control and SN (1).zip`.
+
+**What was done (all read-only — no QBO writes):**
+1. **Read the zip:** Hillary Machinery invoice **#153025** (2/16/2026) + three `TRAXIS MFG #60137-1/#60138-1/#60142-1 Report.pdf`. Confirmed the three "Report" PDFs are **PM service checklists, not invoices** (scanned images, zero billing keywords; invoice itself requests "send copy of PM checklist to customer").
+2. **Reconciled the invoice:** covers 3 PM work orders (Chevalier EM2040L, FANUC Robodrill Mate, Fanuc A04B-0070). 6 line items sum to subtotal **$4,352.50**; sales tax **$28.88**; total **$4,381.38**. Found *why* it doesn't match a naive sum: TX tax was applied **only to the $350 hotel/food reimbursement** (2×$175), not to non-taxable labor (PM flat rates, drive time). So $4,381.38 is the correct payable.
+3. **Checked QBO (read-only, production):** ran `read_qbo_bills.py` — QBO already holds **three separate OPEN Hillary bills** entered 2026-05-17, keyed by **work-order number** not invoice number: id 44286 (60137-1, $1,777.50), id 44287 (None/60138-1, $1,200.00), id 44288 (60142-1, $1,375.00). Sum = $4,352.50 = the **pre-tax subtotal** (tax omitted). That is exactly the "doesn't match" discrepancy.
+4. **Checked payment status (read-only):** queried QBO `Purchase` (231 since Jan 1) — **zero** reference Hillary. Combined with the 3 bills being open at full balance, QBO's books say **unpaid**. Caveat: QBO only knows what's entered/bank-fed; the Amex statement is the authoritative real-world check.
+5. **Advised on entry mechanics:** lines need NOT be itemized by food/travel/PM in QBO — they all post to one Repairs & Maintenance account (the vendor's hotel/food reimbursement is a pass-through service cost, NOT subject to the IRS 50%-meals limit). `create_bill` auto-matches the account from the vendor's prior bill; its reconciliation gate means feeding 6 lines + a $28.88 tax line yields TotalAmt = $4,381.38 exactly.
+
+**Decision reached, NOT yet executed (needs Wolfgang inputs):** consolidate to ONE QBO bill (#153025, $4,381.38, tax line, PDF attached); delete/void the 3 split bills (44286/44287/44288) to avoid double-counting (~$8,734). Blocked on: (a) was the Amex actually charged? → Bill vs already-paid CC Expense; (b) delete via QBO UI or add a `delete_bill` helper (no delete method exists in `accounting_ingest.py` today).
+
+**Files modified:** P27 CLAUDE.md — added Hillary reconciliation item to Next Steps.
+
+**External writes:** none (read-only QBO queries only; `logs/qbo_bills.json` written, gitignored).
+
+**Memory added:** `project_hillary_consolidated_billing.md` (Hillary sends ONE consolidated invoice spanning multiple PM WOs; enter under invoice # not WO #; TX tax on travel/lodging reimbursement only); `project_toolpath_reads_fusion_library.md` (Toolpath ingest paths + geometry-driven presets / product-id likely cosmetic).
+
+---
+
 ## 2026-05-23
 
 ### P15 ProShop Replacement Research: handoff summary for web-Claude interconnections investigation

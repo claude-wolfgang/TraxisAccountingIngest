@@ -259,5 +259,18 @@ C:\Users\AbsoluteArm\Dropbox\MACHINE COMM Traxis\
 
 ---
 
-*Last updated: February 28, 2026*
+## Interfaces
+
+Produces: Modified Fusion tool-library JSON files (`{"data":[...],"version":N}`) via FusionToolAuditor "Export JSON" and ExportToolLibrary's `_full.json` / `_summary.csv`. Each tool object carries normalized top-level keys (`description`, `product-id`, `vendor`, `type`, `BMC`, `guid`) + nested `geometry` (coded keys: `DC`/`NOF`/`LCF`/`LB`/`OAL`/`RE`/`SFDM`), `post-process` (`number` = tool #), `holder`, `start-values.presets[]` (per-operation feeds/speeds), and a parallel single-quoted `expressions` block.
+Consumes: ProShop GraphQL `tools` query (toolNumber/description/cutDiameter/numberOfFlutes/approvedBrands.vendorToolId for EDP lookup); Fusion CAM `libraryManager` (Local/Cloud/Fusion360/Document tool libraries); `.traxis.env` credentials.
+Contracts: At Traxis, the Fusion tool `product-id` field holds the **ProShop tool number** (A15, I460/G458), NOT the manufacturer EDP — required for ProShop Bridge tool matching. **External consumer: Toolpath (toolpath.com)** reads the same exported `.json`/`.tools` libraries (static upload) or two-way cloud-syncs them ("Toolpath Managed Libraries" folder). Toolpath's per-operation "Magic Presets" appear to be generated from `geometry` + `BMC` material (not catalog-matched on `product-id`), so the ProShop-ID repurposing of `product-id` is *probably* invisible to Toolpath — UNVERIFIED (see Next Steps).
+
+## Next Steps
+
+- **[Toolpath] Empirically verify whether Toolpath reads `product-id`** (surfaced 2026-05-25). Whole "perfect library for Toolpath" question hinges on this. Test: upload one exported library to Toolpath, note the generated feeds/speeds; change one tool's `product-id` (e.g. `UGMH12S905`→`ZZZ999`) leaving geometry identical, re-upload. Recipes unchanged → product-id is cosmetic to Toolpath and P16's ProShop-ID overwrite causes no conflict (leading hypothesis). Recipes change / catalog match breaks → real conflict, decide where ProShop ID lives. Needs a Toolpath account (Claude can't reach authenticated pages).
+- **[Toolpath] Decide ingest path: static `.json`/`.tools` upload vs. live cloud sync.** Cloud sync round-trip is also the most reliable field-mapping probe — enable sync on a throwaway library, let it round-trip, re-export from Fusion, diff against original; whatever Toolpath writes back is the canonical field set. Determines what "perfect" means (write-back safety for cloud sync vs. snapshot simplicity for upload).
+
+---
+
+*Last updated: May 25, 2026 (Toolpath investigation — Interfaces + Next Steps added)*
 *Built with Claude Code*
