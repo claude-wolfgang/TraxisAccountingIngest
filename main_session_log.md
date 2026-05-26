@@ -41,6 +41,22 @@ Synced via Dropbox so both machines stay in sync.
 
 **Memory added:** `project_hillary_consolidated_billing.md` (Hillary sends ONE consolidated invoice spanning multiple PM WOs; enter under invoice # not WO #; TX tax on travel/lodging reimbursement only); `project_toolpath_reads_fusion_library.md` (Toolpath ingest paths + geometry-driven presets / product-id likely cosmetic).
 
+### P27 Accounting Ingest: M365 "Bills and Invoices" folder ↔ QBO bill reconciliation (READ-ONLY by Claude)
+
+**Task:** Wolfgang: "review m365 bills and invoices folder and compare to qbo bills to prepare to enter new non-dup bills to QBO."
+
+**What was done (all read-only on Claude's side — zero QBO writes by Claude):**
+1. **Established a "closer API level"** than the MCP connectors. The QBO MCP only exposes unpaid A/P aging + has no create-bill; the project's own `accounting_ingest.py` (`QBOClient` over the production REST API, `GraphClient` over MS Graph app-only creds) is strictly more capable. Built four read-only recon scripts reusing it: `read_bills_folder.py` (locates the tom@ Outlook **Bills and Invoices** mail folder by name — `GraphClient` was inbox-only — and lists messages+attachments), `read_qbo_bills.py` (ALL Bills paid+unpaid; flips in-process env to **production** since the local client defaults to **sandbox**), `extract_new_bills.py` (downloads target PDFs + runs `AIExtractor.extract`), `read_qbo_vendor_txns.py` (a vendor's Bills/BillPayments/Purchases).
+2. **Reconciled 65 folder messages vs 119 QBO bills (since Jan 1).** Confirmed dups (skip): Tricor `00042125`, Lp Machine `260130`, Boedeker `2367248`, Diligent `224142`. **7 clean new bills queued, NOT entered ($5,360.24):** AJ Rod `1880454`/`1880461`/`1880885`, Hadco `2153015`, Dixie `A070086`, Lp Machine `260091`, Samuel Price (F4 Labs = Sam "the portal man", flagger512@gmail.com) `2026-05-14-01`. Excluded non-bills: statements, packing slips/certs, card receipts (Toolpath, Stamp Maker), attachment-less "bill ready" notices.
+3. **Extraction flipped three assumptions:** **Sentry "May" invoice = $1,082.60** (5 policies, inv `1024857667`), NOT the $673 Wolfgang expected → the existing QBO $673 April bill may be understated. **AJ Rod `1878933` = −$310.25 CREDIT**, not a bill → Vendor Credit / Manual Handling. **Dixie's real inv# is `A070086`** (the `PH_13_…` filename hid it).
+4. **Hillary deep-dive (see also the parallel session's entry above):** the original $1,602.50 on bill 44287 traces to the per-WO **service sheet** (PM $1,200 + its own travel $402.50), but the **consolidated invoice 153025 bills travel only ONCE** ($402.50, already in bill 44286/60137-1) and totals **$4,381.38** ($4,352.50 subtotal + $28.88 tax on the $350 lodging only). Verified by rendering the invoice PDF pages. Confirmed via QBO that the 3 bills are **open/unpaid** and there is **no 2026 Hillary payment of any kind** (0 of 276 card charges, no bill-payment since 2025-05).
+
+**Decision divergence flagged:** mid-session Wolfgang manually edited QBO bill **44287 $1,602.50 → $1,200.00** in the UI (fix-in-place). QBO Hillary is now $4,352.50 (= invoice subtotal, $28.88 tax still missing). This **keeps the 3-bill structure** — the OPPOSITE of the parallel session's logged "consolidate-to-ONE-bill-and-delete-the-3" plan. Both reach $4,381.38; doing both double-counts. Wolfgang must pick one (recorded as a DECISION FORK in P27 Next Steps).
+
+**Files added (in `27. Accounting Ingest/`):** `read_bills_folder.py`, `read_qbo_bills.py`, `extract_new_bills.py`, `read_qbo_vendor_txns.py`. **Files modified:** P27 CLAUDE.md (Interfaces + Next Steps); this log; `MEMORY.md` + 3 memory files.
+
+**External writes:** none by Claude. (Bill 44287's $1,200 edit was done by Wolfgang in the QBO UI.) `logs/*.json` sidecars written (gitignored).
+
 ---
 
 ## 2026-05-23
