@@ -26,6 +26,7 @@ import time
 import sqlite3
 import logging
 import threading
+import importlib.util
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -46,7 +47,16 @@ from message_store import MessageStore
 
 HOST = "0.0.0.0"
 PORT = 8070
-DB_PATH = r"C:\FASData\monitoring.db"
+DB_PATH = os.environ.get("TRAXIS_FOCAS_DB", r"C:\FASData\monitoring.db")
+
+# --- Breakeven dashboard (P32), served from this same process off the live DB ---
+BREAKEVEN_DIR = Path(__file__).resolve().parent.parent.parent / "32. Breakeven Dashboard"
+SNAPSHOT_DIR = Path(os.environ.get("TRAXIS_BREAKEVEN_DIR", r"C:\FASData\breakeven"))
+SNAPSHOT_JSON = SNAPSHOT_DIR / "runtime_snapshot.json"
+SNAPSHOT_JS = SNAPSHOT_DIR / "runtime_snapshot.js"
+AGG_INTERVAL_S = 150          # regenerate snapshot every 2.5 min (client refreshes every 5)
+AGG_HISTORY_WEEKS = 4
+AGG_TZ = "America/Chicago"
 
 SHIFT_START_HOUR = 6   # 6 AM
 SHIFT_END_HOUR = 19    # 7 PM
@@ -70,7 +80,7 @@ MACHINE_NAMES = {
     "M8": ("FANUC Mill 8", "Mill"),
 }
 
-VERSION = "2.0"
+VERSION = "2.1"
 
 # ============================================================================
 # LOGGING
@@ -330,6 +340,40 @@ def build_machine_data():
 
 
 # ============================================================================
+# BREAKEVEN AGGREGATOR (P32) — runs in-process so Overseer's health check on
+# this service also keeps the breakeven snapshot fresh.
+# ============================================================================
+
+def _load_aggregator():
+    """Import focas_runtime_aggregator.py from the P32 folder by path."""
+    path = BREAKEVEN_DIR / "focas_runtime_aggregator.py"
+    spec = importlib.util.spec_from_file_location("focas_runtime_aggregator", str(path))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def aggregator_loop():
+    """Regenerate the breakeven runtime snapshot from the live DB on a timer.
+    Machines are discovered from the DB (no machines.json dependency)."""
+    try:
+        agg = _load_aggregator()
+    except Exception as e:
+        log.error("Breakeven aggregator unavailable (%s) — /breakeven will be empty", e)
+        return
+
+    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    while True:
+        try:
+            snap = agg.build_snapshot(DB_PATH, AGG_TZ, history=AGG_HISTORY_WEEKS, logger=log)
+            agg.write_snapshot(snap, str(SNAPSHOT_JSON))
+            log.info("Breakeven snapshot updated (%d machines)", len(snap.get("machines", [])))
+        except Exception as e:
+            log.error("Breakeven aggregation failed: %s", e)
+        time.sleep(AGG_INTERVAL_S)
+
+
+# ============================================================================
 # FLASK APP
 # ============================================================================
 
@@ -345,6 +389,29 @@ def index():
 def api_status():
     """Full machine data — used by dashboard and overseer health checks."""
     return jsonify(build_machine_data())
+
+
+# --- Breakeven dashboard (P32) -------------------------------------------------
+
+@app.route("/breakeven")
+def breakeven():
+    return send_file(BREAKEVEN_DIR / "breakeven.html")
+
+
+@app.route("/runtime_snapshot.js")
+def runtime_snapshot_js():
+    """Served to /breakeven via its relative <script src="runtime_snapshot.js">."""
+    if SNAPSHOT_JS.exists():
+        return send_file(SNAPSHOT_JS, mimetype="application/javascript")
+    return ("window.RUNTIME_DATA = null;\n", 200,
+            {"Content-Type": "application/javascript"})
+
+
+@app.route("/runtime_snapshot.json")
+def runtime_snapshot_json():
+    if SNAPSHOT_JSON.exists():
+        return send_file(SNAPSHOT_JSON, mimetype="application/json")
+    return jsonify({"error": "snapshot not generated yet"}), 503
 
 
 # ============================================================================
@@ -420,6 +487,10 @@ def main():
 
     refresh_thread = threading.Thread(target=proshop_refresh_loop, daemon=True)
     refresh_thread.start()
+
+    # Breakeven snapshot regenerator (serves /breakeven off the live DB)
+    agg_thread = threading.Thread(target=aggregator_loop, daemon=True)
+    agg_thread.start()
 
     if not Path(DB_PATH).exists():
         print(f"WARNING: Database not found at {DB_PATH}")

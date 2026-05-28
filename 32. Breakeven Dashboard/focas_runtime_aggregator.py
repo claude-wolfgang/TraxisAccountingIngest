@@ -323,6 +323,75 @@ def compute_daily_breakdown(db_path, tz, week_start, machine_list, logger,
     return days
 
 
+def build_snapshot(db_path, tz_name=TZ_DEFAULT, history=0, week=None,
+                   machine_list=None, logger=None):
+    """Build the runtime snapshot dict (current week + optional history weeks).
+
+    Pure compute + DB read; no file I/O. Callable both from the CLI and from
+    the dashboard service's in-process aggregator loop. Pass machine_list=None
+    to discover machines directly from the DB."""
+    if logger is None:
+        logger = logging.getLogger("focas_agg")
+    tz = ZoneInfo(tz_name)
+
+    week_start, week_end = week_bounds(tz, week)
+    logger.info("Week: %s to %s", week_start.date(), week_end.date())
+
+    machines_out, error = aggregate_week(db_path, tz, week_start, week_end, machine_list, logger)
+    daily = compute_daily_breakdown(db_path, tz, week_start, machine_list, logger)
+
+    hist = []
+    if history > 0:
+        for i in range(1, history + 1):
+            hist_start = week_start - timedelta(weeks=i)
+            hist_end = hist_start + timedelta(days=6, hours=23, minutes=59, seconds=59)
+            hist_machines, _ = aggregate_week(db_path, tz, hist_start, hist_end, machine_list, logger)
+            hist_daily = compute_daily_breakdown(
+                db_path, tz, hist_start, machine_list, logger, full_week=True)
+            total_hrs = sum(m["runtime_hours"] for m in hist_machines)
+            hist.append({
+                "week_start": hist_start.date().isoformat(),
+                "week_end": hist_end.date().isoformat(),
+                "total_hours": round(total_hrs, 2),
+                "machines": hist_machines,
+                "daily": hist_daily,
+            })
+        hist.reverse()  # chronological order
+
+    snapshot = {
+        "generated_at": datetime.now(tz).isoformat(),
+        "week_start": week_start.date().isoformat(),
+        "week_end": week_end.date().isoformat(),
+        "runtime_signal": f"run_status={RUNNING_STATE}",
+        "sample_interval_config_s": 60,
+        "gap_threshold_s": GAP_THRESHOLD_S,
+        "machines": machines_out,
+        "daily": daily,
+    }
+    if hist:
+        snapshot["history"] = hist
+    if error:
+        snapshot["error"] = error
+    return snapshot
+
+
+def write_snapshot(snapshot, out_path):
+    """Write the snapshot as <out>.json plus a file://-friendly <out>.js."""
+    out_path = str(out_path)
+    out_dir = os.path.dirname(out_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+    with open(out_path, "w") as f:
+        json.dump(snapshot, f, indent=2)
+
+    js_path = out_path[:-5] + ".js" if out_path.endswith(".json") else out_path + ".js"
+    with open(js_path, "w") as f:
+        f.write("window.RUNTIME_DATA = ")
+        json.dump(snapshot, f, indent=2)
+        f.write(";\n")
+    return out_path, js_path
+
+
 def main():
     parser = argparse.ArgumentParser(description="FOCAS Runtime Aggregator")
     parser.add_argument("--out", default=None, help="Output JSON path")
@@ -337,69 +406,18 @@ def main():
     config = load_config()
     db_path = config.get("db_path", r"C:\FASData\monitoring.db")
     tz_name = config.get("timezone", TZ_DEFAULT)
-    tz = ZoneInfo(tz_name)
-
     machine_list = get_enabled_machines(config)
 
-    # Current week
-    week_start, week_end = week_bounds(tz, args.week)
-    logger.info("Week: %s to %s", week_start.date(), week_end.date())
-
-    machines_out, error = aggregate_week(db_path, tz, week_start, week_end, machine_list, logger)
-
-    # Daily breakdown for progress chart
-    daily = compute_daily_breakdown(db_path, tz, week_start, machine_list, logger)
-
-    # History
-    history = []
-    if args.history > 0:
-        for i in range(1, args.history + 1):
-            hist_start = week_start - timedelta(weeks=i)
-            hist_end = hist_start + timedelta(days=6, hours=23, minutes=59, seconds=59)
-            hist_machines, _ = aggregate_week(db_path, tz, hist_start, hist_end, machine_list, logger)
-            hist_daily = compute_daily_breakdown(
-                db_path, tz, hist_start, machine_list, logger, full_week=True)
-            total_hrs = sum(m["runtime_hours"] for m in hist_machines)
-            history.append({
-                "week_start": hist_start.date().isoformat(),
-                "week_end": hist_end.date().isoformat(),
-                "total_hours": round(total_hrs, 2),
-                "machines": hist_machines,
-                "daily": hist_daily,
-            })
-        history.reverse()  # chronological order
-
-    now = datetime.now(tz)
-    snapshot = {
-        "generated_at": now.isoformat(),
-        "week_start": week_start.date().isoformat(),
-        "week_end": week_end.date().isoformat(),
-        "runtime_signal": f"run_status={RUNNING_STATE}",
-        "sample_interval_config_s": 60,
-        "gap_threshold_s": GAP_THRESHOLD_S,
-        "machines": machines_out,
-        "daily": daily,
-    }
-    if history:
-        snapshot["history"] = history
-    if error:
-        snapshot["error"] = error
+    snapshot = build_snapshot(db_path, tz_name, history=args.history,
+                              week=args.week, machine_list=machine_list, logger=logger)
 
     out_path = args.out or os.path.join(SCRIPT_DIR, "runtime_snapshot.json")
-    with open(out_path, "w") as f:
-        json.dump(snapshot, f, indent=2)
-
-    # Also write a .js variant that works from file:// (fetch blocked by CORS)
-    js_path = out_path.replace(".json", ".js")
-    with open(js_path, "w") as f:
-        f.write("window.RUNTIME_DATA = ")
-        json.dump(snapshot, f, indent=2)
-        f.write(";\n")
+    out_path, _ = write_snapshot(snapshot, out_path)
 
     logger.info("Wrote snapshot to %s (+.js)", out_path)
     print(f"Wrote {out_path}")
-    total = sum(m["runtime_hours"] for m in machines_out)
-    print(f"Total runtime this week: {total:.1f} hrs across {len(machines_out)} machines")
+    total = sum(m["runtime_hours"] for m in snapshot["machines"])
+    print(f"Total runtime this week: {total:.1f} hrs across {len(snapshot['machines'])} machines")
 
 
 if __name__ == "__main__":
