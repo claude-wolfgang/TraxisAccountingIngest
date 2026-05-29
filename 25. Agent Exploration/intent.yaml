@@ -1,0 +1,60 @@
+# intent.yaml — Traxis Manufacturing companion intent layer
+#
+# Save at the P25 meta-layer root, next to project_index.json and TRAXIS_ECOSYSTEM.md
+# Hand-authored. Revise only when strategy actually changes.
+# The matcher diffs this (target) against the nightly state files (actual).
+#
+# Optional fields you can add per project when relevant:
+#   trajectory: list of { milestone, target_date }
+#   retire_if:  condition under which this target is wrong and should be killed
+
+north_star: "One Source, captured at intake, verified at every translation from file to sold product."
+
+projects:
+  - id: portal
+    intent: "Customer intake captures The Source as structured data, not a re-keyed PDF."
+    ladders_to: "ESTABLISHES the Source at the front door."
+    owner: samuel          # schema yours
+    weight: 10
+
+  - id: dimension-extraction
+    intent: "Drawings and certs parsed into machine-readable dimensions automatically."
+    ladders_to: "ESTABLISHES the Source when intent arrives as a drawing."
+    owner: wolfgang
+    weight: 8
+
+  - id: proshop-bridge
+    intent: "ProShop stays in sync as the chain runs; strangled over time."
+    ladders_to: "VERIFIES adherence mid-chain (current system of record)."
+    owner: wolfgang
+    weight: 6
+
+  - id: post-processors
+    intent: "File-to-NC translation adheres to The Source; versioned, no drift."
+    ladders_to: "VERIFIES adherence at the NC translation step."
+    owner: wolfgang
+    weight: 5
+
+  - id: focas-monitor
+    intent: "Physical machining correlated to part number; runtime is truth."
+    ladders_to: "VERIFIES the physical part still adheres."
+    owner: wolfgang
+    weight: 6
+
+  - id: qbo-accounting
+    intent: "Money side reconciled; invoice equals sold product, clean AR/AP."
+    ladders_to: "VERIFIES the commercial translation at the sold-product end."
+    owner: wolfgang
+    weight: 7
+
+  - id: companion
+    intent: "Delta-to-ATC-to-one-directive. The dispatch layer over all of it."
+    ladders_to: "ESTABLISHES priority — makes the Source actionable."
+    owner: wolfgang
+    weight: 9
+
+  - id: p25-meta-layer
+    intent: "Nightly state file and index; the substrate that remembers."
+    ladders_to: "ENABLES all of it — the memory the Source lives in."
+    owner: wolfgang
+    weight: 8

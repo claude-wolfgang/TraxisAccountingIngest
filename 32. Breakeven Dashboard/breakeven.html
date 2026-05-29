@@ -971,7 +971,7 @@ body.alarm .machine-row {
     if (pct >= 60)  return '\u{1F63E}';  // 😾 pouting cat
     if (pct >= 40)  return '\u{1F63F}';  // 😿 crying cat
     if (pct >= 20)  return '\u{1F640}';  // 🙀 weary cat
-    return '\u{1F648}';                   // 🙈 see-no-evil monkey
+    return '\u{1F480}';                   // 💀 skull
   }
 
   var lastData = null;
@@ -1302,7 +1302,8 @@ body.alarm .machine-row {
       { pct: 80,  emoji: '\u{1F638}' },
       { pct: 60,  emoji: '\u{1F63E}' },
       { pct: 40,  emoji: '\u{1F63F}' },
-      { pct: 20,  emoji: '\u{1F640}' }
+      { pct: 20,  emoji: '\u{1F640}' },
+      { pct: 0,   emoji: '\u{1F480}' }
     ];
     for (var t = 0; t < catTiers.length; t++) {
       var tierHrs = a.targetHrs * catTiers[t].pct / 100;
